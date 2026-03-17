@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getFunnelsByUser, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
-import { getSessionStats } from "@/db/queries/sessions";
-import { getLeadsThisWeek, getLeadsThisMonth, getTierBreakdown } from "@/db/queries/leads";
+import { getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
 import { generateSlug } from "@/lib/utils";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
@@ -15,33 +13,7 @@ export async function GET() {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const userFunnels = await getFunnelsByUser(userId);
-
-    const funnelsWithStats = await Promise.all(
-      userFunnels.map(async (f) => {
-        const stats = await getSessionStats(f.id);
-        const leadsWeek = await getLeadsThisWeek(f.id);
-        const leadsMonth = await getLeadsThisMonth(f.id);
-        const tierData = await getTierBreakdown(f.id);
-
-        const tierBreakdown = { high: 0, mid: 0, low: 0 };
-        tierData.forEach((t) => {
-          tierBreakdown[t.tier as keyof typeof tierBreakdown] = Number(t.count);
-        });
-
-        return {
-          ...f,
-          stats: {
-            totalSessions: stats.total,
-            completionRate: stats.completionRate,
-            conversionRate: stats.conversionRate,
-            leadsThisWeek: leadsWeek,
-            leadsThisMonth: leadsMonth,
-            tierBreakdown,
-          },
-        };
-      })
-    );
+    const funnelsWithStats = await getFunnelsWithStats(userId);
 
     return NextResponse.json(funnelsWithStats);
   } catch (error) {

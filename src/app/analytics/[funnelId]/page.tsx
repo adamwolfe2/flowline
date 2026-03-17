@@ -18,9 +18,18 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { WaterfallChart } from "@/components/analytics/WaterfallChart";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
+
+const LeadsChart = dynamic(
+  () => import("@/components/analytics/LeadsChart").then((m) => m.LeadsChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 bg-gray-50 rounded-xl animate-pulse" />,
+  }
+);
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -140,6 +149,7 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [leadsPage, setLeadsPage] = useState(0);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
   const fetchData = useCallback(async (page = 0, range: string = timeRange) => {
@@ -414,58 +424,10 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
-          {timeSeries.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-12">No leads captured in this time range</p>
-          ) : (
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timeSeries} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="leadGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(v: string) => {
-                      const d = new Date(v);
-                      return `${d.getMonth() + 1}/${d.getDate()}`;
-                    }}
-                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={30}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      fontSize: 12,
-                      borderRadius: 8,
-                      border: "1px solid #E5E7EB",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                    }}
-                    labelFormatter={(v) => formatDate(String(v))}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#6366F1"
-                    strokeWidth={2}
-                    fill="url(#leadGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
+            <LeadsChart data={timeSeries} timeRange={timeRange} />
+          </div>
         </ErrorBoundary>
 
         {/* ---- Leads Table ---- */}
@@ -501,7 +463,7 @@ export default function AnalyticsDashboard() {
                   </thead>
                   <tbody>
                     {recentLeads.map((lead) => (
-                      <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                      <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer" onClick={() => setSelectedLeadId(lead.id)}>
                         <td className="py-2.5 text-gray-900 font-medium">{lead.email}</td>
                         <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
                         <td className="py-2.5 text-center">
@@ -551,6 +513,8 @@ export default function AnalyticsDashboard() {
           )}
         </div>
       </div>
+
+      <LeadDetailModal leadId={selectedLeadId} onClose={() => setSelectedLeadId(null)} />
     </div>
   );
 }

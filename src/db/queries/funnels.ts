@@ -1,6 +1,6 @@
 import { db } from '@/db';
-import { funnels } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { funnels, funnelSessions, leads } from '@/db/schema';
+import { eq, and, sql } from 'drizzle-orm';
 import type { NewFunnel } from '@/db/schema';
 
 export async function getFunnelsByUser(userId: string) {
@@ -83,4 +83,74 @@ export async function checkSlugAvailable(slug: string): Promise<boolean> {
 export async function getFunnelCount(userId: string): Promise<number> {
   const result = await db.select().from(funnels).where(eq(funnels.userId, userId));
   return result.length;
+}
+
+export async function getFunnelsWithStats(userId: string) {
+  const userFunnels = await getFunnelsByUser(userId);
+  if (userFunnels.length === 0) return [];
+
+  const funnelIds = userFunnels.map(f => f.id);
+
+  // Batch: get all session stats for all funnels in ONE query
+  const sessionStats = await db.select({
+    funnelId: funnelSessions.funnelId,
+    total: sql<number>`count(*)::int`,
+    completed: sql<number>`coalesce(sum(case when ${funnelSessions.completed} then 1 else 0 end), 0)::int`,
+    converted: sql<number>`coalesce(sum(case when ${funnelSessions.converted} then 1 else 0 end), 0)::int`,
+  }).from(funnelSessions)
+    .where(sql`${funnelSessions.funnelId} = ANY(${funnelIds})`)
+    .groupBy(funnelSessions.funnelId);
+
+  // Batch: get lead counts for all funnels in ONE query
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const leadStats = await db.select({
+    funnelId: leads.funnelId,
+    total: sql<number>`count(*)::int`,
+    thisWeek: sql<number>`coalesce(sum(case when ${leads.createdAt} >= ${weekAgo} then 1 else 0 end), 0)::int`,
+    thisMonth: sql<number>`coalesce(sum(case when ${leads.createdAt} >= ${monthAgo} then 1 else 0 end), 0)::int`,
+  }).from(leads)
+    .where(sql`${leads.funnelId} = ANY(${funnelIds})`)
+    .groupBy(leads.funnelId);
+
+  // Batch: get tier breakdown for all funnels in ONE query
+  const tierStats = await db.select({
+    funnelId: leads.funnelId,
+    tier: leads.calendarTier,
+    count: sql<number>`count(*)::int`,
+  }).from(leads)
+    .where(sql`${leads.funnelId} = ANY(${funnelIds})`)
+    .groupBy(leads.funnelId, leads.calendarTier);
+
+  // Map results to funnels
+  const sessionMap = new Map(sessionStats.map(s => [s.funnelId, s]));
+  const leadMap = new Map(leadStats.map(l => [l.funnelId, l]));
+  const tierMap = new Map<string, Record<string, number>>();
+  for (const t of tierStats) {
+    if (!tierMap.has(t.funnelId)) tierMap.set(t.funnelId, { high: 0, mid: 0, low: 0 });
+    const entry = tierMap.get(t.funnelId)!;
+    if (t.tier) entry[t.tier] = Number(t.count);
+  }
+
+  return userFunnels.map(f => {
+    const s = sessionMap.get(f.id);
+    const l = leadMap.get(f.id);
+    const t = tierMap.get(f.id) || { high: 0, mid: 0, low: 0 };
+    const total = Number(s?.total ?? 0);
+    const converted = Number(s?.converted ?? 0);
+
+    return {
+      ...f,
+      stats: {
+        totalSessions: total,
+        completionRate: total > 0 ? Math.round((Number(s?.completed ?? 0) / total) * 100) : 0,
+        conversionRate: total > 0 ? Math.round((converted / total) * 100) : 0,
+        leadsThisWeek: Number(l?.thisWeek ?? 0),
+        leadsThisMonth: Number(l?.thisMonth ?? 0),
+        tierBreakdown: t,
+      },
+    };
+  });
 }
