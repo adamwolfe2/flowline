@@ -183,7 +183,7 @@ function OnboardingContent() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Start with a template</h1>
             <p className="text-sm text-gray-500 mb-6">Pick an industry template to get started instantly, or describe your own below.</p>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-2">
               {TEMPLATES.map((template) => {
                 const Icon = ICON_MAP[template.icon];
                 return (
@@ -213,7 +213,7 @@ function OnboardingContent() {
               onChange={e => setPrompt(e.target.value)}
               placeholder="We help SaaS founders scale from $10k to $100k MRR through outbound sales systems. Our ideal clients are B2B SaaS companies doing at least $10k/mo..."
               rows={4}
-              className="text-sm mb-4 resize-none"
+              className="text-base sm:text-sm mb-4 resize-none"
             />
             <Button
               onClick={handleGenerate}
@@ -279,11 +279,11 @@ function OnboardingContent() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(0)} className="flex-1 gap-1.5">
+              <Button variant="outline" onClick={() => setStep(0)} className="flex-1 gap-1.5 min-h-[44px]">
                 <ArrowLeft className="w-3.5 h-3.5" />
                 Regenerate
               </Button>
-              <Button onClick={() => setStep(2)} className="flex-1 gap-1.5">
+              <Button onClick={() => setStep(2)} className="flex-1 gap-1.5 min-h-[44px]">
                 Looks Good
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
@@ -309,7 +309,7 @@ function OnboardingContent() {
                     ...prev,
                     brand: { ...prev.brand, name: e.target.value },
                   }))}
-                  className="text-sm"
+                  className="text-base sm:text-sm"
                   maxLength={60}
                 />
               </div>
@@ -330,7 +330,7 @@ function OnboardingContent() {
                     }))}
                     className="w-12 h-12 rounded-xl border-2 border-gray-200 cursor-pointer"
                   />
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex flex-wrap gap-2">
                     {["#2563EB", "#7C3AED", "#059669", "#DC2626", "#EA580C", "#0891B2", "#4F46E5", "#D946EF"].map(c => (
                       <button
                         key={c}
@@ -404,10 +404,10 @@ function OnboardingContent() {
             </div>
 
             <div className="flex gap-2 mt-8">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+              <Button variant="outline" onClick={() => setStep(1)} className="flex-1 min-h-[44px]">
                 <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back
               </Button>
-              <Button onClick={() => setStep(3)} className="flex-1">
+              <Button onClick={() => setStep(3)} className="flex-1 min-h-[44px]">
                 Continue <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
               </Button>
             </div>
@@ -436,7 +436,7 @@ function OnboardingContent() {
                     quiz: { ...prev.quiz, calendars: { ...prev.quiz.calendars, high: e.target.value } },
                   }))}
                   placeholder="https://cal.com/you/discovery-call"
-                  className="text-sm"
+                  className="text-base sm:text-sm"
                 />
               </div>
               <div>
@@ -451,7 +451,7 @@ function OnboardingContent() {
                     quiz: { ...prev.quiz, calendars: { ...prev.quiz.calendars, mid: e.target.value } },
                   }))}
                   placeholder="https://cal.com/you/intro-call"
-                  className="text-sm"
+                  className="text-base sm:text-sm"
                 />
               </div>
               <div>
@@ -466,16 +466,16 @@ function OnboardingContent() {
                     quiz: { ...prev.quiz, calendars: { ...prev.quiz.calendars, low: e.target.value } },
                   }))}
                   placeholder="https://cal.com/you/learn-more"
-                  className="text-sm"
+                  className="text-base sm:text-sm"
                 />
               </div>
             </div>
 
             <div className="flex gap-2 mt-8">
-              <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+              <Button variant="outline" onClick={() => setStep(2)} className="flex-1 min-h-[44px]">
                 <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back
               </Button>
-              <Button onClick={() => setStep(4)} className="flex-1">
+              <Button onClick={() => setStep(4)} className="flex-1 min-h-[44px]">
                 Continue <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
               </Button>
             </div>
@@ -500,7 +500,7 @@ function OnboardingContent() {
                 <input
                   value={slug}
                   onChange={e => checkSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  className="flex-1 px-3 py-2.5 text-sm outline-none"
+                  className="flex-1 px-3 py-2.5 text-base sm:text-sm outline-none"
                   placeholder="my-funnel"
                   maxLength={40}
                 />
@@ -516,13 +516,13 @@ function OnboardingContent() {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep(3)} className="flex-1">
+              <Button variant="outline" onClick={() => setStep(3)} className="flex-1 min-h-[44px]">
                 <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back
               </Button>
               <Button
                 onClick={handlePublish}
                 disabled={!slug || slugAvailable === false || publishing}
-                className="flex-1 gap-1.5"
+                className="flex-1 gap-1.5 min-h-[44px]"
               >
                 {publishing ? (
                   <>
@@ -601,7 +601,7 @@ function OnboardingContent() {
         {steps.map((s, i) => (
           <div key={i} className="flex items-center gap-2">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+              className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
                 i < step ? "bg-green-100 text-green-600" :
                 i === step ? "bg-gray-900 text-white" :
                 "bg-gray-100 text-gray-400"
@@ -610,14 +610,14 @@ function OnboardingContent() {
               {i < step ? <Check className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
             </div>
             {i < steps.length - 1 && (
-              <div className={`w-8 h-0.5 ${i < step ? "bg-green-200" : "bg-gray-100"}`} />
+              <div className={`w-4 sm:w-8 h-0.5 ${i < step ? "bg-green-200" : "bg-gray-100"}`} />
             )}
           </div>
         ))}
       </div>
 
       {/* Step content */}
-      <div className="flex-1 flex items-center justify-center px-6 pb-16">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 pb-16">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}

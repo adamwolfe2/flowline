@@ -40,14 +40,14 @@ export function MarketingNav() {
           {[
             { label: "Features", href: "/#features" },
             { label: "Pricing", href: "/pricing" },
-            { label: "Templates", href: "/#templates" },
-          ].map((item) => (
+            { label: "Demo", href: "/#demo" },
+          ].map((link) => (
             <Link
-              key={item.label}
-              href={item.href}
+              key={link.label}
+              href={link.href}
               className="text-sm font-medium text-[#171717] hover:bg-neutral-100 rounded-[10px] px-[10px] py-2 transition-colors"
             >
-              {item.label}
+              {link.label}
             </Link>
           ))}
         </div>
@@ -84,15 +84,15 @@ export function MarketingNav() {
           {[
             { label: "Features", href: "/#features" },
             { label: "Pricing", href: "/pricing" },
-            { label: "Templates", href: "/#templates" },
-          ].map((item) => (
+            { label: "Demo", href: "/#demo" },
+          ].map((link) => (
             <Link
-              key={item.label}
-              href={item.href}
+              key={link.label}
+              href={link.href}
               className="text-sm font-medium text-[#171717] hover:bg-neutral-100 rounded-[10px] px-3 py-2.5 transition-colors"
               onClick={() => setMobileOpen(false)}
             >
-              {item.label}
+              {link.label}
             </Link>
           ))}
           <hr className="border-[#E5E7EB] my-1" />
