@@ -1,29 +1,28 @@
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
-import { store } from "@/lib/store";
+import { getFunnelBySlug } from "@/db/queries/funnels";
 import { FunnelClient } from "@/components/funnel/FunnelClient";
+import { FunnelConfig } from "@/types";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-interface PageProps {
+interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const funnel = store.getFunnelBySlug(slug);
+  const funnel = await getFunnelBySlug(slug);
   if (!funnel) return { title: "Not Found" };
+  const config = funnel.config as FunnelConfig;
   return {
-    title: funnel.config.meta.title,
-    description: funnel.config.meta.description,
+    title: config.meta?.title || config.brand.name,
+    description: config.meta?.description || "",
   };
 }
 
-export default async function FunnelPage({ params }: PageProps) {
+export default async function FunnelPage({ params }: Props) {
   const { slug } = await params;
-  const funnel = store.getFunnelBySlug(slug);
-
-  if (!funnel) {
-    notFound();
-  }
-
-  return <FunnelClient config={funnel.config} funnelId={funnel.id} />;
+  const funnel = await getFunnelBySlug(slug);
+  if (!funnel) notFound();
+  const config = funnel.config as FunnelConfig;
+  return <FunnelClient config={config} funnelId={funnel.id} />;
 }

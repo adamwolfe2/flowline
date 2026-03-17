@@ -1,42 +1,41 @@
-import { NextRequest, NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-export function middleware(req: NextRequest) {
-  const hostname = req.headers.get("host") || "";
-  const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
-  const pathname = req.nextUrl.pathname;
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/builder(.*)',
+  '/onboarding(.*)',
+  '/settings(.*)',
+]);
 
-  // Static files and API routes — pass through
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/favicon") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next();
+const isPlatformDomain = (hostname: string) => {
+  const platform = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? 'localhost';
+  return hostname === platform
+    || hostname === `app.${platform}`
+    || hostname.includes('localhost')
+    || hostname.includes('vercel.app');
+};
+
+export default clerkMiddleware(async (auth, req) => {
+  const hostname = req.headers.get('host') ?? '';
+  const { userId, redirectToSignIn } = await auth();
+
+  if (!isPlatformDomain(hostname)) {
+    const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? '';
+    if (hostname.endsWith(`.${platformDomain}`)) {
+      const slug = hostname.replace(`.${platformDomain}`, '');
+      return NextResponse.rewrite(new URL(`/f/${slug}`, req.url));
+    }
+    return NextResponse.rewrite(new URL(`/f/domain/${hostname}`, req.url));
   }
 
-  // Platform routes — pass through (includes localhost for dev)
-  const isLocalhost = hostname.startsWith("localhost") || hostname.startsWith("127.0.0.1");
-  const isPlatform = hostname === platformDomain || hostname === `app.${platformDomain}` || isLocalhost;
-
-  if (isPlatform) {
-    return NextResponse.next();
+  if (isProtectedRoute(req) && !userId) {
+    return redirectToSignIn({ returnBackUrl: req.url });
   }
 
-  // Subdomain funnel: slug.yourdomain.com
-  if (hostname.endsWith(`.${platformDomain}`)) {
-    const slug = hostname.replace(`.${platformDomain}`, "");
-    const url = req.nextUrl.clone();
-    url.pathname = `/f/${slug}`;
-    return NextResponse.rewrite(url);
-  }
-
-  // Custom domain — rewrite to domain route
-  const url = req.nextUrl.clone();
-  url.pathname = `/f/domain/${hostname}`;
-  return NextResponse.rewrite(url);
-}
+  return NextResponse.next();
+});
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/webhooks).*)'],
 };

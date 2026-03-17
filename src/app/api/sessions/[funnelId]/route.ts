@@ -1,37 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { store } from "@/lib/store";
-import { generateId } from "@/lib/utils";
+import { insertSession, completeSession, convertSession } from "@/db/queries/sessions";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
-  const { funnelId } = await params;
-  const body = await req.json();
-  const { event, sessionId } = body as { event: string; sessionId?: string };
+  try {
+    const { funnelId } = await params;
+    const body = await req.json();
+    const { event, sessionId } = body;
 
-  const funnel = store.getFunnel(funnelId);
-  if (!funnel) return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
-
-  if (event === "start") {
-    const id = generateId();
-    store.addSession({
-      id,
-      funnel_id: funnelId,
-      started_at: new Date().toISOString(),
-      completed: false,
-      converted: false,
-    });
-    return NextResponse.json({ sessionId: id });
-  }
-
-  if (event === "complete" && sessionId) {
-    // Update session — mark as completed and converted
-    const allSessions = store.getSessions(funnelId);
-    const session = allSessions.find((s) => s.id === sessionId);
-    if (session) {
-      session.completed = true;
-      session.converted = true;
+    if (event === "start") {
+      const session = await insertSession(funnelId);
+      return NextResponse.json({ sessionId: session.id });
     }
-    return NextResponse.json({ success: true });
-  }
 
-  return NextResponse.json({ error: "Invalid event" }, { status: 400 });
+    if (event === "complete" && sessionId) {
+      await completeSession(sessionId);
+      await convertSession(sessionId);
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: "Invalid event" }, { status: 400 });
+  } catch (error) {
+    console.error("POST /api/sessions error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

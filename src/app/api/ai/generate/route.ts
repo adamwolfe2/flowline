@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 const SYSTEM_PROMPT = `You are a VSL funnel copywriter and conversion strategist.
 Given a business description, generate a complete lead qualification quiz funnel.
@@ -28,6 +29,9 @@ Return ONLY valid JSON matching this exact schema:
 Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/sophistication. Points 0-3 per option. Do not include calendar URLs, colors, or logo. Return JSON only — no markdown, no backticks.`;
 
 export async function POST(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { prompt } = await req.json();
 
   // If OpenAI key is available, use it

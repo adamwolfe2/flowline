@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserButton } from "@clerk/nextjs";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,9 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 New Funnel
               </Button>
             </Link>
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
-              A
-            </div>
+            <UserButton />
           </div>
         </div>
       </nav>
