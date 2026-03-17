@@ -41,6 +41,22 @@ function OnboardingContent() {
   const [publishing, setPublishing] = useState(false);
   const [createdFunnelId, setCreatedFunnelId] = useState<string | null>(null);
 
+  // Resume pending funnel after sign-up redirect
+  useEffect(() => {
+    const pending = localStorage.getItem("myvsl_pending_funnel");
+    if (pending) {
+      try {
+        const { config: savedConfig, slug: savedSlug } = JSON.parse(pending);
+        setConfig(savedConfig);
+        setSlug(savedSlug);
+        setStep(4); // Go to URL/publish step
+        toast.success("Welcome back! Your funnel is ready to publish.");
+      } catch {
+        localStorage.removeItem("myvsl_pending_funnel");
+      }
+    }
+  }, []);
+
   // Custom logo component for steps array (matches Lucide icon signature)
   const LogoIcon = ({ className }: { className?: string }) => (
     <Image src="/logo.png" alt="MyVSL" width={16} height={16} className={className} />
@@ -130,6 +146,16 @@ function OnboardingContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config, slug }),
       });
+
+      if (createRes.status === 401) {
+        // Not signed in — save config to localStorage and redirect to sign-up
+        localStorage.setItem("myvsl_pending_funnel", JSON.stringify({ config, slug }));
+        toast.error("Sign up to publish your funnel — your progress is saved.");
+        setTimeout(() => router.push("/sign-up"), 1500);
+        setPublishing(false);
+        return;
+      }
+
       const funnel = await createRes.json();
 
       if (createRes.status === 403) {
@@ -153,6 +179,8 @@ function OnboardingContent() {
         return;
       }
 
+      // Clear any saved pending funnel
+      localStorage.removeItem("myvsl_pending_funnel");
       setCreatedFunnelId(funnel.id);
       setStep(5);
       toast.success("Your funnel is live!");
@@ -177,8 +205,8 @@ function OnboardingContent() {
       case 0:
         return (
           <div className="max-w-lg mx-auto text-center">
-            <div className="w-14 h-14 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Image src="/logo.png" alt="MyVSL" width={28} height={28} />
+            <div className="w-14 h-14 bg-[#F0F7F4] rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Image src="/logo.png" alt="MyVSL" width={32} height={32} />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Start with a template</h1>
             <p className="text-sm text-gray-500 mb-6">Pick an industry template to get started instantly, or describe your own below.</p>
@@ -603,7 +631,7 @@ function OnboardingContent() {
             <div
               className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all ${
                 i < step ? "bg-green-100 text-green-600" :
-                i === step ? "bg-gray-900 text-white" :
+                i === step ? "bg-[#2D6A4F] text-white" :
                 "bg-gray-100 text-gray-400"
               }`}
             >

@@ -4,8 +4,9 @@ import { put } from "@vercel/blob";
 
 export async function POST(req: Request) {
   try {
+    // Allow both authenticated and anonymous uploads (for onboarding)
     const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const uploaderId = userId || `anon-${Date.now()}`;
 
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       return NextResponse.json({ error: "File upload is not configured. Contact support." }, { status: 503 });
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     const ext = file.type.split("/")[1] || "png";
-    const filename = `logos/${userId}-${Date.now()}.${ext}`;
+    const filename = `logos/${uploaderId}-${Date.now()}.${ext}`;
     const blob = await put(filename, file, { access: "public" });
 
     return NextResponse.json({ url: blob.url });
