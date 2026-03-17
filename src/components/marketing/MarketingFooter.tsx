@@ -5,74 +5,76 @@ const columns = [
   {
     title: "Product",
     links: [
-      { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Examples", href: "#examples" },
-      { label: "Changelog", href: "#" },
+      { label: "Builder", href: "/product" },
+      { label: "Analytics", href: "/product" },
+      { label: "Templates", href: "/product" },
+    ],
+  },
+  {
+    title: "Use Cases",
+    links: [
+      { label: "Coaches", href: "/use-cases" },
+      { label: "Agencies", href: "/use-cases" },
+      { label: "SaaS", href: "/use-cases" },
+      { label: "Consultants", href: "/use-cases" },
+      { label: "Real Estate", href: "/use-cases" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
-      { label: "Blog", href: "#" },
       { label: "Help Center", href: "#" },
-      { label: "API Reference", href: "#" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "#" },
-      { label: "Contact", href: "#" },
-      { label: "Careers", href: "#" },
+      { label: "Blog", href: "#" },
+      { label: "Status", href: "#" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "#" },
-      { label: "Terms of Service", href: "#" },
+      { label: "Privacy", href: "#" },
+      { label: "Terms", href: "#" },
     ],
   },
 ];
 
 export function MarketingFooter() {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-10">
-      <div className="max-w-6xl mx-auto px-6">
+    <footer className="bg-white py-12 px-6">
+      <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-10 mb-12">
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
-                <Zap className="w-4 h-4 text-white" />
+            <Link href="/" className="flex items-center gap-2.5 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#211C20]">
+                <Zap className="h-4 w-4 text-white" />
               </div>
-              <span className="font-semibold text-gray-900 text-base tracking-tight">
+              <span
+                className="text-lg font-semibold text-[#171717]"
+                style={{ fontFamily: "var(--font-outfit)" }}
+              >
                 Qualifi
               </span>
             </Link>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
-              Quiz-powered funnels that qualify, score, and book your best leads
-              — automatically.
+            <p className="text-sm text-[#737373] leading-relaxed max-w-xs">
+              The AI funnel builder that books calls.
             </p>
           </div>
 
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <p className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-4">
+              <p className="text-xs font-semibold text-[#333333] uppercase tracking-wider mb-4">
                 {col.title}
               </p>
               <ul className="space-y-2.5">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <a
+                    <Link
                       href={link.href}
-                      className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                      className="text-sm text-[#737373] hover:text-[#333333] transition-colors"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -80,18 +82,10 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="border-t border-gray-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} Qualifi. All rights reserved.
+        <div className="border-t border-[#EBEBEB] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-[#A3A3A3]">
+            &copy; 2026 Qualifi, Inc.
           </p>
-          <div className="flex items-center gap-6">
-            <a href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              Twitter
-            </a>
-            <a href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              LinkedIn
-            </a>
-          </div>
         </div>
       </div>
     </footer>

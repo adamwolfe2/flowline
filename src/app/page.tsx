@@ -1,30 +1,29 @@
-import { Sora, DM_Sans } from "next/font/google";
+import { Outfit } from "next/font/google";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { HeroSection } from "@/components/marketing/HeroSection";
-import { LogoBar } from "@/components/marketing/LogoBar";
+import { LogoStrip } from "@/components/marketing/LogoStrip";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
-import { FeatureSplitA } from "@/components/marketing/FeatureSplitA";
-import { FeatureSplitB } from "@/components/marketing/FeatureSplitB";
-import { PricingSection } from "@/components/marketing/PricingSection";
+import { WhySection } from "@/components/marketing/WhySection";
+import { FeaturesSection } from "@/components/marketing/FeaturesSection";
+import { TemplatesSection } from "@/components/marketing/TemplatesSection";
 import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
-import { FinalCTA } from "@/components/marketing/FinalCTA";
+import { BottomCTA } from "@/components/marketing/BottomCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
-const sora = Sora({ subsets: ["latin"], variable: "--font-sora" });
-const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export default function HomePage() {
   return (
-    <div className={`${sora.variable} ${dmSans.variable}`}>
+    <div className={`${outfit.variable} bg-white`}>
       <MarketingNav />
       <HeroSection />
-      <LogoBar />
+      <LogoStrip />
       <HowItWorks />
-      <FeatureSplitA />
-      <FeatureSplitB />
-      <PricingSection />
+      <WhySection />
+      <FeaturesSection />
+      <TemplatesSection />
       <TestimonialsSection />
-      <FinalCTA />
+      <BottomCTA />
       <MarketingFooter />
     </div>
   );

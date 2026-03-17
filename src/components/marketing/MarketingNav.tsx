@@ -9,56 +9,97 @@ export function MarketingNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4">
-      <nav className={`flex items-center justify-between gap-6 px-5 h-12 rounded-full transition-all duration-300 max-w-3xl w-full ${
-        scrolled
-          ? "bg-white/90 backdrop-blur-lg shadow-sm border border-gray-200/50"
-          : "bg-white/70 backdrop-blur-md border border-white/40"
-      }`}>
-        <Link href="/" className="flex items-center gap-1.5">
-          <div className="w-6 h-6 bg-gray-900 rounded-lg flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" />
+    <nav className="sticky top-4 z-50 mx-auto max-w-[1039px] px-4">
+      <div
+        className={`flex items-center justify-between rounded-2xl px-4 py-2.5 transition-all duration-200 ${
+          scrolled
+            ? "bg-white/70 backdrop-blur-md shadow-sm border border-[#F0F0F0]"
+            : "bg-white/50 backdrop-blur-sm"
+        }`}
+      >
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#211C20]">
+            <Zap className="h-4 w-4 text-white" />
           </div>
-          <span className="font-semibold text-gray-900 text-sm">Qualifi</span>
+          <span
+            className="text-lg font-semibold text-[#171717]"
+            style={{ fontFamily: "var(--font-outfit)" }}
+          >
+            Qualifi
+          </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-          <a href="#features" className="hover:text-gray-900 transition-colors">Product</a>
-          <a href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
-          <a href="#examples" className="hover:text-gray-900 transition-colors">Examples</a>
+        {/* Center links */}
+        <div className="hidden md:flex items-center gap-1">
+          {["Product", "Use Cases", "Pricing"].map((label) => (
+            <Link
+              key={label}
+              href={`/${label.toLowerCase().replace(/\s+/g, "-")}`}
+              className="text-sm font-medium text-[#171717] hover:bg-neutral-100 rounded-[10px] px-[10px] py-2 transition-colors"
+            >
+              {label}
+            </Link>
+          ))}
         </div>
 
+        {/* Right */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/sign-in" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Sign in</Link>
-          <Link href="/sign-up" className="bg-gray-900 text-white text-xs px-4 py-1.5 rounded-full hover:bg-gray-800 transition-colors font-medium">
-            Create account
+          <Link
+            href="/sign-in"
+            className="text-sm font-medium text-[#171717] hover:text-[#737373] transition-colors"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/sign-up"
+            className="bg-[#333333] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#171717] transition-colors"
+          >
+            Create account &rarr;
           </Link>
         </div>
 
-        <button className="md:hidden text-gray-600" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
-      </nav>
+      </div>
 
+      {/* Mobile menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-16 bg-white/95 backdrop-blur-lg z-40 p-6 md:hidden">
-          <div className="space-y-4">
-            <a href="#features" className="block text-lg text-gray-900" onClick={() => setMobileOpen(false)}>Product</a>
-            <a href="#pricing" className="block text-lg text-gray-900" onClick={() => setMobileOpen(false)}>Pricing</a>
-            <a href="#examples" className="block text-lg text-gray-900" onClick={() => setMobileOpen(false)}>Examples</a>
-            <div className="pt-4 border-t space-y-3">
-              <Link href="/sign-in" className="block text-gray-600">Sign in</Link>
-              <Link href="/sign-up" className="block bg-gray-900 text-white text-center py-3 rounded-xl">Create account</Link>
-            </div>
-          </div>
+        <div className="md:hidden mt-2 rounded-2xl bg-white/90 backdrop-blur-md border border-[#F0F0F0] shadow-lg p-4 flex flex-col gap-2">
+          {["Product", "Use Cases", "Pricing"].map((label) => (
+            <Link
+              key={label}
+              href={`/${label.toLowerCase().replace(/\s+/g, "-")}`}
+              className="text-sm font-medium text-[#171717] hover:bg-neutral-100 rounded-[10px] px-3 py-2.5 transition-colors"
+              onClick={() => setMobileOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+          <hr className="border-[#EBEBEB] my-1" />
+          <Link href="/sign-in" className="text-sm font-medium text-[#171717] px-3 py-2.5">
+            Sign in
+          </Link>
+          <Link
+            href="/sign-up"
+            className="bg-[#333333] text-white rounded-lg px-4 py-2.5 text-sm font-medium text-center hover:bg-[#171717] transition-colors"
+          >
+            Create account &rarr;
+          </Link>
         </div>
       )}
-    </div>
+    </nav>
   );
 }
