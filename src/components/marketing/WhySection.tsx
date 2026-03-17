@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BarChart3, GitBranch, Calendar } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 function SectionLabel({
   icon,
@@ -29,17 +29,28 @@ function WaterfallChart() {
 
   return (
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-end justify-center gap-3 min-h-[200px]">
-      {bars.map((bar) => (
+      {bars.map((bar, i) => (
         <div key={bar.label} className="flex flex-col items-center gap-2">
-          <span className="text-[10px] font-medium text-[#A3A3A3]">
+          <motion.span
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 + i * 0.12, duration: 0.3 }}
+            className="text-[10px] font-medium text-[#A3A3A3]"
+          >
             {bar.pct}%
-          </span>
-          <div
-            className="w-10 rounded-t-md transition-all"
-            style={{
-              height: `${bar.pct * 1.4}px`,
-              backgroundColor: bar.color,
+          </motion.span>
+          <motion.div
+            initial={{ height: 0 }}
+            whileInView={{ height: bar.pct * 1.4 }}
+            viewport={{ once: true }}
+            transition={{
+              delay: 0.15 + i * 0.12,
+              duration: 0.5,
+              ease: "easeOut",
             }}
+            className="w-10 rounded-t-md"
+            style={{ backgroundColor: bar.color }}
           />
           <span className="text-[10px] text-[#6B7280]">{bar.label}</span>
         </div>
@@ -53,33 +64,76 @@ function ScoringDiagram() {
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="flex flex-col items-center gap-3 w-full max-w-[280px]">
         {/* AI Action */}
-        <div className="bg-[#2D6A4F] text-white text-xs font-medium px-4 py-2 rounded-lg w-full text-center">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="bg-[#2D6A4F] text-white text-xs font-medium px-4 py-2 rounded-lg w-full text-center"
+        >
           AI Scores Lead
-        </div>
-        <div className="h-4 w-px bg-[#D4D4D4]" />
+        </motion.div>
+
+        {/* Connector line grows */}
+        <motion.div
+          initial={{ scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4, duration: 0.3 }}
+          style={{ transformOrigin: "top" }}
+          className="h-4 w-px bg-[#D4D4D4]"
+        />
+
         {/* Branch */}
-        <div className="bg-[#2D6A4F] text-white text-xs font-semibold px-4 py-2 rounded-lg w-full text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.65, duration: 0.35 }}
+          className="bg-[#2D6A4F] text-white text-xs font-semibold px-4 py-2 rounded-lg w-full text-center"
+        >
           Branch by Score
-        </div>
+        </motion.div>
+
+        {/* Three tier boxes fan out */}
         <div className="flex items-start justify-between w-full">
-          <div className="flex flex-col items-center gap-1 flex-1">
-            <div className="h-4 w-px bg-[#D4D4D4]" />
-            <div className="bg-emerald-100 text-emerald-700 text-[10px] font-medium px-3 py-1.5 rounded-md text-center">
-              80+ Hot
-            </div>
-          </div>
-          <div className="flex flex-col items-center gap-1 flex-1">
-            <div className="h-4 w-px bg-[#D4D4D4]" />
-            <div className="bg-amber-100 text-amber-700 text-[10px] font-medium px-3 py-1.5 rounded-md text-center">
-              50-79 Warm
-            </div>
-          </div>
-          <div className="flex flex-col items-center gap-1 flex-1">
-            <div className="h-4 w-px bg-[#D4D4D4]" />
-            <div className="bg-gray-100 text-gray-600 text-[10px] font-medium px-3 py-1.5 rounded-md text-center">
-              0-49 Nurture
-            </div>
-          </div>
+          {[
+            {
+              label: "80+ Hot",
+              cls: "bg-emerald-100 text-emerald-700",
+            },
+            {
+              label: "50-79 Warm",
+              cls: "bg-amber-100 text-amber-700",
+            },
+            {
+              label: "0-49 Nurture",
+              cls: "bg-gray-100 text-gray-600",
+            },
+          ].map((tier, i) => (
+            <motion.div
+              key={tier.label}
+              initial={{ opacity: 0, y: -8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.9 + i * 0.12, duration: 0.35 }}
+              className="flex flex-col items-center gap-1 flex-1"
+            >
+              <motion.div
+                initial={{ scaleY: 0 }}
+                whileInView={{ scaleY: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.85 + i * 0.12, duration: 0.2 }}
+                style={{ transformOrigin: "top" }}
+                className="h-4 w-px bg-[#D4D4D4]"
+              />
+              <div
+                className={`${tier.cls} text-[10px] font-medium px-3 py-1.5 rounded-md text-center`}
+              >
+                {tier.label}
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </div>
@@ -113,9 +167,13 @@ function CalendarTable() {
             Calendar Routing
           </span>
         </div>
-        {rows.map((row) => (
-          <div
+        {rows.map((row, i) => (
+          <motion.div
             key={row.tier}
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 + i * 0.15, duration: 0.35 }}
             className="flex items-center justify-between px-4 py-2.5 border-b border-[#E5E7EB] last:border-0"
           >
             <span
@@ -124,7 +182,7 @@ function CalendarTable() {
               {row.tier}
             </span>
             <span className="text-xs text-[#6B7280]">{row.calendar}</span>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -167,8 +225,8 @@ export function WhySection() {
             Build and deploy with confidence
           </h2>
           <p className="text-[#6B7280] max-w-xl">
-            AI builds your funnel. You control who sees it, how leads are scored,
-            and where they book.
+            AI builds your funnel. You control who sees it, how leads are
+            scored, and where they book.
           </p>
         </div>
 

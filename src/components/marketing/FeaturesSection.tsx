@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Calendar, Globe, Shield } from "lucide-react";
+import { Sparkles, Globe, Shield } from "lucide-react";
 
 function SectionLabel({
   icon,
@@ -19,17 +19,19 @@ function SectionLabel({
 }
 
 function AIGenerationMockup() {
+  const cards = [
+    { q: "What is your monthly revenue?", delay: 0 },
+    { q: "How large is your team?", delay: 0.2 },
+    { q: "What is your biggest challenge?", delay: 0.4 },
+  ];
+
   return (
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="space-y-3 w-full max-w-[320px]">
-        {[
-          { q: "What is your monthly revenue?", delay: 0 },
-          { q: "How large is your team?", delay: 0.15 },
-          { q: "What is your biggest challenge?", delay: 0.3 },
-        ].map((item, i) => (
+        {cards.map((item, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.2 + item.delay }}
@@ -51,25 +53,53 @@ function AIGenerationMockup() {
 
 function ScoringChipsMockup() {
   const chips = [
-    { label: "Revenue", pts: "+20", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    { label: "Timeline", pts: "+15", color: "bg-blue-50 text-blue-700 border-blue-200" },
-    { label: "Budget", pts: "+25", color: "bg-amber-50 text-amber-700 border-amber-200" },
-    { label: "Team Size", pts: "+10", color: "bg-purple-50 text-purple-700 border-purple-200" },
-    { label: "Industry", pts: "+15", color: "bg-rose-50 text-rose-700 border-rose-200" },
-    { label: "Urgency", pts: "+20", color: "bg-orange-50 text-orange-700 border-orange-200" },
+    {
+      label: "Revenue",
+      pts: "+20",
+      color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    },
+    {
+      label: "Timeline",
+      pts: "+15",
+      color: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    {
+      label: "Budget",
+      pts: "+25",
+      color: "bg-amber-50 text-amber-700 border-amber-200",
+    },
+    {
+      label: "Team Size",
+      pts: "+10",
+      color: "bg-purple-50 text-purple-700 border-purple-200",
+    },
+    {
+      label: "Industry",
+      pts: "+15",
+      color: "bg-rose-50 text-rose-700 border-rose-200",
+    },
+    {
+      label: "Urgency",
+      pts: "+20",
+      color: "bg-orange-50 text-orange-700 border-orange-200",
+    },
   ];
 
   return (
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="flex flex-wrap gap-2 justify-center max-w-[300px]">
-        {chips.map((chip) => (
-          <div
+        {chips.map((chip, i) => (
+          <motion.div
             key={chip.label}
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 + i * 0.08, duration: 0.3 }}
             className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border ${chip.color}`}
           >
             {chip.label}
             <span className="opacity-60">{chip.pts}</span>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -79,20 +109,36 @@ function ScoringChipsMockup() {
 function CalendarIntegrationMockup() {
   return (
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
-      <div className="flex items-center gap-4">
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex flex-col items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-blue-600" />
-          </div>
-          <span className="text-[10px] font-medium text-[#6B7280]">Cal.com</span>
-        </div>
-        <div className="text-[#D4D4D4] text-lg">+</div>
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex flex-col items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-indigo-600" />
-          </div>
-          <span className="text-[10px] font-medium text-[#6B7280]">Calendly</span>
-        </div>
+      <div className="flex items-center gap-3">
+        <motion.div
+          initial={{ opacity: 0, x: -12 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1, duration: 0.35 }}
+          className="bg-white rounded-full border border-[#E5E7EB] px-5 py-2.5 flex items-center gap-2"
+        >
+          <span className="text-sm font-semibold text-[#111827]">Cal.com</span>
+        </motion.div>
+        <motion.span
+          initial={{ opacity: 0, scale: 0.5 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3, duration: 0.25 }}
+          className="text-[#9CA3AF] text-lg font-light"
+        >
+          +
+        </motion.span>
+        <motion.div
+          initial={{ opacity: 0, x: 12 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1, duration: 0.35 }}
+          className="bg-white rounded-full border border-[#E5E7EB] px-5 py-2.5 flex items-center gap-2"
+        >
+          <span className="text-sm font-semibold text-[#006BFF]">
+            Calendly
+          </span>
+        </motion.div>
       </div>
     </div>
   );
@@ -106,7 +152,9 @@ function DomainMockup() {
           <Globe className="w-4 h-4 text-[#A3A3A3]" />
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="text-[10px] text-emerald-600 font-medium">Active</span>
+            <span className="text-[10px] text-emerald-600 font-medium">
+              Active
+            </span>
           </div>
         </div>
         <p className="text-sm font-medium text-[#111827]">quiz.acme.com</p>
@@ -123,7 +171,9 @@ function EnterpriseMockup() {
         <div className="w-16 h-16 rounded-full border-2 border-[#E5E7EB] flex items-center justify-center bg-white">
           <Shield className="w-7 h-7 text-[#111827]" />
         </div>
-        <span className="text-xs font-semibold text-[#111827]">Enterprise Ready</span>
+        <span className="text-xs font-semibold text-[#111827]">
+          Enterprise Ready
+        </span>
         <span className="text-[10px] text-[#A3A3A3]">SOC 2 Compliant</span>
       </div>
     </div>
@@ -145,8 +195,8 @@ export function FeaturesSection() {
             Everything you need to convert
           </h2>
           <p className="text-[#6B7280] max-w-xl">
-            From AI-powered quiz generation to smart scoring and calendar routing
-            — all in one platform.
+            From AI-powered quiz generation to smart scoring and calendar
+            routing — all in one platform.
           </p>
         </div>
 

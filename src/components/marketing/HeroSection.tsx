@@ -204,24 +204,7 @@ export function HeroSection() {
               )}
             </div>
 
-            <div className="flex items-center justify-between px-5 pb-4">
-              <div className="flex items-center gap-3">
-                <button className="flex items-center gap-1.5 text-[12px] text-[#A3A3A3] hover:text-[#737373] transition-colors">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                  New Suggestion
-                </button>
-                <div className="flex items-center gap-1">
-                  <div className="w-5 h-5 rounded bg-emerald-50 flex items-center justify-center text-[10px] text-emerald-600 font-medium">
-                    Q
-                  </div>
-                  <div className="w-5 h-5 rounded bg-blue-50 flex items-center justify-center text-[10px] text-blue-600 font-medium">
-                    B
-                  </div>
-                  <div className="w-5 h-5 rounded bg-orange-50 flex items-center justify-center text-[10px] text-orange-600 font-medium">
-                    L
-                  </div>
-                </div>
-              </div>
+            <div className="flex items-center justify-end px-5 pb-4">
               <div className="flex items-center">
                 <button
                   onClick={handleSubmit}
