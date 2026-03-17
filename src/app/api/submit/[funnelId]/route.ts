@@ -3,6 +3,10 @@ import { getFunnelById } from "@/db/queries/funnels";
 import { insertLead } from "@/db/queries/leads";
 import { calculateScore, getCalendarTier, getCalendarUrl } from "@/lib/scoring";
 import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { sendLeadNotification } from "@/lib/resend";
+import { db } from "@/db";
+import { leads, users } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
@@ -29,6 +33,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     const calendarTier = getCalendarTier(config, answers);
     const calendarUrl = getCalendarUrl(config, answers);
 
+    // Duplicate email prevention — same email + same funnel = skip insert
+    const existing = await db.select({ id: leads.id }).from(leads)
+      .where(and(eq(leads.funnelId, funnelId), eq(leads.email, email)));
+    if (existing.length > 0) {
+      return NextResponse.json({ success: true, calendarUrl, deduplicated: true });
+    }
+
     const lead = await insertLead({
       funnelId,
       email,
@@ -37,6 +48,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       calendarTier,
       sessionId: sessionId ?? null,
     });
+
+    // Send email notification to funnel owner (non-blocking)
+    const [owner] = await db.select({ email: users.email }).from(users).where(eq(users.id, funnel.userId));
+    if (owner?.email) {
+      sendLeadNotification({
+        toEmail: owner.email,
+        funnelName: config.brand.name,
+        leadEmail: email,
+        score,
+        calendarTier,
+        funnelId,
+      }).catch(() => {});
+    }
 
     // Fire webhook if configured
     if (config.webhook?.url) {

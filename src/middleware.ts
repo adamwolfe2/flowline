@@ -5,6 +5,7 @@ const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
   '/builder(.*)',
   '/settings(.*)',
+  '/billing(.*)',
   '/admin(.*)',
   '/analytics(.*)',
 ]);
@@ -39,5 +40,5 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/webhooks).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/webhooks|api/stripe).*)'],
 };

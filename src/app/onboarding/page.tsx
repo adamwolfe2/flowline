@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight, ArrowLeft, Loader2, Palette, Calendar, Globe, Check, PartyPopper, Users, Briefcase, Laptop, Home, Dumbbell, LineChart, Upload } from "lucide-react";
+import { firePublishConfetti } from "@/lib/confetti";
 import Image from "next/image";
 import { TEMPLATES, Template } from "@/lib/templates";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -203,6 +204,7 @@ function OnboardingContent() {
       localStorage.removeItem("myvsl_pending_funnel");
       setCreatedFunnelId(funnel.id);
       setStep(5);
+      firePublishConfetti();
       toast.success("Your funnel is live!");
     } catch {
       toast.error("Something went wrong. Try again.");

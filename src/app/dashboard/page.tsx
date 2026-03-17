@@ -1,20 +1,31 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Funnel, FunnelStats } from "@/types";
 import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { toast } from "sonner";
+import { firePublishConfetti } from "@/lib/confetti";
 
 interface FunnelWithStats extends Funnel {
   stats: FunnelStats;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const searchParams = useSearchParams();
   const [funnels, setFunnels] = useState<FunnelWithStats[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "true") {
+      toast.success("Welcome to Pro! Your account has been upgraded.");
+      firePublishConfetti();
+      window.history.replaceState({}, "", "/dashboard");
+    }
+  }, [searchParams]);
 
   const loadFunnels = useCallback(() => {
     fetch("/api/funnels")
@@ -71,5 +82,19 @@ export default function DashboardPage() {
         </ErrorBoundary>
       )}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3].map(i => (
+          <Skeleton key={i} className="h-[220px] rounded-xl" />
+        ))}
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

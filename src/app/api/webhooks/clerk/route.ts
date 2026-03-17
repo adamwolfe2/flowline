@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
+import { sendWelcomeEmail } from "@/lib/resend";
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -39,6 +40,10 @@ export async function POST(req: Request) {
     const { id, email_addresses } = evt.data;
     const email = email_addresses[0]?.email_address ?? "";
     await db.insert(users).values({ id, email }).onConflictDoNothing();
+    // Send welcome email (non-blocking)
+    if (email) {
+      sendWelcomeEmail(email).catch(() => {});
+    }
   }
 
   return new Response("OK", { status: 200 });

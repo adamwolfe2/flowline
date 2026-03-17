@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Globe, Copy, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { firePublishConfetti } from "@/lib/confetti";
 
 interface PublishPanelProps {
   funnel: Funnel;
@@ -29,6 +30,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
     onUpdate(updated);
     setPublishing(false);
     if (res.ok) {
+      firePublishConfetti();
       toast.success("Funnel published!");
     } else {
       toast.error("Failed to publish funnel");
