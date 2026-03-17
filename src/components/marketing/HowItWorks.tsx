@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Zap } from "lucide-react";
 
 const steps = [
   {
@@ -96,8 +97,8 @@ function BuilderMockup() {
           </div>
 
           <div className="bg-white rounded-xl border border-[#EBEBEB] p-5 flex-1">
-            <div className="w-10 h-10 rounded-lg bg-[#F6C744]/20 flex items-center justify-center mb-4">
-              <span className="text-lg">&#9889;</span>
+            <div className="w-10 h-10 rounded-lg bg-[#2D6A4F]/20 flex items-center justify-center mb-4">
+              <Zap className="w-5 h-5 text-[#2D6A4F]" />
             </div>
             <h4 className="text-sm font-semibold text-[#333333] mb-1">
               Coaching Qualifier
@@ -115,7 +116,7 @@ function BuilderMockup() {
                     key={i}
                     className={`text-sm px-4 py-2.5 rounded-lg border cursor-pointer transition-colors ${
                       i === 2
-                        ? "bg-[#F6C744]/10 border-[#F6C744] text-[#333333]"
+                        ? "bg-[#2D6A4F]/10 border-[#2D6A4F] text-[#333333]"
                         : "bg-white border-[#EBEBEB] text-[#737373] hover:border-[#D4D4D4]"
                     }`}
                   >
@@ -145,7 +146,7 @@ export function HowItWorks() {
               transition={{ duration: 0.5, delay: i * 0.12 }}
             >
               {/* Tangerine accent line */}
-              <div className="h-0.5 w-16 bg-[#F9B31E] mb-6" />
+              <div className="h-0.5 w-16 bg-[#2D6A4F] mb-6" />
               <span className="text-sm font-semibold text-[#A3A3A3] mb-2 block">
                 {step.num}
               </span>

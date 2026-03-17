@@ -88,7 +88,7 @@ export function TestimonialsSection() {
                 {Array.from({ length: 5 }).map((_, j) => (
                   <Star
                     key={j}
-                    className="w-3.5 h-3.5 fill-[#F6C744] text-[#F6C744]"
+                    className="w-3.5 h-3.5 fill-[#2D6A4F] text-[#2D6A4F]"
                   />
                 ))}
               </div>
@@ -128,7 +128,7 @@ export function TestimonialsSection() {
                 </span>
                 <div className="flex items-center gap-0.5 mb-1">
                   {Array.from({ length: r.stars }).map((_, j) => (
-                    <span key={j} className="text-[#F6C744] text-sm">
+                    <span key={j} className="text-[#2D6A4F] text-sm">
                       &#9733;
                     </span>
                   ))}

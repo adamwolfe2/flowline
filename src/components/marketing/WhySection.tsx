@@ -21,10 +21,10 @@ function SectionLabel({
 function WaterfallChart() {
   const bars = [
     { label: "Visitors", pct: 100, color: "#D4D4D4" },
-    { label: "Started", pct: 78, color: "#F9B31E" },
-    { label: "Completed", pct: 56, color: "#F6C744" },
+    { label: "Started", pct: 78, color: "#2D6A4F" },
+    { label: "Completed", pct: 56, color: "#2D6A4F" },
     { label: "Qualified", pct: 38, color: "#E8A820" },
-    { label: "Booked", pct: 28, color: "#333333" },
+    { label: "Booked", pct: 28, color: "#2D6A4F" },
   ];
 
   return (
@@ -58,7 +58,7 @@ function ScoringDiagram() {
         </div>
         <div className="h-4 w-px bg-[#D4D4D4]" />
         {/* Branch */}
-        <div className="bg-[#F6C744] text-[#333333] text-xs font-semibold px-4 py-2 rounded-lg w-full text-center">
+        <div className="bg-[#2D6A4F] text-white text-xs font-semibold px-4 py-2 rounded-lg w-full text-center">
           Branch by Score
         </div>
         <div className="flex items-start justify-between w-full">

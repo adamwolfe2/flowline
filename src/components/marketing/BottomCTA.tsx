@@ -105,7 +105,7 @@ export function BottomCTA() {
               <button
                 onClick={() => router.push("/sign-up")}
                 className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-lg transition-all hover:brightness-95"
-                style={{ backgroundColor: "#F6C744", color: "#333333" }}
+                style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
               >
                 Get started
                 <ChevronDown className="w-3.5 h-3.5 -rotate-90" />

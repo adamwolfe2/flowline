@@ -25,7 +25,7 @@ export function MarketingNav() {
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#211C20]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2D6A4F]">
             <Zap className="h-4 w-4 text-white" />
           </div>
           <span
@@ -59,7 +59,7 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/sign-up"
-            className="bg-[#333333] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#171717] transition-colors"
+            className="bg-[#2D6A4F] text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-[#245840] transition-colors"
           >
             Create account &rarr;
           </Link>
@@ -94,7 +94,7 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/sign-up"
-            className="bg-[#333333] text-white rounded-lg px-4 py-2.5 text-sm font-medium text-center hover:bg-[#171717] transition-colors"
+            className="bg-[#2D6A4F] text-white rounded-lg px-4 py-2.5 text-sm font-medium text-center hover:bg-[#245840] transition-colors"
           >
             Create account &rarr;
           </Link>

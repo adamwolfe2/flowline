@@ -35,8 +35,8 @@ function AIGenerationMockup() {
             transition={{ duration: 0.4, delay: 0.2 + item.delay }}
             className="bg-white rounded-xl border border-[#EBEBEB] p-3.5 flex items-center gap-3"
           >
-            <div className="w-8 h-8 rounded-lg bg-[#F6C744]/15 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-[#F6C744]" />
+            <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/15 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-[#2D6A4F]" />
             </div>
             <div>
               <p className="text-xs text-[#333333] font-medium">{item.q}</p>

@@ -29,48 +29,24 @@ const categories = [
 ];
 
 const templates = [
-  {
-    title: "SaaS Discovery Call",
-    author: "Qualifi",
-    clones: 47,
-    color: "#4A90D9",
-    questions: 5,
-  },
-  {
-    title: "Coaching Qualifier",
-    author: "Qualifi",
-    clones: 89,
-    color: "#F6C744",
-    questions: 4,
-  },
-  {
-    title: "Agency Lead Scorer",
-    author: "Qualifi",
-    clones: 63,
-    color: "#E85D75",
-    questions: 6,
-  },
-  {
-    title: "Real Estate Booking",
-    author: "Qualifi",
-    clones: 31,
-    color: "#4BC0A0",
-    questions: 3,
-  },
-  {
-    title: "Fitness Assessment",
-    author: "Qualifi",
-    clones: 52,
-    color: "#9B6FE8",
-    questions: 5,
-  },
-  {
-    title: "Consulting Intake",
-    author: "Qualifi",
-    clones: 28,
-    color: "#F9B31E",
-    questions: 7,
-  },
+  { title: "Life Coach Qualifier", author: "Qualifi", clones: 89, color: "#F6C744", questions: 4, category: "Coaching" },
+  { title: "Executive Coach Intake", author: "Qualifi", clones: 34, color: "#4BC0A0", questions: 5, category: "Coaching" },
+  { title: "Group Coaching Screener", author: "Qualifi", clones: 41, color: "#9B6FE8", questions: 3, category: "Coaching" },
+  { title: "Agency Lead Scorer", author: "Qualifi", clones: 63, color: "#E85D75", questions: 6, category: "Agencies" },
+  { title: "Creative Agency Qualifier", author: "Qualifi", clones: 27, color: "#2D6A4F", questions: 4, category: "Agencies" },
+  { title: "Marketing Agency Intake", author: "Qualifi", clones: 55, color: "#4A90D9", questions: 5, category: "Agencies" },
+  { title: "SaaS Discovery Call", author: "Qualifi", clones: 47, color: "#4A90D9", questions: 5, category: "SaaS" },
+  { title: "Product Demo Qualifier", author: "Qualifi", clones: 38, color: "#9B6FE8", questions: 4, category: "SaaS" },
+  { title: "Enterprise Sales Funnel", author: "Qualifi", clones: 22, color: "#333333", questions: 6, category: "SaaS" },
+  { title: "Real Estate Booking", author: "Qualifi", clones: 31, color: "#4BC0A0", questions: 3, category: "Real Estate" },
+  { title: "Luxury Home Qualifier", author: "Qualifi", clones: 19, color: "#F6C744", questions: 5, category: "Real Estate" },
+  { title: "Investment Property Lead", author: "Qualifi", clones: 26, color: "#E85D75", questions: 4, category: "Real Estate" },
+  { title: "Fitness Assessment", author: "Qualifi", clones: 52, color: "#9B6FE8", questions: 5, category: "Fitness" },
+  { title: "Personal Training Intake", author: "Qualifi", clones: 44, color: "#4BC0A0", questions: 3, category: "Fitness" },
+  { title: "Nutrition Coach Screener", author: "Qualifi", clones: 33, color: "#2D6A4F", questions: 4, category: "Fitness" },
+  { title: "Consulting Intake", author: "Qualifi", clones: 28, color: "#2D6A4F", questions: 7, category: "& more" },
+  { title: "Legal Consultation Funnel", author: "Qualifi", clones: 15, color: "#333333", questions: 4, category: "& more" },
+  { title: "Financial Advisor Qualifier", author: "Qualifi", clones: 36, color: "#4A90D9", questions: 5, category: "& more" },
 ];
 
 function TemplateMockup({
@@ -154,33 +130,34 @@ export function TemplatesSection() {
           ))}
         </div>
 
-        {/* Template grid */}
+        {/* Template grid — filtered by category */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {templates.map((t, i) => (
-            <motion.div
-              key={t.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
-            >
-              <TemplateMockup color={t.color} questions={t.questions} />
-              <div className="p-5 border-t border-[#EBEBEB]">
-                <h3 className="text-sm font-semibold text-[#333333] mb-1">
-                  {t.title}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#A3A3A3]">
-                    by {t.author}
-                  </span>
-                  <span className="text-xs text-[#A3A3A3]">
-                    {t.clones} clones
-                  </span>
+          {templates
+            .filter((t) => t.category === activeCategory)
+            .map((t, i) => (
+              <motion.div
+                key={t.title}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+              >
+                <TemplateMockup color={t.color} questions={t.questions} />
+                <div className="p-5 border-t border-[#EBEBEB]">
+                  <h3 className="text-sm font-semibold text-[#333333] mb-1">
+                    {t.title}
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#A3A3A3]">
+                      by {t.author}
+                    </span>
+                    <span className="text-xs text-[#A3A3A3]">
+                      {t.clones} clones
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
         </div>
 
         {/* View all */}

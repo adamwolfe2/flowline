@@ -164,7 +164,6 @@ export function HeroSection() {
                   </div>
                   <div className="flex-1 mx-8">
                     <div className="bg-white/20 rounded-md px-3 py-1 text-[11px] text-white/50 text-center max-w-xs mx-auto flex items-center justify-center gap-1.5">
-                      <span className="text-white/30">🔍</span>
                       https://yoursite.com
                     </div>
                   </div>
@@ -207,8 +206,9 @@ export function HeroSection() {
 
             <div className="flex items-center justify-between px-5 pb-4">
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-1 text-[12px] text-[#A3A3A3] hover:text-[#737373] transition-colors">
-                  <span className="text-[#D4D4D4]">↻</span> New Suggestion
+                <button className="flex items-center gap-1.5 text-[12px] text-[#A3A3A3] hover:text-[#737373] transition-colors">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  New Suggestion
                 </button>
                 <div className="flex items-center gap-1">
                   <div className="w-5 h-5 rounded bg-emerald-50 flex items-center justify-center text-[10px] text-emerald-600 font-medium">
@@ -221,20 +221,18 @@ export function HeroSection() {
                     L
                   </div>
                 </div>
-                <span className="text-[#D4D4D4] text-sm">📎</span>
-                <span className="text-[#D4D4D4] text-sm">▶</span>
               </div>
               <div className="flex items-center">
                 <button
                   onClick={handleSubmit}
-                  className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-l-lg transition-all hover:brightness-95"
-                  style={{ backgroundColor: "#F6C744", color: "#333333" }}
+                  className="flex items-center gap-1.5 text-sm font-semibold pl-5 pr-3 py-2.5 rounded-l-lg transition-all hover:brightness-95"
+                  style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
                 >
                   Build it
                 </button>
                 <button
-                  className="flex items-center px-2.5 py-2.5 rounded-r-lg border-l border-[#E5B53D] transition-all hover:brightness-95"
-                  style={{ backgroundColor: "#F6C744", color: "#333333" }}
+                  className="flex items-center pl-2.5 pr-3 py-2.5 rounded-r-lg border-l border-[#245840] transition-all hover:brightness-95"
+                  style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
                 >
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
