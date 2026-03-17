@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
   try {
     const [funnel] = await db.select().from(funnels).where(eq(funnels.id, funnelId));
 
-    if (!funnel) {
+    if (!funnel || !funnel.published) {
       return new ImageResponse(
         (
           <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", backgroundColor: "#F9FAFB", fontSize: 32, color: "#666" }}>

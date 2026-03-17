@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { aiLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 const SYSTEM_PROMPT = `You are a VSL funnel copywriter and conversion strategist.
 Given a business description, generate a complete lead qualification quiz funnel.
@@ -62,8 +63,17 @@ export async function POST(req: NextRequest) {
       });
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || "";
-      const parsed = JSON.parse(content);
-      return NextResponse.json(parsed);
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+      } catch {
+        logger.error("AI response was not valid JSON", { content: content?.slice(0, 200) });
+        parsed = null;
+      }
+
+      if (parsed) {
+        return NextResponse.json(parsed);
+      }
     } catch {
       // Fall through to mock
     }

@@ -37,6 +37,7 @@ export interface FunnelConfig {
     emailButtonText?: string;
     successHeadline?: string;
     successSubtext?: string;
+    badgeText?: string;
   };
   webhook: {
     url: string;

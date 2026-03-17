@@ -52,6 +52,7 @@ export const DEFAULT_FUNNEL_CONFIG: FunnelConfig = {
     emailButtonText: "See My Results & Book a Call",
     successHeadline: "You qualify!",
     successSubtext: "We sent a confirmation to {email}. Pick a time that works for you below.",
+    badgeText: "Free Application",
     calendars: {
       high: "https://cal.com/your-name/hot-lead",
       mid: "https://cal.com/your-name/warm-lead",

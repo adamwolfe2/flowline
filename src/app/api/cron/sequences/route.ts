@@ -4,6 +4,15 @@ import { sequenceEnrollments, emailSteps, emailSequences, leads, funnels } from 
 import { eq, and, lte, asc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
@@ -76,9 +85,9 @@ export async function GET(req: Request) {
 
           // Replace placeholders in body
           const emailBody = step.body
-            .replace(/\{email\}/g, lead.email)
-            .replace(/\{score\}/g, String(lead.score))
-            .replace(/\{tier\}/g, lead.calendarTier);
+            .replace(/\{email\}/g, escapeHtml(lead.email))
+            .replace(/\{score\}/g, escapeHtml(String(lead.score)))
+            .replace(/\{tier\}/g, escapeHtml(lead.calendarTier));
 
           await resend.emails.send({
             from: `${fromName} <noreply@getmyvsl.com>`,

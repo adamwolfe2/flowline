@@ -10,11 +10,11 @@ export async function GET(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const page = parseInt(req.nextUrl.searchParams.get("page") || "0");
+    const page = Math.max(0, parseInt(req.nextUrl.searchParams.get("page") || "0") || 0);
     const funnelId = req.nextUrl.searchParams.get("funnelId");
     const tier = req.nextUrl.searchParams.get("tier");
     const search = req.nextUrl.searchParams.get("search");
-    const limit = 25;
+    const limit = Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "25") || 25, 10000);
 
     // Get user's funnel IDs and names
     const userFunnels = await db

@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { events, funnelSessions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { eventLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 const VALID_EVENT_TYPES = [
   "funnel_viewed",
@@ -37,12 +38,15 @@ export async function POST(req: Request) {
 
     // Validate required fields
     if (!sessionId || typeof sessionId !== "string") {
-      return NextResponse.json({ success: true }); // silently drop invalid events
+      logger.warn("Event dropped: missing sessionId", { eventType: body?.eventType });
+      return NextResponse.json({ success: true });
     }
     if (!funnelId || typeof funnelId !== "string") {
+      logger.warn("Event dropped: missing funnelId", { eventType: body?.eventType });
       return NextResponse.json({ success: true });
     }
     if (!eventType || !VALID_EVENT_TYPES.includes(eventType)) {
+      logger.warn("Event dropped: invalid eventType", { eventType: body?.eventType });
       return NextResponse.json({ success: true });
     }
 

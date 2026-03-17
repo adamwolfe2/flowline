@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, Download, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
+import { toast } from "sonner";
 
 interface LeadRow {
   id: string;
@@ -98,39 +99,77 @@ export default function LeadsPage() {
     return leads.filter((l) => new Date(l.createdAt) >= cutoff);
   }, [leads, dateRange]);
 
-  function exportCSV() {
-    if (displayedLeads.length === 0) return;
+  async function exportCSV() {
+    try {
+      // Fetch ALL leads (not just current page) with current filters
+      const params = new URLSearchParams();
+      if (funnelFilter) params.set("funnelId", funnelFilter);
+      if (tierFilter) params.set("tier", tierFilter);
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      params.set("page", "0");
+      params.set("limit", "10000"); // Fetch all
 
-    // Collect all unique answer keys across all leads
-    const answerKeys = new Set<string>();
-    for (const lead of displayedLeads) {
-      if (lead.answers && typeof lead.answers === "object") {
-        for (const key of Object.keys(lead.answers)) {
-          answerKeys.add(key);
+      const res = await fetch(`/api/leads?${params}`);
+      if (!res.ok) {
+        toast.error("Failed to export leads");
+        return;
+      }
+      const data = await res.json();
+      const allLeads: LeadRow[] = data.leads || [];
+
+      if (allLeads.length === 0) {
+        toast.error("No leads to export");
+        return;
+      }
+
+      // Apply date range filter client-side
+      let filteredLeads = allLeads;
+      if (dateRange !== "all") {
+        const now = new Date();
+        const days = dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90;
+        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+        filteredLeads = allLeads.filter((l) => new Date(l.createdAt) >= cutoff);
+      }
+
+      if (filteredLeads.length === 0) {
+        toast.error("No leads match current filters");
+        return;
+      }
+
+      // Collect answer keys
+      const answerKeys = new Set<string>();
+      for (const lead of filteredLeads) {
+        if (lead.answers && typeof lead.answers === "object") {
+          for (const key of Object.keys(lead.answers)) {
+            answerKeys.add(key);
+          }
         }
       }
-    }
-    const sortedKeys = Array.from(answerKeys).sort();
+      const sortedKeys = Array.from(answerKeys).sort();
 
-    const header = ["Email", "Funnel", "Score", "Tier", "Date", ...sortedKeys].join(",") + "\n";
-    const rows = displayedLeads
-      .map((l) => {
-        const fName = (funnelNameMap[l.funnelId] || "").replace(/,/g, " ");
-        const date = new Date(l.createdAt).toLocaleDateString();
-        const answerCols = sortedKeys.map((k) => {
-          const val = l.answers?.[k] ?? "";
-          return String(val).replace(/,/g, " ");
-        });
-        return [l.email, fName, l.score, l.calendarTier, date, ...answerCols].join(",");
-      })
-      .join("\n");
-    const blob = new Blob([header + rows], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `leads-export-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const header = ["Email", "Funnel", "Score", "Tier", "Date", ...sortedKeys].join(",") + "\n";
+      const rows = filteredLeads
+        .map((l) => {
+          const fName = (funnelNameMap[l.funnelId] || "").replace(/,/g, " ");
+          const date = new Date(l.createdAt).toLocaleDateString();
+          const answerCols = sortedKeys.map((k) => {
+            const val = l.answers?.[k] ?? "";
+            return String(val).replace(/,/g, " ");
+          });
+          return [l.email, fName, l.score, l.calendarTier, date, ...answerCols].join(",");
+        })
+        .join("\n");
+      const blob = new Blob([header + rows], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `leads-export-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${filteredLeads.length} leads`);
+    } catch {
+      toast.error("Export failed");
+    }
   }
 
   return (

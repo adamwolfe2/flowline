@@ -10,6 +10,7 @@ interface QuestionStepProps {
   totalQuestions: number;
   selectedOptionId?: string;
   onSelect: (key: string, id: string) => void;
+  onBack?: () => void;
 }
 
 export function QuestionStep({
@@ -19,6 +20,7 @@ export function QuestionStep({
   totalQuestions,
   selectedOptionId,
   onSelect,
+  onBack,
 }: QuestionStepProps) {
   const { brand } = config;
 
@@ -124,6 +126,16 @@ export function QuestionStep({
       </div>
 
       <p className="text-xs text-gray-400 sm:hidden mt-4 text-center">Tap an answer to continue</p>
+
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="mt-6 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          &larr; Back
+        </button>
+      )}
     </div>
   );
 }

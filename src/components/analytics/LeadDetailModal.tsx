@@ -119,7 +119,7 @@ export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
                       </div>
                       <div className="pb-4 flex-1">
                         <p className="text-xs font-medium text-[#333333]">
-                          {(event.eventType as string || '').replace(/_/g, ' ')}
+                          {(event.eventType as string || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-[#A3A3A3]">{event.stepKey as string}</span>

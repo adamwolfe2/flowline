@@ -177,6 +177,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
                 totalQuestions={totalQuestions}
                 selectedOptionId={answers[currentQuestion.key]}
                 onSelect={handleSelect}
+                onBack={step > questionStartStep ? handleBack : undefined}
               />
             </motion.div>
           )}

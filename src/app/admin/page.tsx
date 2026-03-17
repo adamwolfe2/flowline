@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity } from "lucide-react";
 
 interface AdminStats {
@@ -139,7 +140,11 @@ export default function AdminPage() {
             <tbody>
               {stats.topFunnels.map((f) => (
                 <tr key={f.funnelId} className="border-b border-[#EBEBEB] last:border-0">
-                  <td className="px-4 py-2 text-[#333333] font-mono text-xs">{f.funnelId}</td>
+                  <td className="px-4 py-2">
+                    <Link href={`/analytics/${f.funnelId}`} className="text-[#2D6A4F] hover:underline font-mono text-xs">
+                      {f.funnelId.slice(0, 8)}...
+                    </Link>
+                  </td>
                   <td className="px-4 py-2 text-right text-[#333333] font-semibold">{f.count}</td>
                 </tr>
               ))}

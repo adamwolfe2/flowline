@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "@/lib/resend";
 
 export async function POST(req: Request) {
@@ -39,10 +40,17 @@ export async function POST(req: Request) {
   if (evt.type === "user.created") {
     const { id, email_addresses } = evt.data;
     const email = email_addresses[0]?.email_address ?? "";
-    await db.insert(users).values({ id, email }).onConflictDoNothing();
-    // Send welcome email (non-blocking)
-    if (email) {
-      sendWelcomeEmail(email).catch(() => {});
+
+    // Check if user already exists
+    const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.id, id));
+
+    if (!existing) {
+      await db.insert(users).values({ id, email }).onConflictDoNothing();
+
+      // Only send welcome email for genuinely new users
+      if (email) {
+        sendWelcomeEmail(email).catch(() => {});
+      }
     }
   }
 

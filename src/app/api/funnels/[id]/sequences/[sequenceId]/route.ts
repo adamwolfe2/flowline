@@ -33,18 +33,25 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     // Update steps if provided
     if (body.steps && Array.isArray(body.steps)) {
-      // Delete existing steps and re-insert
-      await db.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));
+      try {
+        await db.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));
 
-      for (let i = 0; i < body.steps.length; i++) {
-        const step = body.steps[i];
-        await db.insert(emailSteps).values({
+        for (let i = 0; i < body.steps.length; i++) {
+          const step = body.steps[i];
+          await db.insert(emailSteps).values({
+            sequenceId,
+            stepOrder: i + 1,
+            subject: step.subject || "Follow up",
+            body: step.body || "",
+            delayHours: step.delayHours ?? 24,
+          });
+        }
+      } catch (stepError) {
+        logger.error("Failed to update sequence steps", {
           sequenceId,
-          stepOrder: i + 1,
-          subject: step.subject || "Follow up",
-          body: step.body || "",
-          delayHours: step.delayHours ?? 24,
+          error: stepError instanceof Error ? stepError.message : String(stepError)
         });
+        return NextResponse.json({ error: "Failed to update steps" }, { status: 500 });
       }
     }
 

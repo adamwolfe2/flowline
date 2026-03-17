@@ -182,7 +182,11 @@ export default function SettingsPage() {
           Delete Account
         </button>
         <p className="text-xs text-[#A3A3A3] mt-2">
-          Contact support to delete your account.
+          Contact{" "}
+          <a href="mailto:support@getmyvsl.com" className="text-[#2D6A4F] hover:underline">
+            support@getmyvsl.com
+          </a>{" "}
+          to delete your account.
         </p>
       </section>
     </div>

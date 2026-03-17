@@ -19,10 +19,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: "Invalid domain format" }, { status: 400 });
       }
 
+      const normalizedDomain = domain.toLowerCase();
+
       // Check domain not already taken
       const [existing] = await db.select({ id: funnels.id })
         .from(funnels)
-        .where(eq(funnels.customDomain, domain));
+        .where(eq(funnels.customDomain, normalizedDomain));
 
       if (existing && existing.id !== id) {
         return NextResponse.json({ error: "Domain already in use" }, { status: 409 });
@@ -39,8 +41,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Update domain (null to remove)
+    const normalizedDomain = domain ? domain.toLowerCase() : null;
     const [updated] = await db.update(funnels)
-      .set({ customDomain: domain || null, updatedAt: new Date() })
+      .set({ customDomain: normalizedDomain, updatedAt: new Date() })
       .where(eq(funnels.id, id))
       .returning();
 

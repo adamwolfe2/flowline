@@ -53,7 +53,7 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
           className="inline-block text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full mb-4"
           style={{ backgroundColor: brand.primaryColorLight, color: brand.primaryColor }}
         >
-          Free Application
+          {quiz.badgeText ?? "Free Application"}
         </div>
         <h1
           className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4"

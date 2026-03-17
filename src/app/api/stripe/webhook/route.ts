@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
