@@ -10,6 +10,7 @@ import { SuccessStep } from "./SuccessStep";
 import { VideoStep } from "./VideoStep";
 import { ProgressBar } from "./ProgressBar";
 import { useTracking } from "./useTracking";
+import { toast } from "sonner";
 
 interface FunnelClientProps {
   config: FunnelConfig;
@@ -83,7 +84,7 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
         });
 
         if (!res.ok) {
-          // Don't advance to success step
+          toast.error("Something went wrong. Please try again.");
           return;
         }
 
@@ -97,7 +98,7 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
 
         setStep(successStep);
       } catch {
-        // Don't advance to success step
+        toast.error("Something went wrong. Please try again.");
       }
     },
     [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated]
