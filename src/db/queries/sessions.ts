@@ -2,9 +2,17 @@ import { db } from '@/db';
 import { funnelSessions } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
-export async function insertSession(funnelId: string) {
+export async function insertSession(
+  funnelId: string,
+  utm?: { utmSource?: string; utmMedium?: string; utmCampaign?: string }
+) {
   const result = await db.insert(funnelSessions)
-    .values({ funnelId }).returning();
+    .values({
+      funnelId,
+      utmSource: utm?.utmSource ?? null,
+      utmMedium: utm?.utmMedium ?? null,
+      utmCampaign: utm?.utmCampaign ?? null,
+    }).returning();
   return result[0];
 }
 

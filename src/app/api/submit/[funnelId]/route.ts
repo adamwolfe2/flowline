@@ -8,7 +8,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
   try {
     const { funnelId } = await params;
     const body = await req.json();
-    const { email, answers } = body as { email: string; answers: Record<string, string> };
+    const { email, answers, sessionId } = body as {
+      email: string;
+      answers: Record<string, string>;
+      sessionId?: string;
+    };
 
     const funnel = await getFunnelById(funnelId);
     if (!funnel) return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
@@ -18,12 +22,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     const calendarTier = getCalendarTier(config, answers);
     const calendarUrl = getCalendarUrl(config, answers);
 
-    await insertLead({
+    const lead = await insertLead({
       funnelId,
       email,
       answers,
       score,
       calendarTier,
+      sessionId: sessionId ?? null,
     });
 
     // Fire webhook if configured
@@ -40,7 +45,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       }).catch(() => {});
     }
 
-    return NextResponse.json({ success: true, calendarUrl });
+    return NextResponse.json({
+      success: true,
+      leadId: lead.id,
+      score,
+      calendarTier,
+      calendarUrl,
+    });
   } catch (error) {
     console.error("POST /api/submit error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

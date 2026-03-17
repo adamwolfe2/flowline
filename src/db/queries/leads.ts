@@ -8,8 +8,16 @@ export async function insertLead(data: {
   answers: Record<string, string>;
   score: number;
   calendarTier: 'high' | 'mid' | 'low';
+  sessionId?: string | null;
 }) {
-  const result = await db.insert(leads).values(data).returning();
+  const result = await db.insert(leads).values({
+    funnelId: data.funnelId,
+    email: data.email,
+    answers: data.answers,
+    score: data.score,
+    calendarTier: data.calendarTier,
+    sessionId: data.sessionId ?? null,
+  }).returning();
   return result[0];
 }
 

@@ -8,13 +8,15 @@ import { QuestionStep } from "./QuestionStep";
 import { EmailStep } from "./EmailStep";
 import { SuccessStep } from "./SuccessStep";
 import { ProgressBar } from "./ProgressBar";
+import { useTracking } from "./useTracking";
 
 interface FunnelClientProps {
   config: FunnelConfig;
   funnelId: string;
+  sessionId: string;
 }
 
-export function FunnelClient({ config, funnelId }: FunnelClientProps) {
+export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps) {
   const totalQuestions = config.quiz.questions.length;
   // Steps: 0=Welcome, 1..N=Questions, N+1=Email, N+2=Success
   const emailStep = totalQuestions + 1;
@@ -24,76 +26,82 @@ export function FunnelClient({ config, funnelId }: FunnelClientProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
   const [calendarUrl, setCalendarUrl] = useState("");
-  const sessionIdRef = useRef<string | null>(null);
 
-  // Track session start on mount
+  const {
+    trackPageView, trackAnswer, trackCTAClick, trackFieldFocus,
+    trackFormSubmit, trackLeadCreated, trackFunnelCompleted, trackBackNavigation,
+  } = useTracking({ funnelId, sessionId });
+
+  // Track page views on step change
   useEffect(() => {
-    const trackSession = async () => {
-      try {
-        const res = await fetch(`/api/sessions/${funnelId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ event: "start" }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          sessionIdRef.current = data.sessionId ?? null;
-        }
-      } catch {
-        // Non-blocking — session tracking is best-effort
-      }
-    };
-    trackSession();
-  }, [funnelId]);
+    trackPageView(step);
+  }, [step, trackPageView]);
 
   const handleStart = useCallback(() => {
+    trackCTAClick();
     setStep(1);
-  }, []);
+  }, [trackCTAClick]);
 
   const handleSelect = useCallback(
     (key: string, id: string) => {
+      // Find the question and option to get label + points
+      const question = config.quiz.questions.find((q) => q.key === key);
+      const option = question?.options.find((o) => o.id === id);
+      if (question && option) {
+        trackAnswer(step, key, id, option.label, option.points);
+      }
+
       setAnswers((prev) => ({ ...prev, [key]: id }));
       // Auto-advance after a brief delay
       setTimeout(() => {
         setStep((prev) => prev + 1);
       }, 350);
     },
-    []
+    [config.quiz.questions, step, trackAnswer]
   );
+
+  const handleBack = useCallback(() => {
+    trackBackNavigation(step);
+    setStep((s) => s - 1);
+  }, [step, trackBackNavigation]);
+
+  const handleEmailFocus = useCallback(() => {
+    trackFieldFocus();
+  }, [trackFieldFocus]);
 
   const handleEmailSubmit = useCallback(
     async (submittedEmail: string) => {
       setEmail(submittedEmail);
+      trackFormSubmit();
+
       try {
         const res = await fetch(`/api/submit/${funnelId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: submittedEmail, answers }),
+          body: JSON.stringify({ email: submittedEmail, answers, sessionId }),
         });
         const data = await res.json();
         if (data.calendarUrl) {
           setCalendarUrl(data.calendarUrl);
         }
+        if (data.leadId) {
+          trackLeadCreated(data.leadId, data.score, data.calendarTier);
+        }
       } catch {
         // Still show success step even if submit fails
       }
 
-      // Mark session completed + converted
-      if (sessionIdRef.current) {
-        fetch(`/api/sessions/${funnelId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: "complete",
-            sessionId: sessionIdRef.current,
-          }),
-        }).catch(() => {});
-      }
-
       setStep(successStep);
     },
-    [answers, funnelId, successStep]
+    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated]
   );
+
+  // Track funnel completed when reaching success step
+  useEffect(() => {
+    if (step === successStep) {
+      trackFunnelCompleted();
+    }
+  }, [step, successStep, trackFunnelCompleted]);
 
   // Determine current question index (0-based) from step (1-based for questions)
   const currentQuestionIndex = step - 1;
@@ -147,7 +155,7 @@ export function FunnelClient({ config, funnelId }: FunnelClientProps) {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}
             >
-              <EmailStep config={config} onSubmit={handleEmailSubmit} />
+              <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} />
             </motion.div>
           )}
 

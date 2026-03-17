@@ -8,9 +8,10 @@ import { FunnelConfig } from "@/types";
 interface EmailStepProps {
   config: FunnelConfig;
   onSubmit: (email: string) => void;
+  onFieldFocus?: () => void;
 }
 
-export function EmailStep({ config, onSubmit }: EmailStepProps) {
+export function EmailStep({ config, onSubmit, onFieldFocus }: EmailStepProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -102,6 +103,7 @@ export function EmailStep({ config, onSubmit }: EmailStepProps) {
               fontSize: "16px",
             }}
             onFocus={(e) => {
+              onFieldFocus?.();
               if (!error) (e.currentTarget as HTMLInputElement).style.borderColor = brand.primaryColor;
             }}
             onBlur={(e) => {
