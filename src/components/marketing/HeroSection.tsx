@@ -190,7 +190,7 @@ export function HeroSection() {
                 style={{ fontSize: "16px" }}
               />
               {!userInput && !isFocused && (
-                <div className="absolute top-0 left-0 px-6 py-5 text-base text-[#A3A3A3] pointer-events-none">
+                <div className="absolute top-0 left-0 px-6 py-5 text-base text-[#9CA3AF] pointer-events-none">
                   {displayText}
                   <span className="animate-pulse">|</span>
                 </div>

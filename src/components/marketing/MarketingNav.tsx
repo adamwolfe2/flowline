@@ -53,7 +53,7 @@ export function MarketingNav() {
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/sign-in"
-            className="text-sm font-medium text-[#171717] hover:text-[#737373] transition-colors"
+            className="text-sm font-medium text-[#171717] hover:text-[#6B7280] transition-colors"
           >
             Sign in
           </Link>
