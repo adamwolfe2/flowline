@@ -39,16 +39,16 @@ const columns = [
 
 export function MarketingFooter() {
   return (
-    <footer className="bg-[#09090B] border-t border-white/10 pt-16 pb-10">
+    <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-10">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-10 mb-12">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 bg-[#6366F1] rounded-lg flex items-center justify-center">
+              <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
                 <Zap className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-white text-base tracking-tight font-[family-name:var(--font-sora)]">
+              <span className="font-semibold text-gray-900 text-base tracking-tight">
                 Qualifi
               </span>
             </Link>
@@ -61,7 +61,7 @@ export function MarketingFooter() {
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+              <p className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-4">
                 {col.title}
               </p>
               <ul className="space-y-2.5">
@@ -69,7 +69,7 @@ export function MarketingFooter() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                      className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -80,15 +80,15 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-600">
+        <div className="border-t border-gray-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-400">
             &copy; {new Date().getFullYear()} Qualifi. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
+            <a href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
               Twitter
             </a>
-            <a href="#" className="text-xs text-gray-600 hover:text-gray-400 transition-colors">
+            <a href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
               LinkedIn
             </a>
           </div>

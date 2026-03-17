@@ -29,13 +29,13 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="bg-[#FAFAFA] py-20 md:py-28">
+    <section className="bg-white py-20 md:py-28">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
-          <p className="text-sm font-medium text-indigo-600 uppercase tracking-wider mb-3">
+          <p className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: "#D4A24E" }}>
             How it works
           </p>
-          <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
             From stranger to booked call in three steps
           </h2>
         </div>
@@ -50,20 +50,20 @@ export function HowItWorks() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm"
+                className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-indigo-600" />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#D4A24E15" }}>
+                    <Icon className="w-5 h-5" style={{ color: "#D4A24E" }} />
                   </div>
-                  <span className="text-sm font-bold text-indigo-600 font-[family-name:var(--font-sora)]">
+                  <span className="text-sm font-bold" style={{ color: "#D4A24E" }}>
                     {step.num}
                   </span>
                 </div>
-                <h3 className="font-[family-name:var(--font-sora)] text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {step.title}
                 </h3>
-                <p className="font-[family-name:var(--font-dm-sans)] text-sm text-[#3F3F46] leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed">
                   {step.description}
                 </p>
               </motion.div>

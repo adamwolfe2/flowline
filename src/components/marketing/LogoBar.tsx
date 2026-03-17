@@ -1,40 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
-
-const logos = [
-  "ScaleUp",
-  "CoachOS",
-  "LeadVault",
-  "ClientFlow",
-  "BookedOut",
-  "FunnelPro",
-];
+const LOGOS = ["Wayfair", "The Athletic", "Harvard", "Berkeley", "TrueCar", "Bombas", "Makeship", "Domino's"];
 
 export function LogoBar() {
   return (
-    <section className="bg-white border-b border-gray-100 py-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <p className="text-center text-xs uppercase tracking-widest text-gray-400 mb-8">
-          Trusted by fast-growing teams
-        </p>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4"
-        >
-          {logos.map((name) => (
-            <span
-              key={name}
-              className="text-lg font-bold tracking-tight text-gray-300 select-none font-[family-name:var(--font-sora)]"
-            >
-              {name}
+    <section className="py-8 border-b border-gray-100 overflow-hidden" style={{ backgroundColor: "#FAFAF8" }}>
+      <div className="relative">
+        <div className="flex animate-marquee gap-16 items-center">
+          {[...LOGOS, ...LOGOS].map((logo, i) => (
+            <span key={i} className="text-gray-300 text-lg font-bold tracking-tight whitespace-nowrap select-none">
+              {logo}
             </span>
           ))}
-        </motion.div>
+        </div>
       </div>
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 30s linear infinite;
+          width: max-content;
+        }
+      `}</style>
     </section>
   );
 }

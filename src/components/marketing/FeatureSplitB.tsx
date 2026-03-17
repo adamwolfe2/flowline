@@ -5,11 +5,11 @@ import { Check } from "lucide-react";
 
 function AnalyticsMockup() {
   const bars = [
-    { label: "Visitors", value: 92, color: "bg-gray-300" },
-    { label: "Started Quiz", value: 74, color: "bg-indigo-300" },
-    { label: "Completed", value: 58, color: "bg-indigo-400" },
-    { label: "Qualified", value: 41, color: "bg-indigo-500" },
-    { label: "Booked", value: 32, color: "bg-indigo-600" },
+    { label: "Visitors", value: 92, color: "#E5E7EB" },
+    { label: "Started Quiz", value: 74, color: "#E8D5B7" },
+    { label: "Completed", value: 58, color: "#D4A24E" },
+    { label: "Qualified", value: 41, color: "#C4922E" },
+    { label: "Booked", value: 32, color: "#B07D1E" },
   ];
 
   return (
@@ -44,8 +44,8 @@ function AnalyticsMockup() {
             </div>
             <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className={`h-full ${bar.color} rounded-full`}
-                style={{ width: `${bar.value}%` }}
+                className="h-full rounded-full"
+                style={{ width: `${bar.value}%`, backgroundColor: bar.color }}
               />
             </div>
           </motion.div>
@@ -53,7 +53,7 @@ function AnalyticsMockup() {
       </div>
       <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
         <span className="text-xs text-gray-400">Conversion rate</span>
-        <span className="text-lg font-bold text-indigo-600 font-[family-name:var(--font-sora)]">
+        <span className="text-lg font-bold" style={{ color: "#D4A24E" }}>
           34.8%
         </span>
       </div>
@@ -70,7 +70,7 @@ const bullets = [
 
 export function FeatureSplitB() {
   return (
-    <section className="bg-white py-20 md:py-28">
+    <section className="py-20 md:py-28" style={{ backgroundColor: "#FAFAF8" }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           {/* Mockup */}
@@ -86,10 +86,10 @@ export function FeatureSplitB() {
             transition={{ duration: 0.6 }}
             className="order-1 md:order-2"
           >
-            <p className="text-sm font-medium text-indigo-600 uppercase tracking-wider mb-3">
+            <p className="text-sm font-medium uppercase tracking-wider mb-3" style={{ color: "#D4A24E" }}>
               Analytics
             </p>
-            <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight mb-6">
               Know your numbers.
               <br />
               Optimize every step.
@@ -97,10 +97,10 @@ export function FeatureSplitB() {
             <ul className="space-y-3">
               {bullets.map((b) => (
                 <li key={b} className="flex items-start gap-3">
-                  <div className="mt-0.5 w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
-                    <Check className="w-3 h-3 text-indigo-600" />
+                  <div className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#D4A24E20" }}>
+                    <Check className="w-3 h-3" style={{ color: "#D4A24E" }} />
                   </div>
-                  <span className="font-[family-name:var(--font-dm-sans)] text-sm text-[#3F3F46] leading-relaxed">
+                  <span className="text-sm text-gray-600 leading-relaxed">
                     {b}
                   </span>
                 </li>

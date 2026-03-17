@@ -6,9 +6,9 @@ import { ArrowRight } from "lucide-react";
 
 export function FinalCTA() {
   return (
-    <section className="bg-[#09090B] py-20 md:py-28 relative overflow-hidden">
-      {/* Gradient accent */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+    <section className="py-20 md:py-28 relative overflow-hidden" style={{ backgroundColor: "#1A1A1F" }}>
+      {/* Subtle warm glow */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: "rgba(212, 162, 78, 0.08)" }} />
 
       <div className="relative max-w-3xl mx-auto px-6 text-center">
         <motion.div
@@ -17,18 +17,17 @@ export function FinalCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-[family-name:var(--font-sora)] text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight mb-6">
-            Stop chasing leads.
-            <br />
-            Start closing them.
+          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight mb-6">
+            What will you build?
           </h2>
-          <p className="font-[family-name:var(--font-dm-sans)] text-lg text-gray-400 mb-10 max-w-xl mx-auto">
+          <p className="text-lg text-gray-400 mb-10 max-w-xl mx-auto">
             Build your first qualifying funnel in under 60 seconds. Free
             forever for up to 100 leads per month.
           </p>
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-2 bg-[#6366F1] hover:bg-[#5558E6] text-white font-medium text-lg px-10 py-4 rounded-xl transition-colors shadow-lg shadow-indigo-500/25"
+            className="inline-flex items-center gap-2 text-white font-medium text-lg px-10 py-4 rounded-xl transition-all hover:opacity-90 shadow-lg"
+            style={{ backgroundColor: "#D4A24E", boxShadow: "0 10px 30px -10px rgba(212, 162, 78, 0.4)" }}
           >
             Build My Funnel Free
             <ArrowRight className="w-5 h-5" />

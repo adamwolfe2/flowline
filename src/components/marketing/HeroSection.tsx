@@ -1,210 +1,167 @@
 "use client";
 
-import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Star, MousePointerClick, BarChart3, Calendar } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
-function BrowserMockup() {
+const PROMPTS = [
+  "create a quiz funnel for my coaching business",
+  "build a lead qualifier for my SaaS agency",
+  "make a booking funnel for my real estate team",
+];
+
+export function HeroSection() {
+  const router = useRouter();
+  const [displayText, setDisplayText] = useState("");
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+  const [userInput, setUserInput] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+
+  const typewriter = useCallback(() => {
+    if (isFocused || userInput) return;
+    const currentPrompt = PROMPTS[promptIndex];
+    if (isTyping) {
+      if (displayText.length < currentPrompt.length) {
+        const timeout = setTimeout(() => setDisplayText(currentPrompt.slice(0, displayText.length + 1)), 40);
+        return () => clearTimeout(timeout);
+      } else {
+        const timeout = setTimeout(() => setIsTyping(false), 2500);
+        return () => clearTimeout(timeout);
+      }
+    } else {
+      if (displayText.length > 0) {
+        const timeout = setTimeout(() => setDisplayText(displayText.slice(0, -1)), 20);
+        return () => clearTimeout(timeout);
+      } else {
+        setPromptIndex((i) => (i + 1) % PROMPTS.length);
+        setIsTyping(true);
+      }
+    }
+  }, [displayText, isTyping, promptIndex, isFocused, userInput]);
+
+  useEffect(() => { return typewriter(); }, [typewriter]);
+
+  function handleSubmit() {
+    const prompt = userInput || displayText;
+    router.push(prompt.length > 5 ? `/onboarding?prompt=${encodeURIComponent(prompt)}` : "/onboarding");
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.6 }}
-      className="relative mt-16 mx-auto max-w-4xl"
-    >
-      <motion.div
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-indigo-500/10"
-      >
-        {/* Browser chrome */}
-        <div className="bg-[#1A1A1F] px-4 py-3 flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-            <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-            <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-          </div>
-          <div className="flex-1 mx-4">
-            <div className="bg-[#2A2A30] rounded-md px-3 py-1.5 text-xs text-gray-500 text-center">
-              app.qualifi.io/builder
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+      {/* Sky gradient background */}
+      <div className="absolute inset-0" style={{
+        background: "linear-gradient(180deg, #5B9BD5 0%, #7BB8E0 15%, #A8D4E8 30%, #C8E2EE 45%, #E8D5B7 65%, #F0E4CD 80%, #F5EDE0 90%, #FAFAF8 100%)",
+      }} />
+
+      {/* Subtle cloud-like shapes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] left-[5%] w-[300px] h-[120px] bg-white/30 rounded-full blur-3xl" />
+        <div className="absolute top-[15%] right-[10%] w-[400px] h-[150px] bg-white/25 rounded-full blur-3xl" />
+        <div className="absolute top-[5%] left-[40%] w-[350px] h-[100px] bg-white/20 rounded-full blur-3xl" />
+        <div className="absolute top-[25%] left-[20%] w-[250px] h-[80px] bg-white/15 rounded-full blur-3xl" />
+        <div className="absolute top-[20%] right-[25%] w-[300px] h-[100px] bg-white/20 rounded-full blur-3xl" />
+      </div>
+
+      {/* Fade to white at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-[200px]" style={{
+        background: "linear-gradient(180deg, transparent 0%, rgba(250,250,248,0.3) 40%, rgba(250,250,248,0.8) 70%, #FAFAF8 100%)",
+      }} />
+
+      {/* Content */}
+      <div className="relative z-10 text-center px-6 pt-24 pb-32 max-w-4xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-[1.05] tracking-tight mb-4" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.1)" }}>
+            The AI funnel builder that
+            <br />
+            <span style={{ color: "#D4A24E" }}>books calls</span>
+          </h1>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="text-base md:text-lg text-white/80 max-w-xl mx-auto mb-4"
+          style={{ textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}
+        >
+          Describe what you need and let Qualifi handle the rest.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="flex flex-wrap items-center justify-center gap-2 mb-10"
+        >
+          <span className="text-white/70 text-sm">Build</span>
+          <span className="bg-white/20 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full border border-white/20">Quiz Funnels</span>
+          <span className="text-white/70 text-sm">,</span>
+          <span className="bg-white/20 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full border border-white/20">Booking Pages</span>
+          <span className="text-white/70 text-sm">and</span>
+          <span className="bg-white/20 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full border border-white/20">Lead Qualifiers</span>
+        </motion.div>
+
+        {/* Floating prompt box */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="relative max-w-2xl mx-auto"
+        >
+          {/* Browser mockup behind */}
+          <div className="absolute -left-8 -right-8 top-12 bottom-[-60px] bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 shadow-lg hidden md:block">
+            <div className="h-8 flex items-center px-3 gap-1.5 border-b border-gray-200/30">
+              <div className="w-2.5 h-2.5 rounded-full bg-gray-300/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-gray-300/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-gray-300/60" />
+              <div className="flex-1 mx-6">
+                <div className="bg-white/50 rounded px-2 py-0.5 text-[10px] text-gray-400 text-center w-40 mx-auto">https://yoursite.com</div>
+              </div>
+              <span className="text-[10px] text-gray-400 border border-gray-300/40 rounded px-2 py-0.5">Publish</span>
             </div>
           </div>
-        </div>
 
-        {/* Content area */}
-        <div className="bg-white p-6 md:p-8">
-          <div className="grid md:grid-cols-[240px_1fr] gap-6">
-            {/* Sidebar */}
-            <div className="hidden md:block space-y-3">
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Funnel Steps
-              </div>
-              {["Welcome Screen", "Quiz Question 1", "Quiz Question 2", "Results + CTA"].map(
-                (step, i) => (
-                  <div
-                    key={step}
-                    className={`px-3 py-2.5 rounded-lg text-sm flex items-center gap-2 ${
-                      i === 1
-                        ? "bg-indigo-50 text-indigo-700 font-medium border border-indigo-200"
-                        : "text-gray-500 hover:bg-gray-50"
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded text-xs flex items-center justify-center font-medium ${
-                        i === 1
-                          ? "bg-indigo-100 text-indigo-600"
-                          : "bg-gray-100 text-gray-400"
-                      }`}
-                    >
-                      {i + 1}
-                    </div>
-                    {step}
-                  </div>
-                )
+          {/* Main prompt textarea card */}
+          <div className="relative bg-white rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden z-10">
+            <div className="relative">
+              <textarea
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => { if (!userInput) setIsFocused(false); }}
+                rows={4}
+                className="w-full px-6 py-5 text-base text-gray-900 bg-transparent resize-none outline-none"
+                style={{ fontSize: "16px" }}
+              />
+              {!userInput && !isFocused && (
+                <div className="absolute top-0 left-0 px-6 py-5 text-base text-gray-400 pointer-events-none">
+                  {displayText}<span className="animate-pulse">|</span>
+                </div>
               )}
             </div>
 
-            {/* Editor */}
-            <div className="border border-gray-200 rounded-xl p-6 space-y-4">
-              <div className="text-sm font-medium text-gray-800">
-                What&apos;s your biggest challenge right now?
-              </div>
-              <div className="space-y-2">
-                {["Not enough leads", "Leads aren't qualified", "No-shows on calls"].map(
-                  (opt) => (
-                    <div
-                      key={opt}
-                      className="border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-600 hover:border-indigo-300 transition-colors cursor-pointer"
-                    >
-                      {opt}
-                    </div>
-                  )
-                )}
-              </div>
-              <div className="flex items-center gap-2 pt-2">
-                <div className="bg-[#6366F1] text-white text-xs px-3 py-1.5 rounded-md">
-                  Continue
+            <div className="flex items-center justify-between px-5 pb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] text-gray-400">New Suggestion</span>
+                <div className="flex items-center gap-1">
+                  <div className="w-5 h-5 rounded bg-green-100 flex items-center justify-center text-[10px]">Q</div>
+                  <div className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center text-[10px]">B</div>
+                  <div className="w-5 h-5 rounded bg-orange-100 flex items-center justify-center text-[10px]">L</div>
                 </div>
-                <span className="text-xs text-gray-400">Score: +10 pts</span>
               </div>
+              <button
+                onClick={handleSubmit}
+                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                style={{ backgroundColor: "#D4A24E", color: "white" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#C4922E")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#D4A24E")}
+              >
+                Build it
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
             </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-export function HeroSection() {
-  return (
-    <section className="relative bg-[#09090B] pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden">
-      {/* Subtle gradient orb */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative max-w-6xl mx-auto px-6 text-center">
-        {/* Tag pill */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm px-4 py-1.5 rounded-full mb-8"
-        >
-          <MousePointerClick className="w-3.5 h-3.5" />
-          VSL Funnels That Convert
-        </motion.div>
-
-        {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="font-[family-name:var(--font-sora)] text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight"
-        >
-          Fill Your Calendar
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-indigo-300">
-            With Qualified Leads
-          </span>
-        </motion.h1>
-
-        {/* Subhead */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="font-[family-name:var(--font-dm-sans)] mt-6 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed"
-        >
-          Three questions. Smart scoring. Automatic routing to the right
-          calendar. Build your funnel in 60 seconds — no code required.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-          <Link
-            href="/sign-up"
-            className="bg-[#6366F1] hover:bg-[#5558E6] text-white font-medium text-base px-8 py-3.5 rounded-xl transition-colors shadow-lg shadow-indigo-500/25"
-          >
-            Build My Funnel Free
-          </Link>
-          <a
-            href="#examples"
-            className="border border-white/15 text-gray-300 hover:text-white hover:border-white/30 font-medium text-base px-8 py-3.5 rounded-xl transition-colors"
-          >
-            See a Live Example
-          </a>
-        </motion.div>
-
-        {/* Social proof */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-gray-500"
-        >
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className="w-3.5 h-3.5 fill-amber-400 text-amber-400"
-              />
-            ))}
-          </div>
-          <span>
-            Trusted by{" "}
-            <span className="text-gray-300 font-medium">
-              500+ coaches, agencies, and consultants
-            </span>
-          </span>
-        </motion.div>
-
-        {/* Browser mockup */}
-        <BrowserMockup />
-
-        {/* Mini stat badges */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.9 }}
-          className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm"
-        >
-          <div className="flex items-center gap-2 text-gray-400">
-            <BarChart3 className="w-4 h-4 text-indigo-400" />
-            <span>
-              <span className="text-white font-semibold">3.2x</span> more
-              qualified bookings
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-400">
-            <Calendar className="w-4 h-4 text-indigo-400" />
-            <span>
-              <span className="text-white font-semibold">60s</span> funnel
-              setup
-            </span>
           </div>
         </motion.div>
       </div>
