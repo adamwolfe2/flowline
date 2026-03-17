@@ -13,6 +13,10 @@ interface CalendarEditorProps {
   onSave: (config: FunnelConfig) => void;
 }
 
+function isValidUrl(url: string): boolean {
+  try { new URL(url); return true; } catch { return false; }
+}
+
 export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
   const [testingWebhook, setTestingWebhook] = useState(false);
   function updateCalendar(tier: 'high' | 'mid' | 'low', url: string) {
@@ -86,6 +90,9 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
           placeholder="https://hooks.zapier.com/hooks/catch/..."
           className="text-sm"
         />
+        {config.webhook.url && !isValidUrl(config.webhook.url) && (
+          <p className="text-xs text-red-500 mt-1">Please enter a valid URL</p>
+        )}
         <p className="text-[11px] text-gray-400 mt-1">
           Lead data will be sent here on each submission. Supports Zapier, Make, n8n.
         </p>
@@ -94,7 +101,7 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
             variant="outline"
             size="sm"
             className="text-xs"
-            disabled={!config.webhook.url || testingWebhook}
+            disabled={!config.webhook.url || !isValidUrl(config.webhook.url) || testingWebhook}
             onClick={async () => {
               setTestingWebhook(true);
               try {

@@ -3,6 +3,11 @@ import { Plus, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
+export const metadata = {
+  title: "Dashboard — MyVSL",
+  description: "Manage your VSL funnels, view analytics, and track leads.",
+};
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50/50">

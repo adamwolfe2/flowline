@@ -46,6 +46,12 @@ export async function POST(req: NextRequest) {
 
     let slug = rawSlug || generateSlug(config?.brand?.name || "my-funnel");
 
+    // Validate slug format
+    const validSlug = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(slug) && slug.length >= 3 && slug.length <= 40;
+    if (!validSlug) {
+      return NextResponse.json({ error: "Slug must be 3-40 characters, lowercase letters, numbers, and hyphens only" }, { status: 400 });
+    }
+
     // Check slug availability
     const isAvailable = await checkSlugAvailable(slug);
     if (!isAvailable) {

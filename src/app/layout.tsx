@@ -27,6 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en" className="light">
+        <head>
+          <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        </head>
         <body className={`${inter.className} antialiased bg-white text-gray-900`}>
           {children}
           <Toaster />

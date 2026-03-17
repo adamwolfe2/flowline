@@ -3,6 +3,11 @@ import { Plus, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
+export const metadata = {
+  title: "Settings — MyVSL",
+  description: "Manage your MyVSL account and subscription.",
+};
+
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50/50">

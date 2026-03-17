@@ -1,5 +1,5 @@
+import { auth } from "@clerk/nextjs/server";
 import { getFunnelByIdForPreview } from "@/db/queries/funnels";
-import { insertSession } from "@/db/queries/sessions";
 import { FunnelClient } from "@/components/funnel/FunnelClient";
 import { FunnelConfig } from "@/types";
 import { notFound } from "next/navigation";
@@ -12,9 +12,16 @@ export default async function PreviewPage({ params }: Props) {
   const { funnelId } = await params;
   const funnel = await getFunnelByIdForPreview(funnelId);
   if (!funnel) notFound();
+
+  // Ownership check — only the funnel owner can preview
+  const { userId } = await auth();
+  if (userId && funnel.userId !== userId) notFound();
+  // If no userId (unauthenticated), only show if published
+  if (!userId && !funnel.published) notFound();
+
   const config = funnel.config as FunnelConfig;
 
-  const session = await insertSession(funnel.id);
-
-  return <FunnelClient config={config} funnelId={funnel.id} sessionId={session.id} />;
+  // Use "preview" sessionId — tracking calls will fire but silently fail
+  // since "preview" is not a valid UUID, preventing polluted analytics
+  return <FunnelClient config={config} funnelId={funnel.id} sessionId="preview" />;
 }

@@ -18,6 +18,7 @@ interface PublishPanelProps {
 export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanelProps) {
   const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const domain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
   const funnelUrl = `${domain}/f/${funnel.slug}`;
 
@@ -93,6 +94,15 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                 Unpublish
               </Button>
             </div>
+            <div className="mt-4 p-3 bg-[#F9FAFB] rounded-lg">
+              <p className="text-xs text-[#6B7280] mb-2">Share your funnel</p>
+              <div className="flex gap-2">
+                <Input value={`https://${funnelUrl}`} readOnly className="text-xs font-mono flex-1" />
+                <Button variant="outline" size="sm" onClick={copyUrl}>
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg">
@@ -105,23 +115,28 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                 {domain}/f/<span className="font-semibold text-gray-900">{funnel.slug}</span>
               </div>
             </div>
-            <Button
-              onClick={handlePublish}
-              disabled={publishing}
-              className="w-full gap-2"
-            >
-              {publishing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  <Globe className="w-4 h-4" />
-                  Publish Funnel
-                </>
-              )}
-            </Button>
+            {!showPublishConfirm ? (
+              <Button
+                onClick={() => setShowPublishConfirm(true)}
+                className="w-full gap-2"
+              >
+                <Globe className="w-4 h-4" />
+                Publish Funnel
+              </Button>
+            ) : (
+              <div className="mt-3 p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg">
+                <p className="text-sm text-[#111827] font-medium mb-2">Ready to go live?</p>
+                <p className="text-xs text-[#6B7280] mb-3">Your funnel will be accessible at {domain}/f/{funnel.slug}</p>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handlePublish} disabled={publishing} className="flex-1">
+                    {publishing ? "Publishing..." : "Confirm & Publish"}
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowPublishConfirm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

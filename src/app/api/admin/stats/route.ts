@@ -4,12 +4,12 @@ import { db } from "@/db";
 import { users, funnels, leads, funnelSessions, events } from "@/db/schema";
 import { sql, gte } from "drizzle-orm";
 
-const ADMIN_USER_IDS = [process.env.ADMIN_USER_ID || ""];
+const ADMIN_USER_ID = process.env.ADMIN_USER_ID;
 
 export async function GET() {
   try {
     const { userId } = await auth();
-    if (!userId || !ADMIN_USER_IDS.includes(userId)) {
+    if (!userId || !ADMIN_USER_ID || userId !== ADMIN_USER_ID) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

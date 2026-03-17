@@ -42,12 +42,24 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   }
 }
 
+function validateConfig(config: unknown): config is Record<string, unknown> {
+  if (!config || typeof config !== 'object') return false;
+  const c = config as Record<string, unknown>;
+  if (!c.brand || typeof c.brand !== 'object') return false;
+  if (!c.quiz || typeof c.quiz !== 'object') return false;
+  return true;
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
     const body = await req.json();
+
+    if (!validateConfig(body.config)) {
+      return NextResponse.json({ error: "Invalid config format" }, { status: 400 });
+    }
 
     const funnel = await updateFunnelConfig(id, userId, body.config);
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });

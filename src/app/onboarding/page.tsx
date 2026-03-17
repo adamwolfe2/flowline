@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FunnelConfig } from "@/types";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
@@ -12,13 +12,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight, ArrowLeft, Loader2, Sparkles, Palette, Calendar, Globe, Check, PartyPopper, Users, Briefcase, Laptop, Home, Dumbbell, LineChart } from "lucide-react";
 import { TEMPLATES, Template } from "@/lib/templates";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+      </div>
+    }>
+      <OnboardingContent />
+    </Suspense>
+  );
+}
+
+function OnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialPrompt = searchParams.get("prompt") || "";
   const [step, setStep] = useState(0);
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(initialPrompt);
   const [generating, setGenerating] = useState(false);
   const [config, setConfig] = useState<FunnelConfig>(DEFAULT_FUNNEL_CONFIG);
   const [slug, setSlug] = useState("");
@@ -45,6 +59,12 @@ export default function OnboardingPage() {
       });
       const data = await res.json();
 
+      if (!res.ok) {
+        toast.error(data.error || "Failed to generate funnel");
+        setGenerating(false);
+        return;
+      }
+
       setConfig(prev => ({
         ...prev,
         brand: {
@@ -67,14 +87,29 @@ export default function OnboardingPage() {
       setSlug(generateSlug(data.brandName || "my-funnel"));
       setStep(1);
     } catch {
-      // Handle error
+      toast.error("Something went wrong. Try again.");
     }
     setGenerating(false);
   }
 
+  // Auto-trigger generation if prompt was passed via query params
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (initialPrompt && initialPrompt.length > 10 && !autoTriggered.current) {
+      autoTriggered.current = true;
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [slugError, setSlugError] = useState<string | null>(null);
+
   async function checkSlug(s: string) {
     setSlug(s);
-    if (s.length < 2) { setSlugAvailable(null); return; }
+    setSlugError(null);
+    if (s.length < 3) { setSlugAvailable(null); return; }
+    if (s.length > 40) { setSlugError("Slug must be 40 characters or fewer"); setSlugAvailable(null); return; }
+    if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(s)) { setSlugError("Lowercase letters, numbers, and hyphens only"); setSlugAvailable(null); return; }
     const res = await fetch(`/api/slugs/check?slug=${s}`);
     const data = await res.json();
     setSlugAvailable(data.available);
@@ -91,13 +126,32 @@ export default function OnboardingPage() {
       });
       const funnel = await createRes.json();
 
+      if (createRes.status === 403) {
+        toast.error("Free plan is limited to 1 funnel. Upgrade to Pro for unlimited funnels.");
+        router.push("/pricing");
+        setPublishing(false);
+        return;
+      }
+
+      if (!createRes.ok) {
+        toast.error(funnel.error || "Failed to create funnel");
+        setPublishing(false);
+        return;
+      }
+
       // Publish it
-      await fetch(`/api/funnels/${funnel.id}/publish`, { method: "POST" });
+      const pubRes = await fetch(`/api/funnels/${funnel.id}/publish`, { method: "POST" });
+      if (!pubRes.ok) {
+        toast.error("Failed to publish funnel");
+        setPublishing(false);
+        return;
+      }
+
       setCreatedFunnelId(funnel.id);
       setStep(5);
       toast.success("Your funnel is live!");
     } catch {
-      // Handle error
+      toast.error("Something went wrong. Try again.");
     }
     setPublishing(false);
   }
@@ -250,6 +304,7 @@ export default function OnboardingPage() {
                     brand: { ...prev.brand, name: e.target.value },
                   }))}
                   className="text-sm"
+                  maxLength={60}
                 />
               </div>
               <div>
@@ -405,9 +460,13 @@ export default function OnboardingPage() {
                   onChange={e => checkSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                   className="flex-1 px-3 py-2.5 text-sm outline-none"
                   placeholder="my-funnel"
+                  maxLength={40}
                 />
               </div>
-              {slugAvailable !== null && (
+              {slugError && (
+                <p className="text-xs mt-1.5 text-red-500">{slugError}</p>
+              )}
+              {!slugError && slugAvailable !== null && (
                 <p className={`text-xs mt-1.5 ${slugAvailable ? 'text-green-600' : 'text-red-500'}`}>
                   {slugAvailable ? 'Available!' : 'Already taken. Try another.'}
                 </p>

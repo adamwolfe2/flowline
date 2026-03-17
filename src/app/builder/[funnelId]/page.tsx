@@ -8,7 +8,7 @@ import { BrandEditor } from "@/components/builder/BrandEditor";
 import { CalendarEditor } from "@/components/builder/CalendarEditor";
 import { PublishPanel } from "@/components/builder/PublishPanel";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -22,6 +22,18 @@ export default function BuilderPage() {
   const [saving, setSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     fetch(`/api/funnels/${funnelId}`)
@@ -34,6 +46,7 @@ export default function BuilderPage() {
 
   const saveConfig = useCallback(async (newConfig: FunnelConfig) => {
     setConfig(newConfig);
+    setHasUnsavedChanges(true);
     setSaving(true);
     const res = await fetch(`/api/funnels/${funnelId}`, {
       method: "PATCH",
@@ -43,6 +56,7 @@ export default function BuilderPage() {
     setSaving(false);
     setPreviewKey(k => k + 1);
     if (res.ok) {
+      setHasUnsavedChanges(false);
       toast.success("Changes saved");
     } else {
       toast.error("Failed to save changes");
@@ -75,6 +89,12 @@ export default function BuilderPage() {
           {saving && <span className="text-xs text-gray-400">Saving...</span>}
         </div>
         <div className="flex items-center gap-2">
+          <button
+            className="md:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 transition-colors"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? <Eye className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+          </button>
           <div className="flex bg-gray-100 rounded-lg p-0.5">
             <button
               onClick={() => setPreviewMode("desktop")}
@@ -101,7 +121,7 @@ export default function BuilderPage() {
       {/* Main area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Side panel */}
-        <div className="w-[380px] border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0">
+        <div className={`${sidebarOpen ? 'w-full md:w-[380px]' : 'hidden md:block md:w-[380px]'} border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0`}>
           <Tabs defaultValue="content" className="flex flex-col h-full">
             <TabsList className="mx-3 mt-3 mb-0 grid grid-cols-4 h-9">
               <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
@@ -130,17 +150,24 @@ export default function BuilderPage() {
         <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-hidden">
           <ErrorBoundary>
             <div
-              className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
+              className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
               style={{
                 width: previewMode === "mobile" ? "390px" : "100%",
                 maxWidth: previewMode === "desktop" ? "800px" : "390px",
                 height: "100%",
               }}
             >
+              {/* Loading skeleton behind iframe */}
+              <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
+                <div className="text-center">
+                  <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
+                  <p className="text-xs text-[#9CA3AF]">Loading preview</p>
+                </div>
+              </div>
               <iframe
                 key={previewKey}
                 src={`/f/preview/${funnelId}`}
-                className="w-full h-full border-0"
+                className="w-full h-full border-0 relative z-10"
                 title="Funnel preview"
               />
             </div>

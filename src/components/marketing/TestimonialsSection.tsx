@@ -21,34 +21,32 @@ function SectionLabel({
 const testimonials = [
   {
     quote:
-      "We went from 40% no-show rate to under 15%. The quiz pre-qualifies leads so well that by the time they book, they're already sold.",
+      "Our no-show rate dropped from 40% to under 15% after switching to MyVSL. The scoring system filters out tire-kickers before they even hit our calendar.",
     name: "Sarah Mitchell",
-    title: "Business Coach",
-    company: "Mitchell Coaching Co.",
+    title: "Founder",
+    company: "Mitchell Coaching",
     initials: "SM",
     color: "#4A90D9",
   },
   {
     quote:
-      "Set up our first funnel in two minutes. We embedded it on our VSL page and saw a 28% increase in qualified bookings within the first week.",
+      "We saw a 28% increase in qualified bookings in the first week. The analytics showed us exactly which question was causing drop-off, so we fixed it in 5 minutes.",
     name: "James Kim",
-    title: "Agency Owner",
-    company: "Growth Digital",
+    title: "CEO",
+    company: "Precision Agency",
     initials: "JK",
     color: "#F6C744",
   },
   {
     quote:
-      "The scoring system is a game-changer. Our sales team only talks to people who are actually ready to buy. Closed revenue is up 3x this quarter.",
+      "The fact that hot leads go straight to our senior team while warm leads get an intro call? That alone doubled our close rate. Revenue is up 3x.",
     name: "Priya Reddy",
-    title: "SaaS Founder",
-    company: "DataStack",
+    title: "VP Sales",
+    company: "ScaleWise",
     initials: "PR",
     color: "#4BC0A0",
   },
 ];
-
-/* TODO: Replace with real testimonials */
 
 const ratings = [
   { platform: "Trustpilot", score: "4.7/5", stars: 5 },

@@ -36,6 +36,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
             onSave(newConfig);
           }}
           className="text-sm"
+          maxLength={60}
         />
       </div>
 

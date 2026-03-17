@@ -15,7 +15,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     const leadsPage = Math.max(0, parseInt(req.nextUrl.searchParams.get("leadsPage") ?? "0", 10) || 0);
     const timeRange = req.nextUrl.searchParams.get("timeRange") ?? "all";
     const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange);
-    return NextResponse.json({ funnel, ...analytics });
+    return NextResponse.json({ funnel, ...analytics }, {
+      headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
+    });
   } catch (error) {
     console.error("GET /api/analytics error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

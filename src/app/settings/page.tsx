@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import {
@@ -13,6 +14,16 @@ import {
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
+  const [funnelCount, setFunnelCount] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/funnels")
+      .then((r) => r.json())
+      .then((data) => {
+        setFunnelCount(Array.isArray(data) ? data.length : 0);
+      })
+      .catch(() => {});
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -89,7 +100,7 @@ export default function SettingsPage() {
               </span>
             </div>
             <p className="text-xs text-[#737373] mt-0.5">
-              1 of 1 funnels used
+              {funnelCount} of 1 funnels used
             </p>
           </div>
         </div>

@@ -117,6 +117,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
           onChange={e => updateField("quiz.headline", e.target.value)}
           className="text-sm resize-none"
           rows={2}
+          maxLength={120}
         />
       </div>
 
@@ -126,6 +127,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
           value={config.quiz.subheadline}
           onChange={e => updateField("quiz.subheadline", e.target.value)}
           className="text-sm"
+          maxLength={200}
         />
       </div>
 
@@ -168,6 +170,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                       value={q.text}
                       onChange={e => updateQuestion(qi, "text", e.target.value)}
                       className="text-xs mt-1"
+                      maxLength={200}
                     />
                   </div>
 
@@ -179,6 +182,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                           value={opt.label}
                           onChange={e => updateOption(qi, oi, "label", e.target.value)}
                           className="text-xs flex-1"
+                          maxLength={100}
                         />
                         <Input
                           type="number"
