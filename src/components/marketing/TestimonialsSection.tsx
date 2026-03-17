@@ -11,7 +11,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 border border-black/10 bg-white rounded-full px-3 py-1 text-sm font-medium text-[#333333]">
+    <div className="inline-flex items-center gap-1.5 border border-[#E5E7EB] bg-white rounded-full px-3 py-1 text-sm font-medium text-[#111827]">
       {icon}
       {children}
     </div>
@@ -58,14 +58,14 @@ const ratings = [
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-[#FBFBFB] border-t border-[#F0F0F0] py-20 px-6">
+    <section className="bg-white border-t border-[#E5E7EB] py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<Heart className="w-3.5 h-3.5" />}>
             Wall of Love
           </SectionLabel>
           <h2
-            className="text-[32px] sm:text-[40px] font-semibold text-[#333333] leading-tight"
+            className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
             Join 500+ businesses booking calls with MyVSL
@@ -81,7 +81,7 @@ export function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#EBEBEB] rounded-2xl p-6 hover:shadow-md transition-shadow duration-200"
+              className="bg-white border border-[#E5E7EB] rounded-2xl p-6 hover:shadow-md transition-shadow duration-200"
             >
               {/* Stars */}
               <div className="flex items-center gap-0.5 mb-4">
@@ -92,7 +92,7 @@ export function TestimonialsSection() {
                   />
                 ))}
               </div>
-              <p className="text-sm text-[#737373] leading-relaxed mb-6">
+              <p className="text-sm text-[#6B7280] leading-relaxed mb-6">
                 &ldquo;{t.quote}&rdquo;
               </p>
               <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export function TestimonialsSection() {
                   {t.initials}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#333333]">
+                  <p className="text-sm font-medium text-[#111827]">
                     {t.name}
                   </p>
                   <p className="text-xs text-[#A3A3A3]">
@@ -116,8 +116,8 @@ export function TestimonialsSection() {
         </div>
 
         {/* Ratings row */}
-        <div className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-3 divide-x divide-[#EBEBEB]">
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+          <div className="grid grid-cols-3 divide-x divide-[#E5E7EB]">
             {ratings.map((r) => (
               <div
                 key={r.platform}
@@ -133,7 +133,7 @@ export function TestimonialsSection() {
                     </span>
                   ))}
                 </div>
-                <span className="text-lg font-semibold text-[#333333]">
+                <span className="text-lg font-semibold text-[#111827]">
                   {r.score}
                 </span>
               </div>

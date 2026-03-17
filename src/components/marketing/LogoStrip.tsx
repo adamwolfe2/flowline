@@ -14,7 +14,7 @@ export function LogoStrip() {
   const items = [...LOGOS, ...LOGOS, ...LOGOS, ...LOGOS];
 
   return (
-    <section className="bg-white py-8 border-b border-[#F0F0F0] overflow-hidden">
+    <section className="bg-white py-8 border-b border-[#E5E7EB] overflow-hidden">
       <div className="relative">
         <div className="flex animate-marquee gap-16 items-center">
           {items.map((logo, i) => (

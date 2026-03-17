@@ -79,7 +79,7 @@ export function HeroSection() {
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(250,250,248,0.4) 70%, rgba(250,250,248,0.85) 85%, #FAFAF8 100%)",
+          background: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0.85) 85%, #FFFFFF 100%)",
         }}
       />
 
@@ -193,7 +193,7 @@ export function HeroSection() {
                   if (!userInput) setIsFocused(false);
                 }}
                 rows={3}
-                className="w-full px-6 py-5 text-base text-[#333333] bg-transparent resize-none outline-none placeholder-transparent"
+                className="w-full px-6 py-5 text-base text-[#111827] bg-transparent resize-none outline-none placeholder-transparent"
                 style={{ fontSize: "16px" }}
               />
               {!userInput && !isFocused && (

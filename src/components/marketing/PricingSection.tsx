@@ -64,18 +64,18 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
 
   return (
     <section
-      className={standalone ? "py-20 px-6" : "py-24 px-6 bg-[#FBFBFB]"}
+      className={standalone ? "py-20 px-6" : "py-24 px-6 bg-white"}
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h2
-            className="text-3xl sm:text-4xl font-semibold text-[#333333] mb-3"
+            className="text-3xl sm:text-4xl font-semibold text-[#111827] mb-3"
             style={{ fontFamily: "var(--font-outfit, inherit)" }}
           >
             {standalone ? "Simple, transparent pricing" : "Pricing"}
           </h2>
-          <p className="text-[#737373] max-w-md mx-auto">
+          <p className="text-[#6B7280] max-w-md mx-auto">
             {standalone
               ? "Start free. Upgrade when you're ready. No hidden fees."
               : "Start free, upgrade when you need more."}
@@ -86,7 +86,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         <div className="flex items-center justify-center gap-3 mb-10">
           <span
             className={`text-sm font-medium transition-colors ${
-              !annual ? "text-[#333333]" : "text-[#A3A3A3]"
+              !annual ? "text-[#111827]" : "text-[#A3A3A3]"
             }`}
           >
             Monthly
@@ -106,7 +106,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
           </button>
           <span
             className={`text-sm font-medium transition-colors ${
-              annual ? "text-[#333333]" : "text-[#A3A3A3]"
+              annual ? "text-[#111827]" : "text-[#A3A3A3]"
             }`}
           >
             Annual
@@ -129,7 +129,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                 className={`relative rounded-xl border p-6 flex flex-col ${
                   plan.popular
                     ? "border-[#2D6A4F] shadow-[0_0_0_1px_#2D6A4F] bg-white"
-                    : "border-[#EBEBEB] bg-white"
+                    : "border-[#E5E7EB] bg-white"
                 }`}
               >
                 {plan.popular && (
@@ -141,15 +141,15 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                 )}
 
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-[#333333] mb-1">
+                  <h3 className="text-lg font-semibold text-[#111827] mb-1">
                     {plan.name}
                   </h3>
-                  <p className="text-sm text-[#737373]">{plan.description}</p>
+                  <p className="text-sm text-[#6B7280]">{plan.description}</p>
                 </div>
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-semibold text-[#333333]">
+                    <span className="text-4xl font-semibold text-[#111827]">
                       ${price}
                     </span>
                     {price > 0 && (
@@ -172,7 +172,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                   {plan.features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2 text-sm text-[#737373]"
+                      className="flex items-start gap-2 text-sm text-[#6B7280]"
                     >
                       <Check className="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" />
                       {feature}
@@ -185,7 +185,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                   className={`w-full text-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                     plan.popular
                       ? "bg-[#2D6A4F] text-white hover:bg-[#245840]"
-                      : "border border-[#EBEBEB] text-[#333333] hover:bg-[#FBFBFB]"
+                      : "border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB]"
                   }`}
                 >
                   {plan.cta}

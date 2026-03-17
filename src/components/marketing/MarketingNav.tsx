@@ -19,7 +19,7 @@ export function MarketingNav() {
       <div
         className={`flex items-center justify-between rounded-2xl px-4 py-2.5 transition-all duration-200 ${
           scrolled
-            ? "bg-white/70 backdrop-blur-md shadow-sm border border-[#F0F0F0]"
+            ? "bg-white/70 backdrop-blur-md shadow-sm border border-[#E5E7EB]"
             : "bg-white/50 backdrop-blur-sm"
         }`}
       >
@@ -77,7 +77,7 @@ export function MarketingNav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden mt-2 rounded-2xl bg-white/90 backdrop-blur-md border border-[#F0F0F0] shadow-lg p-4 flex flex-col gap-2">
+        <div className="md:hidden mt-2 rounded-2xl bg-white/90 backdrop-blur-md border border-[#E5E7EB] shadow-lg p-4 flex flex-col gap-2">
           {["Product", "Use Cases", "Pricing"].map((label) => (
             <Link
               key={label}
@@ -88,7 +88,7 @@ export function MarketingNav() {
               {label}
             </Link>
           ))}
-          <hr className="border-[#EBEBEB] my-1" />
+          <hr className="border-[#E5E7EB] my-1" />
           <Link href="/sign-in" className="text-sm font-medium text-[#171717] px-3 py-2.5">
             Sign in
           </Link>

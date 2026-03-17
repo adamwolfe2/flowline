@@ -12,7 +12,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 border border-black/10 bg-white rounded-full px-3 py-1 text-sm font-medium text-[#333333]">
+    <div className="inline-flex items-center gap-1.5 border border-[#E5E7EB] bg-white rounded-full px-3 py-1 text-sm font-medium text-[#111827]">
       {icon}
       {children}
     </div>
@@ -57,10 +57,10 @@ function TemplateMockup({
   questions: number;
 }) {
   return (
-    <div className="bg-[#FBFBFB] p-5 min-h-[160px] flex items-center justify-center">
+    <div className="bg-[#F9FAFB] p-5 min-h-[160px] flex items-center justify-center">
       <div className="w-full max-w-[200px]">
         {/* Mini quiz mockup */}
-        <div className="bg-white rounded-lg border border-[#EBEBEB] p-3">
+        <div className="bg-white rounded-lg border border-[#E5E7EB] p-3">
           <div
             className="h-1.5 w-12 rounded-full mb-3"
             style={{ backgroundColor: color }}
@@ -73,7 +73,7 @@ function TemplateMockup({
                   style={{ backgroundColor: `${color}30` }}
                 />
                 <div
-                  className="h-2 rounded-full bg-[#EBEBEB]"
+                  className="h-2 rounded-full bg-[#E5E7EB]"
                   style={{ width: `${70 - i * 15}%` }}
                 />
               </div>
@@ -95,19 +95,19 @@ export function TemplatesSection() {
   const [activeCategory, setActiveCategory] = useState("Coaching");
 
   return (
-    <section className="border-t border-[#F0F0F0] bg-white py-20 px-6">
+    <section className="border-t border-[#E5E7EB] bg-white py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-8">
           <SectionLabel icon={<LayoutGrid className="w-3.5 h-3.5" />}>
             Templates
           </SectionLabel>
           <h2
-            className="text-[32px] sm:text-[40px] font-semibold text-[#333333] leading-tight"
+            className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
             Start from proven funnel templates
           </h2>
-          <p className="text-[#737373] max-w-xl">
+          <p className="text-[#6B7280] max-w-xl">
             Clone pre-built funnels, customize with AI, deploy instantly. No
             per-lead fees.
           </p>
@@ -121,8 +121,8 @@ export function TemplatesSection() {
               onClick={() => setActiveCategory(cat)}
               className={`text-sm px-4 py-2 rounded-full transition-colors border ${
                 activeCategory === cat
-                  ? "bg-[#333333] text-white border-[#333333]"
-                  : "bg-white text-[#737373] border-[#EBEBEB] hover:border-[#D4D4D4]"
+                  ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                  : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D4D4D4]"
               }`}
             >
               {cat}
@@ -140,11 +140,11 @@ export function TemplatesSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
               >
                 <TemplateMockup color={t.color} questions={t.questions} />
-                <div className="p-5 border-t border-[#EBEBEB]">
-                  <h3 className="text-sm font-semibold text-[#333333] mb-1">
+                <div className="p-5 border-t border-[#E5E7EB]">
+                  <h3 className="text-sm font-semibold text-[#111827] mb-1">
                     {t.title}
                   </h3>
                   <div className="flex items-center justify-between">
@@ -162,7 +162,7 @@ export function TemplatesSection() {
 
         {/* View all */}
         <div className="flex justify-center mt-10">
-          <button className="inline-flex items-center gap-2 text-sm font-medium text-[#333333] border border-[#EBEBEB] rounded-full px-6 py-2.5 hover:bg-[#FBFBFB] transition-colors">
+          <button className="inline-flex items-center gap-2 text-sm font-medium text-[#111827] border border-[#E5E7EB] rounded-full px-6 py-2.5 hover:bg-[#F9FAFB] transition-colors">
             View all templates
             <ArrowRight className="w-4 h-4" />
           </button>

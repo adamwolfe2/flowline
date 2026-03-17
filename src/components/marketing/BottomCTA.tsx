@@ -49,7 +49,8 @@ export function BottomCTA() {
   }, [typewriter]);
 
   return (
-    <section className="bg-white/60 backdrop-blur-xl border border-[#EBEBEB] rounded-[40px] mx-4 mb-8 py-20 md:py-28 px-6">
+    <section className="bg-[#F9FAFB] py-8 px-4">
+      <div className="bg-white/60 backdrop-blur-xl border border-[#E5E7EB] rounded-[40px] max-w-6xl mx-auto py-20 md:py-28 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -58,7 +59,7 @@ export function BottomCTA() {
           transition={{ duration: 0.6 }}
         >
           <h2
-            className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-[#333333] leading-tight mb-10"
+            className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
             What will you build?
@@ -73,9 +74,9 @@ export function BottomCTA() {
           className="max-w-2xl mx-auto"
         >
           {/* Dark prompt box */}
-          <div className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm">
             {/* Browser chrome */}
-            <div className="h-9 flex items-center px-4 gap-1.5 border-b border-[#EBEBEB]">
+            <div className="h-9 flex items-center px-4 gap-1.5 border-b border-[#E5E7EB]">
               <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
               <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
               <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
@@ -113,6 +114,7 @@ export function BottomCTA() {
             </div>
           </div>
         </motion.div>
+      </div>
       </div>
     </section>
   );

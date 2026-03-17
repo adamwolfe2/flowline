@@ -31,15 +31,15 @@ function BuilderMockup() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="mt-16 bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-sm"
+      className="mt-16 bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm"
     >
       {/* Browser chrome */}
-      <div className="h-10 bg-[#FBFBFB] border-b border-[#EBEBEB] flex items-center px-4 gap-2">
+      <div className="h-10 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center px-4 gap-2">
         <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
         <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
         <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
         <div className="flex-1 mx-8">
-          <div className="bg-white rounded border border-[#EBEBEB] px-3 py-1 text-xs text-[#A3A3A3] text-center max-w-[240px] mx-auto">
+          <div className="bg-white rounded border border-[#E5E7EB] px-3 py-1 text-xs text-[#A3A3A3] text-center max-w-[240px] mx-auto">
             app.getmyvsl.com/builder
           </div>
         </div>
@@ -48,23 +48,23 @@ function BuilderMockup() {
       {/* Split view */}
       <div className="grid md:grid-cols-2 min-h-[340px]">
         {/* Left: AI Chat Panel — LIGHT theme */}
-        <div className="bg-white p-6 flex flex-col gap-4 border-r border-[#EBEBEB]">
+        <div className="bg-white p-6 flex flex-col gap-4 border-r border-[#E5E7EB]">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="text-xs text-[#737373] font-medium">AI Builder</span>
+            <span className="text-xs text-[#6B7280] font-medium">AI Builder</span>
           </div>
-          <div className="bg-[#FBFBFB] rounded-xl px-4 py-3 border border-[#EBEBEB]">
-            <p className="text-sm text-[#333333]">
+          <div className="bg-[#F9FAFB] rounded-xl px-4 py-3 border border-[#E5E7EB]">
+            <p className="text-sm text-[#111827]">
               Build a quiz funnel for my coaching business
             </p>
           </div>
           <div className="bg-emerald-50 rounded-xl px-4 py-3 border border-emerald-200">
             <p className="text-xs text-emerald-600 font-medium mb-1">Built</p>
-            <p className="text-sm text-[#737373]">
+            <p className="text-sm text-[#6B7280]">
               5 qualifying questions, scoring rules, and calendar routing created.
             </p>
           </div>
-          <div className="bg-[#FBFBFB] rounded-xl px-4 py-3 border border-[#EBEBEB]">
+          <div className="bg-[#F9FAFB] rounded-xl px-4 py-3 border border-[#E5E7EB]">
             <p className="text-xs text-[#A3A3A3] mb-2">Generated questions:</p>
             <div className="space-y-1.5">
               {[
@@ -74,7 +74,7 @@ function BuilderMockup() {
               ].map((q, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 text-xs text-[#737373]"
+                  className="flex items-center gap-2 text-xs text-[#6B7280]"
                 >
                   <span className="text-[#A3A3A3]">{i + 1}.</span>
                   {q}
@@ -85,7 +85,7 @@ function BuilderMockup() {
         </div>
 
         {/* Right: Live Preview */}
-        <div className="bg-[#FBFBFB] p-6 flex flex-col">
+        <div className="bg-[#F9FAFB] p-6 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-medium text-[#A3A3A3] uppercase tracking-wider">
               Live Preview
@@ -96,17 +96,17 @@ function BuilderMockup() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-[#EBEBEB] p-5 flex-1">
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 flex-1">
             <div className="w-10 h-10 rounded-lg bg-[#2D6A4F]/20 flex items-center justify-center mb-4">
               <Zap className="w-5 h-5 text-[#2D6A4F]" />
             </div>
-            <h4 className="text-sm font-semibold text-[#333333] mb-1">
+            <h4 className="text-sm font-semibold text-[#111827] mb-1">
               Coaching Qualifier
             </h4>
             <p className="text-xs text-[#A3A3A3] mb-4">
               Question 1 of 5
             </p>
-            <p className="text-sm font-medium text-[#333333] mb-3">
+            <p className="text-sm font-medium text-[#111827] mb-3">
               What is your current monthly revenue?
             </p>
             <div className="space-y-2">
@@ -116,8 +116,8 @@ function BuilderMockup() {
                     key={i}
                     className={`text-sm px-4 py-2.5 rounded-lg border cursor-pointer transition-colors ${
                       i === 2
-                        ? "bg-[#2D6A4F]/10 border-[#2D6A4F] text-[#333333]"
-                        : "bg-white border-[#EBEBEB] text-[#737373] hover:border-[#D4D4D4]"
+                        ? "bg-[#2D6A4F]/10 border-[#2D6A4F] text-[#111827]"
+                        : "bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#D4D4D4]"
                     }`}
                   >
                     {opt}
@@ -147,16 +147,16 @@ export function HowItWorks() {
             >
               {/* Tangerine accent line */}
               <div className="h-0.5 w-16 bg-[#2D6A4F] mb-6" />
-              <span className="text-sm font-semibold text-[#A3A3A3] mb-2 block">
+              <span className="text-sm font-semibold text-[#9CA3AF] mb-2 block">
                 {step.num}
               </span>
               <h3
-                className="text-xl font-semibold text-[#333333] mb-2"
+                className="text-xl font-semibold text-[#111827] mb-2"
                 style={{ fontFamily: "var(--font-outfit)" }}
               >
                 {step.title}
               </h3>
-              <p className="text-sm text-[#737373] leading-relaxed">
+              <p className="text-sm text-[#6B7280] leading-relaxed">
                 {step.description}
               </p>
             </motion.div>

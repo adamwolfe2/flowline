@@ -11,7 +11,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 border border-black/10 bg-white rounded-full px-3 py-1 text-sm font-medium text-[#333333]">
+    <div className="inline-flex items-center gap-1.5 border border-[#E5E7EB] bg-white rounded-full px-3 py-1 text-sm font-medium text-[#111827]">
       {icon}
       {children}
     </div>
@@ -20,7 +20,7 @@ function SectionLabel({
 
 function AIGenerationMockup() {
   return (
-    <div className="bg-[#FBFBFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="space-y-3 w-full max-w-[320px]">
         {[
           { q: "What is your monthly revenue?", delay: 0 },
@@ -33,13 +33,13 @@ function AIGenerationMockup() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.2 + item.delay }}
-            className="bg-white rounded-xl border border-[#EBEBEB] p-3.5 flex items-center gap-3"
+            className="bg-white rounded-xl border border-[#E5E7EB] p-3.5 flex items-center gap-3"
           >
             <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/15 flex items-center justify-center shrink-0">
               <Sparkles className="w-4 h-4 text-[#2D6A4F]" />
             </div>
             <div>
-              <p className="text-xs text-[#333333] font-medium">{item.q}</p>
+              <p className="text-xs text-[#111827] font-medium">{item.q}</p>
               <p className="text-[10px] text-[#A3A3A3]">AI generated</p>
             </div>
           </motion.div>
@@ -60,7 +60,7 @@ function ScoringChipsMockup() {
   ];
 
   return (
-    <div className="bg-[#FBFBFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="flex flex-wrap gap-2 justify-center max-w-[300px]">
         {chips.map((chip) => (
           <div
@@ -78,20 +78,20 @@ function ScoringChipsMockup() {
 
 function CalendarIntegrationMockup() {
   return (
-    <div className="bg-[#FBFBFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="flex items-center gap-4">
-        <div className="bg-white rounded-xl border border-[#EBEBEB] p-4 flex flex-col items-center gap-2">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
             <Calendar className="w-5 h-5 text-blue-600" />
           </div>
-          <span className="text-[10px] font-medium text-[#737373]">Cal.com</span>
+          <span className="text-[10px] font-medium text-[#6B7280]">Cal.com</span>
         </div>
         <div className="text-[#D4D4D4] text-lg">+</div>
-        <div className="bg-white rounded-xl border border-[#EBEBEB] p-4 flex flex-col items-center gap-2">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex flex-col items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
             <Calendar className="w-5 h-5 text-indigo-600" />
           </div>
-          <span className="text-[10px] font-medium text-[#737373]">Calendly</span>
+          <span className="text-[10px] font-medium text-[#6B7280]">Calendly</span>
         </div>
       </div>
     </div>
@@ -100,8 +100,8 @@ function CalendarIntegrationMockup() {
 
 function DomainMockup() {
   return (
-    <div className="bg-[#FBFBFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
-      <div className="bg-white rounded-xl border border-[#EBEBEB] p-4 w-full max-w-[240px]">
+    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 w-full max-w-[240px]">
         <div className="flex items-center justify-between mb-3">
           <Globe className="w-4 h-4 text-[#A3A3A3]" />
           <div className="flex items-center gap-1.5">
@@ -109,7 +109,7 @@ function DomainMockup() {
             <span className="text-[10px] text-emerald-600 font-medium">Active</span>
           </div>
         </div>
-        <p className="text-sm font-medium text-[#333333]">quiz.acme.com</p>
+        <p className="text-sm font-medium text-[#111827]">quiz.acme.com</p>
         <p className="text-[10px] text-[#A3A3A3] mt-1">SSL secured</p>
       </div>
     </div>
@@ -118,12 +118,12 @@ function DomainMockup() {
 
 function EnterpriseMockup() {
   return (
-    <div className="bg-[#FBFBFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-16 h-16 rounded-full border-2 border-[#EBEBEB] flex items-center justify-center bg-white">
-          <Shield className="w-7 h-7 text-[#333333]" />
+        <div className="w-16 h-16 rounded-full border-2 border-[#E5E7EB] flex items-center justify-center bg-white">
+          <Shield className="w-7 h-7 text-[#111827]" />
         </div>
-        <span className="text-xs font-semibold text-[#333333]">Enterprise Ready</span>
+        <span className="text-xs font-semibold text-[#111827]">Enterprise Ready</span>
         <span className="text-[10px] text-[#A3A3A3]">SOC 2 Compliant</span>
       </div>
     </div>
@@ -132,19 +132,19 @@ function EnterpriseMockup() {
 
 export function FeaturesSection() {
   return (
-    <section className="bg-[#FBFBFB] border-t border-[#F0F0F0] py-20 px-6">
+    <section className="bg-white border-t border-[#E5E7EB] py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<Sparkles className="w-3.5 h-3.5" />}>
             Features
           </SectionLabel>
           <h2
-            className="text-[32px] sm:text-[40px] font-semibold text-[#333333] leading-tight"
+            className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
             Everything you need to convert
           </h2>
-          <p className="text-[#737373] max-w-xl">
+          <p className="text-[#6B7280] max-w-xl">
             From AI-powered quiz generation to smart scoring and calendar routing
             — all in one platform.
           </p>
@@ -172,14 +172,14 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200"
+              className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200"
             >
               {card.illustration}
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-[#333333] mb-2">
+                <h3 className="text-xl font-semibold text-[#111827] mb-2">
                   {card.title}
                 </h3>
-                <p className="text-sm text-[#737373]">{card.description}</p>
+                <p className="text-sm text-[#6B7280]">{card.description}</p>
               </div>
             </motion.div>
           ))}
@@ -213,14 +213,14 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200"
+              className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200"
             >
               {card.illustration}
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-[#333333] mb-2">
+                <h3 className="text-xl font-semibold text-[#111827] mb-2">
                   {card.title}
                 </h3>
-                <p className="text-sm text-[#737373]">{card.description}</p>
+                <p className="text-sm text-[#6B7280]">{card.description}</p>
               </div>
             </motion.div>
           ))}

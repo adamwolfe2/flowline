@@ -39,13 +39,13 @@ const columns = [
 
 export function MarketingFooter() {
   return (
-    <footer className="bg-white py-12 px-6">
+    <footer className="bg-white border-t border-[#E5E7EB] py-12 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-10 mb-12">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#211C20]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2D6A4F]">
                 <Zap className="h-4 w-4 text-white" />
               </div>
               <span
@@ -55,7 +55,7 @@ export function MarketingFooter() {
                 MyVSL
               </span>
             </Link>
-            <p className="text-sm text-[#737373] leading-relaxed max-w-xs">
+            <p className="text-sm text-[#6B7280] leading-relaxed max-w-xs">
               The AI funnel builder that books calls.
             </p>
           </div>
@@ -63,7 +63,7 @@ export function MarketingFooter() {
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <p className="text-xs font-semibold text-[#333333] uppercase tracking-wider mb-4">
+              <p className="text-xs font-semibold text-[#111827] uppercase tracking-wider mb-4">
                 {col.title}
               </p>
               <ul className="space-y-2.5">
@@ -71,7 +71,7 @@ export function MarketingFooter() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-[#737373] hover:text-[#333333] transition-colors"
+                      className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -82,7 +82,7 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="border-t border-[#EBEBEB] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="border-t border-[#E5E7EB] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#A3A3A3]">
             &copy; 2026 MyVSL, Inc.
           </p>
