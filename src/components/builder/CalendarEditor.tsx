@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { FunnelConfig } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface CalendarEditorProps {
   config: FunnelConfig;
@@ -11,6 +14,7 @@ interface CalendarEditorProps {
 }
 
 export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
+  const [testingWebhook, setTestingWebhook] = useState(false);
   function updateCalendar(tier: 'high' | 'mid' | 'low', url: string) {
     const newConfig = JSON.parse(JSON.stringify(config));
     newConfig.quiz.calendars[tier] = url;
@@ -85,6 +89,49 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
         <p className="text-[11px] text-gray-400 mt-1">
           Lead data will be sent here on each submission. Supports Zapier, Make, n8n.
         </p>
+        <div className="flex items-center gap-2 mt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            disabled={!config.webhook.url || testingWebhook}
+            onClick={async () => {
+              setTestingWebhook(true);
+              try {
+                const res = await fetch("/api/webhooks/test", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ url: config.webhook.url }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                  toast.success("Test payload sent successfully");
+                } else {
+                  toast.error(data.error || "Webhook test failed");
+                }
+              } catch {
+                toast.error("Failed to send test");
+              }
+              setTestingWebhook(false);
+            }}
+          >
+            {testingWebhook ? "Sending..." : "Send test payload"}
+          </Button>
+        </div>
+        <div className="mt-3 p-3 bg-[#FBFBFB] rounded-lg border border-[#EBEBEB]">
+          <p className="text-[11px] text-[#A3A3A3] font-medium mb-1">Webhook payload format</p>
+          <pre className="text-[10px] text-[#737373] font-mono overflow-x-auto">
+{`{
+  "email": "lead@example.com",
+  "answers": { "q1": "b", "q2": "c" },
+  "score": 7,
+  "calendar_tier": "high",
+  "timestamp": "2026-01-01T00:00:00Z",
+  "source": "Your Business",
+  "funnel_slug": "your-funnel"
+}`}
+          </pre>
+        </div>
       </div>
     </div>
   );

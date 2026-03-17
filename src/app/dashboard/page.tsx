@@ -56,6 +56,7 @@ export default function DashboardPage() {
                 funnel={funnel}
                 stats={funnel.stats}
                 onDelete={handleDelete}
+                onDuplicate={loadFunnels}
               />
             ))}
           </div>
