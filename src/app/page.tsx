@@ -4,7 +4,7 @@ import { HeroSection } from "@/components/marketing/HeroSection";
 import { LogoStrip } from "@/components/marketing/LogoStrip";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { WhySection } from "@/components/marketing/WhySection";
-import { FeaturesSection } from "@/components/marketing/FeaturesSection";
+import { ProductDemo } from "@/components/marketing/ProductDemo";
 import { TemplatesSection } from "@/components/marketing/TemplatesSection";
 import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
 import { BottomCTA } from "@/components/marketing/BottomCTA";
@@ -20,7 +20,7 @@ export default function HomePage() {
       <LogoStrip />
       <HowItWorks />
       <WhySection />
-      <FeaturesSection />
+      <ProductDemo />
       <TemplatesSection />
       <TestimonialsSection />
       <BottomCTA />
