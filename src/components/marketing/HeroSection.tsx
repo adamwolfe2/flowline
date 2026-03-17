@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 import { ChevronDown, Sparkles } from "lucide-react";
 
 const PROMPTS = [
-  "create a quiz funnel for my coaching business",
-  "build a lead qualifier for my SaaS agency",
-  "make a booking funnel for my real estate team",
+  "I sell business coaching to 6-figure entrepreneurs...",
+  "I run a marketing agency for e-commerce brands...",
+  "I offer fitness programs for busy professionals...",
 ];
 
 export function HeroSection() {
@@ -97,9 +97,9 @@ export function HeroSection() {
               textShadow: "0 2px 24px rgba(0,0,0,0.12)",
             }}
           >
-            The AI funnel builder that
+            Your VSL funnel.
             <br />
-            <span className="text-white/70">books calls</span>
+            <span className="text-white/70">Built in 60 seconds.</span>
           </h1>
         </motion.div>
 
@@ -110,7 +110,7 @@ export function HeroSection() {
           className="text-base sm:text-lg md:text-xl text-white/85 max-w-xl mt-5 mb-5"
           style={{ textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}
         >
-          Describe what you need and let MyVSL handle the rest.
+          Describe your product in one sentence. AI generates the questions, scoring, and booking flow. You're live in minutes.
         </motion.p>
 
         <motion.div
@@ -119,22 +119,15 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.25 }}
           className="flex flex-wrap items-center justify-center gap-1.5 mb-10 text-sm text-white/80"
         >
-          <span>Build</span>
-          <span className="inline-flex items-center gap-1 bg-white/15 rounded-md px-1.5 py-0.5 text-white">
-            <Sparkles className="w-3 h-3" />
-            Quiz Funnels
+          <span className="inline-flex items-center bg-white/15 rounded-md px-1.5 py-0.5 text-white">
+            No code.
           </span>
-          <span>,</span>
-          <span className="inline-flex items-center gap-1 bg-white/15 rounded-md px-1.5 py-0.5 text-white">
-            <Sparkles className="w-3 h-3" />
-            Booking Pages
+          <span className="inline-flex items-center bg-white/15 rounded-md px-1.5 py-0.5 text-white">
+            No designer.
           </span>
-          <span>and</span>
-          <span className="inline-flex items-center gap-1 bg-white/15 rounded-md px-1.5 py-0.5 text-white">
-            <Sparkles className="w-3 h-3" />
-            Lead Qualifiers
+          <span className="inline-flex items-center bg-white/15 rounded-md px-1.5 py-0.5 text-white">
+            No agency.
           </span>
-          <span>for your entire team.</span>
         </motion.div>
 
         {/* Floating prompt box + wide browser mockup */}

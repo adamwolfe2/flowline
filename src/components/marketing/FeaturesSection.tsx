@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Sparkles, Globe, Shield } from "lucide-react";
 
+
 function SectionLabel({
   icon,
   children,

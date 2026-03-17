@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { BarChart3 } from "lucide-react";
 
+
 function SectionLabel({
   icon,
   children,

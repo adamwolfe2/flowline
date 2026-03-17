@@ -1,9 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Zap } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
-import { useInView } from "framer-motion";
 
 const steps = [
   {
