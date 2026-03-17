@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, Download, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
 
@@ -10,6 +10,7 @@ interface LeadRow {
   funnelId: string;
   score: number;
   calendarTier: string;
+  answers: Record<string, string>;
   createdAt: string;
 }
 
@@ -31,6 +32,7 @@ export default function LeadsPage() {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [dateRange, setDateRange] = useState<string>("all");
 
   // Debounce search
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function LeadsPage() {
   // Reset to page 0 when filters change
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, funnelFilter, tierFilter]);
+  }, [debouncedSearch, funnelFilter, tierFilter, dateRange]);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -88,14 +90,38 @@ export default function LeadsPage() {
     );
   };
 
+  const displayedLeads = useMemo(() => {
+    if (dateRange === "all") return leads;
+    const now = new Date();
+    const days = dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90;
+    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    return leads.filter((l) => new Date(l.createdAt) >= cutoff);
+  }, [leads, dateRange]);
+
   function exportCSV() {
-    if (leads.length === 0) return;
-    const header = "Email,Funnel,Score,Tier,Date\n";
-    const rows = leads
+    if (displayedLeads.length === 0) return;
+
+    // Collect all unique answer keys across all leads
+    const answerKeys = new Set<string>();
+    for (const lead of displayedLeads) {
+      if (lead.answers && typeof lead.answers === "object") {
+        for (const key of Object.keys(lead.answers)) {
+          answerKeys.add(key);
+        }
+      }
+    }
+    const sortedKeys = Array.from(answerKeys).sort();
+
+    const header = ["Email", "Funnel", "Score", "Tier", "Date", ...sortedKeys].join(",") + "\n";
+    const rows = displayedLeads
       .map((l) => {
         const fName = (funnelNameMap[l.funnelId] || "").replace(/,/g, " ");
         const date = new Date(l.createdAt).toLocaleDateString();
-        return `${l.email},${fName},${l.score},${l.calendarTier},${date}`;
+        const answerCols = sortedKeys.map((k) => {
+          const val = l.answers?.[k] ?? "";
+          return String(val).replace(/,/g, " ");
+        });
+        return [l.email, fName, l.score, l.calendarTier, date, ...answerCols].join(",");
       })
       .join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
@@ -160,6 +186,16 @@ export default function LeadsPage() {
           <option value="mid">Mid</option>
           <option value="low">Low</option>
         </select>
+        <select
+          value={dateRange}
+          onChange={(e) => setDateRange(e.target.value)}
+          className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
+        >
+          <option value="all">All time</option>
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+        </select>
       </div>
 
       {/* Table */}
@@ -168,7 +204,7 @@ export default function LeadsPage() {
           <div className="flex items-center justify-center py-20">
             <div className="w-5 h-5 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : leads.length === 0 ? (
+        ) : displayedLeads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Users className="w-10 h-10 text-[#D1D5DB] mb-3" />
             <p className="text-sm font-medium text-[#6B7280]">No leads found</p>
@@ -201,7 +237,7 @@ export default function LeadsPage() {
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead) => (
+                {displayedLeads.map((lead) => (
                   <tr
                     key={lead.id}
                     onClick={() => setSelectedLeadId(lead.id)}

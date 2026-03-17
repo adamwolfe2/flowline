@@ -31,6 +31,12 @@ export interface FunnelConfig {
       enabled: boolean;
       url: string;
     };
+    ctaButtonText?: string;
+    emailHeadline?: string;
+    emailSubtext?: string;
+    emailButtonText?: string;
+    successHeadline?: string;
+    successSubtext?: string;
   };
   webhook: {
     url: string;

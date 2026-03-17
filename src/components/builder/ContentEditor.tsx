@@ -260,6 +260,87 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
           </div>
         </div>
       </div>
+      <Separator />
+
+      <div>
+        <Label className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-3">
+          Funnel Text
+        </Label>
+        <p className="text-[11px] text-gray-400 mb-4">
+          Customize the text shown on each step of your funnel. Leave blank to use defaults.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">CTA Button Text</Label>
+            <Input
+              value={config.quiz.ctaButtonText ?? ""}
+              onChange={e => updateField("quiz.ctaButtonText", e.target.value)}
+              placeholder="Take the Quiz — It Takes 60 Seconds"
+              className="text-xs"
+              maxLength={80}
+            />
+          </div>
+
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Email Step Headline</Label>
+            <Input
+              value={config.quiz.emailHeadline ?? ""}
+              onChange={e => updateField("quiz.emailHeadline", e.target.value)}
+              placeholder="One last step"
+              className="text-xs"
+              maxLength={60}
+            />
+          </div>
+
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Email Step Subtext</Label>
+            <Input
+              value={config.quiz.emailSubtext ?? ""}
+              onChange={e => updateField("quiz.emailSubtext", e.target.value)}
+              placeholder="Enter your email to see your results and book your call."
+              className="text-xs"
+              maxLength={120}
+            />
+          </div>
+
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Email Button Text</Label>
+            <Input
+              value={config.quiz.emailButtonText ?? ""}
+              onChange={e => updateField("quiz.emailButtonText", e.target.value)}
+              placeholder="See My Results & Book a Call"
+              className="text-xs"
+              maxLength={60}
+            />
+          </div>
+
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Success Headline</Label>
+            <Input
+              value={config.quiz.successHeadline ?? ""}
+              onChange={e => updateField("quiz.successHeadline", e.target.value)}
+              placeholder="You qualify!"
+              className="text-xs"
+              maxLength={60}
+            />
+          </div>
+
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Success Subtext</Label>
+            <Input
+              value={config.quiz.successSubtext ?? ""}
+              onChange={e => updateField("quiz.successSubtext", e.target.value)}
+              placeholder="We sent a confirmation to {email}. Pick a time that works for you below."
+              className="text-xs"
+              maxLength={150}
+            />
+            <p className="text-[10px] text-gray-300 mt-1">
+              Use {"{email}"} as a placeholder for the lead&apos;s email address.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

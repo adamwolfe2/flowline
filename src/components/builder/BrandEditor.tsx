@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { FunnelConfig } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,20 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
     newConfig.brand.primaryColorDark = deriveDarkColor(hex);
     onSave(newConfig);
   }
+
+  useEffect(() => {
+    const fonts = new Set([config.brand.fontHeading, config.brand.fontBody]);
+    fonts.forEach((font) => {
+      const id = `gfont-${font.replace(/\s+/g, "-")}`;
+      if (!document.getElementById(id)) {
+        const link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700&display=swap`;
+        document.head.appendChild(link);
+      }
+    });
+  }, [config.brand.fontHeading, config.brand.fontBody]);
 
   return (
     <div className="space-y-5">
@@ -139,7 +154,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
             }}
             className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
           >
-            {FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+            {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
           </select>
         </div>
         <div>
@@ -153,7 +168,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
             }}
             className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
           >
-            {FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+            {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
           </select>
         </div>
       </div>

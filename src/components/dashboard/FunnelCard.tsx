@@ -45,7 +45,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           config: funnel.config,
-          slug: `${funnel.slug}-copy`,
+          slug: `${funnel.slug}-copy-${Math.random().toString(36).slice(2, 6)}`,
         }),
       });
       if (res.ok) {

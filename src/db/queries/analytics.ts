@@ -132,32 +132,47 @@ export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', tot
   }));
 }
 
-export async function getDeviceBreakdown(funnelId: string) {
+export async function getDeviceBreakdown(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
+    : eq(funnelSessions.funnelId, funnelId);
+
   return db.select({
     deviceType: funnelSessions.deviceType,
     count: sql<number>`count(*)::int`,
   }).from(funnelSessions)
-    .where(eq(funnelSessions.funnelId, funnelId))
+    .where(whereClause)
     .groupBy(funnelSessions.deviceType);
 }
 
-export async function getUTMBreakdown(funnelId: string) {
+export async function getUTMBreakdown(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const baseConditions = [eq(leads.funnelId, funnelId), sql`${leads.utmSource} is not null`];
+  if (cutoff) baseConditions.push(gte(leads.createdAt, cutoff));
+  const whereClause = and(...baseConditions);
+
   return db.select({
     utmSource: leads.utmSource,
     count: sql<number>`count(*)::int`,
   }).from(leads)
-    .where(and(eq(leads.funnelId, funnelId), sql`${leads.utmSource} is not null`))
+    .where(whereClause)
     .groupBy(leads.utmSource)
     .orderBy(sql`count(*) desc`)
     .limit(10);
 }
 
-export async function getTierDistribution(funnelId: string) {
+export async function getTierDistribution(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
+    : eq(leads.funnelId, funnelId);
+
   return db.select({
     tier: leads.calendarTier,
     count: sql<number>`count(*)::int`,
   }).from(leads)
-    .where(eq(leads.funnelId, funnelId))
+    .where(whereClause)
     .groupBy(leads.calendarTier);
 }
 
@@ -198,9 +213,9 @@ export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRang
     getDropoffWaterfall(funnelId, timeRange),
     getAnswerDistribution(funnelId, timeRange),
     getAbandonHeatmap(funnelId, timeRange),
-    getDeviceBreakdown(funnelId),
-    getUTMBreakdown(funnelId),
-    getTierDistribution(funnelId),
+    getDeviceBreakdown(funnelId, timeRange),
+    getUTMBreakdown(funnelId, timeRange),
+    getTierDistribution(funnelId, timeRange),
     getLeadsTimeSeries(funnelId, timeRange),
     getLeadsForTable(funnelId, leadsLimit, leadsOffset),
     getLeadCount(funnelId),

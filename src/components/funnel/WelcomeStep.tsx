@@ -89,7 +89,7 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
             (e.currentTarget as HTMLButtonElement).style.backgroundColor = brand.primaryColor;
           }}
         >
-          Take the Quiz — It Takes 60 Seconds
+          {quiz.ctaButtonText ?? "Take the Quiz — It Takes 60 Seconds"}
         </motion.button>
 
         <div className="flex items-center justify-center gap-4 mt-4">

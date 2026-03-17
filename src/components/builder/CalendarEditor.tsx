@@ -112,7 +112,7 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
                 });
                 const data = await res.json();
                 if (data.success) {
-                  toast.success("Test payload sent successfully");
+                  toast.success(`Webhook responded with ${data.status} OK`);
                 } else {
                   toast.error(data.error || "Webhook test failed");
                 }

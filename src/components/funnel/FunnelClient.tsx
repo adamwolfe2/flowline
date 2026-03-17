@@ -188,7 +188,7 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}
             >
-              <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} />
+              <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onBack={handleBack} />
             </motion.div>
           )}
 

@@ -9,9 +9,10 @@ interface EmailStepProps {
   config: FunnelConfig;
   onSubmit: (email: string) => void;
   onFieldFocus?: () => void;
+  onBack?: () => void;
 }
 
-export function EmailStep({ config, onSubmit, onFieldFocus }: EmailStepProps) {
+export function EmailStep({ config, onSubmit, onFieldFocus, onBack }: EmailStepProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -71,10 +72,10 @@ export function EmailStep({ config, onSubmit, onFieldFocus }: EmailStepProps) {
           className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
           style={{ fontFamily: brand.fontHeading }}
         >
-          One last step
+          {config.quiz.emailHeadline ?? "One last step"}
         </h2>
         <p className="text-sm text-gray-500 max-w-xs mx-auto">
-          Enter your email to see your results and book your call.
+          {config.quiz.emailSubtext ?? "Enter your email to see your results and book your call."}
         </p>
       </motion.div>
 
@@ -91,6 +92,7 @@ export function EmailStep({ config, onSubmit, onFieldFocus }: EmailStepProps) {
             type="email"
             inputMode="email"
             autoComplete="email"
+            enterKeyHint="send"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => {
@@ -142,7 +144,7 @@ export function EmailStep({ config, onSubmit, onFieldFocus }: EmailStepProps) {
               Processing...
             </span>
           ) : (
-            "See My Results & Book a Call →"
+            <>{config.quiz.emailButtonText ?? "See My Results & Book a Call"} &rarr;</>
           )}
         </motion.button>
 
@@ -150,6 +152,16 @@ export function EmailStep({ config, onSubmit, onFieldFocus }: EmailStepProps) {
           No spam. Unsubscribe anytime.
         </p>
       </motion.form>
+
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            &larr; Back
+          </button>
+        )}
     </div>
   );
 }

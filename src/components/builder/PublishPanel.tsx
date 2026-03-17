@@ -105,6 +105,32 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                 </Button>
               </div>
             </div>
+            {/* Embed Code */}
+            <div className="mt-4 p-3 bg-[#F9FAFB] rounded-lg">
+              <p className="text-xs text-[#6B7280] mb-2">Embed on your website</p>
+              <div className="relative">
+                <pre className="text-[10px] text-[#737373] font-mono bg-white border border-[#E5E7EB] rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-all">
+{`<iframe src="https://${funnelUrl}" width="100%" height="800" frameborder="0" style="border:none;"></iframe>`}
+                </pre>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2 text-[10px] h-6 px-2"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `<iframe src="https://${funnelUrl}" width="100%" height="800" frameborder="0" style="border:none;"></iframe>`
+                    );
+                    toast.success("Embed code copied");
+                  }}
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Copy
+                </Button>
+              </div>
+              <p className="text-[10px] text-[#9CA3AF] mt-2">
+                Paste this code into your website&apos;s HTML to embed the funnel.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg">

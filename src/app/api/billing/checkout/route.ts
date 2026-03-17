@@ -18,6 +18,18 @@ export async function POST(req: Request) {
     const { priceId } = await req.json();
     if (!priceId) return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
 
+    const PRICE_LOOKUP: Record<string, string | undefined> = {
+      pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
+      pro_annual: process.env.STRIPE_PRO_ANNUAL_PRICE_ID,
+      agency_monthly: process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID,
+      agency_annual: process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID,
+    };
+
+    const resolvedPriceId = PRICE_LOOKUP[priceId];
+    if (!resolvedPriceId) {
+      return NextResponse.json({ error: "Invalid or unconfigured plan" }, { status: 400 });
+    }
+
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     let customerId = user?.stripeCustomerId;
 
@@ -34,7 +46,7 @@ export async function POST(req: Request) {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: resolvedPriceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${appUrl}/dashboard?upgraded=true`,
       cancel_url: `${appUrl}/pricing`,

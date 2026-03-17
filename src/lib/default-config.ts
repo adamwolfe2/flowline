@@ -46,6 +46,12 @@ export const DEFAULT_FUNNEL_CONFIG: FunnelConfig = {
       },
     ],
     thresholds: { high: 7, mid: 4 },
+    ctaButtonText: "Take the Quiz — It Takes 60 Seconds",
+    emailHeadline: "One last step",
+    emailSubtext: "Enter your email to see your results and book your call.",
+    emailButtonText: "See My Results & Book a Call",
+    successHeadline: "You qualify!",
+    successSubtext: "We sent a confirmation to {email}. Pick a time that works for you below.",
     calendars: {
       high: "https://cal.com/your-name/hot-lead",
       mid: "https://cal.com/your-name/warm-lead",

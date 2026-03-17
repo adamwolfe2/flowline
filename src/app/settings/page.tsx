@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const { user, isLoaded } = useUser();
   const { openUserProfile } = useClerk();
   const [funnelCount, setFunnelCount] = useState(0);
+  const [plan, setPlan] = useState<string>("free");
 
   useEffect(() => {
     fetch("/api/funnels")
@@ -26,6 +27,15 @@ export default function SettingsPage() {
       .catch(() => {
         setFunnelCount(0);
       });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/user")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.plan) setPlan(data.plan);
+      })
+      .catch(() => {});
   }, []);
 
   if (!isLoaded) {
@@ -90,48 +100,60 @@ export default function SettingsPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-[#333333]">
-                Free Plan
+                {plan.charAt(0).toUpperCase() + plan.slice(1)} Plan
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-green-100 text-green-700">
-                Free
+                {plan.charAt(0).toUpperCase() + plan.slice(1)}
               </span>
             </div>
             <p className="text-xs text-[#737373] mt-0.5">
-              {funnelCount} of 1 funnels used
+              {plan === "free" ? `${funnelCount} of 1 funnels used` : `${funnelCount} funnels (unlimited)`}
             </p>
           </div>
         </div>
 
-        <div className="bg-[#FBFBFB] rounded-lg border border-[#EBEBEB] p-4 mb-4">
-          <p className="text-xs font-semibold text-[#333333] uppercase tracking-wider mb-3">
-            Unlock with Pro
-          </p>
-          <ul className="space-y-2">
-            {[
-              "Unlimited funnels",
-              "Custom domains",
-              "Advanced analytics & scoring",
-              "Priority support",
-              "Remove MyVSL branding",
-            ].map((feature) => (
-              <li
-                key={feature}
-                className="flex items-center gap-2 text-sm text-[#737373]"
-              >
-                <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {plan === "free" ? (
+          <>
+            <div className="bg-[#FBFBFB] rounded-lg border border-[#EBEBEB] p-4 mb-4">
+              <p className="text-xs font-semibold text-[#333333] uppercase tracking-wider mb-3">
+                Unlock with Pro
+              </p>
+              <ul className="space-y-2">
+                {[
+                  "Unlimited funnels",
+                  "Custom domains",
+                  "Advanced analytics & scoring",
+                  "Priority support",
+                  "Remove MyVSL branding",
+                ].map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2 text-sm text-[#737373]"
+                  >
+                    <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-        <Link
-          href="/pricing"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors"
-        >
-          <Zap className="w-3.5 h-3.5" />
-          Upgrade to Pro
-        </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Upgrade to Pro
+            </Link>
+          </>
+        ) : (
+          <Link
+            href="/billing"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2D6A4F] hover:text-[#245840] transition-colors"
+          >
+            Manage Billing
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
+        )}
       </section>
 
       {/* Danger Zone */}

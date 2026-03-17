@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
 
@@ -12,6 +12,7 @@ interface SuccessStepProps {
 
 export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
   const { brand } = config;
+  const [calEmbedFailed, setCalEmbedFailed] = useState(false);
 
   // Auto-detect Cal.com from the calendar URL
   const isCalcom = useMemo(() => calendarUrl.includes("cal.com"), [calendarUrl]);
@@ -42,29 +43,50 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
     script.async = true;
     document.head.appendChild(script);
 
+    let timeout: ReturnType<typeof setTimeout>;
+
+    script.onerror = () => {
+      setCalEmbedFailed(true);
+    };
+
     script.onload = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const Cal = (window as any).Cal;
-      if (Cal) {
-        Cal("init", effectiveNamespace, { origin: "https://cal.com" });
-        Cal.ns[effectiveNamespace]("inline", {
-          elementOrSelector: `#cal-embed-${effectiveNamespace}`,
-          calLink: effectiveCalLink,
-          layout: "month_view",
-          config: {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const Cal = (window as any).Cal;
+        if (Cal) {
+          Cal("init", effectiveNamespace, { origin: "https://cal.com" });
+          Cal.ns[effectiveNamespace]("inline", {
+            elementOrSelector: `#cal-embed-${effectiveNamespace}`,
+            calLink: effectiveCalLink,
+            layout: "month_view",
+            config: {
+              theme: "light",
+            },
+          });
+          Cal.ns[effectiveNamespace]("ui", {
             theme: "light",
-          },
-        });
-        Cal.ns[effectiveNamespace]("ui", {
-          theme: "light",
-          styles: { branding: { brandColor: effectiveBrandColor } },
-          hideEventTypeDetails: false,
-          layout: "month_view",
-        });
+            styles: { branding: { brandColor: effectiveBrandColor } },
+            hideEventTypeDetails: false,
+            layout: "month_view",
+          });
+        } else {
+          setCalEmbedFailed(true);
+        }
+      } catch {
+        setCalEmbedFailed(true);
       }
     };
 
+    // 10s timeout fallback
+    timeout = setTimeout(() => {
+      const container = document.getElementById(`cal-embed-${effectiveNamespace}`);
+      if (container && container.children.length === 0) {
+        setCalEmbedFailed(true);
+      }
+    }, 10000);
+
     return () => {
+      clearTimeout(timeout);
       script.remove();
     };
   }, [useCalEmbed, effectiveCalLink, effectiveNamespace, effectiveBrandColor]);
@@ -104,11 +126,15 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
             className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
             style={{ fontFamily: brand.fontHeading }}
           >
-            You qualify!
+            {config.quiz.successHeadline ?? "You qualify!"}
           </h2>
           <p className="text-sm text-gray-500">
-            We sent a confirmation to <span className="font-medium text-gray-700">{email}</span>.
-            Pick a time that works for you below.
+            {(config.quiz.successSubtext ?? "We sent a confirmation to {email}. Pick a time that works for you below.").split("{email}").map((part, i, arr) => (
+              <span key={i}>
+                {part}
+                {i < arr.length - 1 && <span className="font-medium text-gray-700">{email}</span>}
+              </span>
+            ))}
           </p>
         </motion.div>
       </motion.div>
@@ -119,7 +145,7 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
         transition={{ delay: 0.3, duration: 0.4 }}
         className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
       >
-        {useCalEmbed && effectiveCalLink ? (
+        {useCalEmbed && effectiveCalLink && !calEmbedFailed ? (
           <div
             id={`cal-embed-${effectiveNamespace}`}
             style={{ width: "100%", height: "700px", overflow: "auto" }}
@@ -134,6 +160,19 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
             style={{ minHeight: "600px" }}
             title="Book your call"
           />
+        ) : calEmbedFailed && calendarUrl ? (
+          <div className="text-center py-12">
+            <p className="text-sm text-gray-500 mb-4">Calendar is loading externally.</p>
+            <a
+              href={calendarUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-base shadow-lg transition-all hover:opacity-90"
+              style={{ backgroundColor: brand.primaryColor }}
+            >
+              Book Your Call
+            </a>
+          </div>
         ) : (
           <div className="text-center py-12">
             <p className="text-sm text-gray-500">Calendar booking coming soon. We'll be in touch!</p>

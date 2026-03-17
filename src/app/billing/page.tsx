@@ -44,12 +44,12 @@ type PlanKey = keyof typeof PLANS;
 
 const PRICE_MAP: Record<string, { monthly: string; annual: string }> = {
   pro: {
-    monthly: "STRIPE_PRO_MONTHLY_PRICE_ID",
-    annual: "STRIPE_PRO_ANNUAL_PRICE_ID",
+    monthly: "pro_monthly",
+    annual: "pro_annual",
   },
   agency: {
-    monthly: "STRIPE_AGENCY_MONTHLY_PRICE_ID",
-    annual: "STRIPE_AGENCY_ANNUAL_PRICE_ID",
+    monthly: "agency_monthly",
+    annual: "agency_annual",
   },
 };
 
@@ -61,8 +61,13 @@ export default function BillingPage() {
   const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/funnels")
+    fetch("/api/user")
       .then((r) => r.json())
+      .then((data) => {
+        if (data.plan && ["free", "pro", "agency"].includes(data.plan)) {
+          setCurrentPlan(data.plan as PlanKey);
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -210,7 +215,7 @@ export default function BillingPage() {
                   ${price}
                 </span>
                 {price > 0 && (
-                  <span className="text-sm text-[#737373]">/mo</span>
+                  <span className="text-sm text-[#737373]">/mo{annual ? " billed annually" : ""}</span>
                 )}
                 {price === 0 && (
                   <span className="text-sm text-[#737373] ml-1">forever</span>
