@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Funnel, FunnelStats } from "@/types";
 import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface FunnelWithStats extends Funnel {
   stats: FunnelStats;
@@ -14,7 +15,7 @@ export default function DashboardPage() {
   const [funnels, setFunnels] = useState<FunnelWithStats[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadFunnels = useCallback(() => {
     fetch("/api/funnels")
       .then(r => r.json())
       .then(data => {
@@ -22,6 +23,14 @@ export default function DashboardPage() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    loadFunnels();
+  }, [loadFunnels]);
+
+  function handleDelete(id: string) {
+    setFunnels(prev => prev.filter(f => f.id !== id));
+  }
 
   return (
     <div>
@@ -39,11 +48,18 @@ export default function DashboardPage() {
       ) : funnels.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {funnels.map(funnel => (
-            <FunnelCard key={funnel.id} funnel={funnel} stats={funnel.stats} />
-          ))}
-        </div>
+        <ErrorBoundary>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {funnels.map(funnel => (
+              <FunnelCard
+                key={funnel.id}
+                funnel={funnel}
+                stats={funnel.stats}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </ErrorBoundary>
       )}
     </div>
   );

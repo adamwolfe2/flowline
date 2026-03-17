@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { aiLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 const SYSTEM_PROMPT = `You are a VSL funnel copywriter and conversion strategist.
 Given a business description, generate a complete lead qualification quiz funnel.
@@ -31,6 +32,11 @@ Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { success } = await checkRateLimit(aiLimiter, userId);
+  if (!success) {
+    return NextResponse.json({ error: "AI generation limit reached. Try again tomorrow." }, { status: 429 });
+  }
 
   const { prompt } = await req.json();
 

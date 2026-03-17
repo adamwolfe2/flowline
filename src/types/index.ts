@@ -1,3 +1,11 @@
+import type { Funnel as DbFunnel } from "@/db/schema";
+
+// Re-export DB model types that need no override
+export type { Lead, FunnelSession, User } from "@/db/schema";
+
+// Funnel with properly typed config (Drizzle returns jsonb as unknown)
+export type Funnel = Omit<DbFunnel, "config"> & { config: FunnelConfig };
+
 export interface FunnelConfig {
   brand: {
     name: string;
@@ -41,36 +49,6 @@ export interface QuizOption {
   points: number;
 }
 
-export interface Funnel {
-  id: string;
-  user_id: string;
-  slug: string;
-  custom_domain: string | null;
-  config: FunnelConfig;
-  published: boolean;
-  published_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Lead {
-  id: string;
-  funnel_id: string;
-  email: string;
-  answers: Record<string, string>;
-  score: number;
-  calendar_tier: 'high' | 'mid' | 'low';
-  created_at: string;
-}
-
-export interface FunnelSession {
-  id: string;
-  funnel_id: string;
-  started_at: string;
-  completed: boolean;
-  converted: boolean;
-}
-
 export interface FunnelStats {
   totalSessions: number;
   completionRate: number;
@@ -81,11 +59,3 @@ export interface FunnelStats {
 }
 
 export type Plan = 'free' | 'pro' | 'agency';
-
-export interface User {
-  id: string;
-  email: string;
-  stripe_customer_id: string | null;
-  plan: Plan;
-  created_at: string;
-}

@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getFunnelById } from "@/db/queries/funnels";
 import { insertLead } from "@/db/queries/leads";
 import { calculateScore, getCalendarTier, getCalendarUrl } from "@/lib/scoring";
+import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
 import type { FunnelConfig } from "@/types";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await checkRateLimit(submitLimiter, ip);
+    if (!success) {
+      return NextResponse.json({ error: "Too many submissions" }, { status: 429 });
+    }
+
     const { funnelId } = await params;
     const body = await req.json();
     const { email, answers, sessionId } = body as {

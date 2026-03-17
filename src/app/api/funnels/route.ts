@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getFunnelsByUser, createFunnel, getFunnelCount } from "@/db/queries/funnels";
+import { getFunnelsByUser, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { getSessionStats } from "@/db/queries/sessions";
 import { getLeadsThisWeek, getLeadsThisMonth, getTierBreakdown } from "@/db/queries/leads";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
@@ -72,7 +72,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { config, slug: rawSlug } = body;
 
-    const slug = rawSlug || generateSlug(config?.brand?.name || "my-funnel");
+    let slug = rawSlug || generateSlug(config?.brand?.name || "my-funnel");
+
+    // Check slug availability
+    const isAvailable = await checkSlugAvailable(slug);
+    if (!isAvailable) {
+      const suffixedSlug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+      const isSuffixAvailable = await checkSlugAvailable(suffixedSlug);
+      if (!isSuffixAvailable) {
+        return NextResponse.json({ error: "Slug unavailable" }, { status: 409 });
+      }
+      slug = suffixedSlug;
+    }
 
     const finalConfig = {
       ...DEFAULT_FUNNEL_CONFIG,

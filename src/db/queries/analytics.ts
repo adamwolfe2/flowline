@@ -138,6 +138,12 @@ export async function getLeadsTimeSeries(funnelId: string) {
     .orderBy(sql`date_trunc('day', ${leads.createdAt})`);
 }
 
+export async function getLeadCount(funnelId: string) {
+  const result = await db.select({ count: sql<number>`count(*)::int` })
+    .from(leads).where(eq(leads.funnelId, funnelId));
+  return Number(result[0]?.count ?? 0);
+}
+
 export async function getLeadsForTable(funnelId: string, limit = 25, offset = 0) {
   return db.select().from(leads)
     .where(eq(leads.funnelId, funnelId))
@@ -146,8 +152,10 @@ export async function getLeadsForTable(funnelId: string, limit = 25, offset = 0)
     .offset(offset);
 }
 
-export async function getFullAnalytics(funnelId: string) {
-  const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads] = await Promise.all([
+export async function getFullAnalytics(funnelId: string, leadsPage = 0) {
+  const leadsLimit = 25;
+  const leadsOffset = leadsPage * leadsLimit;
+  const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount] = await Promise.all([
     getFunnelOverview(funnelId),
     getDropoffWaterfall(funnelId),
     getAnswerDistribution(funnelId),
@@ -156,7 +164,8 @@ export async function getFullAnalytics(funnelId: string) {
     getUTMBreakdown(funnelId),
     getTierDistribution(funnelId),
     getLeadsTimeSeries(funnelId),
-    getLeadsForTable(funnelId),
+    getLeadsForTable(funnelId, leadsLimit, leadsOffset),
+    getLeadCount(funnelId),
   ]);
-  return { stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads };
+  return { stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount };
 }

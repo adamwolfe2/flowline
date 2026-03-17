@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight, ArrowLeft, Loader2, Sparkles, Palette, Calendar, Globe, Check, PartyPopper } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -93,6 +94,7 @@ export default function OnboardingPage() {
       await fetch(`/api/funnels/${funnel.id}/publish`, { method: "POST" });
       setCreatedFunnelId(funnel.id);
       setStep(5);
+      toast.success("Your funnel is live!");
     } catch {
       // Handle error
     }

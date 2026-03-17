@@ -15,7 +15,10 @@ import {
   Smartphone,
   Monitor,
   Tablet,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { WaterfallChart } from "@/components/analytics/WaterfallChart";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -50,6 +53,7 @@ interface AnalyticsData {
   utmSources: Array<{ utmSource: string | null; count: number }>;
   tiers: Array<{ tier: string | null; count: number }>;
   timeSeries: Array<{ date: string; count: number }>;
+  totalLeadCount: number;
   recentLeads: Array<{
     id: string;
     email: string;
@@ -135,11 +139,12 @@ export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [leadsPage, setLeadsPage] = useState(0);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (page = 0) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/analytics/${funnelId}`);
+      const res = await fetch(`/api/analytics/${funnelId}?leadsPage=${page}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Failed to load analytics");
@@ -153,8 +158,8 @@ export default function AnalyticsDashboard() {
   }, [funnelId]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(leadsPage);
+  }, [fetchData, leadsPage]);
 
   /* ---------- Loading ---------- */
   if (loading) {
@@ -193,7 +198,9 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, funnel } = data;
+  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel } = data;
+  const leadsPerPage = 25;
+  const totalLeadPages = Math.max(1, Math.ceil(totalLeadCount / leadsPerPage));
 
   /* ---------- Device helpers ---------- */
   const totalDevices = devices.reduce((s, d) => s + d.count, 0) || 1;
@@ -256,10 +263,12 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* ---- Waterfall Chart ---- */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
-          <WaterfallChart steps={dropoff} />
-        </div>
+        <ErrorBoundary>
+          <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
+            <WaterfallChart steps={dropoff} />
+          </div>
+        </ErrorBoundary>
 
         {/* ---- Answer Distribution ---- */}
         {answerKeys.length > 0 && (
@@ -386,6 +395,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* ---- Leads Time Series ---- */}
+        <ErrorBoundary>
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads (Last 30 Days)</h3>
           {timeSeries.length === 0 ? (
@@ -438,6 +448,7 @@ export default function AnalyticsDashboard() {
             </div>
           )}
         </div>
+        </ErrorBoundary>
 
         {/* ---- Leads Table ---- */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
@@ -454,41 +465,71 @@ export default function AnalyticsDashboard() {
             )}
           </div>
 
-          {recentLeads.length === 0 ? (
+          {recentLeads.length === 0 && totalLeadCount === 0 ? (
             <p className="text-sm text-gray-400 text-center py-12">No leads captured yet</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-gray-400 border-b border-gray-100">
-                    <th className="text-left py-2 font-medium">Email</th>
-                    <th className="text-center py-2 font-medium">Score</th>
-                    <th className="text-center py-2 font-medium">Tier</th>
-                    <th className="text-center py-2 font-medium">Device</th>
-                    <th className="text-left py-2 font-medium">Source</th>
-                    <th className="text-right py-2 font-medium">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentLeads.map((lead) => (
-                    <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                      <td className="py-2.5 text-gray-900 font-medium">{lead.email}</td>
-                      <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
-                      <td className="py-2.5 text-center">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}
-                        >
-                          {lead.calendarTier}
-                        </span>
-                      </td>
-                      <td className="py-2.5 text-center text-gray-500 capitalize">{lead.deviceType ?? "--"}</td>
-                      <td className="py-2.5 text-gray-500">{lead.utmSource ?? "--"}</td>
-                      <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left py-2 font-medium">Email</th>
+                      <th className="text-center py-2 font-medium">Score</th>
+                      <th className="text-center py-2 font-medium">Tier</th>
+                      <th className="text-center py-2 font-medium">Device</th>
+                      <th className="text-left py-2 font-medium">Source</th>
+                      <th className="text-right py-2 font-medium">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {recentLeads.map((lead) => (
+                      <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                        <td className="py-2.5 text-gray-900 font-medium">{lead.email}</td>
+                        <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
+                        <td className="py-2.5 text-center">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}
+                          >
+                            {lead.calendarTier}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-center text-gray-500 capitalize">{lead.deviceType ?? "--"}</td>
+                        <td className="py-2.5 text-gray-500">{lead.utmSource ?? "--"}</td>
+                        <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-400">
+                  Showing {leadsPage * leadsPerPage + 1}–{Math.min((leadsPage + 1) * leadsPerPage, totalLeadCount)} of {totalLeadCount}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setLeadsPage((p) => Math.max(0, p - 1))}
+                    disabled={leadsPage === 0}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-3 h-3" />
+                    Prev
+                  </button>
+                  <span className="text-xs text-gray-500">
+                    Page {leadsPage + 1} of {totalLeadPages}
+                  </span>
+                  <button
+                    onClick={() => setLeadsPage((p) => Math.min(totalLeadPages - 1, p + 1))}
+                    disabled={leadsPage >= totalLeadPages - 1}
+                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

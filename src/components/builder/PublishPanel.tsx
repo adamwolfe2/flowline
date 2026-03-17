@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Globe, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface PublishPanelProps {
   funnel: Funnel;
@@ -26,12 +27,22 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
     const updated = await res.json();
     onUpdate(updated);
     setPublishing(false);
+    if (res.ok) {
+      toast.success("Funnel published!");
+    } else {
+      toast.error("Failed to publish funnel");
+    }
   }
 
   async function handleUnpublish() {
     const res = await fetch(`/api/funnels/${funnel.id}/unpublish`, { method: "POST" });
     const updated = await res.json();
     onUpdate(updated);
+    if (res.ok) {
+      toast.success("Funnel unpublished");
+    } else {
+      toast.error("Failed to unpublish funnel");
+    }
   }
 
   function copyUrl() {

@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { events, funnelSessions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { eventLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await checkRateLimit(eventLimiter, ip);
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await req.json();
     const {
       sessionId, funnelId, eventType, stepIndex, stepKey,

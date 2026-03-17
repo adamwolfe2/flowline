@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Monitor, Smartphone, Eye } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function BuilderPage() {
   const params = useParams();
@@ -33,13 +35,18 @@ export default function BuilderPage() {
   const saveConfig = useCallback(async (newConfig: FunnelConfig) => {
     setConfig(newConfig);
     setSaving(true);
-    await fetch(`/api/funnels/${funnelId}`, {
+    const res = await fetch(`/api/funnels/${funnelId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ config: newConfig }),
     });
     setSaving(false);
     setPreviewKey(k => k + 1);
+    if (res.ok) {
+      toast.success("Changes saved");
+    } else {
+      toast.error("Failed to save changes");
+    }
   }, [funnelId]);
 
   if (!funnel || !config) {
@@ -121,21 +128,23 @@ export default function BuilderPage() {
 
         {/* Preview pane */}
         <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-hidden">
-          <div
-            className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
-            style={{
-              width: previewMode === "mobile" ? "390px" : "100%",
-              maxWidth: previewMode === "desktop" ? "800px" : "390px",
-              height: "100%",
-            }}
-          >
-            <iframe
-              key={previewKey}
-              src={`/f/preview/${funnelId}`}
-              className="w-full h-full border-0"
-              title="Funnel preview"
-            />
-          </div>
+          <ErrorBoundary>
+            <div
+              className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
+              style={{
+                width: previewMode === "mobile" ? "390px" : "100%",
+                maxWidth: previewMode === "desktop" ? "800px" : "390px",
+                height: "100%",
+              }}
+            >
+              <iframe
+                key={previewKey}
+                src={`/f/preview/${funnelId}`}
+                className="w-full h-full border-0"
+                title="Funnel preview"
+              />
+            </div>
+          </ErrorBoundary>
         </div>
       </div>
     </div>
