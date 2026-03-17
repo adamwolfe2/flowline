@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
               <Zap className="w-4 h-4 text-white" />
             </div>
-            Flowline
+            MyVSL
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/onboarding">

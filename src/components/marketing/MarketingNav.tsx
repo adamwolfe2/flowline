@@ -32,7 +32,7 @@ export function MarketingNav() {
             className="text-lg font-semibold text-[#171717]"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Qualifi
+            MyVSL
           </span>
         </Link>
 

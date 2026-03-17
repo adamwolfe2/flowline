@@ -52,7 +52,7 @@ export function MarketingFooter() {
                 className="text-lg font-semibold text-[#171717]"
                 style={{ fontFamily: "var(--font-outfit)" }}
               >
-                Qualifi
+                MyVSL
               </span>
             </Link>
             <p className="text-sm text-[#737373] leading-relaxed max-w-xs">
@@ -84,7 +84,7 @@ export function MarketingFooter() {
 
         <div className="border-t border-[#EBEBEB] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#A3A3A3]">
-            &copy; 2026 Qualifi, Inc.
+            &copy; 2026 MyVSL, Inc.
           </p>
         </div>
       </div>

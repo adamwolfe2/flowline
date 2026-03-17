@@ -104,7 +104,7 @@ export default function SettingsPage() {
               "Custom domains",
               "Advanced analytics & scoring",
               "Priority support",
-              "Remove Qualifi branding",
+              "Remove MyVSL branding",
             ].map((feature) => (
               <li
                 key={feature}

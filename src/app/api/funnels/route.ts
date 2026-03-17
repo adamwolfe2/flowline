@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     // Ensure user exists in DB
     const existingUser = await db.select().from(users).where(eq(users.id, userId));
     if (existingUser.length === 0) {
-      await db.insert(users).values({ id: userId, email: "unknown@flowline.app" }).onConflictDoNothing();
+      await db.insert(users).values({ id: userId, email: "unknown@getmyvsl.com" }).onConflictDoNothing();
     }
 
     // Free plan check

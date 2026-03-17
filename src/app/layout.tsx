@@ -7,19 +7,19 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Qualifi — AI Funnel Builder That Books Calls",
+  title: "MyVSL — AI Funnel Builder That Books Calls",
   description: "Build AI-powered quiz-to-calendar booking funnels in minutes. No code required.",
   openGraph: {
-    title: "Qualifi — AI Funnel Builder That Books Calls",
+    title: "MyVSL — AI Funnel Builder That Books Calls",
     description: "Three questions. Smart scoring. Automatic calendar routing.",
-    images: [{ url: "/api/og?title=Qualifi&description=AI-powered+funnel+builder+that+books+calls", width: 1200, height: 630 }],
+    images: [{ url: "/api/og?title=MyVSL&description=AI-powered+funnel+builder+that+books+calls", width: 1200, height: 630 }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Qualifi — AI Funnel Builder That Books Calls",
+    title: "MyVSL — AI Funnel Builder That Books Calls",
     description: "Build quiz-to-calendar booking funnels in minutes.",
-    images: ["/api/og?title=Qualifi&description=AI-powered+funnel+builder+that+books+calls"],
+    images: ["/api/og?title=MyVSL&description=AI-powered+funnel+builder+that+books+calls"],
   },
 };
 

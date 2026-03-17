@@ -158,7 +158,7 @@ export function WhySection() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<BarChart3 className="w-3.5 h-3.5" />}>
-            Why Qualifi?
+            Why MyVSL?
           </SectionLabel>
           <h2
             className="text-[32px] sm:text-[40px] font-semibold text-[#333333] leading-tight"

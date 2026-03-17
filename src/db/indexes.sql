@@ -1,4 +1,4 @@
--- Performance indexes for Qualifi
+-- Performance indexes for MyVSL
 -- Run in Neon SQL console after db:push
 
 -- Funnels

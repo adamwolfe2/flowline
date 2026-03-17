@@ -398,7 +398,7 @@ export default function OnboardingPage() {
               <Label className="text-xs text-gray-500 mb-1.5">Funnel URL</Label>
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                 <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-400 border-r border-gray-200 whitespace-nowrap">
-                  flowline.app/f/
+                  getmyvsl.com/f/
                 </span>
                 <input
                   value={slug}
@@ -462,12 +462,12 @@ export default function OnboardingPage() {
                 <p className="text-xs text-gray-400 mb-2">Your funnel URL</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 text-sm font-mono text-gray-900 bg-white border border-gray-200 rounded-lg px-3 py-2 text-left">
-                    flowline.app/f/{slug}
+                    getmyvsl.com/f/{slug}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigator.clipboard.writeText(`https://flowline.app/f/${slug}`)}
+                    onClick={() => navigator.clipboard.writeText(`https://getmyvsl.com/f/${slug}`)}
                   >
                     Copy
                   </Button>

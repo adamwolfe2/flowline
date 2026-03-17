@@ -5,7 +5,7 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const title = searchParams.get("title") || "Qualifi";
+  const title = searchParams.get("title") || "MyVSL";
   const description = searchParams.get("description") || "AI-powered funnel builder";
 
   return new ImageResponse(
@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
           </div>
-          <span style={{ fontSize: 18, fontWeight: 600, color: "#333333" }}>Qualifi</span>
+          <span style={{ fontSize: 18, fontWeight: 600, color: "#333333" }}>MyVSL</span>
         </div>
       </div>
     ),

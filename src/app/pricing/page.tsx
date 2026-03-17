@@ -6,7 +6,7 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata = {
-  title: "Pricing - Qualifi",
+  title: "Pricing - MyVSL",
   description:
     "Simple, transparent pricing. Start free, upgrade when you need more.",
 };

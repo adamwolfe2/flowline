@@ -110,7 +110,7 @@ export function HeroSection() {
           className="text-base sm:text-lg md:text-xl text-white/85 max-w-xl mt-5 mb-5"
           style={{ textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}
         >
-          Describe what you need and let Qualifi handle the rest.
+          Describe what you need and let MyVSL handle the rest.
         </motion.p>
 
         <motion.div

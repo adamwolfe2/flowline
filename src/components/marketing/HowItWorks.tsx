@@ -8,7 +8,7 @@ const steps = [
     num: "01",
     title: "Describe your business",
     description:
-      "Tell Qualifi what you do in one prompt. AI writes your quiz, scoring, and calendar routing.",
+      "Tell MyVSL what you do in one prompt. AI writes your quiz, scoring, and calendar routing.",
   },
   {
     num: "02",
@@ -40,7 +40,7 @@ function BuilderMockup() {
         <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
         <div className="flex-1 mx-8">
           <div className="bg-white rounded border border-[#EBEBEB] px-3 py-1 text-xs text-[#A3A3A3] text-center max-w-[240px] mx-auto">
-            app.qualifi.com/builder
+            app.getmyvsl.com/builder
           </div>
         </div>
       </div>

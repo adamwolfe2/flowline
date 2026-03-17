@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       score: 7,
       calendar_tier: "high",
       timestamp: new Date().toISOString(),
-      source: "Qualifi Test",
+      source: "MyVSL Test",
       funnel_slug: "test-funnel",
       _test: true,
     };

@@ -68,7 +68,7 @@ export function TestimonialsSection() {
             className="text-[32px] sm:text-[40px] font-semibold text-[#333333] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Join 500+ businesses booking calls with Qualifi
+            Join 500+ businesses booking calls with MyVSL
           </h2>
         </div>
 

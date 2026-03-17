@@ -205,12 +205,12 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
         {/* Powered by badge — shown for free plan, hidden for Pro+ */}
         <div className="mt-8 text-center">
           <a
-            href="https://qualifi.co"
+            href="https://getmyvsl.com"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-gray-500 transition-colors"
           >
-            Powered by Qualifi
+            Powered by MyVSL
           </a>
         </div>
       </div>
