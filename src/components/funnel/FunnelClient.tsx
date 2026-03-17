@@ -81,6 +81,12 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: submittedEmail, answers, sessionId }),
         });
+
+        if (!res.ok) {
+          // Don't advance to success step
+          return;
+        }
+
         const data = await res.json();
         if (data.calendarUrl) {
           setCalendarUrl(data.calendarUrl);
@@ -88,11 +94,11 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
         if (data.leadId) {
           trackLeadCreated(data.leadId, data.score, data.calendarTier);
         }
-      } catch {
-        // Still show success step even if submit fails
-      }
 
-      setStep(successStep);
+        setStep(successStep);
+      } catch {
+        // Don't advance to success step
+      }
     },
     [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated]
   );

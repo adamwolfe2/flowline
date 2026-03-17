@@ -6,6 +6,7 @@ import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { toast } from "sonner";
 
 interface FunnelWithStats extends Funnel {
   stats: FunnelStats;
@@ -17,10 +18,17 @@ export default function DashboardPage() {
 
   const loadFunnels = useCallback(() => {
     fetch("/api/funnels")
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load");
+        return r.json();
+      })
       .then(data => {
         setFunnels(data);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        toast.error("Failed to load funnels. Please refresh.");
       });
   }, []);
 

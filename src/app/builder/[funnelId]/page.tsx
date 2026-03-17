@@ -152,8 +152,8 @@ export default function BuilderPage() {
             <div
               className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
               style={{
-                width: previewMode === "mobile" ? "390px" : "100%",
-                maxWidth: previewMode === "desktop" ? "800px" : "390px",
+                width: previewMode === "mobile" ? "min(375px, 100%)" : "100%",
+                maxWidth: previewMode === "desktop" ? "800px" : "375px",
                 height: "100%",
               }}
             >

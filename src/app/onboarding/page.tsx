@@ -133,8 +133,8 @@ function OnboardingContent() {
       const funnel = await createRes.json();
 
       if (createRes.status === 403) {
-        toast.error("Free plan is limited to 1 funnel. Upgrade to Pro for unlimited funnels.");
-        router.push("/pricing");
+        toast.error("You've reached the 1 funnel limit on the Free plan. Upgrade to Pro for unlimited funnels.");
+        setTimeout(() => router.push("/pricing"), 2000);
         setPublishing(false);
         return;
       }
@@ -213,7 +213,7 @@ function OnboardingContent() {
               onChange={e => setPrompt(e.target.value)}
               placeholder="We help SaaS founders scale from $10k to $100k MRR through outbound sales systems. Our ideal clients are B2B SaaS companies doing at least $10k/mo..."
               rows={4}
-              className="text-base sm:text-sm mb-4 resize-none"
+              className="text-base mb-4 resize-none"
             />
             <Button
               onClick={handleGenerate}
@@ -309,7 +309,7 @@ function OnboardingContent() {
                     ...prev,
                     brand: { ...prev.brand, name: e.target.value },
                   }))}
-                  className="text-base sm:text-sm"
+                  className="text-base"
                   maxLength={60}
                 />
               </div>
@@ -436,7 +436,7 @@ function OnboardingContent() {
                     quiz: { ...prev.quiz, calendars: { ...prev.quiz.calendars, high: e.target.value } },
                   }))}
                   placeholder="https://cal.com/you/discovery-call"
-                  className="text-base sm:text-sm"
+                  className="text-base"
                 />
               </div>
               <div>
@@ -451,7 +451,7 @@ function OnboardingContent() {
                     quiz: { ...prev.quiz, calendars: { ...prev.quiz.calendars, mid: e.target.value } },
                   }))}
                   placeholder="https://cal.com/you/intro-call"
-                  className="text-base sm:text-sm"
+                  className="text-base"
                 />
               </div>
               <div>
@@ -466,7 +466,7 @@ function OnboardingContent() {
                     quiz: { ...prev.quiz, calendars: { ...prev.quiz.calendars, low: e.target.value } },
                   }))}
                   placeholder="https://cal.com/you/learn-more"
-                  className="text-base sm:text-sm"
+                  className="text-base"
                 />
               </div>
             </div>
@@ -500,7 +500,7 @@ function OnboardingContent() {
                 <input
                   value={slug}
                   onChange={e => checkSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  className="flex-1 px-3 py-2.5 text-base sm:text-sm outline-none"
+                  className="flex-1 px-3 py-2.5 text-base outline-none"
                   placeholder="my-funnel"
                   maxLength={40}
                 />

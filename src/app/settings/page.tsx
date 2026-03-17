@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import {
   User,
@@ -14,6 +14,7 @@ import {
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
+  const { openUserProfile } = useClerk();
   const [funnelCount, setFunnelCount] = useState(0);
 
   useEffect(() => {
@@ -22,7 +23,9 @@ export default function SettingsPage() {
       .then((data) => {
         setFunnelCount(Array.isArray(data) ? data.length : 0);
       })
-      .catch(() => {});
+      .catch(() => {
+        setFunnelCount(0);
+      });
   }, []);
 
   if (!isLoaded) {
@@ -65,13 +68,7 @@ export default function SettingsPage() {
           </div>
 
           <button
-            onClick={() => {
-              // Opens Clerk's user profile modal
-              const el = document.querySelector(
-                "[data-clerk-component='UserButton'] button"
-              ) as HTMLButtonElement | null;
-              el?.click();
-            }}
+            onClick={() => openUserProfile()}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2D6A4F] hover:text-[#245840] transition-colors"
           >
             Manage Account
