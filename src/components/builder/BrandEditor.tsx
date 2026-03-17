@@ -30,6 +30,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
   useEffect(() => {
     const fonts = new Set([config.brand.fontHeading, config.brand.fontBody]);
     fonts.forEach((font) => {
+      if (!FONT_OPTIONS.includes(font)) return;
       const id = `gfont-${font.replace(/\s+/g, "-")}`;
       if (!document.getElementById(id)) {
         const link = document.createElement("link");
@@ -148,6 +149,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
           <select
             value={config.brand.fontHeading}
             onChange={e => {
+              if (!FONT_OPTIONS.includes(e.target.value)) return;
               const newConfig = JSON.parse(JSON.stringify(config));
               newConfig.brand.fontHeading = e.target.value;
               onSave(newConfig);
@@ -162,6 +164,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
           <select
             value={config.brand.fontBody}
             onChange={e => {
+              if (!FONT_OPTIONS.includes(e.target.value)) return;
               const newConfig = JSON.parse(JSON.stringify(config));
               newConfig.brand.fontBody = e.target.value;
               onSave(newConfig);

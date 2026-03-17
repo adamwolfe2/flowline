@@ -13,7 +13,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const leadsPage = Math.max(0, parseInt(req.nextUrl.searchParams.get("leadsPage") ?? "0", 10) || 0);
-    const timeRange = req.nextUrl.searchParams.get("timeRange") ?? "all";
+    const VALID_TIME_RANGES = ["7d", "30d", "90d", "all"];
+    const rawTimeRange = req.nextUrl.searchParams.get("timeRange") ?? "all";
+    const timeRange = VALID_TIME_RANGES.includes(rawTimeRange) ? rawTimeRange : "all";
     const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange);
     return NextResponse.json({ funnel, ...analytics }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },

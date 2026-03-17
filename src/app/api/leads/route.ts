@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
+import { logger } from "@/lib/logger";
 import { leads, funnels } from "@/db/schema";
 import { eq, desc, sql, and, ilike } from "drizzle-orm";
 
@@ -65,7 +66,7 @@ export async function GET(req: NextRequest) {
       funnels: userFunnels,
     });
   } catch (error) {
-    console.error("GET /api/leads error:", error);
+    logger.error("GET /api/leads error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

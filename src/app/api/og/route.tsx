@@ -1,9 +1,16 @@
 import { ImageResponse } from "next/og";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { ogLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  const { limited } = await checkRateLimit(ogLimiter, ip, 30);
+  if (limited) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { searchParams } = req.nextUrl;
   const title = searchParams.get("title") || "MyVSL";
   const description =

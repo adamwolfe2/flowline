@@ -20,8 +20,8 @@ const VALID_EVENT_TYPES = [
 export async function POST(req: Request) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
-    const { success } = await checkRateLimit(eventLimiter, ip);
-    if (!success) {
+    const { limited } = await checkRateLimit(eventLimiter, ip);
+    if (limited) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 

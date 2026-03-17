@@ -6,4 +6,6 @@ Disallow: /analytics
 Disallow: /settings
 Disallow: /admin
 Disallow: /api
+Disallow: /leads
+Disallow: /onboarding
 Sitemap: https://getmyvsl.com/sitemap.xml

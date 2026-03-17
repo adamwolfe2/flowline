@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { db } from "@/db";
+import { logger } from "@/lib/logger";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
       }
     }
   } catch (error) {
-    console.error("Stripe webhook error:", error);
+    logger.error("Stripe webhook error", { error: error instanceof Error ? error.message : String(error) });
   }
 
   return NextResponse.json({ received: true });

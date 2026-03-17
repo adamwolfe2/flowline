@@ -25,6 +25,19 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
     return calLink.replace(/[^a-zA-Z0-9]/g, "-") || "default";
   }, [calLink]);
 
+  const safeCalendarUrl = useMemo(() => {
+    if (!calendarUrl) return "";
+    try {
+      const parsed = new URL(calendarUrl);
+      if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+        return calendarUrl;
+      }
+      return "";
+    } catch {
+      return "";
+    }
+  }, [calendarUrl]);
+
   // Also support the legacy calEmbed config if present
   const legacyCalEmbed = config.quiz.calEmbed;
 
@@ -150,9 +163,9 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
             id={`cal-embed-${effectiveNamespace}`}
             style={{ width: "100%", height: "700px", overflow: "auto" }}
           />
-        ) : calendarUrl ? (
+        ) : safeCalendarUrl ? (
           <iframe
-            src={calendarUrl}
+            src={safeCalendarUrl}
             width="100%"
             height="700"
             frameBorder="0"
@@ -160,11 +173,11 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
             style={{ minHeight: "600px" }}
             title="Book your call"
           />
-        ) : calEmbedFailed && calendarUrl ? (
+        ) : calEmbedFailed && safeCalendarUrl ? (
           <div className="text-center py-12">
             <p className="text-sm text-gray-500 mb-4">Calendar is loading externally.</p>
             <a
-              href={calendarUrl}
+              href={safeCalendarUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-base shadow-lg transition-all hover:opacity-90"

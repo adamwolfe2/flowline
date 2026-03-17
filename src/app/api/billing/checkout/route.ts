@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { db } from "@/db";
+import { logger } from "@/lib/logger";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -31,6 +32,9 @@ export async function POST(req: Request) {
     }
 
     const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) {
+      return NextResponse.json({ error: "Account not ready. Please refresh and try again." }, { status: 400 });
+    }
     let customerId = user?.stripeCustomerId;
 
     if (!customerId) {
@@ -56,7 +60,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("Checkout error:", error);
+    logger.error("Checkout error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { insertSession, completeSession, convertSession } from "@/db/queries/sessions";
+import { sessionLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const { limited } = await checkRateLimit(sessionLimiter, ip, 60);
+    if (limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { funnelId } = await params;
     const body = await req.json();
     const { event, sessionId } = body;

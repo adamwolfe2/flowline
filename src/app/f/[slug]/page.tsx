@@ -48,7 +48,14 @@ export default async function FunnelPage({ params, searchParams }: Props) {
   const utmMedium = typeof sp.utm_medium === "string" ? sp.utm_medium : undefined;
   const utmCampaign = typeof sp.utm_campaign === "string" ? sp.utm_campaign : undefined;
 
-  const session = await insertSession(funnel.id, { utmSource, utmMedium, utmCampaign });
+  let sessionId: string;
+  try {
+    const session = await insertSession(funnel.id, { utmSource, utmMedium, utmCampaign });
+    sessionId = session.id;
+  } catch (error) {
+    console.error("Failed to create session:", error);
+    sessionId = crypto.randomUUID();
+  }
 
-  return <FunnelClient config={config} funnelId={funnel.id} sessionId={session.id} />;
+  return <FunnelClient config={config} funnelId={funnel.id} sessionId={sessionId} />;
 }

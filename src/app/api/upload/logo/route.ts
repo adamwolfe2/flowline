@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { put } from "@vercel/blob";
+import { uploadLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
-    // Allow both authenticated and anonymous uploads (for onboarding)
     const { userId } = await auth();
-    const uploaderId = userId || `anon-${Date.now()}`;
+    if (!userId) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const { limited } = await checkRateLimit(uploadLimiter, userId, 10);
+    if (limited) {
+      return NextResponse.json({ error: "Upload limit reached. Try again later." }, { status: 429 });
+    }
+
+    const uploaderId = userId;
 
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       return NextResponse.json({ error: "File upload is not configured. Contact support." }, { status: 503 });

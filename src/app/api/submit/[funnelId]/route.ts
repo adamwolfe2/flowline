@@ -6,6 +6,7 @@ import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { sendLeadNotification } from "@/lib/resend";
 import { fireWebhook } from "@/lib/webhook";
 import { db } from "@/db";
+import { logger } from "@/lib/logger";
 import { leads, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
@@ -14,13 +15,13 @@ function isValidUUID(str: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
-    const { success } = await checkRateLimit(submitLimiter, ip);
-    if (!success) {
+    const rateLimitResult = await checkRateLimit(submitLimiter, ip);
+    if (rateLimitResult.limited) {
       return NextResponse.json({ error: "Too many submissions" }, { status: 429 });
     }
 
@@ -56,11 +57,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     const calendarTier = getCalendarTier(config, answers);
     const calendarUrl = getCalendarUrl(config, answers);
 
-    // Duplicate email prevention — same email + same funnel = skip insert
+    // Duplicate email check — same email + same funnel = update existing answers
     const existing = await db.select({ id: leads.id }).from(leads)
       .where(and(eq(leads.funnelId, funnelId), eq(leads.email, email)));
     if (existing.length > 0) {
-      return NextResponse.json({ success: true, calendarUrl, deduplicated: true });
+      await db.update(leads)
+        .set({ answers, score, calendarTier })
+        .where(eq(leads.id, existing[0].id));
+
+      return NextResponse.json({
+        success: true,
+        leadId: existing[0].id,
+        calendarUrl,
+        score,
+        calendarTier,
+        updated: true,
+      });
     }
 
     const lead = await insertLead({
@@ -104,7 +116,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       calendarUrl,
     });
   } catch (error) {
-    console.error("POST /api/submit error:", error);
+    logger.error("POST /api/submit error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
 
   // Rate limit: by userId if authenticated, by IP if not
   const identifier = userId || req.headers.get("x-forwarded-for") || "anonymous";
-  const { success } = await checkRateLimit(aiLimiter, identifier);
-  if (!success) {
+  const { limited } = await checkRateLimit(aiLimiter, identifier);
+  if (limited) {
     return NextResponse.json({ error: "AI generation limit reached. Try again later." }, { status: 429 });
   }
 

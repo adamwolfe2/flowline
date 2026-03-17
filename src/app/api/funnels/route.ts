@@ -5,6 +5,7 @@ import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
 import { generateSlug } from "@/lib/utils";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { db } from "@/db";
+import { logger } from "@/lib/logger";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -19,7 +20,7 @@ export async function GET() {
       headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" }
     });
   } catch (error) {
-    console.error("GET /api/funnels error:", error);
+    logger.error("GET /api/funnels error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -52,6 +53,32 @@ export async function POST(req: NextRequest) {
     }
     if (!config?.quiz || typeof config.quiz !== "object") {
       return NextResponse.json({ error: "Config must include a 'quiz' object" }, { status: 400 });
+    }
+
+    // Field length validation
+    if (config.brand.name && config.brand.name.length > 100) {
+      return NextResponse.json({ error: "Business name too long (max 100 chars)" }, { status: 400 });
+    }
+    if (config.quiz.headline && config.quiz.headline.length > 200) {
+      return NextResponse.json({ error: "Headline too long (max 200 chars)" }, { status: 400 });
+    }
+    if (config.quiz.subheadline && config.quiz.subheadline.length > 300) {
+      return NextResponse.json({ error: "Subheadline too long (max 300 chars)" }, { status: 400 });
+    }
+    if (config.quiz.questions && config.quiz.questions.length > 10) {
+      return NextResponse.json({ error: "Too many questions (max 10)" }, { status: 400 });
+    }
+
+    // Webhook URL validation
+    if (config.webhook?.url) {
+      try {
+        const webhookParsed = new URL(config.webhook.url);
+        if (webhookParsed.protocol !== "https:") {
+          return NextResponse.json({ error: "Webhook URL must use HTTPS" }, { status: 400 });
+        }
+      } catch {
+        return NextResponse.json({ error: "Invalid webhook URL" }, { status: 400 });
+      }
     }
 
     let slug = rawSlug || generateSlug(config?.brand?.name || "my-funnel");
@@ -87,7 +114,7 @@ export async function POST(req: NextRequest) {
     const funnel = await createFunnel({ userId, slug, config: finalConfig });
     return NextResponse.json(funnel, { status: 201 });
   } catch (error) {
-    console.error("POST /api/funnels error:", error);
+    logger.error("POST /api/funnels error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
