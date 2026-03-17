@@ -1,70 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-// lucide-react icons removed — using inline SVG for arrow
-
-const PROMPTS = [
-  "I sell business coaching to 6-figure entrepreneurs...",
-  "I run a marketing agency for e-commerce brands...",
-  "I offer fitness programs for busy professionals...",
-];
+import { FunnelGenerator } from "./FunnelGenerator";
 
 export function HeroSection() {
-  const router = useRouter();
-  const [displayText, setDisplayText] = useState("");
-  const [promptIndex, setPromptIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(true);
-  const [userInput, setUserInput] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-
-  const typewriter = useCallback(() => {
-    if (isFocused || userInput) return;
-    const currentPrompt = PROMPTS[promptIndex];
-    if (isTyping) {
-      if (displayText.length < currentPrompt.length) {
-        const timeout = setTimeout(
-          () => setDisplayText(currentPrompt.slice(0, displayText.length + 1)),
-          40
-        );
-        return () => clearTimeout(timeout);
-      } else {
-        const timeout = setTimeout(() => setIsTyping(false), 2500);
-        return () => clearTimeout(timeout);
-      }
-    } else {
-      if (displayText.length > 0) {
-        const timeout = setTimeout(
-          () => setDisplayText(displayText.slice(0, -1)),
-          20
-        );
-        return () => clearTimeout(timeout);
-      } else {
-        setPromptIndex((i) => (i + 1) % PROMPTS.length);
-        setIsTyping(true);
-      }
-    }
-  }, [displayText, isTyping, promptIndex, isFocused, userInput]);
-
-  useEffect(() => {
-    return typewriter();
-  }, [typewriter]);
-
-  function handleSubmit() {
-    const prompt = userInput || displayText;
-    router.push(
-      prompt.length > 5
-        ? `/onboarding?prompt=${encodeURIComponent(prompt)}`
-        : "/onboarding"
-    );
-  }
-
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{ height: "clamp(720px, 80vh, 778px)" }}
-    >
+    <section className="relative overflow-hidden pb-16">
       {/* Forest background image */}
       <div
         className="absolute inset-0"
@@ -79,12 +20,12 @@ export function HeroSection() {
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0.85) 85%, #FFFFFF 100%)",
+          background: "linear-gradient(180deg, transparent 0%, transparent 40%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0.7) 80%, #FFFFFF 100%)",
         }}
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 pt-28 md:pt-32 max-w-4xl mx-auto">
+      <div className="relative z-10 flex flex-col items-center text-center px-6 pt-28 md:pt-32 max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -130,91 +71,14 @@ export function HeroSection() {
           </span>
         </motion.div>
 
-        {/* Floating prompt box + wide browser mockup */}
+        {/* AI Funnel Generator */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.35 }}
-          className="relative w-full max-w-2xl"
+          className="w-full"
         >
-          {/* WIDE browser mockup — spans far beyond the prompt box */}
-          <div
-            className="absolute top-10 hidden md:block"
-            style={{
-              left: "calc(-50vw + 50%)",
-              right: "calc(-50vw + 50%)",
-              bottom: "-60px",
-            }}
-          >
-            <div className="max-w-6xl mx-auto">
-              <div className="bg-white/25 backdrop-blur-[2px] rounded-2xl border border-white/20 shadow-lg overflow-hidden">
-                <div className="h-9 flex items-center px-4 gap-2 border-b border-white/10">
-                  {/* Browser chrome left */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-white/40 text-xs">‹</span>
-                    <span className="text-white/30 text-xs">›</span>
-                    <span className="text-white/30 text-xs">⟨/⟩</span>
-                  </div>
-                  <div className="flex-1 mx-8">
-                    <div className="bg-white/20 rounded-md px-3 py-1 text-[11px] text-white/50 text-center max-w-xs mx-auto flex items-center justify-center gap-1.5">
-                      https://yoursite.com
-                    </div>
-                  </div>
-                  {/* Browser chrome right */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-[11px] text-white/50 border border-white/20 rounded-md px-3 py-1 bg-white/5">
-                      Publish
-                    </span>
-                    <span className="text-white/30 text-xs">▫</span>
-                    <span className="text-white/30 text-xs">⚙</span>
-                  </div>
-                </div>
-                {/* Empty content area — the prompt card sits on top */}
-                <div className="h-[180px]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Main prompt card — centered, on top of browser mockup */}
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-10">
-            <div className="relative">
-              <textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => {
-                  if (!userInput) setIsFocused(false);
-                }}
-                rows={3}
-                className="w-full px-6 py-5 text-base text-[#111827] bg-transparent resize-none outline-none placeholder-transparent"
-                style={{ fontSize: "16px" }}
-              />
-              {!userInput && !isFocused && (
-                <div className="absolute top-0 left-0 px-6 py-5 text-base text-[#9CA3AF] pointer-events-none">
-                  {displayText}
-                  <span className="animate-pulse">|</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-end px-5 pb-4">
-              <button
-                onClick={handleSubmit}
-                className="flex items-center gap-2 text-sm font-semibold px-6 py-2.5 rounded-lg transition-all hover:brightness-95"
-                style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
-              >
-                Build it
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Sub-prompt text */}
-          <p className="text-sm text-white/60 mt-4 text-center" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.06)" }}>
-            Free to start. Live in under 2 minutes.
-          </p>
+          <FunnelGenerator />
         </motion.div>
       </div>
     </section>
