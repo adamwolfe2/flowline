@@ -49,7 +49,7 @@ export function BottomCTA() {
   }, [typewriter]);
 
   return (
-    <section className="bg-[#212124] rounded-t-[40px] py-20 md:py-28 px-6">
+    <section className="bg-white/60 backdrop-blur-xl border border-[#EBEBEB] rounded-[40px] mx-4 mb-8 py-20 md:py-28 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -58,7 +58,7 @@ export function BottomCTA() {
           transition={{ duration: 0.6 }}
         >
           <h2
-            className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-white leading-tight mb-10"
+            className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-[#333333] leading-tight mb-10"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
             What will you build?
@@ -73,32 +73,32 @@ export function BottomCTA() {
           className="max-w-2xl mx-auto"
         >
           {/* Dark prompt box */}
-          <div className="bg-[#252528] border border-white/[0.08] rounded-2xl overflow-hidden">
+          <div className="bg-white border border-[#EBEBEB] rounded-2xl overflow-hidden shadow-sm">
             {/* Browser chrome */}
-            <div className="h-9 flex items-center px-4 gap-1.5 border-b border-white/[0.06]">
-              <div className="w-2.5 h-2.5 rounded-full bg-white/15" />
-              <div className="w-2.5 h-2.5 rounded-full bg-white/15" />
-              <div className="w-2.5 h-2.5 rounded-full bg-white/15" />
+            <div className="h-9 flex items-center px-4 gap-1.5 border-b border-[#EBEBEB]">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
             </div>
 
             {/* Prompt area */}
             <div className="px-6 py-5 min-h-[100px] text-left">
-              <p className="text-base text-white/50">
+              <p className="text-base text-[#A3A3A3]">
                 {displayText}
-                <span className="animate-pulse text-white/30">|</span>
+                <span className="animate-pulse text-[#D4D4D4]">|</span>
               </p>
             </div>
 
             {/* Bottom bar */}
             <div className="flex items-center justify-between px-5 pb-4">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-white/5 flex items-center justify-center text-[10px] text-white/30">
+                <div className="w-5 h-5 rounded bg-emerald-50 flex items-center justify-center text-[10px] text-emerald-600">
                   Q
                 </div>
-                <div className="w-5 h-5 rounded bg-white/5 flex items-center justify-center text-[10px] text-white/30">
+                <div className="w-5 h-5 rounded bg-blue-50 flex items-center justify-center text-[10px] text-blue-600">
                   B
                 </div>
-                <div className="w-5 h-5 rounded bg-white/5 flex items-center justify-center text-[10px] text-white/30">
+                <div className="w-5 h-5 rounded bg-orange-50 flex items-center justify-center text-[10px] text-orange-600">
                   L
                 </div>
               </div>
