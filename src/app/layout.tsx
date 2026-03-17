@@ -6,8 +6,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Flowline — Build VSL Funnels in Minutes",
-  description: "Create AI-powered quiz-to-calendar booking funnels. No code required.",
+  title: "Qualifi — Quiz-Powered Funnels That Qualify, Score & Book Your Best Leads",
+  description: "Build quiz-to-calendar booking funnels in 60 seconds. Smart scoring, automatic routing, no code required. Start free.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

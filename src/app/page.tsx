@@ -1,23 +1,31 @@
-import { Navbar } from "@/components/landing/Navbar";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
-import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
-import { StatsBar } from "@/components/landing/StatsBar";
-import { CtaSection } from "@/components/landing/CtaSection";
-import { Footer } from "@/components/landing/Footer";
+import { Sora, DM_Sans } from "next/font/google";
+import { MarketingNav } from "@/components/marketing/MarketingNav";
+import { HeroSection } from "@/components/marketing/HeroSection";
+import { LogoBar } from "@/components/marketing/LogoBar";
+import { HowItWorks } from "@/components/marketing/HowItWorks";
+import { FeatureSplitA } from "@/components/marketing/FeatureSplitA";
+import { FeatureSplitB } from "@/components/marketing/FeatureSplitB";
+import { PricingSection } from "@/components/marketing/PricingSection";
+import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
+import { FinalCTA } from "@/components/marketing/FinalCTA";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
-export default function LandingPage() {
+const sora = Sora({ subsets: ["latin"], variable: "--font-sora" });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+
+export default function HomePage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#FAFAF8" }}>
-      <Navbar />
+    <div className={`${sora.variable} ${dmSans.variable}`}>
+      <MarketingNav />
       <HeroSection />
+      <LogoBar />
       <HowItWorks />
-      <InteractiveDemo />
-      <FeaturesGrid />
-      <StatsBar />
-      <CtaSection />
-      <Footer />
+      <FeatureSplitA />
+      <FeatureSplitB />
+      <PricingSection />
+      <TestimonialsSection />
+      <FinalCTA />
+      <MarketingFooter />
     </div>
   );
 }
