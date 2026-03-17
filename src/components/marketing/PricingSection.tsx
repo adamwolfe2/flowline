@@ -1,0 +1,200 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Check } from "lucide-react";
+
+const plans = [
+  {
+    name: "Free",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    description: "Get started with quiz funnels.",
+    features: [
+      "Up to 3 funnels",
+      "100 submissions / month",
+      "Basic analytics",
+      "Qualifi branding",
+      "Community support",
+    ],
+    cta: "Get Started",
+    href: "/sign-up",
+    popular: false,
+  },
+  {
+    name: "Pro",
+    monthlyPrice: 49,
+    annualPrice: 39,
+    description: "For growing businesses that need more.",
+    features: [
+      "Unlimited funnels",
+      "Unlimited submissions",
+      "Advanced analytics & scoring",
+      "Custom domains",
+      "Remove Qualifi branding",
+      "Calendar integrations",
+      "Priority support",
+    ],
+    cta: "Start Free Trial",
+    href: "/sign-up",
+    popular: true,
+  },
+  {
+    name: "Agency",
+    monthlyPrice: 149,
+    annualPrice: 119,
+    description: "For teams managing multiple clients.",
+    features: [
+      "Everything in Pro",
+      "Unlimited workspaces",
+      "White-label branding",
+      "Client sub-accounts",
+      "Team collaboration",
+      "API access",
+      "Dedicated account manager",
+    ],
+    cta: "Start Free Trial",
+    href: "/sign-up",
+    popular: false,
+  },
+];
+
+export function PricingSection({ standalone = false }: { standalone?: boolean }) {
+  const [annual, setAnnual] = useState(true);
+
+  return (
+    <section
+      className={standalone ? "py-20 px-6" : "py-24 px-6 bg-[#FBFBFB]"}
+    >
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2
+            className="text-3xl sm:text-4xl font-semibold text-[#333333] mb-3"
+            style={{ fontFamily: "var(--font-outfit, inherit)" }}
+          >
+            {standalone ? "Simple, transparent pricing" : "Pricing"}
+          </h2>
+          <p className="text-[#737373] max-w-md mx-auto">
+            {standalone
+              ? "Start free. Upgrade when you're ready. No hidden fees."
+              : "Start free, upgrade when you need more."}
+          </p>
+        </div>
+
+        {/* Toggle */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <span
+            className={`text-sm font-medium transition-colors ${
+              !annual ? "text-[#333333]" : "text-[#A3A3A3]"
+            }`}
+          >
+            Monthly
+          </span>
+          <button
+            onClick={() => setAnnual(!annual)}
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              annual ? "bg-[#2D6A4F]" : "bg-[#D4D4D4]"
+            }`}
+            aria-label="Toggle annual billing"
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                annual ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+          <span
+            className={`text-sm font-medium transition-colors ${
+              annual ? "text-[#333333]" : "text-[#A3A3A3]"
+            }`}
+          >
+            Annual
+          </span>
+          {annual && (
+            <span className="text-xs font-semibold text-[#2D6A4F] bg-[#2D6A4F]/10 px-2 py-0.5 rounded-full">
+              Save 20%
+            </span>
+          )}
+        </div>
+
+        {/* Cards */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {plans.map((plan) => {
+            const price = annual ? plan.annualPrice : plan.monthlyPrice;
+
+            return (
+              <div
+                key={plan.name}
+                className={`relative rounded-xl border p-6 flex flex-col ${
+                  plan.popular
+                    ? "border-[#2D6A4F] shadow-[0_0_0_1px_#2D6A4F] bg-white"
+                    : "border-[#EBEBEB] bg-white"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#2D6A4F] text-white">
+                      Most popular
+                    </span>
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#333333] mb-1">
+                    {plan.name}
+                  </h3>
+                  <p className="text-sm text-[#737373]">{plan.description}</p>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-semibold text-[#333333]">
+                      ${price}
+                    </span>
+                    {price > 0 && (
+                      <span className="text-sm text-[#A3A3A3]">/mo</span>
+                    )}
+                  </div>
+                  {price > 0 && annual && (
+                    <p className="text-xs text-[#A3A3A3] mt-1">
+                      Billed annually (${price * 12}/yr)
+                    </p>
+                  )}
+                  {price === 0 && (
+                    <p className="text-xs text-[#A3A3A3] mt-1">
+                      Free forever
+                    </p>
+                  )}
+                </div>
+
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2 text-sm text-[#737373]"
+                    >
+                      <Check className="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={plan.href}
+                  className={`w-full text-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                    plan.popular
+                      ? "bg-[#2D6A4F] text-white hover:bg-[#245840]"
+                      : "border border-[#EBEBEB] text-[#333333] hover:bg-[#FBFBFB]"
+                  }`}
+                >
+                  {plan.cta}
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
