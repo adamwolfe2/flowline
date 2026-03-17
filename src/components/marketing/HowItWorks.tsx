@@ -46,25 +46,25 @@ function BuilderMockup() {
 
       {/* Split view */}
       <div className="grid md:grid-cols-2 min-h-[340px]">
-        {/* Left: AI Chat Panel */}
-        <div className="bg-[#1A1A1F] p-6 flex flex-col gap-4">
+        {/* Left: AI Chat Panel — LIGHT theme */}
+        <div className="bg-white p-6 flex flex-col gap-4 border-r border-[#EBEBEB]">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="text-xs text-white/50 font-medium">AI Builder</span>
+            <span className="text-xs text-[#737373] font-medium">AI Builder</span>
           </div>
-          <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10">
-            <p className="text-sm text-white/80">
+          <div className="bg-[#FBFBFB] rounded-xl px-4 py-3 border border-[#EBEBEB]">
+            <p className="text-sm text-[#333333]">
               Build a quiz funnel for my coaching business
             </p>
           </div>
-          <div className="bg-emerald-500/10 rounded-xl px-4 py-3 border border-emerald-500/20">
-            <p className="text-xs text-emerald-400 font-medium mb-1">Built</p>
-            <p className="text-sm text-white/70">
+          <div className="bg-emerald-50 rounded-xl px-4 py-3 border border-emerald-200">
+            <p className="text-xs text-emerald-600 font-medium mb-1">Built</p>
+            <p className="text-sm text-[#737373]">
               5 qualifying questions, scoring rules, and calendar routing created.
             </p>
           </div>
-          <div className="bg-white/5 rounded-xl px-4 py-3 border border-white/10">
-            <p className="text-xs text-white/40 mb-2">Generated questions:</p>
+          <div className="bg-[#FBFBFB] rounded-xl px-4 py-3 border border-[#EBEBEB]">
+            <p className="text-xs text-[#A3A3A3] mb-2">Generated questions:</p>
             <div className="space-y-1.5">
               {[
                 "What is your current revenue?",
@@ -73,9 +73,9 @@ function BuilderMockup() {
               ].map((q, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 text-xs text-white/60"
+                  className="flex items-center gap-2 text-xs text-[#737373]"
                 >
-                  <span className="text-white/30">{i + 1}.</span>
+                  <span className="text-[#A3A3A3]">{i + 1}.</span>
                   {q}
                 </div>
               ))}

@@ -65,94 +65,21 @@ export function HeroSection() {
       className="relative overflow-hidden"
       style={{ height: "clamp(720px, 80vh, 778px)" }}
     >
-      {/* Sky gradient */}
+      {/* Forest background image */}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(180deg, #4A90D9 0%, #6BA3E0 15%, #8BB8E8 30%, #B8D4F0 45%, #D4C5A0 60%, #E8D5B0 70%, #F0E4CD 80%, #FAFAF8 95%)",
+          backgroundImage: "url(/hero-bg.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
         }}
       />
 
-      {/* Cloud shapes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute rounded-full"
-          style={{
-            top: "8%",
-            left: "2%",
-            width: 420,
-            height: 140,
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.45) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute rounded-full"
-          style={{
-            top: "5%",
-            left: "35%",
-            width: 500,
-            height: 160,
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute rounded-full"
-          style={{
-            top: "12%",
-            right: "5%",
-            width: 450,
-            height: 150,
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.4) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute rounded-full"
-          style={{
-            top: "22%",
-            left: "15%",
-            width: 300,
-            height: 100,
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.25) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute rounded-full"
-          style={{
-            top: "18%",
-            right: "20%",
-            width: 350,
-            height: 110,
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.3) 0%, transparent 70%)",
-          }}
-        />
-      </div>
-
-      {/* Buildings silhouette at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-[120px] pointer-events-none">
-        <svg
-          viewBox="0 0 1440 120"
-          className="absolute bottom-0 w-full h-full"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0,120 L0,90 L60,90 L60,70 L80,70 L80,60 L100,60 L100,70 L120,70 L120,50 L140,50 L140,70 L180,70 L180,80 L220,80 L220,55 L240,55 L240,40 L260,40 L260,55 L280,55 L280,75 L340,75 L340,60 L360,60 L360,45 L380,45 L380,35 L400,35 L400,45 L420,45 L420,65 L480,65 L480,50 L500,50 L500,30 L520,30 L520,50 L540,50 L540,70 L600,70 L600,55 L620,55 L620,40 L640,40 L640,25 L660,25 L660,40 L680,40 L680,60 L740,60 L740,45 L760,45 L760,35 L780,35 L780,20 L800,20 L800,35 L820,35 L820,50 L860,50 L860,65 L920,65 L920,50 L940,50 L940,38 L960,38 L960,28 L980,28 L980,38 L1000,38 L1000,55 L1060,55 L1060,42 L1080,42 L1080,30 L1100,30 L1100,42 L1120,42 L1120,60 L1180,60 L1180,70 L1220,70 L1220,55 L1240,55 L1240,45 L1260,45 L1260,55 L1280,55 L1280,70 L1340,70 L1340,80 L1400,80 L1400,90 L1440,90 L1440,120 Z"
-            fill="rgba(0,0,0,0.06)"
-          />
-        </svg>
-      </div>
-
-      {/* Fade to white */}
+      {/* Light transparent fade — NO darkening, just blend to page bg at bottom */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-[180px]"
+        className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(180deg, transparent 0%, rgba(250,250,248,0.3) 40%, rgba(250,250,248,0.8) 70%, #FAFAF8 100%)",
+          background: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(250,250,248,0.4) 70%, rgba(250,250,248,0.85) 85%, #FAFAF8 100%)",
         }}
       />
 
