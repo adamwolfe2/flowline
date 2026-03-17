@@ -2,24 +2,44 @@ import { db } from "@/db";
 import { events, funnelSessions, leads } from "@/db/schema";
 import { eq, and, gte, sql, avg } from "drizzle-orm";
 
-const STEP_LABELS: Record<number, string> = {
-  0: "Welcome",
-  1: "Question 1",
-  2: "Question 2",
-  3: "Question 3",
-  4: "Email",
-  5: "Booked",
-};
+function getDateCutoff(timeRange: string): Date | null {
+  const now = new Date();
+  switch (timeRange) {
+    case '7d': now.setDate(now.getDate() - 7); return now;
+    case '30d': now.setDate(now.getDate() - 30); return now;
+    case '90d': now.setDate(now.getDate() - 90); return now;
+    default: return null; // 'all' — no cutoff
+  }
+}
 
-export async function getFunnelOverview(funnelId: string) {
+function getStepLabel(index: number, totalQuestions: number, hasVideo: boolean): string {
+  if (index === 0) return "Welcome";
+  const videoOffset = hasVideo ? 1 : 0;
+  if (hasVideo && index === 1) return "Video";
+  const qStart = 1 + videoOffset;
+  if (index >= qStart && index < qStart + totalQuestions) return `Question ${index - qStart + 1}`;
+  if (index === qStart + totalQuestions) return "Email";
+  if (index === qStart + totalQuestions + 1) return "Booked";
+  return `Step ${index}`;
+}
+
+export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const sessionWhere = cutoff
+    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
+    : eq(funnelSessions.funnelId, funnelId);
+  const leadWhere = cutoff
+    ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
+    : eq(leads.funnelId, funnelId);
+
   const [sessionStats, leadStats] = await Promise.all([
     db.select({
       total: sql<number>`count(*)::int`,
       completed: sql<number>`coalesce(sum(case when ${funnelSessions.completed} then 1 else 0 end), 0)::int`,
       converted: sql<number>`coalesce(sum(case when ${funnelSessions.converted} then 1 else 0 end), 0)::int`,
       avgDuration: avg(funnelSessions.totalDurationMs),
-    }).from(funnelSessions).where(eq(funnelSessions.funnelId, funnelId)),
-    db.select({ count: sql<number>`count(*)::int` }).from(leads).where(eq(leads.funnelId, funnelId)),
+    }).from(funnelSessions).where(sessionWhere),
+    db.select({ count: sql<number>`count(*)::int` }).from(leads).where(leadWhere),
   ]);
 
   const s = sessionStats[0];
@@ -36,12 +56,17 @@ export async function getFunnelOverview(funnelId: string) {
   };
 }
 
-export async function getDropoffWaterfall(funnelId: string) {
+export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', totalQuestions = 3, hasVideo = false) {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(events.funnelId, funnelId), eq(events.eventType, "page_viewed"), gte(events.createdAt, cutoff))
+    : and(eq(events.funnelId, funnelId), eq(events.eventType, "page_viewed"));
+
   const result = await db.select({
     stepIndex: events.stepIndex,
     uniqueSessions: sql<number>`count(distinct ${events.sessionId})::int`,
   }).from(events)
-    .where(and(eq(events.funnelId, funnelId), eq(events.eventType, "page_viewed")))
+    .where(whereClause)
     .groupBy(events.stepIndex)
     .orderBy(events.stepIndex);
 
@@ -53,7 +78,7 @@ export async function getDropoffWaterfall(funnelId: string) {
     const prevVisitors = prev ? Number(prev.uniqueSessions) : visitors;
     return {
       stepIndex: row.stepIndex,
-      stepLabel: STEP_LABELS[row.stepIndex] ?? `Step ${row.stepIndex}`,
+      stepLabel: getStepLabel(row.stepIndex, totalQuestions, hasVideo),
       visitors,
       dropoffFromPrev: prevVisitors > 0 ? Math.round((1 - visitors / prevVisitors) * 100) : 0,
       retentionFromTop: topOfFunnel > 0 ? Math.round((visitors / topOfFunnel) * 100) : 0,
@@ -61,14 +86,19 @@ export async function getDropoffWaterfall(funnelId: string) {
   });
 }
 
-export async function getAnswerDistribution(funnelId: string) {
+export async function getAnswerDistribution(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(events.funnelId, funnelId), eq(events.eventType, "answer_selected"), sql`${events.questionKey} is not null`, gte(events.createdAt, cutoff))
+    : and(eq(events.funnelId, funnelId), eq(events.eventType, "answer_selected"), sql`${events.questionKey} is not null`);
+
   const result = await db.select({
     questionKey: events.questionKey,
     answerId: events.answerId,
     answerLabel: events.answerLabel,
     count: sql<number>`count(*)::int`,
   }).from(events)
-    .where(and(eq(events.funnelId, funnelId), eq(events.eventType, "answer_selected"), sql`${events.questionKey} is not null`))
+    .where(whereClause)
     .groupBy(events.questionKey, events.answerId, events.answerLabel)
     .orderBy(events.questionKey);
 
@@ -81,18 +111,23 @@ export async function getAnswerDistribution(funnelId: string) {
   return grouped;
 }
 
-export async function getAbandonHeatmap(funnelId: string) {
+export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', totalQuestions = 3, hasVideo = false) {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(funnelSessions.funnelId, funnelId), sql`${funnelSessions.abandonedAtStep} is not null`, gte(funnelSessions.startedAt, cutoff))
+    : and(eq(funnelSessions.funnelId, funnelId), sql`${funnelSessions.abandonedAtStep} is not null`);
+
   const result = await db.select({
     stepIndex: funnelSessions.abandonedAtStep,
     count: sql<number>`count(*)::int`,
   }).from(funnelSessions)
-    .where(and(eq(funnelSessions.funnelId, funnelId), sql`${funnelSessions.abandonedAtStep} is not null`))
+    .where(whereClause)
     .groupBy(funnelSessions.abandonedAtStep)
     .orderBy(funnelSessions.abandonedAtStep);
 
   return result.map((r) => ({
     stepIndex: r.stepIndex ?? 0,
-    stepLabel: STEP_LABELS[r.stepIndex ?? 0] ?? `Step ${r.stepIndex}`,
+    stepLabel: getStepLabel(r.stepIndex ?? 0, totalQuestions, hasVideo),
     abandonCount: Number(r.count),
   }));
 }
@@ -126,14 +161,17 @@ export async function getTierDistribution(funnelId: string) {
     .groupBy(leads.calendarTier);
 }
 
-export async function getLeadsTimeSeries(funnelId: string) {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 30);
+export async function getLeadsTimeSeries(funnelId: string, timeRange = '30d') {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
+    : eq(leads.funnelId, funnelId);
+
   return db.select({
     date: sql<string>`to_char(date_trunc('day', ${leads.createdAt}), 'YYYY-MM-DD')`,
     count: sql<number>`count(*)::int`,
   }).from(leads)
-    .where(and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff)))
+    .where(whereClause)
     .groupBy(sql`date_trunc('day', ${leads.createdAt})`)
     .orderBy(sql`date_trunc('day', ${leads.createdAt})`);
 }
@@ -152,18 +190,18 @@ export async function getLeadsForTable(funnelId: string, limit = 25, offset = 0)
     .offset(offset);
 }
 
-export async function getFullAnalytics(funnelId: string, leadsPage = 0) {
+export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRange = 'all') {
   const leadsLimit = 25;
   const leadsOffset = leadsPage * leadsLimit;
   const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount] = await Promise.all([
-    getFunnelOverview(funnelId),
-    getDropoffWaterfall(funnelId),
-    getAnswerDistribution(funnelId),
-    getAbandonHeatmap(funnelId),
+    getFunnelOverview(funnelId, timeRange),
+    getDropoffWaterfall(funnelId, timeRange),
+    getAnswerDistribution(funnelId, timeRange),
+    getAbandonHeatmap(funnelId, timeRange),
     getDeviceBreakdown(funnelId),
     getUTMBreakdown(funnelId),
     getTierDistribution(funnelId),
-    getLeadsTimeSeries(funnelId),
+    getLeadsTimeSeries(funnelId, timeRange),
     getLeadsForTable(funnelId, leadsLimit, leadsOffset),
     getLeadCount(funnelId),
   ]);

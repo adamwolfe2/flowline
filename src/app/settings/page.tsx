@@ -89,7 +89,7 @@ export default function SettingsPage() {
               </span>
             </div>
             <p className="text-xs text-[#737373] mt-0.5">
-              1 of 3 funnels used
+              1 of 1 funnels used
             </p>
           </div>
         </div>

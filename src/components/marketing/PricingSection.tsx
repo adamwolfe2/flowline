@@ -11,7 +11,7 @@ const plans = [
     annualPrice: 0,
     description: "Get started with quiz funnels.",
     features: [
-      "Up to 3 funnels",
+      "1 funnel",
       "100 submissions / month",
       "Basic analytics",
       "Qualifi branding",

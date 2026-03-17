@@ -27,6 +27,10 @@ export interface FunnelConfig {
       calLink: string;
       brandColor: string;
     };
+    video?: {
+      enabled: boolean;
+      url: string;
+    };
   };
   webhook: {
     url: string;

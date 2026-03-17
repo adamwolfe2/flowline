@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
     const count = await getFunnelCount(userId);
     const userRow = existingUser[0];
     const plan = userRow?.plan ?? "free";
-    if (plan === "free" && count >= 3) {
-      return NextResponse.json({ error: "Free plan limited to 3 funnels. Upgrade to Pro." }, { status: 403 });
+    if (plan === "free" && count >= 1) {
+      return NextResponse.json({ error: "Free plan limited to 1 funnel. Upgrade to Pro." }, { status: 403 });
     }
 
     const body = await req.json();

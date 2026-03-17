@@ -140,11 +140,12 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [leadsPage, setLeadsPage] = useState(0);
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
-  const fetchData = useCallback(async (page = 0) => {
+  const fetchData = useCallback(async (page = 0, range: string = timeRange) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/analytics/${funnelId}?leadsPage=${page}`);
+      const res = await fetch(`/api/analytics/${funnelId}?leadsPage=${page}&timeRange=${range}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Failed to load analytics");
@@ -155,11 +156,11 @@ export default function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [funnelId]);
+  }, [funnelId, timeRange]);
 
   useEffect(() => {
-    fetchData(leadsPage);
-  }, [fetchData, leadsPage]);
+    fetchData(leadsPage, timeRange);
+  }, [fetchData, leadsPage, timeRange]);
 
   /* ---------- Loading ---------- */
   if (loading) {
@@ -249,6 +250,23 @@ export default function AnalyticsDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 space-y-8">
+        {/* ---- Time Range Selector ---- */}
+        <div className="flex items-center gap-2">
+          {(['7d', '30d', '90d', 'all'] as const).map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                timeRange === range
+                  ? 'bg-[#333333] text-white'
+                  : 'bg-[#FBFBFB] text-[#737373] hover:bg-[#F0F0F0] border border-[#EBEBEB]'
+              }`}
+            >
+              {range === 'all' ? 'All time' : range}
+            </button>
+          ))}
+        </div>
+
         {/* ---- Stats Bar ---- */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <StatCard label="Sessions" value={stats.totalSessions.toLocaleString()} icon={Eye} />
@@ -397,9 +415,9 @@ export default function AnalyticsDashboard() {
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
         <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads (Last 30 Days)</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
           {timeSeries.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-12">No leads captured in the last 30 days</p>
+            <p className="text-sm text-gray-400 text-center py-12">No leads captured in this time range</p>
           ) : (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
 interface ContentEditorProps {
@@ -80,6 +81,36 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
   return (
     <div className="space-y-5">
       <div>
+        <div className="flex items-center justify-between mb-2">
+          <Label className="text-xs text-gray-500">Video Intro</Label>
+          <Switch
+            checked={config.quiz.video?.enabled ?? false}
+            onCheckedChange={(checked) => {
+              const newConfig = JSON.parse(JSON.stringify(config));
+              if (!newConfig.quiz.video) newConfig.quiz.video = { enabled: false, url: "" };
+              newConfig.quiz.video.enabled = checked;
+              onSave(newConfig);
+            }}
+          />
+        </div>
+        {config.quiz.video?.enabled && (
+          <Input
+            value={config.quiz.video?.url ?? ""}
+            onChange={(e) => {
+              const newConfig = JSON.parse(JSON.stringify(config));
+              if (!newConfig.quiz.video) newConfig.quiz.video = { enabled: false, url: "" };
+              newConfig.quiz.video.url = e.target.value;
+              onSave(newConfig);
+            }}
+            placeholder="https://youtube.com/watch?v=... or Vimeo/Loom URL"
+            className="text-sm"
+          />
+        )}
+      </div>
+
+      <Separator />
+
+      <div>
         <Label className="text-xs text-gray-500 mb-1.5">Headline</Label>
         <Textarea
           value={config.quiz.headline}
@@ -102,8 +133,16 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <Label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Questions</Label>
-          <Button variant="ghost" size="sm" onClick={addQuestion} className="gap-1 text-xs h-7">
+          <Label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+            Questions <span className="text-gray-400 font-normal normal-case">(max 7)</span>
+          </Label>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={addQuestion}
+            disabled={config.quiz.questions.length >= 7}
+            className="gap-1 text-xs h-7"
+          >
             <Plus className="w-3 h-3" /> Add
           </Button>
         </div>

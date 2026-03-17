@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
 import { WelcomeStep } from "./WelcomeStep";
 import { QuestionStep } from "./QuestionStep";
 import { EmailStep } from "./EmailStep";
 import { SuccessStep } from "./SuccessStep";
+import { VideoStep } from "./VideoStep";
 import { ProgressBar } from "./ProgressBar";
 import { useTracking } from "./useTracking";
 
@@ -18,9 +19,11 @@ interface FunnelClientProps {
 
 export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps) {
   const totalQuestions = config.quiz.questions.length;
-  // Steps: 0=Welcome, 1..N=Questions, N+1=Email, N+2=Success
-  const emailStep = totalQuestions + 1;
-  const successStep = totalQuestions + 2;
+  const hasVideo = !!(config.quiz.video?.enabled && config.quiz.video?.url);
+  const videoOffset = hasVideo ? 1 : 0;
+  const questionStartStep = 1 + videoOffset;
+  const emailStep = questionStartStep + totalQuestions;
+  const successStep = emailStep + 1;
 
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -30,7 +33,7 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
   const {
     trackPageView, trackAnswer, trackCTAClick, trackFieldFocus,
     trackFormSubmit, trackLeadCreated, trackFunnelCompleted, trackBackNavigation,
-  } = useTracking({ funnelId, sessionId });
+  } = useTracking({ funnelId, sessionId, totalQuestions, hasVideo });
 
   // Track page views on step change
   useEffect(() => {
@@ -44,7 +47,6 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
 
   const handleSelect = useCallback(
     (key: string, id: string) => {
-      // Find the question and option to get label + points
       const question = config.quiz.questions.find((q) => q.key === key);
       const option = question?.options.find((o) => o.id === id);
       if (question && option) {
@@ -52,7 +54,6 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
       }
 
       setAnswers((prev) => ({ ...prev, [key]: id }));
-      // Auto-advance after a brief delay
       setTimeout(() => {
         setStep((prev) => prev + 1);
       }, 350);
@@ -103,9 +104,22 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
     }
   }, [step, successStep, trackFunnelCompleted]);
 
-  // Determine current question index (0-based) from step (1-based for questions)
-  const currentQuestionIndex = step - 1;
-  const currentQuestion = config.quiz.questions[currentQuestionIndex];
+  // Determine current question index from step
+  const currentQuestionIndex = step - questionStartStep;
+  const currentQuestion =
+    step >= questionStartStep && step < emailStep
+      ? config.quiz.questions[currentQuestionIndex]
+      : undefined;
+
+  // For progress bar, map question steps to 1..totalQuestions range
+  const progressStep =
+    step >= questionStartStep && step < emailStep
+      ? currentQuestionIndex + 1
+      : step === emailStep
+        ? totalQuestions + 1
+        : step >= successStep
+          ? totalQuestions
+          : 0;
 
   return (
     <div
@@ -113,7 +127,7 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
       style={{ fontFamily: config.brand.fontBody }}
     >
       <div className="w-full max-w-lg mx-auto py-12 px-4">
-        <ProgressBar config={config} step={step} totalQuestions={totalQuestions} />
+        <ProgressBar config={config} step={progressStep} totalQuestions={totalQuestions} />
 
         <AnimatePresence mode="wait">
           {step === 0 && (
@@ -128,7 +142,19 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
             </motion.div>
           )}
 
-          {step >= 1 && step <= totalQuestions && currentQuestion && (
+          {hasVideo && step === 1 && (
+            <motion.div
+              key="video"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <VideoStep config={config} onContinue={() => setStep(2)} />
+            </motion.div>
+          )}
+
+          {step >= questionStartStep && step < emailStep && currentQuestion && (
             <motion.div
               key={`question-${step}`}
               initial={{ opacity: 0, x: 20 }}
@@ -139,7 +165,7 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
               <QuestionStep
                 config={config}
                 question={currentQuestion}
-                questionNumber={step}
+                questionNumber={currentQuestionIndex + 1}
                 totalQuestions={totalQuestions}
                 selectedOptionId={answers[currentQuestion.key]}
                 onSelect={handleSelect}
@@ -175,6 +201,18 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Powered by badge — shown for free plan, hidden for Pro+ */}
+        <div className="mt-8 text-center">
+          <a
+            href="https://qualifi.co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-gray-500 transition-colors"
+          >
+            Powered by Qualifi
+          </a>
+        </div>
       </div>
     </div>
   );

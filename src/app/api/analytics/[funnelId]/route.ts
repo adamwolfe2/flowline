@@ -13,7 +13,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const leadsPage = Math.max(0, parseInt(req.nextUrl.searchParams.get("leadsPage") ?? "0", 10) || 0);
-    const analytics = await getFullAnalytics(funnelId, leadsPage);
+    const timeRange = req.nextUrl.searchParams.get("timeRange") ?? "all";
+    const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange);
     return NextResponse.json({ funnel, ...analytics });
   } catch (error) {
     console.error("GET /api/analytics error:", error);

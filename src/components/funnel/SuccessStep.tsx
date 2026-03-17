@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
 
@@ -12,11 +12,30 @@ interface SuccessStepProps {
 
 export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
   const { brand } = config;
-  const calEmbed = config.quiz.calEmbed;
 
-  // Load Cal.com embed script if calEmbed is configured
+  // Auto-detect Cal.com from the calendar URL
+  const isCalcom = useMemo(() => calendarUrl.includes("cal.com"), [calendarUrl]);
+  const calLink = useMemo(() => {
+    if (!isCalcom) return "";
+    return calendarUrl.replace(/https?:\/\/(app\.)?cal\.com\//, "");
+  }, [calendarUrl, isCalcom]);
+  const calNamespace = useMemo(() => {
+    if (!calLink) return "default";
+    return calLink.replace(/[^a-zA-Z0-9]/g, "-") || "default";
+  }, [calLink]);
+
+  // Also support the legacy calEmbed config if present
+  const legacyCalEmbed = config.quiz.calEmbed;
+
+  // Determine which Cal.com config to use
+  const effectiveCalLink = isCalcom ? calLink : legacyCalEmbed?.calLink ?? "";
+  const effectiveNamespace = isCalcom ? calNamespace : legacyCalEmbed?.namespace ?? "default";
+  const effectiveBrandColor = legacyCalEmbed?.brandColor ?? brand.primaryColor;
+  const useCalEmbed = isCalcom || !!legacyCalEmbed;
+
+  // Load Cal.com embed script if needed
   useEffect(() => {
-    if (!calEmbed) return;
+    if (!useCalEmbed || !effectiveCalLink) return;
 
     const script = document.createElement("script");
     script.src = "https://app.cal.com/embed/embed.js";
@@ -27,18 +46,18 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const Cal = (window as any).Cal;
       if (Cal) {
-        Cal("init", calEmbed.namespace, { origin: "https://cal.com" });
-        Cal.ns[calEmbed.namespace]("inline", {
-          elementOrSelector: `#cal-embed-${calEmbed.namespace}`,
-          calLink: calEmbed.calLink,
+        Cal("init", effectiveNamespace, { origin: "https://cal.com" });
+        Cal.ns[effectiveNamespace]("inline", {
+          elementOrSelector: `#cal-embed-${effectiveNamespace}`,
+          calLink: effectiveCalLink,
           layout: "month_view",
           config: {
             theme: "light",
           },
         });
-        Cal.ns[calEmbed.namespace]("ui", {
+        Cal.ns[effectiveNamespace]("ui", {
           theme: "light",
-          styles: { branding: { brandColor: calEmbed.brandColor } },
+          styles: { branding: { brandColor: effectiveBrandColor } },
           hideEventTypeDetails: false,
           layout: "month_view",
         });
@@ -48,7 +67,7 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
     return () => {
       script.remove();
     };
-  }, [calEmbed]);
+  }, [useCalEmbed, effectiveCalLink, effectiveNamespace, effectiveBrandColor]);
 
   return (
     <div className="w-full px-4">
@@ -100,9 +119,9 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
         transition={{ delay: 0.3, duration: 0.4 }}
         className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
       >
-        {calEmbed ? (
+        {useCalEmbed && effectiveCalLink ? (
           <div
-            id={`cal-embed-${calEmbed.namespace}`}
+            id={`cal-embed-${effectiveNamespace}`}
             style={{ width: "100%", height: "700px", overflow: "auto" }}
           />
         ) : calendarUrl ? (

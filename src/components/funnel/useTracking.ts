@@ -21,12 +21,25 @@ function getUTMParams(): Record<string, string | null> {
   };
 }
 
+function getStepKey(index: number, totalQuestions: number, hasVideo: boolean): string {
+  if (index === 0) return "welcome";
+  const videoOffset = hasVideo ? 1 : 0;
+  if (hasVideo && index === 1) return "video";
+  const qStart = 1 + videoOffset;
+  if (index >= qStart && index < qStart + totalQuestions) return `q${index - qStart + 1}`;
+  if (index === qStart + totalQuestions) return "email";
+  if (index === qStart + totalQuestions + 1) return "success";
+  return `step_${index}`;
+}
+
 interface TrackingConfig {
   funnelId: string;
   sessionId: string;
+  totalQuestions: number;
+  hasVideo: boolean;
 }
 
-export function useTracking({ funnelId, sessionId }: TrackingConfig) {
+export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: TrackingConfig) {
   const sessionStart = useRef(Date.now());
   const stepStart = useRef(Date.now());
   const currentStep = useRef(0);
@@ -35,6 +48,12 @@ export function useTracking({ funnelId, sessionId }: TrackingConfig) {
   const cumScore = useRef(0);
   const hasFiredView = useRef(false);
 
+  // Store in refs so callbacks don't need them as deps
+  const totalQRef = useRef(totalQuestions);
+  const hasVideoRef = useRef(hasVideo);
+  totalQRef.current = totalQuestions;
+  hasVideoRef.current = hasVideo;
+
   useEffect(() => {
     utmParams.current = getUTMParams();
     device.current = getDeviceType();
@@ -42,11 +61,15 @@ export function useTracking({ funnelId, sessionId }: TrackingConfig) {
 
   const track = useCallback(
     (payload: Record<string, unknown>) => {
+      const stepKey =
+        typeof payload.stepKey === "string"
+          ? payload.stepKey
+          : getStepKey(currentStep.current, totalQRef.current, hasVideoRef.current);
       const base = {
         sessionId,
         funnelId,
         stepIndex: currentStep.current,
-        stepKey: getStepKey(currentStep.current),
+        stepKey,
         sessionDurationMs: Date.now() - sessionStart.current,
         deviceType: device.current,
         ...utmParams.current,
@@ -74,12 +97,14 @@ export function useTracking({ funnelId, sessionId }: TrackingConfig) {
   }, [track]);
 
   useEffect(() => {
+    const videoOffset = hasVideoRef.current ? 1 : 0;
+    const emailStepIndex = 1 + videoOffset + totalQRef.current;
     const handleAbandon = () => {
       track({
         eventType: "funnel_abandoned",
         abandonedAtStep: currentStep.current,
         timeOnStepMs: Date.now() - stepStart.current,
-        reachedEmail: currentStep.current >= 4,
+        reachedEmail: currentStep.current >= emailStepIndex,
       });
     };
     window.addEventListener("beforeunload", handleAbandon);
@@ -90,7 +115,11 @@ export function useTracking({ funnelId, sessionId }: TrackingConfig) {
     (stepIndex: number) => {
       currentStep.current = stepIndex;
       stepStart.current = Date.now();
-      track({ eventType: "page_viewed", stepIndex, stepKey: getStepKey(stepIndex) });
+      track({
+        eventType: "page_viewed",
+        stepIndex,
+        stepKey: getStepKey(stepIndex, totalQRef.current, hasVideoRef.current),
+      });
     },
     [track]
   );
@@ -101,7 +130,7 @@ export function useTracking({ funnelId, sessionId }: TrackingConfig) {
       track({
         eventType: "answer_selected",
         stepIndex,
-        stepKey: getStepKey(stepIndex),
+        stepKey: getStepKey(stepIndex, totalQRef.current, hasVideoRef.current),
         questionKey,
         answerId,
         answerLabel,
@@ -144,9 +173,4 @@ export function useTracking({ funnelId, sessionId }: TrackingConfig) {
   );
 
   return { trackPageView, trackAnswer, trackCTAClick, trackFieldFocus, trackFormSubmit, trackLeadCreated, trackFunnelCompleted, trackBackNavigation };
-}
-
-function getStepKey(index: number): string {
-  const keys = ["welcome", "q1", "q2", "q3", "email", "success"];
-  return keys[index] ?? `step_${index}`;
 }
