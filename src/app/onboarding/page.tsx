@@ -41,6 +41,26 @@ function OnboardingContent() {
   const [publishing, setPublishing] = useState(false);
   const [createdFunnelId, setCreatedFunnelId] = useState<string | null>(null);
 
+  // Rotating generating messages
+  const [genMessage, setGenMessage] = useState("Analyzing your business...");
+
+  useEffect(() => {
+    if (!generating) return;
+    const messages = [
+      "Analyzing your business...",
+      "Writing your headline...",
+      "Crafting qualifying questions...",
+      "Setting up scoring rules...",
+      "Configuring calendar routing...",
+    ];
+    let i = 0;
+    const interval = setInterval(() => {
+      i = (i + 1) % messages.length;
+      setGenMessage(messages[i]);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [generating]);
+
   // Resume pending funnel after sign-up redirect
   useEffect(() => {
     const pending = localStorage.getItem("myvsl_pending_funnel");
@@ -267,7 +287,7 @@ function OnboardingContent() {
                 animate={{ opacity: 1 }}
                 className="mt-4 space-y-1"
               >
-                <p className="text-xs text-gray-400 animate-pulse">Writing your headline...</p>
+                <p className="text-xs text-[#6B7280] animate-pulse">{genMessage}</p>
               </motion.div>
             )}
           </div>

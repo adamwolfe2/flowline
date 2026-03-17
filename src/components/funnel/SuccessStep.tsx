@@ -135,17 +135,8 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
             title="Book your call"
           />
         ) : (
-          <div
-            className="flex items-center justify-center"
-            style={{ height: "400px", backgroundColor: brand.primaryColorLight }}
-          >
-            <div className="text-center">
-              <svg className="animate-spin w-8 h-8 mx-auto mb-3" style={{ color: brand.primaryColor }} fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              <p className="text-sm text-gray-500">Loading your calendar...</p>
-            </div>
+          <div className="text-center py-12">
+            <p className="text-sm text-gray-500">Calendar booking coming soon. We'll be in touch!</p>
           </div>
         )}
       </motion.div>

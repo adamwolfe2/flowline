@@ -7,6 +7,7 @@ import { UserButton } from "@clerk/nextjs";
 export const metadata = {
   title: "Dashboard — MyVSL",
   description: "Manage your VSL funnels, view analytics, and track leads.",
+  robots: { index: false, follow: false },
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

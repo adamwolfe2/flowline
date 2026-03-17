@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         }}
       >
         {/* Brand mark */}
-        <img src="https://getmyvsl.com/logo.png" width={56} height={56} style={{ marginBottom: 24 }} />
+        <img src="https://getmyvsl.com/logo.png" alt="MyVSL" width={56} height={56} style={{ marginBottom: 24 }} />
 
         {/* Title */}
         <div
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
             gap: 8,
           }}
         >
-          <img src="https://getmyvsl.com/logo.png" width={24} height={24} />
+          <img src="https://getmyvsl.com/logo.png" alt="MyVSL" width={24} height={24} />
           <span style={{ fontSize: 18, fontWeight: 600, color: "#333333" }}>MyVSL</span>
         </div>
       </div>

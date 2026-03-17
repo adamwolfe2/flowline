@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /builder
+Disallow: /analytics
+Disallow: /settings
+Disallow: /admin
+Disallow: /api
+Sitemap: https://getmyvsl.com/sitemap.xml

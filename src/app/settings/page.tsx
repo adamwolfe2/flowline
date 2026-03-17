@@ -92,8 +92,8 @@ export default function SettingsPage() {
               <span className="text-sm font-medium text-[#333333]">
                 Free Plan
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-gray-100 text-[#737373]">
-                Current
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-green-100 text-green-700">
+                Free
               </span>
             </div>
             <p className="text-xs text-[#737373] mt-0.5">

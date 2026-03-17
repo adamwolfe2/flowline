@@ -7,6 +7,7 @@ import { UserButton } from "@clerk/nextjs";
 export const metadata = {
   title: "Settings — MyVSL",
   description: "Manage your MyVSL account and subscription.",
+  robots: { index: false, follow: false },
 };
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {

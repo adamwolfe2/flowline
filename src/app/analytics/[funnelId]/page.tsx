@@ -268,7 +268,7 @@ export default function AnalyticsDashboard() {
               onClick={() => setTimeRange(range)}
               className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
                 timeRange === range
-                  ? 'bg-[#333333] text-white'
+                  ? 'bg-[#2D6A4F] text-white'
                   : 'bg-[#FBFBFB] text-[#737373] hover:bg-[#F0F0F0] border border-[#EBEBEB]'
               }`}
             >
@@ -284,7 +284,13 @@ export default function AnalyticsDashboard() {
           <StatCard label="Conversion" value={stats.conversionRate} icon={BarChart3} suffix="%" />
           <StatCard
             label="Avg. Time"
-            value={stats.avgCompletionTimeSec > 0 ? `${stats.avgCompletionTimeSec}s` : "--"}
+            value={
+              stats.avgCompletionTimeSec > 0
+                ? stats.avgCompletionTimeSec >= 60
+                  ? `${Math.floor(stats.avgCompletionTimeSec / 60)}m ${stats.avgCompletionTimeSec % 60}s`
+                  : `${stats.avgCompletionTimeSec}s`
+                : "--"
+            }
             icon={Clock}
           />
           <StatCard label="Leads" value={stats.totalLeads.toLocaleString()} icon={Users} />
@@ -292,7 +298,7 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Waterfall Chart ---- */}
         <ErrorBoundary>
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl border border-gray-100 p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
             <WaterfallChart steps={dropoff} />
           </div>
@@ -464,7 +470,7 @@ export default function AnalyticsDashboard() {
                   <tbody>
                     {recentLeads.map((lead) => (
                       <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer" onClick={() => setSelectedLeadId(lead.id)}>
-                        <td className="py-2.5 text-gray-900 font-medium">{lead.email}</td>
+                        <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
                         <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
                         <td className="py-2.5 text-center">
                           <span

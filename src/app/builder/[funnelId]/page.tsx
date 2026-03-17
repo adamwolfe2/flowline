@@ -20,6 +20,7 @@ export default function BuilderPage() {
   const [funnel, setFunnel] = useState<Funnel | null>(null);
   const [config, setConfig] = useState<FunnelConfig | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "failed">("idle");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -57,8 +58,10 @@ export default function BuilderPage() {
     setPreviewKey(k => k + 1);
     if (res.ok) {
       setHasUnsavedChanges(false);
-      toast.success("Changes saved");
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
     } else {
+      setSaveStatus("failed");
       toast.error("Failed to save changes");
     }
   }, [funnelId]);
@@ -87,6 +90,8 @@ export default function BuilderPage() {
             {config.brand.name}
           </span>
           {saving && <span className="text-xs text-gray-400">Saving...</span>}
+          {!saving && saveStatus === "saved" && <span className="text-xs text-green-600">Saved</span>}
+          {!saving && saveStatus === "failed" && <span className="text-xs text-red-500">Save failed</span>}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -123,7 +128,7 @@ export default function BuilderPage() {
         {/* Side panel */}
         <div className={`${sidebarOpen ? 'w-full md:w-[380px]' : 'hidden md:block md:w-[380px]'} border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0`}>
           <Tabs defaultValue="content" className="flex flex-col h-full">
-            <TabsList className="mx-3 mt-3 mb-0 grid grid-cols-4 h-9">
+            <TabsList className="mx-3 mt-3 mb-0 grid grid-cols-4 h-9 overflow-x-auto">
               <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
               <TabsTrigger value="brand" className="text-xs">Brand</TabsTrigger>
               <TabsTrigger value="calendars" className="text-xs">Calendars</TabsTrigger>

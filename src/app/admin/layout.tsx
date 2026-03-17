@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
 
+export const metadata = {
+  title: "Admin — MyVSL",
+  robots: { index: false, follow: false },
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#FAFAF8]">

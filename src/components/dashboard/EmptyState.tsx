@@ -12,7 +12,7 @@ export function EmptyState() {
         Create your first AI-powered booking funnel in under 5 minutes. No code required.
       </p>
       <Link href="/onboarding">
-        <Button className="gap-2">
+        <Button className="gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white px-6 py-2.5 text-base">
           Create Your First Funnel
           <ArrowRight className="w-4 h-4" />
         </Button>
