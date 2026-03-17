@@ -1,6 +1,5 @@
-import { getFunnelBySlug } from "@/db/queries/funnels";
+import { getFunnelByCustomDomain } from "@/db/queries/funnels";
 import { insertSession } from "@/db/queries/sessions";
-import { getActiveVariants, selectVariant, recordAssignment } from "@/db/queries/variants";
 import { FunnelClient } from "@/components/funnel/FunnelClient";
 import { FunnelConfig } from "@/types";
 import { notFound } from "next/navigation";
@@ -8,19 +7,19 @@ import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
 
 const getCachedFunnel = unstable_cache(
-  async (slug: string) => getFunnelBySlug(slug),
-  ["funnel-by-slug"],
+  async (hostname: string) => getFunnelByCustomDomain(hostname),
+  ["funnel-by-domain"],
   { revalidate: 60 }
 );
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ hostname: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const funnel = await getCachedFunnel(slug);
+  const { hostname } = await params;
+  const funnel = await getCachedFunnel(hostname);
   if (!funnel) return { title: "Not Found" };
   const config = funnel.config as FunnelConfig;
   return {
@@ -38,10 +37,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function FunnelPage({ params, searchParams }: Props) {
-  const { slug } = await params;
+export default async function DomainFunnelPage({ params, searchParams }: Props) {
+  const { hostname } = await params;
   const sp = await searchParams;
-  const funnel = await getCachedFunnel(slug);
+  const funnel = await getCachedFunnel(hostname);
   if (!funnel) notFound();
   const config = funnel.config as FunnelConfig;
 
@@ -58,17 +57,5 @@ export default async function FunnelPage({ params, searchParams }: Props) {
     sessionId = crypto.randomUUID();
   }
 
-  // A/B testing: check for active variants
-  const variants = await getActiveVariants(funnel.id);
-  let activeConfig = config;
-
-  if (variants.length > 0) {
-    const selected = selectVariant(variants);
-    if (selected) {
-      activeConfig = selected.config as FunnelConfig;
-      await recordAssignment(sessionId, funnel.id, selected.id);
-    }
-  }
-
-  return <FunnelClient config={activeConfig} funnelId={funnel.id} sessionId={sessionId} />;
+  return <FunnelClient config={config} funnelId={funnel.id} sessionId={sessionId} />;
 }

@@ -7,7 +7,7 @@ import { sendLeadNotification } from "@/lib/resend";
 import { fireWebhook } from "@/lib/webhook";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
-import { leads, users } from "@/db/schema";
+import { leads, users, emailSequences, sequenceEnrollments } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
 
@@ -83,6 +83,30 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       calendarTier,
       sessionId: sessionId ?? null,
     });
+
+    // Auto-enroll in matching email sequences
+    try {
+      const activeSequences = await db.select().from(emailSequences)
+        .where(and(
+          eq(emailSequences.funnelId, funnelId),
+          eq(emailSequences.active, true),
+        ));
+
+      for (const seq of activeSequences) {
+        // Check tier match (null triggerTier = all tiers)
+        if (seq.triggerTier && seq.triggerTier !== calendarTier) continue;
+
+        await db.insert(sequenceEnrollments).values({
+          sequenceId: seq.id,
+          leadId: lead.id,
+          currentStep: 0,
+          status: "active",
+          nextSendAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // First email after 24h
+        });
+      }
+    } catch {
+      // Non-critical — don't block lead creation
+    }
 
     // Send email notification to funnel owner (non-blocking)
     const [owner] = await db.select({ email: users.email }).from(users).where(eq(users.id, funnel.userId));

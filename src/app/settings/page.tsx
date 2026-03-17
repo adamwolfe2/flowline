@@ -11,6 +11,7 @@ import {
   Check,
   Zap,
 } from "lucide-react";
+import { TeamSettings } from "@/components/settings/TeamSettings";
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
@@ -155,6 +156,9 @@ export default function SettingsPage() {
           </Link>
         )}
       </section>
+
+      {/* Team */}
+      <TeamSettings />
 
       {/* Danger Zone */}
       <section className="bg-white rounded-xl border border-red-200 p-6">

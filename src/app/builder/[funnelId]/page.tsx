@@ -7,8 +7,10 @@ import { ContentEditor } from "@/components/builder/ContentEditor";
 import { BrandEditor } from "@/components/builder/BrandEditor";
 import { CalendarEditor } from "@/components/builder/CalendarEditor";
 import { PublishPanel } from "@/components/builder/PublishPanel";
+import { ABTestEditor } from "@/components/builder/ABTestEditor";
+import { SequenceEditor } from "@/components/builder/SequenceEditor";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -128,10 +130,18 @@ export default function BuilderPage() {
         {/* Side panel */}
         <div className={`${sidebarOpen ? 'w-full md:w-[380px]' : 'hidden md:block md:w-[380px]'} border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0`}>
           <Tabs defaultValue="content" className="flex flex-col h-full">
-            <TabsList className="mx-3 mt-3 mb-0 grid grid-cols-4 h-9 overflow-x-auto">
+            <TabsList className="mx-3 mt-3 mb-0 grid grid-cols-6 h-9 overflow-x-auto">
               <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
               <TabsTrigger value="brand" className="text-xs">Brand</TabsTrigger>
               <TabsTrigger value="calendars" className="text-xs">Calendars</TabsTrigger>
+              <TabsTrigger value="emails" className="text-xs gap-1">
+                <Mail className="w-3 h-3" />
+                Emails
+              </TabsTrigger>
+              <TabsTrigger value="ab-test" className="text-xs gap-1">
+                <FlaskConical className="w-3 h-3" />
+                A/B
+              </TabsTrigger>
               <TabsTrigger value="publish" className="text-xs">Publish</TabsTrigger>
             </TabsList>
             <div className="flex-1 overflow-y-auto p-4">
@@ -143,6 +153,12 @@ export default function BuilderPage() {
               </TabsContent>
               <TabsContent value="calendars" className="mt-0">
                 <CalendarEditor config={config} onSave={saveConfig} />
+              </TabsContent>
+              <TabsContent value="emails" className="mt-0">
+                <SequenceEditor funnel={funnel} />
+              </TabsContent>
+              <TabsContent value="ab-test" className="mt-0">
+                <ABTestEditor funnel={funnel} />
               </TabsContent>
               <TabsContent value="publish" className="mt-0">
                 <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />

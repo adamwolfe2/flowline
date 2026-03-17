@@ -20,6 +20,8 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [customDomain, setCustomDomain] = useState(funnel.customDomain || "");
+  const [savingDomain, setSavingDomain] = useState(false);
   const domain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
   const funnelUrl = `${domain}/f/${funnel.slug}`;
 
@@ -169,14 +171,65 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
         )}
       </div>
 
+      {/* Custom Domain */}
       <div className="p-3 bg-gray-50 rounded-lg">
-        <p className="text-[11px] text-gray-400 font-medium mb-1">Custom Domains</p>
-        <p className="text-[11px] text-gray-400">
-          Connect your own domain to this funnel. Available on Pro plan.
-        </p>
-        <Button variant="outline" size="sm" className="mt-2 text-xs" disabled>
-          Upgrade to Pro
-        </Button>
+        <p className="text-[11px] text-gray-500 font-medium mb-2">Custom Domain</p>
+        {funnel.published ? (
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={customDomain}
+                onChange={(e) => setCustomDomain(e.target.value)}
+                placeholder="app.yourdomain.com"
+                className="text-xs font-mono flex-1"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs shrink-0"
+                disabled={savingDomain}
+                onClick={async () => {
+                  setSavingDomain(true);
+                  try {
+                    const res = await fetch(`/api/funnels/${funnel.id}/domain`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ domain: customDomain || null }),
+                    });
+                    if (res.ok) {
+                      const updated = await res.json();
+                      onUpdate(updated);
+                      toast.success(customDomain ? "Domain saved" : "Domain removed");
+                    } else {
+                      const data = await res.json();
+                      toast.error(data.error || "Failed to save domain");
+                    }
+                  } catch {
+                    toast.error("Failed to save domain");
+                  }
+                  setSavingDomain(false);
+                }}
+              >
+                {savingDomain ? "Saving..." : "Save"}
+              </Button>
+            </div>
+            {funnel.customDomain && (
+              <div className="text-[10px] text-gray-400 space-y-1">
+                <p>Point a CNAME record to <span className="font-mono font-medium text-gray-500">cname.vercel-dns.com</span></p>
+                <p>It may take up to 48 hours for DNS to propagate.</p>
+              </div>
+            )}
+            {!customDomain && !funnel.customDomain && (
+              <p className="text-[10px] text-gray-400">
+                Connect your own domain to this funnel.
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="text-[10px] text-gray-400">
+            Publish your funnel first, then connect a custom domain.
+          </p>
+        )}
       </div>
     </div>
   );
