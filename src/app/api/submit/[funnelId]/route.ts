@@ -4,6 +4,7 @@ import { insertLead } from "@/db/queries/leads";
 import { calculateScore, getCalendarTier, getCalendarUrl } from "@/lib/scoring";
 import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { sendLeadNotification } from "@/lib/resend";
+import { fireWebhook } from "@/lib/webhook";
 import { db } from "@/db";
 import { leads, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -62,18 +63,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       }).catch(() => {});
     }
 
-    // Fire webhook if configured
+    // Fire webhook if configured (retries with exponential backoff, non-blocking)
     if (config.webhook?.url) {
-      fetch(config.webhook.url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email, answers, score,
-          calendar_tier: calendarTier,
-          timestamp: new Date().toISOString(),
-          source: config.brand.name,
-        }),
-      }).catch(() => {});
+      fireWebhook(config.webhook.url, {
+        email, answers, score,
+        calendar_tier: calendarTier,
+        timestamp: new Date().toISOString(),
+        source: config.brand.name,
+        funnel_slug: funnel.slug,
+      }).catch(() => {}); // Final catch for the retry chain — truly best-effort
     }
 
     return NextResponse.json({

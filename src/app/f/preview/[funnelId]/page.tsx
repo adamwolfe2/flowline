@@ -13,11 +13,16 @@ export default async function PreviewPage({ params }: Props) {
   const funnel = await getFunnelByIdForPreview(funnelId);
   if (!funnel) notFound();
 
-  // Ownership check — only the funnel owner can preview
+  // Ownership check — owner can always preview, otherwise must be published
   const { userId } = await auth();
-  if (userId && funnel.userId !== userId) notFound();
-  // If no userId (unauthenticated), only show if published
-  if (!userId && !funnel.published) notFound();
+  if (userId && funnel.userId === userId) {
+    // OK — owner can preview
+  } else if (funnel.published) {
+    // OK — published funnel is publicly viewable
+  } else {
+    // Not owner and not published — deny access
+    notFound();
+  }
 
   const config = funnel.config as FunnelConfig;
 

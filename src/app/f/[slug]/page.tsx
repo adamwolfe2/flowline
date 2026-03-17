@@ -3,7 +3,14 @@ import { insertSession } from "@/db/queries/sessions";
 import { FunnelClient } from "@/components/funnel/FunnelClient";
 import { FunnelConfig } from "@/types";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
+
+const getCachedFunnel = unstable_cache(
+  async (slug: string) => getFunnelBySlug(slug),
+  ["funnel-by-slug"],
+  { revalidate: 60 }
+);
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -12,7 +19,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const funnel = await getFunnelBySlug(slug);
+  const funnel = await getCachedFunnel(slug);
   if (!funnel) return { title: "Not Found" };
   const config = funnel.config as FunnelConfig;
   return {
@@ -33,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function FunnelPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
-  const funnel = await getFunnelBySlug(slug);
+  const funnel = await getCachedFunnel(slug);
   if (!funnel) notFound();
   const config = funnel.config as FunnelConfig;
 

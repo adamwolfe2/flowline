@@ -15,7 +15,9 @@ export async function GET() {
 
     const funnelsWithStats = await getFunnelsWithStats(userId);
 
-    return NextResponse.json(funnelsWithStats);
+    return NextResponse.json(funnelsWithStats, {
+      headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" }
+    });
   } catch (error) {
     console.error("GET /api/funnels error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
