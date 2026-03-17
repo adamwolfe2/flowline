@@ -226,7 +226,7 @@ function OnboardingContent() {
         return (
           <div className="max-w-lg mx-auto text-center">
             <div className="w-14 h-14 bg-[#F0F7F4] rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Image src="/logo.png" alt="MyVSL" width={32} height={32} />
+              <Image src="/logo.png" alt="MyVSL" width={32} height={32} priority />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Start with a template</h1>
             <p className="text-sm text-gray-500 mb-6">Pick an industry template to get started instantly, or describe your own below.</p>
