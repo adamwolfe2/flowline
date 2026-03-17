@@ -18,6 +18,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: config.meta?.title || config.brand.name,
     description: config.meta?.description || "",
+    openGraph: {
+      title: config.meta?.title || config.brand.name,
+      description: config.meta?.description || "",
+      images: [{
+        url: `/api/og?title=${encodeURIComponent(config.brand.name)}&description=${encodeURIComponent(config.quiz.headline)}`,
+        width: 1200,
+        height: 630,
+      }],
+    },
   };
 }
 

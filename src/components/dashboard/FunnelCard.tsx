@@ -22,18 +22,46 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { BarChart3, ExternalLink, MoreVertical, Pencil, Users, Eye, Target, Trash2 } from "lucide-react";
+import { BarChart3, ExternalLink, MoreVertical, Pencil, Users, Eye, Target, Trash2, Copy } from "lucide-react";
 
 interface FunnelCardProps {
   funnel: Funnel;
   stats: FunnelStats;
   onDelete?: (id: string) => void;
+  onDuplicate?: () => void;
 }
 
-export function FunnelCard({ funnel, stats, onDelete }: FunnelCardProps) {
+export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardProps) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+
+  async function handleDuplicate() {
+    setDuplicating(true);
+    try {
+      const res = await fetch("/api/funnels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          config: funnel.config,
+          slug: `${funnel.slug}-copy`,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Funnel duplicated");
+        onDuplicate?.();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        toast.error(body.error || "Failed to duplicate funnel");
+      }
+    } catch (err) {
+      console.error("Failed to duplicate funnel:", err);
+      toast.error("Failed to duplicate funnel");
+    } finally {
+      setDuplicating(false);
+    }
+  }
 
   async function handleDelete() {
     setDeleting(true);
@@ -87,6 +115,10 @@ export function FunnelCard({ funnel, stats, onDelete }: FunnelCardProps) {
                 <DropdownMenuItem onClick={() => router.push(`/analytics/${funnel.id}`)}>
                   <BarChart3 className="w-3.5 h-3.5 mr-2" />
                   Analytics
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDuplicate} disabled={duplicating}>
+                  <Copy className="w-3.5 h-3.5 mr-2" />
+                  {duplicating ? "Duplicating..." : "Duplicate"}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"

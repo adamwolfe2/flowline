@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Zap, ArrowRight, ArrowLeft, Loader2, Sparkles, Palette, Calendar, Globe, Check, PartyPopper } from "lucide-react";
+import { Zap, ArrowRight, ArrowLeft, Loader2, Sparkles, Palette, Calendar, Globe, Check, PartyPopper, Users, Briefcase, Laptop, Home, Dumbbell, LineChart } from "lucide-react";
+import { TEMPLATES, Template } from "@/lib/templates";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -101,16 +102,52 @@ export default function OnboardingPage() {
     setPublishing(false);
   }
 
+  const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+    Users, Briefcase, Laptop, Home, Dumbbell, LineChart,
+  };
+
+  function selectTemplate(template: Template) {
+    setConfig(template.config);
+    setSlug(generateSlug(template.config.brand.name));
+    setStep(1);
+  }
+
   function renderStep() {
     switch (step) {
       case 0:
         return (
-          <div className="max-w-md mx-auto text-center">
+          <div className="max-w-lg mx-auto text-center">
             <div className="w-14 h-14 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Sparkles className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Describe your business</h1>
-            <p className="text-sm text-gray-500 mb-8">Tell us what you do and who your ideal client is. AI will generate your complete funnel.</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Start with a template</h1>
+            <p className="text-sm text-gray-500 mb-6">Pick an industry template to get started instantly, or describe your own below.</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-2">
+              {TEMPLATES.map((template) => {
+                const Icon = ICON_MAP[template.icon];
+                return (
+                  <button
+                    key={template.id}
+                    onClick={() => selectTemplate(template)}
+                    className="bg-white border border-[#EBEBEB] rounded-xl p-4 text-left hover:border-[#2D6A4F] hover:shadow-sm transition-all group"
+                  >
+                    <div className="w-9 h-9 bg-[#2D6A4F]/10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#2D6A4F]/20 transition-colors">
+                      {Icon && <Icon className="w-4.5 h-4.5 text-[#2D6A4F]" />}
+                    </div>
+                    <h3 className="text-sm font-semibold text-[#333333] mb-1">{template.name}</h3>
+                    <p className="text-xs text-[#A3A3A3]">{template.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-[#EBEBEB]" />
+              <span className="text-xs text-[#A3A3A3]">or describe your own</span>
+              <div className="flex-1 h-px bg-[#EBEBEB]" />
+            </div>
+
             <Textarea
               value={prompt}
               onChange={e => setPrompt(e.target.value)}
