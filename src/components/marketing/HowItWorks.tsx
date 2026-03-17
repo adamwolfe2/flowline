@@ -7,21 +7,21 @@ import { useRef, useState, useEffect } from "react";
 const steps = [
   {
     num: "01",
-    title: "Describe your business",
+    title: "Type what you sell",
     description:
-      "Tell MyVSL what you do in one prompt. AI writes your quiz, scoring, and calendar routing.",
+      "One sentence is all it takes. AI writes your qualifying questions, scores every answer, and routes leads to your calendar.",
   },
   {
     num: "02",
-    title: "Brand it in seconds",
+    title: "Drop in your logo",
     description:
-      "Upload your logo, pick your color. Your funnel looks native to your brand.",
+      "Upload your logo, pick a color. Your funnel looks like it cost $5,000 to build. It took 30 seconds.",
   },
   {
     num: "03",
-    title: "Deploy to your leads",
+    title: "Share the link, get booked",
     description:
-      "Publish to your subdomain or custom domain. No per-lead fees, ever.",
+      "Publish to your own domain. No per-lead fees. Ever.",
   },
 ];
 

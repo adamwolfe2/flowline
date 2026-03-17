@@ -1,46 +1,22 @@
-"use client";
-
-const LOGOS = [
-  "Wayfair",
-  "The Athletic",
-  "Harvard",
-  "Berkeley",
-  "TrueCar",
-  "Bombas",
-  "Makeship",
-];
-
 export function LogoStrip() {
-  const items = [...LOGOS, ...LOGOS, ...LOGOS, ...LOGOS];
-
   return (
-    <section className="bg-white py-8 border-b border-[#E5E7EB] overflow-hidden">
-      <div className="relative">
-        <div className="flex animate-marquee gap-16 items-center">
-          {items.map((logo, i) => (
-            <span
-              key={i}
-              className="text-lg font-bold tracking-tight whitespace-nowrap select-none opacity-40 text-[#737373]"
-            >
-              {logo}
-            </span>
-          ))}
+    <section className="bg-white border-b border-[#E5E7EB] py-6 px-6">
+      <div className="max-w-4xl mx-auto flex items-center justify-center gap-8 md:gap-16 text-center">
+        <div>
+          <p className="text-2xl font-bold text-[#111827]">500+</p>
+          <p className="text-xs text-[#6B7280]">Businesses live</p>
+        </div>
+        <div className="w-px h-8 bg-[#E5E7EB]" />
+        <div>
+          <p className="text-2xl font-bold text-[#111827]">12,000+</p>
+          <p className="text-xs text-[#6B7280]">Calls booked</p>
+        </div>
+        <div className="w-px h-8 bg-[#E5E7EB]" />
+        <div>
+          <p className="text-2xl font-bold text-[#111827]">2 min</p>
+          <p className="text-xs text-[#6B7280]">Average setup time</p>
         </div>
       </div>
-      <style jsx>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .animate-marquee {
-          animation: marquee 30s linear infinite;
-          width: max-content;
-        }
-      `}</style>
     </section>
   );
 }

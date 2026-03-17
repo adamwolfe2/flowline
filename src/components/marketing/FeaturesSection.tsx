@@ -193,11 +193,10 @@ export function FeaturesSection() {
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Everything you need to convert
+            Your funnel, fully built
           </h2>
           <p className="text-[#6B7280] max-w-xl">
-            From AI-powered quiz generation to smart scoring and calendar
-            routing — all in one platform.
+            Tell us what you sell. We handle the questions, scoring, and calendar routing. You just share the link.
           </p>
         </div>
 

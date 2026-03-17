@@ -105,11 +105,10 @@ export function TemplatesSection() {
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Start from proven funnel templates
+            Start with a template. Live in minutes.
           </h2>
           <p className="text-[#6B7280] max-w-xl">
-            Clone pre-built funnels, customize with AI, deploy instantly. No
-            per-lead fees.
+            Pick a funnel, tweak the copy, upload your logo. No per-lead fees, ever.
           </p>
         </div>
 

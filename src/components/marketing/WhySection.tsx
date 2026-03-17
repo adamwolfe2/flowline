@@ -207,7 +207,7 @@ export function WhySection() {
     {
       title: "Control your calendar routing",
       description:
-        "Assign different calendars based on lead quality. Hot leads meet your AE, warm leads meet your SDR.",
+        "Hot leads book a sales call. Warm leads get a nurture sequence. Cold leads get filtered out automatically.",
       illustration: <CalendarTable />,
     },
   ];
@@ -223,11 +223,10 @@ export function WhySection() {
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Build and deploy with confidence
+            Know exactly why leads don&apos;t book
           </h2>
           <p className="text-[#6B7280] max-w-xl">
-            AI builds your funnel. You control who sees it, how leads are
-            scored, and where they book.
+            Every drop-off. Every answer. Every booking. All tracked automatically.
           </p>
         </div>
 

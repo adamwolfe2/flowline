@@ -56,7 +56,7 @@ export function MarketingFooter() {
               </span>
             </Link>
             <p className="text-sm text-[#6B7280] leading-relaxed max-w-xs">
-              The AI funnel builder that books calls.
+              VSL funnels. Built in minutes. No agency needed.
             </p>
           </div>
 

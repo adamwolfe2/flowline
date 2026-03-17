@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 const PROMPTS = [
   "I sell business coaching to 6-figure entrepreneurs...",
@@ -215,6 +215,11 @@ export function HeroSection() {
               </div>
             </div>
           </div>
+
+          {/* Sub-prompt text */}
+          <p className="text-sm text-white/60 mt-4 text-center" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.06)" }}>
+            Free to start. Live in under 2 minutes.
+          </p>
         </motion.div>
       </div>
     </section>

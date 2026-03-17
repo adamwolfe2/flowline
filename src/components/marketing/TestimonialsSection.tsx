@@ -62,13 +62,13 @@ export function TestimonialsSection() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<Heart className="w-3.5 h-3.5" />}>
-            Wall of Love
+            Results
           </SectionLabel>
           <h2
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            Join 500+ businesses booking calls with MyVSL
+            What happens when you go live
           </h2>
         </div>
 

@@ -62,7 +62,7 @@ export function BottomCTA() {
             className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
             style={{ fontFamily: "var(--font-outfit)" }}
           >
-            What will you build?
+            Your funnel is 2 minutes away.
           </h2>
         </motion.div>
 
@@ -108,7 +108,7 @@ export function BottomCTA() {
                 className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-lg transition-all hover:brightness-95"
                 style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
               >
-                Get started
+                Build your funnel free
                 <ChevronDown className="w-3.5 h-3.5 -rotate-90" />
               </button>
             </div>
