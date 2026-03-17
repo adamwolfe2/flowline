@@ -210,32 +210,54 @@ export function HeroSection() {
           <span>for your entire team.</span>
         </motion.div>
 
-        {/* Floating prompt box */}
+        {/* Floating prompt box + wide browser mockup */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.35 }}
           className="relative w-full max-w-2xl"
         >
-          {/* Browser mockup behind */}
-          <div className="absolute -left-6 -right-6 top-10 bottom-[-50px] bg-white/30 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg hidden md:block">
-            <div className="h-8 flex items-center px-3 gap-1.5 border-b border-white/15">
-              <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
-              <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
-              <div className="w-2.5 h-2.5 rounded-full bg-white/40" />
-              <div className="flex-1 mx-6">
-                <div className="bg-white/30 rounded px-2 py-0.5 text-[10px] text-white/60 text-center w-44 mx-auto">
-                  https://quiz.yoursite.com
+          {/* WIDE browser mockup — spans far beyond the prompt box */}
+          <div
+            className="absolute top-10 hidden md:block"
+            style={{
+              left: "calc(-50vw + 50%)",
+              right: "calc(-50vw + 50%)",
+              bottom: "-60px",
+            }}
+          >
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-white/25 backdrop-blur-[2px] rounded-2xl border border-white/20 shadow-lg overflow-hidden">
+                <div className="h-9 flex items-center px-4 gap-2 border-b border-white/10">
+                  {/* Browser chrome left */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-white/40 text-xs">‹</span>
+                    <span className="text-white/30 text-xs">›</span>
+                    <span className="text-white/30 text-xs">⟨/⟩</span>
+                  </div>
+                  <div className="flex-1 mx-8">
+                    <div className="bg-white/20 rounded-md px-3 py-1 text-[11px] text-white/50 text-center max-w-xs mx-auto flex items-center justify-center gap-1.5">
+                      <span className="text-white/30">🔍</span>
+                      https://yoursite.com
+                    </div>
+                  </div>
+                  {/* Browser chrome right */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] text-white/50 border border-white/20 rounded-md px-3 py-1 bg-white/5">
+                      Publish
+                    </span>
+                    <span className="text-white/30 text-xs">▫</span>
+                    <span className="text-white/30 text-xs">⚙</span>
+                  </div>
                 </div>
+                {/* Empty content area — the prompt card sits on top */}
+                <div className="h-[180px]" />
               </div>
-              <span className="text-[10px] text-white/50 border border-white/20 rounded px-2 py-0.5">
-                Publish
-              </span>
             </div>
           </div>
 
-          {/* Main prompt card */}
-          <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-10">
+          {/* Main prompt card — centered, on top of browser mockup */}
+          <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-10">
             <div className="relative">
               <textarea
                 value={userInput}
@@ -258,8 +280,8 @@ export function HeroSection() {
 
             <div className="flex items-center justify-between px-5 pb-4">
               <div className="flex items-center gap-3">
-                <button className="text-[11px] text-[#A3A3A3] hover:text-[#737373] transition-colors">
-                  New Suggestion
+                <button className="flex items-center gap-1 text-[12px] text-[#A3A3A3] hover:text-[#737373] transition-colors">
+                  <span className="text-[#D4D4D4]">↻</span> New Suggestion
                 </button>
                 <div className="flex items-center gap-1">
                   <div className="w-5 h-5 rounded bg-emerald-50 flex items-center justify-center text-[10px] text-emerald-600 font-medium">
@@ -272,15 +294,24 @@ export function HeroSection() {
                     L
                   </div>
                 </div>
+                <span className="text-[#D4D4D4] text-sm">📎</span>
+                <span className="text-[#D4D4D4] text-sm">▶</span>
               </div>
-              <button
-                onClick={handleSubmit}
-                className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-lg transition-all hover:brightness-95"
-                style={{ backgroundColor: "#F6C744", color: "#333333" }}
-              >
-                Build it
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center">
+                <button
+                  onClick={handleSubmit}
+                  className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-l-lg transition-all hover:brightness-95"
+                  style={{ backgroundColor: "#F6C744", color: "#333333" }}
+                >
+                  Build it
+                </button>
+                <button
+                  className="flex items-center px-2.5 py-2.5 rounded-r-lg border-l border-[#E5B53D] transition-all hover:brightness-95"
+                  style={{ backgroundColor: "#F6C744", color: "#333333" }}
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
