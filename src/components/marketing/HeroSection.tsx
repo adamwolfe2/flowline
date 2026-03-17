@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+// lucide-react icons removed — using inline SVG for arrow
 
 const PROMPTS = [
   "I sell business coaching to 6-figure entrepreneurs...",
@@ -198,21 +198,16 @@ export function HeroSection() {
             </div>
 
             <div className="flex items-center justify-end px-5 pb-4">
-              <div className="flex items-center">
-                <button
-                  onClick={handleSubmit}
-                  className="flex items-center gap-1.5 text-sm font-semibold pl-5 pr-3 py-2.5 rounded-l-lg transition-all hover:brightness-95"
-                  style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
-                >
-                  Build it
-                </button>
-                <button
-                  className="flex items-center pl-2.5 pr-3 py-2.5 rounded-r-lg border-l border-[#245840] transition-all hover:brightness-95"
-                  style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
-                >
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              <button
+                onClick={handleSubmit}
+                className="flex items-center gap-2 text-sm font-semibold px-6 py-2.5 rounded-lg transition-all hover:brightness-95"
+                style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
+              >
+                Build it
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </button>
             </div>
           </div>
 
