@@ -191,7 +191,7 @@ export function FeaturesSection() {
           </SectionLabel>
           <h2
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-outfit)" }}
+            style={{ fontFamily: "var(--font-lora)" }}
           >
             Your funnel, fully built
           </h2>

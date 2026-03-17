@@ -30,7 +30,7 @@ export function MarketingNav() {
           </div>
           <span
             className="text-lg font-semibold text-[#171717]"
-            style={{ fontFamily: "var(--font-outfit)" }}
+            style={{ fontFamily: "var(--font-lora)" }}
           >
             MyVSL
           </span>

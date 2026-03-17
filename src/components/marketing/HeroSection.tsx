@@ -93,7 +93,7 @@ export function HeroSection() {
           <h1
             className="text-[48px] sm:text-[56px] md:text-[68px] font-semibold leading-none text-white"
             style={{
-              fontFamily: "var(--font-outfit)",
+              fontFamily: "var(--font-lora)",
               textShadow: "0 2px 24px rgba(0,0,0,0.12)",
             }}
           >

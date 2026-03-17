@@ -60,7 +60,7 @@ export function BottomCTA() {
         >
           <h2
             className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
-            style={{ fontFamily: "var(--font-outfit)" }}
+            style={{ fontFamily: "var(--font-lora)" }}
           >
             Your funnel is 2 minutes away.
           </h2>
