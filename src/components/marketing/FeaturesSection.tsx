@@ -43,7 +43,7 @@ function AIGenerationMockup() {
             </div>
             <div>
               <p className="text-xs text-[#111827] font-medium">{item.q}</p>
-              <p className="text-[10px] text-[#A3A3A3]">AI generated</p>
+              <p className="text-[10px] text-[#9CA3AF]">AI generated</p>
             </div>
           </motion.div>
         ))}
@@ -150,7 +150,7 @@ function DomainMockup() {
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 w-full max-w-[240px]">
         <div className="flex items-center justify-between mb-3">
-          <Globe className="w-4 h-4 text-[#A3A3A3]" />
+          <Globe className="w-4 h-4 text-[#9CA3AF]" />
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
             <span className="text-[10px] text-emerald-600 font-medium">
@@ -159,7 +159,7 @@ function DomainMockup() {
           </div>
         </div>
         <p className="text-sm font-medium text-[#111827]">quiz.acme.com</p>
-        <p className="text-[10px] text-[#A3A3A3] mt-1">SSL secured</p>
+        <p className="text-[10px] text-[#9CA3AF] mt-1">SSL secured</p>
       </div>
     </div>
   );
@@ -175,7 +175,7 @@ function EnterpriseMockup() {
         <span className="text-xs font-semibold text-[#111827]">
           Enterprise Ready
         </span>
-        <span className="text-[10px] text-[#A3A3A3]">SOC 2 Compliant</span>
+        <span className="text-[10px] text-[#9CA3AF]">SOC 2 Compliant</span>
       </div>
     </div>
   );

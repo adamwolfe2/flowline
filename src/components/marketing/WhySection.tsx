@@ -21,7 +21,7 @@ function SectionLabel({
 
 function WaterfallChart() {
   const bars = [
-    { label: "Visitors", pct: 100, color: "#D4D4D4" },
+    { label: "Visitors", pct: 100, color: "#D1D5DB" },
     { label: "Started", pct: 78, color: "#2D6A4F" },
     { label: "Completed", pct: 56, color: "#2D6A4F" },
     { label: "Qualified", pct: 38, color: "#2D6A4F" },
@@ -37,7 +37,7 @@ function WaterfallChart() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 + i * 0.12, duration: 0.3 }}
-            className="text-[10px] font-medium text-[#A3A3A3]"
+            className="text-[10px] font-medium text-[#9CA3AF]"
           >
             {bar.pct}%
           </motion.span>
@@ -82,7 +82,7 @@ function ScoringDiagram() {
           viewport={{ once: true }}
           transition={{ delay: 0.4, duration: 0.3 }}
           style={{ transformOrigin: "top" }}
-          className="h-4 w-px bg-[#D4D4D4]"
+          className="h-4 w-px bg-[#D1D5DB]"
         />
 
         {/* Branch */}
@@ -126,7 +126,7 @@ function ScoringDiagram() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.85 + i * 0.12, duration: 0.2 }}
                 style={{ transformOrigin: "top" }}
-                className="h-4 w-px bg-[#D4D4D4]"
+                className="h-4 w-px bg-[#D1D5DB]"
               />
               <div
                 className={`${tier.cls} text-[10px] font-medium px-3 py-1.5 rounded-md text-center`}
@@ -164,7 +164,7 @@ function CalendarTable() {
     <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="w-full max-w-[280px] bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
         <div className="px-4 py-2.5 border-b border-[#E5E7EB] bg-[#F9FAFB]">
-          <span className="text-[10px] font-semibold text-[#A3A3A3] uppercase tracking-wider">
+          <span className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider">
             Calendar Routing
           </span>
         </div>

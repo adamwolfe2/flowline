@@ -77,16 +77,16 @@ export function BottomCTA() {
           <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm">
             {/* Browser chrome */}
             <div className="h-9 flex items-center px-4 gap-1.5 border-b border-[#E5E7EB]">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#D4D4D4]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
             </div>
 
             {/* Prompt area */}
             <div className="px-6 py-5 min-h-[100px] text-left">
-              <p className="text-base text-[#A3A3A3]">
+              <p className="text-base text-[#9CA3AF]">
                 {displayText}
-                <span className="animate-pulse text-[#D4D4D4]">|</span>
+                <span className="animate-pulse text-[#D1D5DB]">|</span>
               </p>
             </div>
 

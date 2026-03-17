@@ -121,7 +121,7 @@ export function TemplatesSection() {
               className={`text-sm px-4 py-2 rounded-full transition-colors border ${
                 activeCategory === cat
                   ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
-                  : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D4D4D4]"
+                  : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
               }`}
             >
               {cat}
@@ -147,10 +147,10 @@ export function TemplatesSection() {
                     {t.title}
                   </h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#A3A3A3]">
+                    <span className="text-xs text-[#9CA3AF]">
                       by {t.author}
                     </span>
-                    <span className="text-xs text-[#A3A3A3]">
+                    <span className="text-xs text-[#9CA3AF]">
                       {t.clones} clones
                     </span>
                   </div>

@@ -104,7 +104,7 @@ export function TestimonialsSection() {
                   <p className="text-sm font-medium text-[#111827]">
                     {t.name}
                   </p>
-                  <p className="text-xs text-[#A3A3A3]">
+                  <p className="text-xs text-[#9CA3AF]">
                     {t.title}, {t.company}
                   </p>
                 </div>
@@ -121,7 +121,7 @@ export function TestimonialsSection() {
                 key={r.platform}
                 className="flex flex-col items-center py-6 px-4"
               >
-                <span className="text-xs font-semibold text-[#A3A3A3] uppercase tracking-wider mb-2">
+                <span className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-2">
                   {r.platform}
                 </span>
                 <div className="flex items-center gap-0.5 mb-1">

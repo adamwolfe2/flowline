@@ -83,7 +83,7 @@ export function MarketingFooter() {
         </div>
 
         <div className="border-t border-[#E5E7EB] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[#A3A3A3]">
+          <p className="text-xs text-[#9CA3AF]">
             &copy; 2026 MyVSL, Inc.
           </p>
         </div>

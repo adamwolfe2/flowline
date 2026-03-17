@@ -10,6 +10,7 @@ const isProtectedRoute = createRouteMatcher([
 const isPlatformDomain = (hostname: string) => {
   const platform = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? 'localhost';
   return hostname === platform
+    || hostname === `www.${platform}`
     || hostname === `app.${platform}`
     || hostname.includes('localhost')
     || hostname.includes('vercel.app');

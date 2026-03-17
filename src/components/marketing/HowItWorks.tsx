@@ -63,11 +63,11 @@ function BuilderMockup() {
     >
       {/* Browser chrome */}
       <div className="h-10 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center px-4 gap-2">
-        <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
-        <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
-        <div className="w-3 h-3 rounded-full bg-[#D4D4D4]" />
+        <div className="w-3 h-3 rounded-full bg-[#D1D5DB]" />
+        <div className="w-3 h-3 rounded-full bg-[#D1D5DB]" />
+        <div className="w-3 h-3 rounded-full bg-[#D1D5DB]" />
         <div className="flex-1 mx-8">
-          <div className="bg-white rounded border border-[#E5E7EB] px-3 py-1 text-xs text-[#A3A3A3] text-center max-w-[240px] mx-auto">
+          <div className="bg-white rounded border border-[#E5E7EB] px-3 py-1 text-xs text-[#9CA3AF] text-center max-w-[240px] mx-auto">
             app.getmyvsl.com/builder
           </div>
         </div>
@@ -168,14 +168,14 @@ function BuilderMockup() {
         {/* Right: Live Preview — quiz UI animates in */}
         <div className="bg-[#F9FAFB] p-6 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-[#A3A3A3] uppercase tracking-wider">
+            <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">
               Live Preview
             </span>
             <div className="flex items-center gap-1.5">
               <div
-                className={`w-2 h-2 rounded-full transition-colors duration-500 ${stage >= 2 ? "bg-emerald-400" : "bg-[#D4D4D4]"}`}
+                className={`w-2 h-2 rounded-full transition-colors duration-500 ${stage >= 2 ? "bg-emerald-400" : "bg-[#D1D5DB]"}`}
               />
-              <span className="text-[10px] text-[#A3A3A3]">
+              <span className="text-[10px] text-[#9CA3AF]">
                 {stage >= 2 ? "Synced" : "Waiting"}
               </span>
             </div>
@@ -183,7 +183,7 @@ function BuilderMockup() {
 
           {stage < 2 && (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-sm text-[#D4D4D4]">
+              <p className="text-sm text-[#D1D5DB]">
                 Waiting for AI to build...
               </p>
             </div>
@@ -207,7 +207,7 @@ function BuilderMockup() {
                 <h4 className="text-sm font-semibold text-[#111827] mb-1">
                   Coaching Qualifier
                 </h4>
-                <p className="text-xs text-[#A3A3A3] mb-4">
+                <p className="text-xs text-[#9CA3AF] mb-4">
                   Question 1 of 3
                 </p>
               </motion.div>

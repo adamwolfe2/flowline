@@ -86,7 +86,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         <div className="flex items-center justify-center gap-3 mb-10">
           <span
             className={`text-sm font-medium transition-colors ${
-              !annual ? "text-[#111827]" : "text-[#A3A3A3]"
+              !annual ? "text-[#111827]" : "text-[#9CA3AF]"
             }`}
           >
             Monthly
@@ -94,7 +94,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
           <button
             onClick={() => setAnnual(!annual)}
             className={`relative h-6 w-11 rounded-full transition-colors ${
-              annual ? "bg-[#2D6A4F]" : "bg-[#D4D4D4]"
+              annual ? "bg-[#2D6A4F]" : "bg-[#D1D5DB]"
             }`}
             aria-label="Toggle annual billing"
           >
@@ -106,7 +106,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
           </button>
           <span
             className={`text-sm font-medium transition-colors ${
-              annual ? "text-[#111827]" : "text-[#A3A3A3]"
+              annual ? "text-[#111827]" : "text-[#9CA3AF]"
             }`}
           >
             Annual
@@ -153,16 +153,16 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                       ${price}
                     </span>
                     {price > 0 && (
-                      <span className="text-sm text-[#A3A3A3]">/mo</span>
+                      <span className="text-sm text-[#9CA3AF]">/mo</span>
                     )}
                   </div>
                   {price > 0 && annual && (
-                    <p className="text-xs text-[#A3A3A3] mt-1">
+                    <p className="text-xs text-[#9CA3AF] mt-1">
                       Billed annually (${price * 12}/yr)
                     </p>
                   )}
                   {price === 0 && (
-                    <p className="text-xs text-[#A3A3A3] mt-1">
+                    <p className="text-xs text-[#9CA3AF] mt-1">
                       Free forever
                     </p>
                   )}
