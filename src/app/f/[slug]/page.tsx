@@ -6,6 +6,9 @@ import { FunnelConfig } from "@/types";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const getCachedFunnel = unstable_cache(
   async (slug: string) => getFunnelBySlug(slug),
@@ -23,17 +26,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const funnel = await getCachedFunnel(slug);
   if (!funnel) return { title: "Not Found" };
   const config = funnel.config as FunnelConfig;
+  const metaTitle = config.meta?.title || config.brand.name;
+  const metaDesc = config.meta?.description || "";
   return {
-    title: config.meta?.title || config.brand.name,
-    description: config.meta?.description || "",
+    title: metaTitle,
+    description: metaDesc,
     openGraph: {
-      title: config.meta?.title || config.brand.name,
-      description: config.meta?.description || "",
-      images: [{
-        url: `/api/og?title=${encodeURIComponent(config.brand.name)}&description=${encodeURIComponent(config.quiz.headline)}`,
-        width: 1200,
-        height: 630,
-      }],
+      title: metaTitle,
+      description: metaDesc,
+      images: [`/api/og/funnel/${funnel.id}`],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metaTitle,
+      description: metaDesc,
+      images: [`/api/og/funnel/${funnel.id}`],
     },
   };
 }
@@ -58,6 +65,12 @@ export default async function FunnelPage({ params, searchParams }: Props) {
     sessionId = crypto.randomUUID();
   }
 
+  // Check if funnel owner has Pro+ plan (hide branding)
+  const [funnelOwner] = await db.select({ plan: users.plan })
+    .from(users)
+    .where(eq(users.id, funnel.userId));
+  const hideBranding = funnelOwner?.plan === "pro" || funnelOwner?.plan === "agency";
+
   // A/B testing: check for active variants
   const variants = await getActiveVariants(funnel.id);
   let activeConfig = config;
@@ -70,5 +83,5 @@ export default async function FunnelPage({ params, searchParams }: Props) {
     }
   }
 
-  return <FunnelClient config={activeConfig} funnelId={funnel.id} sessionId={sessionId} />;
+  return <FunnelClient config={activeConfig} funnelId={funnel.id} sessionId={sessionId} hideBranding={hideBranding} />;
 }

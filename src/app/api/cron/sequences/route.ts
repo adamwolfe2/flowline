@@ -10,7 +10,12 @@ export const maxDuration = 60;
 export async function GET(req: Request) {
   // Verify cron secret
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET;
+
+  // Vercel crons send this header automatically
+  const isVercelCron = req.headers.get("x-vercel-cron") === "true";
+
+  if (!isVercelCron && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -67,6 +72,7 @@ export async function GET(req: Request) {
           const funnelConfig = funnel?.config as Record<string, unknown> | undefined;
           const brand = funnelConfig?.brand as Record<string, string> | undefined;
           const fromName = brand?.name || "MyVSL";
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";
 
           // Replace placeholders in body
           const emailBody = step.body
@@ -78,7 +84,45 @@ export async function GET(req: Request) {
             from: `${fromName} <noreply@getmyvsl.com>`,
             to: lead.email,
             subject: step.subject,
-            text: emailBody,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;padding:40px 20px;">
+                  <tr>
+                    <td align="center">
+                      <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+                        <!-- Header -->
+                        <tr>
+                          <td style="padding:24px 32px;border-bottom:1px solid #f3f4f6;">
+                            <span style="font-size:16px;font-weight:600;color:#111827;">${fromName}</span>
+                          </td>
+                        </tr>
+                        <!-- Body -->
+                        <tr>
+                          <td style="padding:32px;color:#374151;font-size:15px;line-height:1.6;">
+                            ${emailBody.split('\n').map(line => `<p style="margin:0 0 12px 0;">${line}</p>`).join('')}
+                          </td>
+                        </tr>
+                        <!-- Footer -->
+                        <tr>
+                          <td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
+                            <p style="margin:0;font-size:11px;color:#9ca3af;">
+                              Sent by ${fromName} via <a href="${appUrl}" style="color:#9ca3af;">MyVSL</a>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </body>
+              </html>
+            `,
           });
           sent++;
         }

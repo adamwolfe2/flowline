@@ -29,6 +29,7 @@ export const funnels = pgTable('funnels', {
   publishedAt: timestamp('published_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  shareToken: text('share_token').unique(),
 });
 
 export const leads = pgTable('leads', {

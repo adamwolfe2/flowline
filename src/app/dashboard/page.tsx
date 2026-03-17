@@ -7,6 +7,7 @@ import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { TemplateGallery } from "@/components/dashboard/TemplateGallery";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 
@@ -95,6 +96,8 @@ function DashboardContent() {
         <h1 className="text-2xl font-bold text-gray-900">Your Funnels</h1>
         <p className="text-sm text-gray-500 mt-1">Create, manage, and monitor your booking funnels.</p>
       </div>
+
+      <TemplateGallery onCreated={loadFunnels} />
 
       {!loading && funnels.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 mb-6">

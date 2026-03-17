@@ -16,9 +16,10 @@ interface FunnelClientProps {
   config: FunnelConfig;
   funnelId: string;
   sessionId: string;
+  hideBranding?: boolean;
 }
 
-export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps) {
+export function FunnelClient({ config, funnelId, sessionId, hideBranding }: FunnelClientProps) {
   const totalQuestions = config.quiz.questions.length;
   const hasVideo = !!(config.quiz.video?.enabled && config.quiz.video?.url);
   const videoOffset = hasVideo ? 1 : 0;
@@ -209,23 +210,25 @@ export function FunnelClient({ config, funnelId, sessionId }: FunnelClientProps)
           )}
         </AnimatePresence>
 
-        {/* Powered by badge — shown for free plan, hidden for Pro+ later */}
-        <div className="mt-8 text-center">
-          <a
-            href="https://getmyvsl.com?utm_source=powered_by&utm_medium=funnel&utm_campaign=badge"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[10px] text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-              <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z" />
-              <path d="M6 18h12" />
-              <path d="M6 14h12" />
-              <path d="m11.6 4 .4 4 .4-4" />
-            </svg>
-            Powered by MyVSL
-          </a>
-        </div>
+        {/* Powered by badge — hidden for Pro+ plans */}
+        {!hideBranding && (
+          <div className="mt-8 text-center">
+            <a
+              href="https://getmyvsl.com?utm_source=powered_by&utm_medium=funnel&utm_campaign=badge"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[10px] text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z" />
+                <path d="M6 18h12" />
+                <path d="M6 14h12" />
+                <path d="m11.6 4 .4 4 .4-4" />
+              </svg>
+              Powered by MyVSL
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

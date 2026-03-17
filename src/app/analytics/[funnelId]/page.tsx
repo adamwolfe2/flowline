@@ -17,6 +17,10 @@ import {
   Tablet,
   ChevronLeft,
   ChevronRight,
+  Share2,
+  Link2,
+  Link2Off,
+  Check,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -151,6 +155,36 @@ export default function AnalyticsDashboard() {
   const [leadsPage, setLeadsPage] = useState(0);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnelId}/share`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const { shareToken: token } = await res.json();
+      setShareToken(token);
+      const url = `${window.location.origin}/analytics/shared/${token}`;
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // silently fail
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleRevokeShare = async () => {
+    try {
+      await fetch(`/api/funnels/${funnelId}/share`, { method: "DELETE" });
+      setShareToken(null);
+    } catch {
+      // silently fail
+    }
+  };
 
   const fetchData = useCallback(async (page = 0, range: string = timeRange) => {
     try {
@@ -247,6 +281,33 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {shareToken ? (
+              <button
+                onClick={handleRevokeShare}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Link2Off className="w-3 h-3" />
+                Revoke link
+              </button>
+            ) : (
+              <button
+                onClick={handleShare}
+                disabled={sharing}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3 h-3 text-green-600" />
+                    <span className="text-green-600">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3 h-3" />
+                    Share
+                  </>
+                )}
+              </button>
+            )}
             {funnel.published && (
               <a href={`/f/${funnel.slug}`} target="_blank" rel="noopener noreferrer">
                 <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">

@@ -7,21 +7,21 @@ import { useRef, useState, useEffect } from "react";
 const steps = [
   {
     num: "01",
-    title: "Type what you sell",
+    title: "Build your funnel",
     description:
-      "One sentence is all it takes. AI writes your qualifying questions, scores every answer, and routes leads to your calendar.",
+      "Use AI or templates to create a qualifying quiz in minutes. Describe your business and let AI generate questions, scoring, and branding.",
   },
   {
     num: "02",
-    title: "Drop in your logo",
+    title: "Share your link",
     description:
-      "Upload your logo, pick a color. Your funnel looks like it cost $5,000 to build. It took 30 seconds.",
+      "Publish and share your funnel link anywhere. Custom domains, embed on your site, or send directly to prospects.",
   },
   {
     num: "03",
-    title: "Share the link, get booked",
+    title: "Book qualified calls",
     description:
-      "Publish to your own domain. No per-lead fees. Ever.",
+      "Leads get scored and routed to the right calendar. Hot leads book your premium slots. Cold leads get filtered out automatically.",
   },
 ];
 
