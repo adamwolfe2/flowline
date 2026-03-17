@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Zap, ArrowRight, ArrowLeft, Loader2, Sparkles, Palette, Calendar, Globe, Check, PartyPopper, Users, Briefcase, Laptop, Home, Dumbbell, LineChart } from "lucide-react";
+import { Zap, ArrowRight, ArrowLeft, Loader2, Palette, Calendar, Globe, Check, PartyPopper, Users, Briefcase, Laptop, Home, Dumbbell, LineChart, Upload } from "lucide-react";
+import Image from "next/image";
 import { TEMPLATES, Template } from "@/lib/templates";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -40,8 +41,13 @@ function OnboardingContent() {
   const [publishing, setPublishing] = useState(false);
   const [createdFunnelId, setCreatedFunnelId] = useState<string | null>(null);
 
+  // Custom logo component for steps array (matches Lucide icon signature)
+  const LogoIcon = ({ className }: { className?: string }) => (
+    <Image src="/logo.png" alt="MyVSL" width={16} height={16} className={className} />
+  );
+
   const steps = [
-    { icon: Sparkles, label: "Describe" },
+    { icon: LogoIcon, label: "Describe" },
     { icon: Zap, label: "Preview" },
     { icon: Palette, label: "Brand" },
     { icon: Calendar, label: "Calendars" },
@@ -172,7 +178,7 @@ function OnboardingContent() {
         return (
           <div className="max-w-lg mx-auto text-center">
             <div className="w-14 h-14 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Sparkles className="w-7 h-7 text-white" />
+              <Image src="/logo.png" alt="MyVSL" width={28} height={28} />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Start with a template</h1>
             <p className="text-sm text-gray-500 mb-6">Pick an industry template to get started instantly, or describe your own below.</p>
@@ -222,7 +228,7 @@ function OnboardingContent() {
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <Image src="/logo.png" alt="" width={16} height={16} />
                   Generate My Funnel
                 </>
               )}
@@ -347,17 +353,53 @@ function OnboardingContent() {
                   </div>
                 </div>
               </div>
+              {/* Logo Upload */}
               <div>
-                <Label className="text-xs text-gray-500 mb-1.5">Logo URL (optional)</Label>
-                <Input
-                  value={config.brand.logoUrl}
-                  onChange={e => setConfig(prev => ({
-                    ...prev,
-                    brand: { ...prev.brand, logoUrl: e.target.value },
-                  }))}
-                  placeholder="https://your-site.com/logo.png"
-                  className="text-sm"
-                />
+                <Label className="text-xs text-[#6B7280] mb-1.5">Logo (optional)</Label>
+                {config.brand.logoUrl ? (
+                  <div className="flex items-center gap-3 mb-2">
+                    <img src={config.brand.logoUrl} alt="Logo" className="w-12 h-12 rounded-lg object-contain border border-[#E5E7EB]" />
+                    <button
+                      onClick={() => setConfig(prev => ({ ...prev, brand: { ...prev.brand, logoUrl: "" } }))}
+                      className="text-xs text-red-500 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-[#E5E7EB] rounded-xl cursor-pointer hover:border-[#2D6A4F] transition-colors bg-[#F9FAFB]">
+                    <Upload className="w-5 h-5 text-[#9CA3AF] mb-1" />
+                    <span className="text-xs text-[#9CA3AF]">Click to upload logo</span>
+                    <span className="text-[10px] text-[#D1D5DB]">PNG, JPG, SVG up to 2MB</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 2 * 1024 * 1024) {
+                          toast.error("Logo must be under 2MB");
+                          return;
+                        }
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        try {
+                          const res = await fetch("/api/upload/logo", { method: "POST", body: formData });
+                          if (!res.ok) {
+                            toast.error("Upload failed — sign in first to upload logos");
+                            return;
+                          }
+                          const { url } = await res.json();
+                          setConfig(prev => ({ ...prev, brand: { ...prev.brand, logoUrl: url } }));
+                          toast.success("Logo uploaded");
+                        } catch {
+                          toast.error("Upload failed");
+                        }
+                      }}
+                    />
+                  </label>
+                )}
               </div>
             </div>
 

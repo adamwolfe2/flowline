@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles, Globe, Shield } from "lucide-react";
+import { Globe, Shield, Wand2 } from "lucide-react";
+import Image from "next/image";
 
 
 function SectionLabel({
@@ -39,7 +40,7 @@ function AIGenerationMockup() {
             className="bg-white rounded-xl border border-[#E5E7EB] p-3.5 flex items-center gap-3"
           >
             <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/15 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-[#2D6A4F]" />
+              <Image src="/logo.png" alt="MyVSL" width={16} height={16} />
             </div>
             <div>
               <p className="text-xs text-[#111827] font-medium">{item.q}</p>
@@ -186,7 +187,7 @@ export function FeaturesSection() {
     <section className="bg-white border-t border-[#E5E7EB] py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
-          <SectionLabel icon={<Sparkles className="w-3.5 h-3.5" />}>
+          <SectionLabel icon={<Wand2 className="w-3.5 h-3.5" />}>
             Features
           </SectionLabel>
           <h2

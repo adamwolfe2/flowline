@@ -17,18 +17,20 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
     shortcut: "/favicon.ico",
   },
+  metadataBase: new URL("https://getmyvsl.com"),
   openGraph: {
-    title: "MyVSL — AI Funnel Builder That Books Calls",
-    description: "Three questions. Smart scoring. Automatic calendar routing.",
-    images: [{ url: "/api/og?title=MyVSL&description=AI-powered+funnel+builder+that+books+calls", width: 1200, height: 630 }],
+    title: "MyVSL — Your VSL Funnel. Built in 60 Seconds.",
+    description: "Describe your product in one sentence. AI generates the questions, scoring, and booking flow. You're live in minutes.",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
     type: "website",
     siteName: "MyVSL",
+    url: "https://getmyvsl.com",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MyVSL — AI Funnel Builder That Books Calls",
-    description: "Build quiz-to-calendar booking funnels in minutes.",
-    images: ["/api/og?title=MyVSL&description=AI-powered+funnel+builder+that+books+calls"],
+    title: "MyVSL — Your VSL Funnel. Built in 60 Seconds.",
+    description: "Describe your product in one sentence. AI generates the questions, scoring, and booking flow. You're live in minutes.",
+    images: ["/og.png"],
   },
 };
 

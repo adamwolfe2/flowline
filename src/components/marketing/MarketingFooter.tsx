@@ -5,19 +5,19 @@ const columns = [
   {
     title: "Product",
     links: [
-      { label: "Builder", href: "/product" },
-      { label: "Analytics", href: "/product" },
-      { label: "Templates", href: "/product" },
+      { label: "Builder", href: "/#features" },
+      { label: "Analytics", href: "/#features" },
+      { label: "Templates", href: "/#templates" },
     ],
   },
   {
     title: "Use Cases",
     links: [
-      { label: "Coaches", href: "/use-cases" },
-      { label: "Agencies", href: "/use-cases" },
-      { label: "SaaS", href: "/use-cases" },
-      { label: "Consultants", href: "/use-cases" },
-      { label: "Real Estate", href: "/use-cases" },
+      { label: "Coaches", href: "/onboarding" },
+      { label: "Agencies", href: "/onboarding" },
+      { label: "SaaS", href: "/onboarding" },
+      { label: "Consultants", href: "/onboarding" },
+      { label: "Real Estate", href: "/onboarding" },
     ],
   },
   {

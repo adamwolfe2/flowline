@@ -31,11 +31,12 @@ Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { success } = await checkRateLimit(aiLimiter, userId);
+  // Rate limit: by userId if authenticated, by IP if not
+  const identifier = userId || req.headers.get("x-forwarded-for") || "anonymous";
+  const { success } = await checkRateLimit(aiLimiter, identifier);
   if (!success) {
-    return NextResponse.json({ error: "AI generation limit reached. Try again tomorrow." }, { status: 429 });
+    return NextResponse.json({ error: "AI generation limit reached. Try again later." }, { status: 429 });
   }
 
   const { prompt } = await req.json();

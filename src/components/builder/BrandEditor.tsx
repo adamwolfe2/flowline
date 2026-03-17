@@ -4,6 +4,8 @@ import { FunnelConfig } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
+import { Upload } from "lucide-react";
+import { toast } from "sonner";
 
 interface BrandEditorProps {
   config: FunnelConfig;
@@ -40,19 +42,59 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
         />
       </div>
 
+      {/* Logo Upload */}
       <div>
-        <Label className="text-xs text-gray-500 mb-1.5">Logo URL</Label>
-        <Input
-          value={config.brand.logoUrl}
-          onChange={e => {
-            const newConfig = JSON.parse(JSON.stringify(config));
-            newConfig.brand.logoUrl = e.target.value;
-            onSave(newConfig);
-          }}
-          placeholder="https://... or /logo.svg"
-          className="text-sm"
-        />
-        <p className="text-[11px] text-gray-400 mt-1">Paste a public URL to your logo image. File upload coming soon.</p>
+        <Label className="text-xs text-gray-500 mb-1.5">Logo</Label>
+        {config.brand.logoUrl ? (
+          <div className="flex items-center gap-3 mb-2">
+            <img src={config.brand.logoUrl} alt="Logo" className="w-12 h-12 rounded-lg object-contain border border-[#E5E7EB]" />
+            <button
+              onClick={() => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                newConfig.brand.logoUrl = "";
+                onSave(newConfig);
+              }}
+              className="text-xs text-red-500 hover:underline"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-[#E5E7EB] rounded-xl cursor-pointer hover:border-[#2D6A4F] transition-colors bg-[#F9FAFB]">
+            <Upload className="w-5 h-5 text-[#9CA3AF] mb-1" />
+            <span className="text-xs text-[#9CA3AF]">Click to upload logo</span>
+            <span className="text-[10px] text-[#D1D5DB]">PNG, JPG, SVG up to 2MB</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) {
+                  toast.error("Logo must be under 2MB");
+                  return;
+                }
+                const formData = new FormData();
+                formData.append("file", file);
+                try {
+                  const res = await fetch("/api/upload/logo", { method: "POST", body: formData });
+                  if (!res.ok) {
+                    toast.error("Upload failed");
+                    return;
+                  }
+                  const { url } = await res.json();
+                  const newConfig = JSON.parse(JSON.stringify(config));
+                  newConfig.brand.logoUrl = url;
+                  onSave(newConfig);
+                  toast.success("Logo uploaded");
+                } catch {
+                  toast.error("Upload failed");
+                }
+              }}
+            />
+          </label>
+        )}
       </div>
 
       <div>

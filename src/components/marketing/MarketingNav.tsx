@@ -37,13 +37,17 @@ export function MarketingNav() {
 
         {/* Center links */}
         <div className="hidden md:flex items-center gap-1">
-          {["Product", "Use Cases", "Pricing"].map((label) => (
+          {[
+            { label: "Features", href: "/#features" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "Templates", href: "/#templates" },
+          ].map((item) => (
             <Link
-              key={label}
-              href={`/${label.toLowerCase().replace(/\s+/g, "-")}`}
+              key={item.label}
+              href={item.href}
               className="text-sm font-medium text-[#171717] hover:bg-neutral-100 rounded-[10px] px-[10px] py-2 transition-colors"
             >
-              {label}
+              {item.label}
             </Link>
           ))}
         </div>
@@ -77,14 +81,18 @@ export function MarketingNav() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden mt-2 rounded-2xl bg-white/90 backdrop-blur-md border border-[#E5E7EB] shadow-lg p-4 flex flex-col gap-2">
-          {["Product", "Use Cases", "Pricing"].map((label) => (
+          {[
+            { label: "Features", href: "/#features" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "Templates", href: "/#templates" },
+          ].map((item) => (
             <Link
-              key={label}
-              href={`/${label.toLowerCase().replace(/\s+/g, "-")}`}
+              key={item.label}
+              href={item.href}
               className="text-sm font-medium text-[#171717] hover:bg-neutral-100 rounded-[10px] px-3 py-2.5 transition-colors"
               onClick={() => setMobileOpen(false)}
             >
-              {label}
+              {item.label}
             </Link>
           ))}
           <hr className="border-[#E5E7EB] my-1" />
