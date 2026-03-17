@@ -68,7 +68,7 @@ export function FunnelCard({ funnel, stats }: FunnelCardProps) {
             Edit
           </Button>
         </Link>
-        <Link href={`/builder/${funnel.id}?tab=analytics`} className="flex-1">
+        <Link href={`/analytics/${funnel.id}`} className="flex-1">
           <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
             <BarChart3 className="w-3 h-3" />
             Analytics
