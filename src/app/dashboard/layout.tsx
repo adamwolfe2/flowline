@@ -20,6 +20,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             MyVSL
           </Link>
           <div className="flex items-center gap-3">
+            <Link href="/leads" className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors">
+              Leads
+            </Link>
             <Link href="/onboarding">
               <Button size="sm" className="gap-1.5">
                 <Plus className="w-4 h-4" />

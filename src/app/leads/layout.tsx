@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
 export const metadata = {
-  title: "Billing — MyVSL",
-  description: "Manage your MyVSL subscription and billing.",
+  title: "Leads — MyVSL",
+  description: "View and manage all your funnel leads.",
   robots: { index: false, follow: false },
 };
 
-export default function BillingLayout({ children }: { children: React.ReactNode }) {
+export default function LeadsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50/50">
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
@@ -20,7 +20,7 @@ export default function BillingLayout({ children }: { children: React.ReactNode 
             MyVSL
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/leads" className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors">
+            <Link href="/leads" className="text-sm text-[#111827] font-medium transition-colors">
               Leads
             </Link>
             <Link href="/onboarding">

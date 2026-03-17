@@ -8,6 +8,7 @@ const isProtectedRoute = createRouteMatcher([
   '/billing(.*)',
   '/admin(.*)',
   '/analytics(.*)',
+  '/leads(.*)',
 ]);
 
 const isPlatformDomain = (hostname: string) => {
