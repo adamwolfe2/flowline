@@ -46,6 +46,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { config, slug: rawSlug } = body;
 
+    // Validate config has required sections
+    if (!config?.brand || typeof config.brand !== "object") {
+      return NextResponse.json({ error: "Config must include a 'brand' object" }, { status: 400 });
+    }
+    if (!config?.quiz || typeof config.quiz !== "object") {
+      return NextResponse.json({ error: "Config must include a 'quiz' object" }, { status: 400 });
+    }
+
     let slug = rawSlug || generateSlug(config?.brand?.name || "my-funnel");
 
     // Validate slug format

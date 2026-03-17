@@ -10,6 +10,12 @@ import { leads, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
 
+function isValidUUID(str: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
@@ -19,12 +25,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     }
 
     const { funnelId } = await params;
+
+    // Validate funnelId format
+    if (!isValidUUID(funnelId)) {
+      return NextResponse.json({ error: "Invalid funnel ID" }, { status: 400 });
+    }
+
     const body = await req.json();
     const { email, answers, sessionId } = body as {
       email: string;
       answers: Record<string, string>;
       sessionId?: string;
     };
+
+    // Validate email
+    if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+    }
+
+    // Validate answers
+    if (!answers || typeof answers !== "object" || Array.isArray(answers)) {
+      return NextResponse.json({ error: "Answers must be an object" }, { status: 400 });
+    }
 
     const funnel = await getFunnelById(funnelId);
     if (!funnel) return NextResponse.json({ error: "Funnel not found" }, { status: 404 });

@@ -1,6 +1,9 @@
 "use client";
 import { useRef, useCallback, useEffect } from "react";
 
+// Failed events retry queue (module-level for persistence across re-renders)
+const MAX_RETRY_QUEUE = 20;
+
 function getDeviceType(): "mobile" | "desktop" | "tablet" {
   if (typeof navigator === "undefined") return "desktop";
   const ua = navigator.userAgent;
@@ -47,6 +50,7 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
   const device = useRef<string>("desktop");
   const cumScore = useRef(0);
   const hasFiredView = useRef(false);
+  const failedQueue = useRef<Array<Record<string, unknown>>>([]);
 
   // Store in refs so callbacks don't need them as deps
   const totalQRef = useRef(totalQuestions);
@@ -84,7 +88,12 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(base),
           keepalive: true,
-        }).catch(() => {});
+        }).catch(() => {
+          // Queue for retry (max 20 events in queue)
+          if (failedQueue.current.length < MAX_RETRY_QUEUE) {
+            failedQueue.current.push(base);
+          }
+        });
       }
     },
     [funnelId, sessionId]
@@ -95,6 +104,29 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
     hasFiredView.current = true;
     track({ eventType: "funnel_viewed", stepIndex: 0, stepKey: "welcome" });
   }, [track]);
+
+  // Retry failed events periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (failedQueue.current.length === 0) return;
+      const events = [...failedQueue.current];
+      failedQueue.current = [];
+      events.forEach(event => {
+        fetch("/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(event),
+          keepalive: true,
+        }).catch(() => {
+          // Re-queue if still failing (but respect max)
+          if (failedQueue.current.length < MAX_RETRY_QUEUE) {
+            failedQueue.current.push(event);
+          }
+        });
+      });
+    }, 10000); // Retry every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const videoOffset = hasVideoRef.current ? 1 : 0;

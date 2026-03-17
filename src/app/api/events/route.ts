@@ -4,6 +4,19 @@ import { events, funnelSessions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { eventLimiter, checkRateLimit } from "@/lib/rate-limit";
 
+const VALID_EVENT_TYPES = [
+  "funnel_viewed",
+  "page_viewed",
+  "cta_clicked",
+  "answer_selected",
+  "field_focused",
+  "form_submitted",
+  "lead_created",
+  "funnel_completed",
+  "funnel_abandoned",
+  "back_navigated",
+] as const;
+
 export async function POST(req: Request) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
@@ -22,7 +35,14 @@ export async function POST(req: Request) {
       leadId, calendarTier, score,
     } = body;
 
-    if (!sessionId || !funnelId || !eventType) {
+    // Validate required fields
+    if (!sessionId || typeof sessionId !== "string") {
+      return NextResponse.json({ success: true }); // silently drop invalid events
+    }
+    if (!funnelId || typeof funnelId !== "string") {
+      return NextResponse.json({ success: true });
+    }
+    if (!eventType || !VALID_EVENT_TYPES.includes(eventType)) {
       return NextResponse.json({ success: true });
     }
 
