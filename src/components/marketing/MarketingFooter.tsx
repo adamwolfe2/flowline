@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import Image from "next/image";
 
 const columns = [
   {
@@ -45,9 +45,7 @@ export function MarketingFooter() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2D6A4F]">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
+              <Image src="/logo.png" alt="MyVSL" width={20} height={20} />
               <span
                 className="text-lg font-semibold text-[#171717]"
                 style={{ fontFamily: "var(--font-lora)" }}

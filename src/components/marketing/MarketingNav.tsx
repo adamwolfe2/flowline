@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Zap, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import Image from "next/image";
 
 export function MarketingNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -25,9 +26,7 @@ export function MarketingNav() {
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2D6A4F]">
-            <Zap className="h-4 w-4 text-white" />
-          </div>
+          <Image src="/logo.png" alt="MyVSL" width={24} height={24} />
           <span
             className="text-lg font-semibold text-[#171717]"
             style={{ fontFamily: "var(--font-lora)" }}

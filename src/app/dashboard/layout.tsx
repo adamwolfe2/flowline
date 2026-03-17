@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Plus, Zap } from "lucide-react";
+import { Plus } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
@@ -14,9 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-gray-900">
-            <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
+            <Image src="/logo.png" alt="MyVSL" width={24} height={24} />
             MyVSL
           </Link>
           <div className="flex items-center gap-3">

@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import Image from "next/image";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
       <div className="text-center">
-        <div className="w-12 h-12 bg-[#2D6A4F] rounded-xl flex items-center justify-center mx-auto mb-6">
-          <Zap className="w-6 h-6 text-white" />
-        </div>
+        <Image src="/logo.png" alt="MyVSL" width={32} height={32} className="mx-auto mb-6" />
         <h1
           className="text-4xl font-bold text-[#111827] mb-2"
           style={{ fontFamily: "var(--font-lora, serif)" }}

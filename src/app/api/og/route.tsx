@@ -23,22 +23,7 @@ export async function GET(req: NextRequest) {
         }}
       >
         {/* Brand mark */}
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            backgroundColor: "#2D6A4F",
-            borderRadius: 12,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 24,
-          }}
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-        </div>
+        <img src="https://getmyvsl.com/logo.png" width={56} height={56} style={{ marginBottom: 24 }} />
 
         {/* Title */}
         <div
@@ -77,21 +62,7 @@ export async function GET(req: NextRequest) {
             gap: 8,
           }}
         >
-          <div
-            style={{
-              width: 24,
-              height: 24,
-              backgroundColor: "#2D6A4F",
-              borderRadius: 6,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </div>
+          <img src="https://getmyvsl.com/logo.png" width={24} height={24} />
           <span style={{ fontSize: 18, fontWeight: 600, color: "#333333" }}>MyVSL</span>
         </div>
       </div>
