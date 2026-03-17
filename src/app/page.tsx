@@ -1,5 +1,3 @@
-"use client";
-
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -11,7 +9,7 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ backgroundColor: "#FAFAF8" }}>
       <Navbar />
       <HeroSection />
       <HowItWorks />
