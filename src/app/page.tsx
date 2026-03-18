@@ -3,7 +3,6 @@ import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { LogoStrip } from "@/components/marketing/LogoStrip";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
-import { FeaturesSection } from "@/components/marketing/FeaturesSection";
 import { WhySection } from "@/components/marketing/WhySection";
 import { ProductDemo } from "@/components/marketing/ProductDemo";
 import { TemplatesSection } from "@/components/marketing/TemplatesSection";
@@ -20,9 +19,8 @@ export default function HomePage() {
       <HeroSection />
       <LogoStrip />
       <HowItWorks />
-      <FeaturesSection />
-      <WhySection />
       <ProductDemo />
+      <WhySection />
       <TemplatesSection />
       <TestimonialsSection />
       <BottomCTA />

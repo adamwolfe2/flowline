@@ -40,7 +40,7 @@ export function MarketingNav() {
           {[
             { label: "Features", href: "/#features" },
             { label: "Pricing", href: "/pricing" },
-            { label: "Demo", href: "/#demo" },
+            { label: "Demo", href: "/build" },
           ].map((link) => (
             <Link
               key={link.label}
@@ -84,7 +84,7 @@ export function MarketingNav() {
           {[
             { label: "Features", href: "/#features" },
             { label: "Pricing", href: "/pricing" },
-            { label: "Demo", href: "/#demo" },
+            { label: "Demo", href: "/build" },
           ].map((link) => (
             <Link
               key={link.label}

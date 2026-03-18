@@ -676,10 +676,20 @@ export function ProductDemo() {
   const [activeTab, setActiveTab] = useState<TabId>("builder");
 
   return (
-    <section id="demo" className="bg-white py-24 px-6">
+    <section id="features" className="bg-[#FAFAFA] py-24 px-6">
       <div className="max-w-6xl mx-auto">
+        {/* Section header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-semibold text-[#111827] mb-3" style={{ fontFamily: "var(--font-lora)" }}>
+            Everything you need to convert
+          </h2>
+          <p className="text-base text-[#6B7280] max-w-lg mx-auto">
+            From AI-powered funnel creation to automated follow-ups — explore every feature.
+          </p>
+        </div>
+
         {/* Fillout-style frosted glass tab bar */}
-        <div className="flex items-center justify-center mb-12">
+        <div className="flex items-center justify-center mb-10">
           <div className="inline-flex items-center gap-0.5 bg-[#F3F4F6]/80 backdrop-blur-sm rounded-2xl p-1.5 border border-[#E5E7EB]/60 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
