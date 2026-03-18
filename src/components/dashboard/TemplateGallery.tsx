@@ -5,8 +5,16 @@ import { useRouter } from "next/navigation";
 import { FUNNEL_TEMPLATES, FunnelTemplate } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutTemplate, Plus, Loader2, X } from "lucide-react";
+import { LayoutTemplate, Plus, Loader2, X, GraduationCap, Monitor, Megaphone, Home, Dumbbell } from "lucide-react";
 import { toast } from "sonner";
+
+const TEMPLATE_ICONS: Record<string, React.ElementType> = {
+  coaching: GraduationCap,
+  "saas-demo": Monitor,
+  agency: Megaphone,
+  "real-estate": Home,
+  fitness: Dumbbell,
+};
 
 interface TemplateGalleryProps {
   onCreated?: () => void;
@@ -90,12 +98,17 @@ export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
             className="text-left p-4 border border-gray-100 rounded-xl hover:border-[#2D6A4F] hover:shadow-sm transition-all disabled:opacity-50"
           >
             <div className="flex items-center gap-2 mb-3">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-                style={{ backgroundColor: template.config.brand.primaryColor }}
-              >
-                {template.name.charAt(0)}
-              </div>
+              {(() => {
+                const Icon = TEMPLATE_ICONS[template.id] || LayoutTemplate;
+                return (
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: `${template.config.brand.primaryColor}15` }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: template.config.brand.primaryColor }} />
+                  </div>
+                );
+              })()}
               <Badge variant="secondary" className="text-[10px]">{template.category}</Badge>
             </div>
             <p className="text-sm font-medium text-gray-900 mb-0.5">
