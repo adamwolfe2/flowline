@@ -57,7 +57,7 @@ export function HeroSection() {
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
               placeholder="I sell business coaching to 6-figure entrepreneurs..."
               rows={3}
-              className="w-full px-6 py-5 text-base text-[#111827] placeholder-[#9CA3AF] bg-transparent resize-none outline-none"
+              className="w-full px-6 py-5 text-base text-[#111827] placeholder-[#9CA3AF] bg-transparent resize-none outline-none border-none focus:ring-0 focus:outline-none"
               style={{ fontSize: "16px" }}
             />
             <div className="flex items-center justify-end px-5 pb-4">
