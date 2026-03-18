@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { funnels } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { logger } from "@/lib/logger";
+import { addDomainToVercel, removeDomainFromVercel, isVercelConfigured } from "@/lib/vercel-domains";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -40,8 +42,31 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
     }
 
-    // Update domain (null to remove)
     const normalizedDomain = domain ? domain.toLowerCase() : null;
+    const oldDomain = funnel.customDomain;
+
+    // Register/remove domain with Vercel
+    if (isVercelConfigured()) {
+      try {
+        // Remove old domain if changing
+        if (oldDomain && oldDomain !== normalizedDomain) {
+          await removeDomainFromVercel(oldDomain).catch(() => {});
+        }
+
+        // Add new domain
+        if (normalizedDomain) {
+          await addDomainToVercel(normalizedDomain);
+        }
+      } catch (vercelError) {
+        logger.error("Vercel domain registration failed", {
+          domain: normalizedDomain,
+          error: vercelError instanceof Error ? vercelError.message : String(vercelError),
+        });
+        // Don't block — save to DB anyway, admin can fix later
+      }
+    }
+
+    // Update domain in DB
     const [updated] = await db.update(funnels)
       .set({ customDomain: normalizedDomain, updatedAt: new Date() })
       .where(eq(funnels.id, id))
@@ -49,7 +74,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error("PUT /api/funnels/[id]/domain error:", error);
+    logger.error("Domain update error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

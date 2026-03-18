@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity } from "lucide-react";
+import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity, Globe, CheckCircle, XCircle } from "lucide-react";
 
 interface AdminStats {
   totalUsers: number;
@@ -30,6 +30,20 @@ export default function AdminPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [domains, setDomains] = useState<{
+    domains: Array<{
+      funnelId: string;
+      domain: string;
+      slug: string;
+      published: boolean;
+      userId: string;
+      funnelName: string;
+      registeredInVercel: boolean;
+    }>;
+    vercelConfigured: boolean;
+    totalVercelDomains: number;
+  } | null>(null);
+  const [domainAction, setDomainAction] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/stats")
@@ -40,6 +54,13 @@ export default function AdminPage() {
       .then(setStats)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/domains")
+      .then(r => r.ok ? r.json() : null)
+      .then(setDomains)
+      .catch(() => {});
   }, []);
 
   if (loading) {
@@ -151,6 +172,136 @@ export default function AdminPage() {
               {stats.topFunnels.length === 0 && (
                 <tr>
                   <td colSpan={2} className="px-4 py-6 text-center text-[#999999] text-xs">No leads this month</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Domain Management */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[#333333]">Custom Domains</h2>
+          {domains && (
+            <span className="text-[10px] text-[#999999]">
+              Vercel: {domains.vercelConfigured ? "Connected" : "Not configured"} | {domains.totalVercelDomains} domains registered
+            </span>
+          )}
+        </div>
+        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#EBEBEB] text-left text-[#737373]">
+                <th className="px-4 py-2 font-medium text-xs">Domain</th>
+                <th className="px-4 py-2 font-medium text-xs">Funnel</th>
+                <th className="px-4 py-2 font-medium text-xs">Vercel</th>
+                <th className="px-4 py-2 font-medium text-xs text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {domains?.domains.map((d) => (
+                <tr key={d.funnelId} className="border-b border-[#EBEBEB] last:border-0">
+                  <td className="px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-[#737373]" />
+                      <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-[#2D6A4F] hover:underline font-mono text-xs">
+                        {d.domain}
+                      </a>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 text-xs text-[#737373]">
+                    <Link href={`/builder/${d.funnelId}`} className="hover:underline">
+                      {d.funnelName}
+                    </Link>
+                    <span className="text-[10px] text-[#999999] ml-1">/{d.slug}</span>
+                  </td>
+                  <td className="px-4 py-2">
+                    {d.registeredInVercel ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-green-600">
+                        <CheckCircle className="w-3 h-3" /> Registered
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-red-500">
+                        <XCircle className="w-3 h-3" /> Not registered
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      {!d.registeredInVercel && (
+                        <button
+                          disabled={domainAction === d.domain}
+                          onClick={async () => {
+                            setDomainAction(d.domain);
+                            try {
+                              const res = await fetch("/api/admin/domains", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ action: "register", domain: d.domain }),
+                              });
+                              if (res.ok) {
+                                setDomains(prev => prev ? {
+                                  ...prev,
+                                  domains: prev.domains.map(dd => dd.domain === d.domain ? { ...dd, registeredInVercel: true } : dd),
+                                } : null);
+                              }
+                            } catch {}
+                            setDomainAction(null);
+                          }}
+                          className="text-[10px] px-2 py-1 bg-[#2D6A4F] text-white rounded hover:bg-[#245840] transition-colors"
+                        >
+                          {domainAction === d.domain ? "..." : "Register"}
+                        </button>
+                      )}
+                      <button
+                        disabled={domainAction === `verify-${d.domain}`}
+                        onClick={async () => {
+                          setDomainAction(`verify-${d.domain}`);
+                          try {
+                            const res = await fetch("/api/admin/domains", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ action: "verify", domain: d.domain }),
+                            });
+                            const data = await res.json();
+                            alert(JSON.stringify(data, null, 2));
+                          } catch {}
+                          setDomainAction(null);
+                        }}
+                        className="text-[10px] px-2 py-1 border border-[#EBEBEB] rounded hover:bg-gray-50 transition-colors"
+                      >
+                        Verify
+                      </button>
+                      <button
+                        disabled={domainAction === `remove-${d.domain}`}
+                        onClick={async () => {
+                          if (!confirm(`Remove ${d.domain} from Vercel?`)) return;
+                          setDomainAction(`remove-${d.domain}`);
+                          try {
+                            await fetch("/api/admin/domains", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ action: "remove", domain: d.domain }),
+                            });
+                            setDomains(prev => prev ? {
+                              ...prev,
+                              domains: prev.domains.map(dd => dd.domain === d.domain ? { ...dd, registeredInVercel: false } : dd),
+                            } : null);
+                          } catch {}
+                          setDomainAction(null);
+                        }}
+                        className="text-[10px] px-2 py-1 text-red-500 border border-red-200 rounded hover:bg-red-50 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {(!domains || domains.domains.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-center text-[#999999] text-xs">No custom domains configured</td>
                 </tr>
               )}
             </tbody>
