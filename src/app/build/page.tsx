@@ -64,6 +64,10 @@ function BuildContent() {
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
 
+      if (data._fallback) {
+        toast.warning("Used example template. Try a more detailed description for better results.");
+      }
+
       const color = pickColor(text);
       setPrimaryColor(color);
       setGeneratedData(data);

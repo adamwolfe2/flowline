@@ -199,29 +199,32 @@ export default function BuilderPage() {
         <div className={`${sidebarOpen ? 'w-full md:w-[380px]' : 'hidden md:block md:w-[380px]'} border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0`}>
           <Tabs defaultValue="content" className="flex flex-col h-full">
             <div className="relative mx-3 mt-3 mb-0">
-              <TabsList className="w-full flex overflow-x-auto gap-1 bg-gray-50 p-1 rounded-lg scrollbar-hide">
-                <TabsTrigger value="content" className="text-xs shrink-0 whitespace-nowrap">Content</TabsTrigger>
-                <TabsTrigger value="blocks" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                  <LayoutGrid className="w-3 h-3" />
-                  Blocks
-                </TabsTrigger>
-                <TabsTrigger value="brand" className="text-xs shrink-0 whitespace-nowrap">Brand</TabsTrigger>
-                <TabsTrigger value="calendars" className="text-xs shrink-0 whitespace-nowrap">Calendars</TabsTrigger>
-                <TabsTrigger value="emails" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                  <Mail className="w-3 h-3" />
-                  Emails
-                </TabsTrigger>
-                <TabsTrigger value="ab-test" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                  <FlaskConical className="w-3 h-3" />
-                  A/B
-                </TabsTrigger>
-                <TabsTrigger value="tracking" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                  <BarChart3 className="w-3 h-3" />
-                  Tracking
-                </TabsTrigger>
-                <TabsTrigger value="publish" className="text-xs shrink-0 whitespace-nowrap">Publish</TabsTrigger>
-              </TabsList>
-              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none rounded-r-lg md:hidden" />
+              <div className="overflow-x-auto scrollbar-hide">
+                <TabsList className="inline-flex w-max gap-0.5 bg-gray-50 p-1 rounded-lg">
+                  <TabsTrigger value="content" className="text-[11px] px-2.5 py-1.5 shrink-0">Content</TabsTrigger>
+                  <TabsTrigger value="blocks" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
+                    <LayoutGrid className="w-3 h-3" />
+                    Blocks
+                  </TabsTrigger>
+                  <TabsTrigger value="brand" className="text-[11px] px-2.5 py-1.5 shrink-0">Brand</TabsTrigger>
+                  <TabsTrigger value="calendars" className="text-[11px] px-2.5 py-1.5 shrink-0">Calendars</TabsTrigger>
+                  <TabsTrigger value="emails" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
+                    <Mail className="w-3 h-3" />
+                    Emails
+                  </TabsTrigger>
+                  <TabsTrigger value="ab-test" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
+                    <FlaskConical className="w-3 h-3" />
+                    A/B
+                  </TabsTrigger>
+                  <TabsTrigger value="tracking" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
+                    <BarChart3 className="w-3 h-3" />
+                    Tracking
+                  </TabsTrigger>
+                  <TabsTrigger value="publish" className="text-[11px] px-2.5 py-1.5 shrink-0">Publish</TabsTrigger>
+                </TabsList>
+              </div>
+              <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none rounded-r-lg" />
+              <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none rounded-l-lg" />
             </div>
             <div className="flex-1 overflow-y-auto p-4">
               <TabsContent value="content" className="mt-0">
@@ -253,13 +256,13 @@ export default function BuilderPage() {
         </div>
 
         {/* Preview pane */}
-        <div className="flex-1 bg-gray-50 flex items-center justify-center p-8 overflow-hidden">
+        <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-6" : "p-3"}`}>
           <ErrorBoundary>
             <div
               className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
               style={{
                 width: previewMode === "mobile" ? "min(375px, 100%)" : "100%",
-                maxWidth: previewMode === "desktop" ? "800px" : "375px",
+                maxWidth: previewMode === "desktop" ? "100%" : "375px",
                 height: "100%",
               }}
             >

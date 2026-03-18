@@ -158,7 +158,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Target className="w-3 h-3 text-gray-400" />
             </div>
-            <p className="text-lg font-bold text-gray-900">{stats.totalSessions === 0 ? "\u2014" : `${stats.conversionRate}%`}</p>
+            <p className="text-lg font-bold text-gray-900">{stats.totalSessions === 0 ? "--" : `${stats.conversionRate}%`}</p>
             <p className="text-[10px] text-gray-400">Conv.</p>
           </div>
         </div>

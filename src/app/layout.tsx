@@ -10,7 +10,7 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "MyVSL — AI Funnel Builder That Books Calls",
+  title: "MyVSL | AI Funnel Builder That Books Calls",
   description: "Build AI-powered quiz-to-calendar booking funnels in minutes. No code required.",
   icons: {
     icon: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   openGraph: {
-    title: "MyVSL — AI Funnel Builder That Books Calls",
+    title: "MyVSL | AI Funnel Builder That Books Calls",
     description: "Three questions. Smart scoring. Automatic calendar routing.",
     url: appUrl,
     images: [{ url: `${appUrl}/og.png`, width: 1200, height: 630 }],
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MyVSL — AI Funnel Builder That Books Calls",
+    title: "MyVSL | AI Funnel Builder That Books Calls",
     description: "Build quiz-to-calendar booking funnels in minutes.",
     images: [`${appUrl}/og.png`],
   },

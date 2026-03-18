@@ -239,8 +239,13 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
               type="number"
               value={config.quiz.thresholds.high}
               onChange={e => {
+                const val = parseInt(e.target.value) || 0;
                 const newConfig = JSON.parse(JSON.stringify(config));
-                newConfig.quiz.thresholds.high = parseInt(e.target.value) || 0;
+                newConfig.quiz.thresholds.high = val;
+                // Enforce high >= mid
+                if (val < newConfig.quiz.thresholds.mid) {
+                  newConfig.quiz.thresholds.mid = val;
+                }
                 onSave(newConfig);
               }}
               className="text-xs mt-1"
@@ -252,14 +257,22 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
               type="number"
               value={config.quiz.thresholds.mid}
               onChange={e => {
+                const val = parseInt(e.target.value) || 0;
                 const newConfig = JSON.parse(JSON.stringify(config));
-                newConfig.quiz.thresholds.mid = parseInt(e.target.value) || 0;
+                newConfig.quiz.thresholds.mid = val;
+                // Enforce mid <= high
+                if (val > newConfig.quiz.thresholds.high) {
+                  newConfig.quiz.thresholds.high = val;
+                }
                 onSave(newConfig);
               }}
               className="text-xs mt-1"
             />
           </div>
         </div>
+        {config.quiz.thresholds.high < config.quiz.thresholds.mid && (
+          <p className="text-xs text-red-500 mt-1.5">High threshold must be greater than or equal to mid threshold.</p>
+        )}
       </div>
       <Separator />
 
@@ -288,7 +301,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
             <Input
               value={config.quiz.ctaButtonText ?? ""}
               onChange={e => updateField("quiz.ctaButtonText", e.target.value)}
-              placeholder="Take the Quiz — It Takes 60 Seconds"
+              placeholder="Take the Quiz. It Takes 60 Seconds"
               className="text-xs"
               maxLength={80}
             />
@@ -379,7 +392,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                 newConfig.quiz.results.high.headline = e.target.value;
                 onSave(newConfig);
               }}
-              placeholder="Perfect score — you're an ideal fit!"
+              placeholder="Perfect score! You're an ideal fit."
               className="text-xs mb-2"
               maxLength={80}
             />
@@ -412,7 +425,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                 newConfig.quiz.results.mid.headline = e.target.value;
                 onSave(newConfig);
               }}
-              placeholder="Good potential — let's explore further"
+              placeholder="Good potential. Let's explore further"
               className="text-xs mb-2"
               maxLength={80}
             />

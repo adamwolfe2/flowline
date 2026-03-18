@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
 export const metadata = {
-  title: "Dashboard — MyVSL",
+  title: "Dashboard | MyVSL",
   description: "Manage your VSL funnels, view analytics, and track leads.",
   robots: { index: false, follow: false },
 };

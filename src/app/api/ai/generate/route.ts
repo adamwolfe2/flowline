@@ -2,19 +2,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { aiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+const aiOutputSchema = z.object({
+  headline: z.string(),
+  subheadline: z.string(),
+  brandName: z.string(),
+  questions: z.array(z.object({
+    key: z.string(),
+    text: z.string(),
+    options: z.array(z.object({
+      id: z.string(),
+      label: z.string(),
+      points: z.number(),
+    })).min(2),
+  })).min(1),
+  thresholds: z.object({
+    high: z.number(),
+    mid: z.number(),
+  }),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+});
 
 const SYSTEM_PROMPT = `You are a VSL funnel copywriter and conversion strategist.
 Given a business description, generate a complete lead qualification quiz funnel.
 
 Return ONLY valid JSON matching this exact schema:
 {
-  "headline": "string — compelling, outcome-focused, max 12 words",
-  "subheadline": "string — clarifies who this is for, max 20 words",
-  "brandName": "string — extracted or inferred business name",
+  "headline": "string, compelling, outcome-focused, max 12 words",
+  "subheadline": "string, clarifies who this is for, max 20 words",
+  "brandName": "string, extracted or inferred business name",
   "questions": [
     {
       "key": "q1",
-      "text": "string — qualification question",
+      "text": "string, qualification question",
       "options": [
         { "id": "a", "label": "string", "points": 0 },
         { "id": "b", "label": "string", "points": 1 },
@@ -28,7 +50,7 @@ Return ONLY valid JSON matching this exact schema:
   "metaDescription": "string"
 }
 
-Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/sophistication. Points 0-3 per option. Do not include calendar URLs, colors, or logo. Return JSON only — no markdown, no backticks.`;
+Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/sophistication. Points 0-3 per option. Do not include calendar URLs, colors, or logo. Do not use em dashes in any generated text. Return JSON only, no markdown, no backticks.`;
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -76,15 +98,24 @@ export async function POST(req: NextRequest) {
       }
 
       if (parsed) {
-        return NextResponse.json(parsed);
+        const validated = aiOutputSchema.safeParse(parsed);
+        if (validated.success) {
+          return NextResponse.json(validated.data);
+        }
+        logger.error("AI response failed schema validation", {
+          errors: validated.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
+        });
+        // Fall through to mock with fallback flag
       }
     } catch {
       // Fall through to mock
     }
   }
 
-  // Mock response for development
+  // Mock/fallback response
   const mock = {
+    _fallback: true,
+    _reason: "AI response was incomplete or unavailable",
     headline: "Discover If You Qualify for Accelerated Growth",
     subheadline: "Answer 3 quick questions to see if we're the right fit for your business.",
     brandName: "Your Business",

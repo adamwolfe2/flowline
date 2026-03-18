@@ -108,6 +108,17 @@ function OnboardingContent() {
         return;
       }
 
+      if (data._fallback) {
+        toast.warning("Used example template. Try a more detailed description for better results.");
+      }
+
+      // Validate generated config has questions with options
+      if (!data.questions?.length || !data.questions.every((q: { options?: unknown[] }) => (q.options?.length ?? 0) >= 2)) {
+        toast.error("Generated funnel was incomplete. Please try again with more detail.");
+        setGenerating(false);
+        return;
+      }
+
       setConfig(prev => ({
         ...prev,
         brand: {
@@ -171,7 +182,7 @@ function OnboardingContent() {
       if (createRes.status === 401) {
         // Not signed in — save config to localStorage and redirect to sign-up
         localStorage.setItem("myvsl_pending_funnel", JSON.stringify({ config, slug }));
-        toast.error("Sign up to publish your funnel — your progress is saved.");
+        toast.error("Sign up to publish your funnel. Your progress is saved.");
         setTimeout(() => router.push("/sign-up"), 1500);
         setPublishing(false);
         return;
@@ -438,14 +449,15 @@ function OnboardingContent() {
                         try {
                           const res = await fetch("/api/upload/logo", { method: "POST", body: formData });
                           if (!res.ok) {
-                            toast.error("Upload failed — sign in first to upload logos");
+                            const data = await res.json().catch(() => ({}));
+                            toast.error(data.error || "Upload failed. Please try again.");
                             return;
                           }
                           const { url } = await res.json();
                           setConfig(prev => ({ ...prev, brand: { ...prev.brand, logoUrl: url } }));
                           toast.success("Logo uploaded");
                         } catch {
-                          toast.error("Upload failed");
+                          toast.error("Upload failed. Please try again.");
                         }
                       }}
                     />

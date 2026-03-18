@@ -5,7 +5,7 @@ import Image from "next/image";
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 export const metadata = {
-  title: "Privacy Policy — MyVSL",
+  title: "Privacy Policy | MyVSL",
   description: "How MyVSL handles your data.",
 };
 
@@ -50,12 +50,12 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-[#111827]">3. Data Sharing</h2>
             <p>We do not sell your data. We share data only with:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Clerk</strong> — authentication provider.</li>
-              <li><strong>Stripe</strong> — payment processing.</li>
-              <li><strong>Neon</strong> — database hosting.</li>
-              <li><strong>Vercel</strong> — application hosting and file storage.</li>
-              <li><strong>Resend</strong> — transactional email delivery.</li>
-              <li><strong>OpenAI</strong> — AI funnel generation (your business description is sent to generate quiz content).</li>
+              <li><strong>Clerk</strong>: authentication provider.</li>
+              <li><strong>Stripe</strong>: payment processing.</li>
+              <li><strong>Neon</strong>: database hosting.</li>
+              <li><strong>Vercel</strong>: application hosting and file storage.</li>
+              <li><strong>Resend</strong>: transactional email delivery.</li>
+              <li><strong>OpenAI</strong>: AI funnel generation (your business description is sent to generate quiz content).</li>
             </ul>
           </section>
 

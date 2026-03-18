@@ -66,6 +66,18 @@ interface AnalyticsData {
   utmSources: Array<{ utmSource: string | null; count: number }>;
   tiers: Array<{ tier: string | null; count: number }>;
   timeSeries: Array<{ date: string; count: number }>;
+  variantPerformance: Array<{
+    variantId: string;
+    variantName: string;
+    isControl: boolean;
+    trafficWeight: number;
+    sessions: number;
+    completions: number;
+    conversions: number;
+    completionRate: number;
+    conversionRate: number;
+    avgScore: number;
+  }>;
   totalLeadCount: number;
   recentLeads: Array<{
     id: string;
@@ -243,7 +255,7 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel } = data;
+  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel, variantPerformance } = data;
   const leadsPerPage = 25;
   const totalLeadPages = Math.max(1, Math.ceil(totalLeadCount / leadsPerPage));
 
@@ -489,6 +501,66 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
 
+        {/* ---- Variant Performance (A/B Tests) ---- */}
+        {variantPerformance && variantPerformance.length > 0 && (() => {
+          const MIN_SAMPLE_SIZE = 30;
+          const eligible = variantPerformance.filter(v => v.sessions >= MIN_SAMPLE_SIZE);
+          const winner = eligible.length > 1
+            ? eligible.reduce((best, v) => v.conversionRate > best.conversionRate ? v : best)
+            : null;
+
+          return (
+            <div className="bg-white rounded-xl border border-gray-100 p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">A/B Test Performance</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left py-2 font-medium">Variant</th>
+                      <th className="text-center py-2 font-medium">Traffic</th>
+                      <th className="text-center py-2 font-medium">Sessions</th>
+                      <th className="text-center py-2 font-medium">Completions</th>
+                      <th className="text-center py-2 font-medium">Completion %</th>
+                      <th className="text-center py-2 font-medium">Conversions</th>
+                      <th className="text-center py-2 font-medium">Conversion %</th>
+                      <th className="text-center py-2 font-medium">Avg Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {variantPerformance.map((v) => (
+                      <tr key={v.variantId} className="border-b border-gray-50">
+                        <td className="py-2.5 text-gray-900 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            {v.variantName}
+                            {v.isControl && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Control</span>
+                            )}
+                            {winner && winner.variantId === v.variantId && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">Winner</span>
+                            )}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-center text-gray-500">{v.trafficWeight}%</td>
+                        <td className="py-2.5 text-center text-gray-700">{v.sessions}</td>
+                        <td className="py-2.5 text-center text-gray-700">{v.completions}</td>
+                        <td className="py-2.5 text-center text-gray-700">{v.completionRate}%</td>
+                        <td className="py-2.5 text-center text-gray-700">{v.conversions}</td>
+                        <td className="py-2.5 text-center font-medium text-gray-900">{v.conversionRate}%</td>
+                        <td className="py-2.5 text-center text-gray-700">{v.avgScore}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {eligible.length < 2 && (
+                <p className="text-[11px] text-gray-400 mt-3">
+                  Need at least {MIN_SAMPLE_SIZE} sessions per variant to determine a winner.
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
           <div className="bg-white rounded-xl border border-gray-100 p-6">
@@ -502,13 +574,22 @@ export default function AnalyticsDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-900">Recent Leads</h3>
             {recentLeads.length > 0 && (
-              <button
-                onClick={() => downloadCSV(recentLeads, funnel.slug)}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                <Download className="w-3 h-3" />
-                Export CSV
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => downloadCSV(recentLeads, funnel.slug)}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <Download className="w-3 h-3" />
+                  Export Page
+                </button>
+                <a
+                  href={`/api/analytics/${funnelId}/export?timeRange=${timeRange}`}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <Download className="w-3 h-3" />
+                  Export All ({totalLeadCount})
+                </a>
+              </div>
             )}
           </div>
 

@@ -48,7 +48,7 @@ const leftContent: Record<TabId, TabContent> = {
     bullets: [
       { icon: MessageSquare, text: "Describe your business in one sentence" },
       { icon: Bot, text: "AI writes your headline, questions, and scoring" },
-      { icon: Sparkles, text: "Live in under 60 seconds \u2014 no code needed" },
+      { icon: Sparkles, text: "Live in under 60 seconds. No code needed" },
     ],
     cta: "Try the AI builder",
   },
@@ -69,7 +69,7 @@ const leftContent: Record<TabId, TabContent> = {
     bullets: [
       { icon: BarChart3, text: "Step-by-step drop-off waterfall chart" },
       { icon: Target, text: "See which questions cause the most friction" },
-      { icon: Link2, text: "UTM attribution \u2014 know your best traffic source" },
+      { icon: Link2, text: "UTM attribution so you know your best traffic source" },
     ],
     cta: "View sample analytics",
   },
@@ -94,8 +94,8 @@ const leftContent: Record<TabId, TabContent> = {
   integrations: {
     headline: "Connect to your existing stack",
     bullets: [
-      { icon: Calendar, text: "Works with Cal.com, Calendly, and Google Calendar" },
-      { icon: Link2, text: "Send leads to Zapier, Make, or any webhook" },
+      { icon: Calendar, text: "Embed Cal.com or Calendly booking pages directly" },
+      { icon: Link2, text: "Send leads to Zapier, Make, n8n, or any webhook URL" },
       { icon: Sparkles, text: "Embed on any website with a single link" },
     ],
     cta: "Explore integrations",
@@ -503,21 +503,21 @@ function RoutingMockup() {
 function IntegrationsMockup() {
   const rows = [
     {
-      category: "Calendar",
+      category: "Direct",
       items: [
         { name: "Cal.com", logo: "/integrations/calcom.svg" },
         { name: "Calendly", logo: "/integrations/calendly.svg" },
       ],
     },
     {
-      category: "Automation",
+      category: "Via Webhooks",
       items: [
         { name: "Zapier", logo: "/integrations/zapier.svg" },
         { name: "Make", logo: "/integrations/make.svg" },
       ],
     },
     {
-      category: "CRM",
+      category: "Coming Soon",
       items: [
         { name: "HubSpot", logo: "/integrations/hubspot-svgrepo-com.svg" },
         { name: "Salesforce", logo: "/integrations/salesforce.svg" },
@@ -689,7 +689,7 @@ export function ProductDemo() {
             Everything you need to convert
           </h2>
           <p className="text-base text-[#6B7280] max-w-lg mx-auto">
-            From AI-powered funnel creation to automated follow-ups — explore every feature.
+            From AI-powered funnel creation to automated follow-ups. Explore every feature.
           </p>
         </div>
 

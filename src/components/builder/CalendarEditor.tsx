@@ -39,6 +39,9 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
           Based on quiz answers, leads get a score. High scorers see your &quot;Best fit&quot; calendar,
           mid-scorers see &quot;Good fit,&quot; and lower scorers see &quot;Intro call.&quot;
         </p>
+        <p className="text-[11px] text-blue-600 leading-relaxed mt-1.5">
+          Works with Cal.com and Calendly links. Both are embedded directly in your funnel.
+        </p>
       </div>
 
       <div>
@@ -112,9 +115,9 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
                 });
                 const data = await res.json();
                 if (data.success) {
-                  toast.success(`Webhook responded with ${data.status} OK`);
+                  toast.success(`Webhook responded ${data.status} OK`);
                 } else {
-                  toast.error(data.error || "Webhook test failed");
+                  toast.error(`Webhook returned ${data.status ?? "error"}: ${data.error || "check your URL"}`);
                 }
               } catch {
                 toast.error("Failed to send test");

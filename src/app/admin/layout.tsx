@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
 
 export const metadata = {
-  title: "Admin — MyVSL",
+  title: "Admin | MyVSL",
   robots: { index: false, follow: false },
 };
 

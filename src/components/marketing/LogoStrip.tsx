@@ -1,18 +1,11 @@
 "use client";
 
 const logos = [
+  { src: "/integrations/calcom.svg", name: "Cal.com" },
   { src: "/integrations/calendly.svg", name: "Calendly" },
-  { src: "/integrations/hubspot-svgrepo-com.svg", name: "HubSpot" },
-  { src: "/integrations/salesforce.svg", name: "Salesforce" },
-  { src: "/integrations/slack.svg", name: "Slack" },
-  { src: "/integrations/notion.svg", name: "Notion" },
-  { src: "/integrations/google-calendar.svg", name: "Google Calendar" },
-  { src: "/integrations/gmail.svg", name: "Gmail" },
-  { src: "/integrations/shopify.svg", name: "Shopify" },
-  { src: "/integrations/meta-color.svg", name: "Meta" },
-  { src: "/integrations/linkedin.svg", name: "LinkedIn" },
+  { src: "/integrations/zapier.svg", name: "Zapier" },
+  { src: "/integrations/make.svg", name: "Make" },
   { src: "/integrations/openai-svgrepo-com.svg", name: "OpenAI" },
-  { src: "/integrations/google-ads-svgrepo-com.svg", name: "Google Ads" },
 ];
 
 export function LogoStrip() {

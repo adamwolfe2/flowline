@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Create Your Funnel — MyVSL",
+  title: "Create Your Funnel | MyVSL",
   description: "Build an AI-powered VSL funnel in 60 seconds.",
 };
 

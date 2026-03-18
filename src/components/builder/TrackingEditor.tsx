@@ -75,9 +75,9 @@ export function TrackingEditor({ config, onSave }: TrackingEditorProps) {
       <div className="p-3 bg-gray-50 rounded-lg">
         <p className="text-[11px] text-gray-500 font-medium mb-1">Events fired automatically</p>
         <ul className="text-[10px] text-gray-400 space-y-1">
-          <li>PageView — when funnel loads</li>
-          <li>ViewContent / quiz_start — when quiz begins</li>
-          <li>Lead / SubmitForm / generate_lead — when email is submitted</li>
+          <li>PageView: when funnel loads</li>
+          <li>ViewContent / quiz_start: when quiz begins</li>
+          <li>Lead / SubmitForm / generate_lead: when email is submitted</li>
         </ul>
       </div>
 
@@ -95,7 +95,7 @@ export function TrackingEditor({ config, onSave }: TrackingEditorProps) {
           </div>
           <p className="text-xs text-gray-600 leading-relaxed mb-3">
             Unmask up to <span className="font-semibold text-blue-700">60% of anonymous visitors</span> on
-            your funnel pages — even if they never submit the quiz. Get full contact info (name, email, phone)
+            your funnel pages, even if they never submit the quiz. Get full contact info (name, email, phone)
             for every visitor that lands on your funnel.
           </p>
           <ul className="text-[11px] text-gray-500 space-y-1.5 mb-4">
@@ -109,7 +109,7 @@ export function TrackingEditor({ config, onSave }: TrackingEditorProps) {
               <span className="text-blue-500 mt-0.5">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
               </span>
-              Works on all funnel page visitors — no form fill required
+              Works on all funnel page visitors, no form fill required
             </li>
             <li className="flex items-start gap-1.5">
               <span className="text-blue-500 mt-0.5">
@@ -132,7 +132,7 @@ export function TrackingEditor({ config, onSave }: TrackingEditorProps) {
             <ExternalLink className="w-3 h-3" />
           </a>
           <p className="text-center text-[9px] text-gray-400 mt-2">
-            Powered by <a href="https://meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive</a> — Identity Resolution for Performance Marketers
+            Powered by <a href="https://meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive</a>. Identity Resolution for Performance Marketers
           </p>
         </div>
       </div>

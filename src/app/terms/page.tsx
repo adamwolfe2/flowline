@@ -5,7 +5,7 @@ import Image from "next/image";
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 export const metadata = {
-  title: "Terms of Service — MyVSL",
+  title: "Terms of Service | MyVSL",
   description: "Terms of Service for the MyVSL platform.",
 };
 

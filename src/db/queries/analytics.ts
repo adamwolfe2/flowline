@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { events, funnelSessions, leads } from "@/db/schema";
+import { events, funnelSessions, leads, funnelVariants, variantAssignments } from "@/db/schema";
 import { eq, and, gte, sql, avg } from "drizzle-orm";
 
 function getDateCutoff(timeRange: string): Date | null {
@@ -191,24 +191,105 @@ export async function getLeadsTimeSeries(funnelId: string, timeRange = '30d') {
     .orderBy(sql`date_trunc('day', ${leads.createdAt})`);
 }
 
-export async function getLeadCount(funnelId: string) {
+export async function getLeadCount(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
+    : eq(leads.funnelId, funnelId);
   const result = await db.select({ count: sql<number>`count(*)::int` })
-    .from(leads).where(eq(leads.funnelId, funnelId));
+    .from(leads).where(whereClause);
   return Number(result[0]?.count ?? 0);
 }
 
-export async function getLeadsForTable(funnelId: string, limit = 25, offset = 0) {
+export async function getLeadsForTable(funnelId: string, limit = 25, offset = 0, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
+    : eq(leads.funnelId, funnelId);
   return db.select().from(leads)
-    .where(eq(leads.funnelId, funnelId))
+    .where(whereClause)
     .orderBy(sql`${leads.createdAt} desc`)
     .limit(limit)
     .offset(offset);
 }
 
+export async function getVariantPerformance(funnelId: string, timeRange = 'all') {
+  const cutoff = getDateCutoff(timeRange);
+
+  // Get all active variants for this funnel
+  const variants = await db.select().from(funnelVariants)
+    .where(and(eq(funnelVariants.funnelId, funnelId), eq(funnelVariants.active, true)));
+
+  if (variants.length === 0) return [];
+
+  const results = await Promise.all(variants.map(async (variant) => {
+    // Get sessions assigned to this variant
+    const assignmentConditions = [
+      eq(variantAssignments.variantId, variant.id),
+      eq(variantAssignments.funnelId, funnelId),
+    ];
+    if (cutoff) {
+      assignmentConditions.push(gte(variantAssignments.createdAt, cutoff));
+    }
+
+    const sessionIds = await db.select({ sessionId: variantAssignments.sessionId })
+      .from(variantAssignments)
+      .where(and(...assignmentConditions));
+
+    if (sessionIds.length === 0) {
+      return {
+        variantId: variant.id,
+        variantName: variant.name,
+        isControl: variant.isControl,
+        trafficWeight: variant.trafficWeight,
+        sessions: 0,
+        completions: 0,
+        conversions: 0,
+        completionRate: 0,
+        conversionRate: 0,
+        avgScore: 0,
+      };
+    }
+
+    const ids = sessionIds.map(s => s.sessionId);
+
+    const [sessionStats] = await db.select({
+      total: sql<number>`count(*)::int`,
+      completed: sql<number>`coalesce(sum(case when ${funnelSessions.completed} then 1 else 0 end), 0)::int`,
+      converted: sql<number>`coalesce(sum(case when ${funnelSessions.converted} then 1 else 0 end), 0)::int`,
+    }).from(funnelSessions)
+      .where(sql`${funnelSessions.id} in (${sql.join(ids.map(id => sql`${id}`), sql`, `)})`);
+
+    const [scoreStats] = await db.select({
+      avgScore: avg(leads.score),
+    }).from(leads)
+      .where(sql`${leads.sessionId} in (${sql.join(ids.map(id => sql`${id}`), sql`, `)})`);
+
+    const total = Number(sessionStats?.total ?? 0);
+    const completed = Number(sessionStats?.completed ?? 0);
+    const converted = Number(sessionStats?.converted ?? 0);
+
+    return {
+      variantId: variant.id,
+      variantName: variant.name,
+      isControl: variant.isControl,
+      trafficWeight: variant.trafficWeight,
+      sessions: total,
+      completions: completed,
+      conversions: converted,
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+      conversionRate: total > 0 ? Math.round((converted / total) * 100) : 0,
+      avgScore: scoreStats?.avgScore ? Math.round(Number(scoreStats.avgScore)) : 0,
+    };
+  }));
+
+  return results;
+}
+
 export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRange = 'all') {
   const leadsLimit = 25;
   const leadsOffset = leadsPage * leadsLimit;
-  const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount] = await Promise.all([
+  const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount, variantPerformance] = await Promise.all([
     getFunnelOverview(funnelId, timeRange),
     getDropoffWaterfall(funnelId, timeRange),
     getAnswerDistribution(funnelId, timeRange),
@@ -217,8 +298,9 @@ export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRang
     getUTMBreakdown(funnelId, timeRange),
     getTierDistribution(funnelId, timeRange),
     getLeadsTimeSeries(funnelId, timeRange),
-    getLeadsForTable(funnelId, leadsLimit, leadsOffset),
-    getLeadCount(funnelId),
+    getLeadsForTable(funnelId, leadsLimit, leadsOffset, timeRange),
+    getLeadCount(funnelId, timeRange),
+    getVariantPerformance(funnelId, timeRange),
   ]);
-  return { stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount };
+  return { stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount, variantPerformance };
 }

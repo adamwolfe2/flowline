@@ -21,8 +21,12 @@ export async function POST(req: NextRequest) {
         hostname === "127.0.0.1" ||
         hostname === "0.0.0.0" ||
         hostname === "[::1]" ||
+        hostname === "169.254.169.254" ||
         hostname.startsWith("10.") ||
         hostname.startsWith("192.168.") ||
+        hostname.startsWith("169.254.") ||
+        hostname.startsWith("fd") ||
+        hostname.startsWith("fc") ||
         /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
       ) {
         return NextResponse.json({ success: false, error: "Internal URLs are not allowed" }, { status: 400 });
