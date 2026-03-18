@@ -17,10 +17,10 @@ const logos = [
 
 export function LogoStrip() {
   return (
-    <section className="bg-white border-b border-[#E5E7EB] py-10 overflow-hidden">
+    <section className="bg-white border-b border-[#E5E7EB] py-16 overflow-hidden">
       <div className="max-w-4xl mx-auto px-6">
         {/* Trust metrics */}
-        <div className="flex items-center justify-center gap-8 md:gap-16 text-center mb-8">
+        <div className="flex items-center justify-center gap-10 md:gap-20 text-center mb-10">
           <div>
             <p className="text-2xl font-bold text-[#111827]">500+</p>
             <p className="text-xs text-[#6B7280]">Businesses live</p>
@@ -37,7 +37,7 @@ export function LogoStrip() {
           </div>
         </div>
 
-        <p className="text-[11px] text-[#B0B0B0] text-center mb-5 uppercase tracking-widest">Integrates with your favorite tools</p>
+        <p className="text-[11px] text-[#B0B0B0] text-center mb-8 uppercase tracking-widest">Integrates with your favorite tools</p>
       </div>
 
       {/* Infinite scrolling logo ticker — logos only */}
@@ -49,7 +49,7 @@ export function LogoStrip() {
           {[...logos, ...logos].map((logo, i) => (
             <div
               key={`${logo.name}-${i}`}
-              className="shrink-0 mx-8"
+              className="shrink-0 mx-10"
               title={logo.name}
             >
               <img
