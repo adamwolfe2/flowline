@@ -12,12 +12,13 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 const isPlatformDomain = (hostname: string) => {
-  const platform = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? 'localhost';
-  return hostname === platform
-    || hostname === `www.${platform}`
-    || hostname === `app.${platform}`
-    || hostname.includes('localhost')
-    || hostname.includes('vercel.app');
+  const platform = (process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? 'localhost').trim();
+  const host = hostname.split(':')[0]; // strip port
+  return host === platform
+    || host === `www.${platform}`
+    || host === `app.${platform}`
+    || host.includes('localhost')
+    || host.includes('vercel.app');
 };
 
 export default clerkMiddleware(async (auth, req) => {
