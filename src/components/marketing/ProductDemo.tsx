@@ -26,6 +26,7 @@ const tabs = [
   { id: "scoring", label: "Lead Scoring", icon: Target },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "routing", label: "Calendar Routing", icon: Calendar },
+  { id: "emails", label: "Email Sequences", icon: Mail },
   { id: "integrations", label: "Integrations", icon: Link2 },
 ] as const;
 
@@ -80,6 +81,15 @@ const leftContent: Record<TabId, TabContent> = {
       { icon: Mail, text: "Low scorers receive a nurture sequence" },
     ],
     cta: "Set up routing",
+  },
+  emails: {
+    headline: "Automated follow-up sequences",
+    bullets: [
+      { icon: Mail, text: "Trigger email drips based on lead score tier" },
+      { icon: CheckCircle2, text: "Customize subject, body, and delay per step" },
+      { icon: Target, text: "Nurture cold leads while hot leads book instantly" },
+    ],
+    cta: "Set up sequences",
   },
   integrations: {
     headline: "Connect to your existing stack",
@@ -588,6 +598,59 @@ function IntegrationsMockup() {
 /*  Mockup selector                                                    */
 /* ------------------------------------------------------------------ */
 
+function EmailsMockup() {
+  const [step, setStep] = useState(0);
+  const emails = [
+    { delay: "Immediately", subject: "Thanks for your interest!", status: "Sent" },
+    { delay: "After 24h", subject: "Quick question for you...", status: "Scheduled" },
+    { delay: "After 72h", subject: "Last chance to book your call", status: "Scheduled" },
+  ];
+
+  useEffect(() => {
+    setStep(0);
+    const timers = [
+      setTimeout(() => setStep(1), 400),
+      setTimeout(() => setStep(2), 1000),
+      setTimeout(() => setStep(3), 1600),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="w-full max-w-[360px] space-y-3">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white border border-[#E5E7EB] rounded-xl p-3 text-center"
+      >
+        <div className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-semibold mb-1">Trigger</div>
+        <div className="text-xs font-medium text-[#111827]">Lead submits quiz (Score &lt; 40)</div>
+      </motion.div>
+      {emails.map((email, i) => (
+        <motion.div
+          key={email.subject}
+          initial={{ opacity: 0, y: 12 }}
+          animate={i < step ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white border border-[#E5E7EB] rounded-xl p-3"
+        >
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[9px] text-[#9CA3AF] font-medium">{email.delay}</span>
+            <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
+              email.status === "Sent" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+            }`}>{email.status}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Mail className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+            <span className="text-xs font-medium text-[#111827]">{email.subject}</span>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 function RightMockup({ tab }: { tab: TabId }) {
   switch (tab) {
     case "builder":
@@ -598,6 +661,8 @@ function RightMockup({ tab }: { tab: TabId }) {
       return <AnalyticsMockup />;
     case "routing":
       return <RoutingMockup />;
+    case "emails":
+      return <EmailsMockup />;
     case "integrations":
       return <IntegrationsMockup />;
   }
@@ -613,22 +678,24 @@ export function ProductDemo() {
   return (
     <section id="demo" className="bg-white py-24 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Tab bar */}
-        <div className="flex items-center justify-center gap-1 mb-12 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "bg-[#2D6A4F] text-white shadow-sm"
-                  : "text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#111827]"
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
+        {/* Fillout-style frosted glass tab bar */}
+        <div className="flex items-center justify-center mb-12">
+          <div className="inline-flex items-center gap-0.5 bg-[#F3F4F6]/80 backdrop-blur-sm rounded-2xl p-1.5 border border-[#E5E7EB]/60 overflow-x-auto scrollbar-hide">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "bg-white text-[#111827] shadow-sm"
+                    : "text-[#6B7280] hover:text-[#111827]"
+                }`}
+              >
+                <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? "text-[#2D6A4F]" : ""}`} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Content area */}

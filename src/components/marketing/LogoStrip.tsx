@@ -23,16 +23,18 @@ export function LogoStrip() {
         </div>
 
         {/* Industry badges */}
-        <div className="flex items-center justify-center gap-2 flex-wrap">
-          <span className="text-xs text-[#9CA3AF] mr-1">Trusted by</span>
-          {industries.map((industry) => (
-            <span
-              key={industry}
-              className="text-xs font-medium text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full px-3 py-1"
-            >
-              {industry}
-            </span>
-          ))}
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-xs text-[#9CA3AF]">Trusted by</span>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            {industries.map((industry) => (
+              <span
+                key={industry}
+                className="text-xs font-medium text-[#6B7280] bg-[#F9FAFB] border border-[#E5E7EB] rounded-full px-3 py-1"
+              >
+                {industry}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>

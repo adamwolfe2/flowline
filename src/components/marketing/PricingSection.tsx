@@ -119,14 +119,14 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         </div>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {plans.map((plan) => {
             const price = annual ? plan.annualPrice : plan.monthlyPrice;
 
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-xl border p-6 flex flex-col ${
+                className={`relative rounded-2xl border p-8 flex flex-col ${
                   plan.popular
                     ? "border-[#2D6A4F] shadow-[0_0_0_1px_#2D6A4F] bg-white"
                     : "border-[#E5E7EB] bg-white"
@@ -140,14 +140,14 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-[#111827] mb-1">
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-[#111827] mb-1">
                     {plan.name}
                   </h3>
                   <p className="text-sm text-[#6B7280]">{plan.description}</p>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-8">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-semibold text-[#111827]">
                       ${price}
@@ -168,11 +168,11 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                   )}
                 </div>
 
-                <ul className="space-y-2.5 mb-8 flex-1">
+                <ul className="space-y-3 mb-10 flex-1">
                   {plan.features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2 text-sm text-[#6B7280]"
+                      className="flex items-start gap-2.5 text-sm text-[#6B7280]"
                     >
                       <Check className="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" />
                       {feature}
@@ -182,7 +182,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
 
                 <Link
                   href={plan.href}
-                  className={`w-full text-center rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                  className={`w-full text-center rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                     plan.popular
                       ? "bg-[#2D6A4F] text-white hover:bg-[#245840]"
                       : "border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB]"
