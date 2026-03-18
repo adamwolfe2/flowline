@@ -2,6 +2,15 @@
 
 import Script from "next/script";
 
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+    ttq?: { track: (...args: unknown[]) => void };
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  }
+}
+
 interface TrackingPixelsProps {
   fbPixelId?: string;
   tiktokPixelId?: string;
@@ -86,33 +95,29 @@ export function TrackingPixels({ fbPixelId, tiktokPixelId, ga4MeasurementId }: T
 // Fire conversion events from funnel steps
 export function fireConversionEvent(tracking?: { fbPixelId?: string; tiktokPixelId?: string; ga4MeasurementId?: string }) {
   if (!tracking) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const w = window as any;
 
-  if (tracking.fbPixelId && w.fbq) {
-    w.fbq("track", "Lead");
+  if (tracking.fbPixelId && window.fbq) {
+    window.fbq("track", "Lead");
   }
-  if (tracking.tiktokPixelId && w.ttq) {
-    w.ttq.track("SubmitForm");
+  if (tracking.tiktokPixelId && window.ttq) {
+    window.ttq.track("SubmitForm");
   }
-  if (tracking.ga4MeasurementId && w.gtag) {
-    w.gtag("event", "generate_lead");
+  if (tracking.ga4MeasurementId && window.gtag) {
+    window.gtag("event", "generate_lead");
   }
 }
 
 // Fire quiz start event
 export function fireQuizStartEvent(tracking?: { fbPixelId?: string; tiktokPixelId?: string; ga4MeasurementId?: string }) {
   if (!tracking) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const w = window as any;
 
-  if (tracking.fbPixelId && w.fbq) {
-    w.fbq("track", "ViewContent", { content_name: "Quiz Started" });
+  if (tracking.fbPixelId && window.fbq) {
+    window.fbq("track", "ViewContent", { content_name: "Quiz Started" });
   }
-  if (tracking.tiktokPixelId && w.ttq) {
-    w.ttq.track("ViewContent");
+  if (tracking.tiktokPixelId && window.ttq) {
+    window.ttq.track("ViewContent");
   }
-  if (tracking.ga4MeasurementId && w.gtag) {
-    w.gtag("event", "quiz_start");
+  if (tracking.ga4MeasurementId && window.gtag) {
+    window.gtag("event", "quiz_start");
   }
 }

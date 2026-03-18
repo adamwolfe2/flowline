@@ -68,9 +68,10 @@ export function ContentBlockDisplay({ blocks, brand, onContinue }: ContentBlockD
               <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                 <img
                   src={block.content.imageUrl}
-                  alt={block.content.caption || ""}
+                  alt={block.content.caption || "Content image"}
                   className="w-full object-cover"
                   style={{ maxHeight: "300px" }}
+                  loading="lazy"
                 />
                 {block.content.caption && (
                   <p className="text-xs text-gray-500 p-3 text-center">{block.content.caption}</p>

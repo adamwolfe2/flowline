@@ -142,6 +142,7 @@ function BuildContent() {
                   rows={3}
                   className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] resize-none outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#2D6A4F] transition-colors"
                   style={{ fontSize: "16px" }}
+                  aria-label="Describe your business and ideal client"
                 />
                 <button onClick={() => handleBuild()} disabled={prompt.length < 10}
                   className="w-full mt-3 py-2.5 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2">

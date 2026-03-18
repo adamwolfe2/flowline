@@ -106,6 +106,7 @@ export function HeroSection() {
               rows={3}
               className="w-full px-6 py-5 text-base text-[#111827] placeholder-[#9CA3AF] bg-transparent resize-none outline-none border-none focus:ring-0 focus:outline-none"
               style={{ fontSize: "16px" }}
+              aria-label="Describe your business to generate a funnel"
             />
             <div className="flex items-center justify-between px-5 pb-4">
               {/* Integration logos */}
@@ -132,6 +133,7 @@ export function HeroSection() {
                     onClick={() => { setShowTemplates(!showTemplates); setShowStyles(false); }}
                     className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${showTemplates ? "border-[#2D6A4F] text-[#2D6A4F] bg-[#2D6A4F]/5" : "border-[#E5E7EB] text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB]"}`}
                     title="Templates"
+                    aria-label="Quick start templates"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
                   </button>
@@ -171,6 +173,7 @@ export function HeroSection() {
                     onClick={() => { setShowStyles(!showStyles); setShowTemplates(false); }}
                     className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${showStyles ? "border-[#2D6A4F] text-[#2D6A4F] bg-[#2D6A4F]/5" : "border-[#E5E7EB] text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB]"}`}
                     title="Brand color"
+                    aria-label="Brand color picker"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
                   </button>

@@ -56,6 +56,7 @@ export function LogoStrip() {
                 src={logo.src}
                 alt={logo.name}
                 className="h-8 w-auto object-contain opacity-30 hover:opacity-80 transition-opacity duration-300"
+                loading="lazy"
               />
             </div>
           ))}

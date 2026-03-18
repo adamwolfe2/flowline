@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
 
+declare global {
+  interface Window {
+    Cal?: ((...args: unknown[]) => void) & { ns: Record<string, (...args: unknown[]) => void> };
+  }
+}
+
 interface SuccessStepProps {
   config: FunnelConfig;
   calendarUrl: string;
@@ -71,8 +77,7 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
 
     script.onload = () => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const Cal = (window as any).Cal;
+        const Cal = window.Cal;
         if (Cal) {
           Cal("init", effectiveNamespace, { origin: "https://cal.com" });
           Cal.ns[effectiveNamespace]("inline", {

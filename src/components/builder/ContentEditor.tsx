@@ -195,6 +195,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                         <button
                           onClick={() => removeOption(qi, oi)}
                           className="p-1 text-gray-300 hover:text-red-400 transition-colors"
+                          aria-label="Remove option"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>

@@ -379,6 +379,7 @@ function OnboardingContent() {
                       },
                     }))}
                     className="w-12 h-12 rounded-xl border-2 border-gray-200 cursor-pointer"
+                    aria-label="Brand color"
                   />
                   <div className="flex flex-wrap gap-2">
                     {["#2563EB", "#7C3AED", "#059669", "#DC2626", "#EA580C", "#0891B2", "#4F46E5", "#D946EF"].map(c => (
@@ -553,6 +554,7 @@ function OnboardingContent() {
                   className="flex-1 px-3 py-2.5 text-base outline-none"
                   placeholder="my-funnel"
                   maxLength={40}
+                  aria-label="Funnel URL slug"
                 />
               </div>
               {slugError && (

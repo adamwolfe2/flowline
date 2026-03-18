@@ -110,8 +110,9 @@ export default function BuilderPage() {
 
   if (!funnel || !config) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center" role="status" aria-busy="true">
         <div className="animate-spin w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full" />
+        <span className="sr-only">Loading builder...</span>
       </div>
     );
   }
@@ -171,12 +172,14 @@ export default function BuilderPage() {
             <button
               onClick={() => setPreviewMode("desktop")}
               className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-white shadow-sm" : "text-gray-400"}`}
+              aria-label="Desktop preview"
             >
               <Monitor className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setPreviewMode("mobile")}
               className={`p-1.5 rounded-md transition-colors ${previewMode === "mobile" ? "bg-white shadow-sm" : "text-gray-400"}`}
+              aria-label="Mobile preview"
             >
               <Smartphone className="w-3.5 h-3.5" />
             </button>

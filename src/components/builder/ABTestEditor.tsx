@@ -159,6 +159,7 @@ export function ABTestEditor({ funnel }: ABTestEditorProps) {
                     <button
                       onClick={() => deleteVariant(variant.id)}
                       className="p-1 text-gray-300 hover:text-red-400 transition-colors"
+                      aria-label="Delete variant"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

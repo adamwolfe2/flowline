@@ -94,6 +94,7 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onBack }: EmailStepP
             autoComplete="email"
             enterKeyHint="send"
             placeholder="you@example.com"
+            aria-label="Email address"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);

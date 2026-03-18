@@ -221,13 +221,13 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
                   <Separator />
 
                   {seq.steps.map((step, si) => (
-                    <div key={si} className="p-2 bg-gray-50 rounded-lg space-y-2">
+                    <div key={step.id || `step-${si}`} className="p-2 bg-gray-50 rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-medium text-gray-500">
                           Step {si + 1} {si === 0 ? "" : `(after ${step.delayHours}h)`}
                         </span>
                         {seq.steps.length > 1 && (
-                          <button onClick={() => removeStep(seq.id, si)} className="p-0.5 text-gray-300 hover:text-red-400">
+                          <button onClick={() => removeStep(seq.id, si)} className="p-0.5 text-gray-300 hover:text-red-400" aria-label="Remove step">
                             <Trash2 className="w-3 h-3" />
                           </button>
                         )}

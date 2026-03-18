@@ -123,6 +123,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
               onChange={e => updateColor(e.target.value)}
               className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer appearance-none p-0"
               style={{ backgroundColor: config.brand.primaryColor }}
+              aria-label="Brand color"
             />
           </div>
           <Input

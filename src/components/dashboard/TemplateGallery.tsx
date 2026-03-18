@@ -68,7 +68,7 @@ export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
           <LayoutTemplate className="w-4 h-4 text-[#737373]" />
           <h3 className="text-sm font-semibold text-[#333333]">Choose a Template</h3>
         </div>
-        <button onClick={() => setOpen(false)} className="p-1 hover:bg-gray-100 rounded-md transition-colors">
+        <button onClick={() => setOpen(false)} className="p-1 hover:bg-gray-100 rounded-md transition-colors" aria-label="Close template gallery">
           <X className="w-4 h-4 text-gray-400" />
         </button>
       </div>
