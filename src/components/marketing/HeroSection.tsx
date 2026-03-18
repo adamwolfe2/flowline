@@ -72,11 +72,10 @@ export function HeroSection() {
 
         <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="text-base sm:text-lg md:text-xl text-white/80 max-w-2xl mt-5 mb-10 leading-relaxed"
+          className="text-white/80 max-w-2xl mt-5 mb-10"
           style={{ textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}>
-          Describe what you need and let AI handle the rest.
-          <br className="hidden sm:block" />
-          {" "}Build{" "}
+          <span className="block text-lg sm:text-xl md:text-2xl leading-relaxed mb-2">Describe what you need and let AI handle the rest.</span>
+          <span className="block text-base sm:text-lg md:text-xl leading-relaxed">Build{" "}
           <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-3 py-1 rounded-lg text-sm sm:text-base cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
             <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Quiz Funnels
@@ -91,14 +90,14 @@ export function HeroSection() {
             <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             Calendar Routing
           </span>
-          {" for your business."}
+          {" for your business."}</span>
         </motion.p>
 
         {/* Clean prompt box — Zite style */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           className="w-full max-w-2xl">
-          <div className="bg-white rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl border border-white/20">
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
