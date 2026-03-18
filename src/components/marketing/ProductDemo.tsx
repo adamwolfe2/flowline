@@ -505,22 +505,22 @@ function IntegrationsMockup() {
     {
       category: "Calendar",
       items: [
-        { name: "Cal.com", color: "text-[#111827]" },
-        { name: "Calendly", color: "text-[#006BFF]" },
+        { name: "Cal.com", logo: "/integrations/calcom.svg" },
+        { name: "Calendly", logo: "/integrations/calendly.svg" },
       ],
     },
     {
       category: "Automation",
       items: [
-        { name: "Zapier", color: "text-[#FF4A00]" },
-        { name: "Make", color: "text-[#6D00CC]" },
+        { name: "Zapier", logo: "/integrations/zapier.svg" },
+        { name: "Make", logo: "/integrations/make.svg" },
       ],
     },
     {
       category: "CRM",
       items: [
-        { name: "HubSpot", color: "text-[#FF7A59]" },
-        { name: "Salesforce", color: "text-[#00A1E0]" },
+        { name: "HubSpot", logo: "/integrations/hubspot-svgrepo-com.svg" },
+        { name: "Salesforce", logo: "/integrations/salesforce.svg" },
       ],
     },
   ];
@@ -554,9 +554,14 @@ function IntegrationsMockup() {
             {row.items.map((item) => (
               <div
                 key={item.name}
-                className="flex-1 bg-white border border-[#E5E7EB] rounded-lg p-3 flex items-center justify-center"
+                className="flex-1 bg-white border border-[#E5E7EB] rounded-lg p-3 flex items-center justify-center gap-2"
               >
-                <span className={`text-sm font-semibold ${item.color}`}>
+                <img
+                  src={item.logo}
+                  alt={item.name}
+                  className="w-6 h-6 object-contain"
+                />
+                <span className="text-xs font-medium text-[#6B7280]">
                   {item.name}
                 </span>
               </div>
