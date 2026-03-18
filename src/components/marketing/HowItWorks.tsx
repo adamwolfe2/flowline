@@ -301,7 +301,6 @@ export function HowItWorks() {
           ))}
         </div>
 
-        <BuilderMockup />
       </div>
     </section>
   );

@@ -166,7 +166,7 @@ function BuilderMockup() {
   return (
     <div className="w-full max-w-[420px] grid grid-cols-2 gap-3 h-full">
       {/* Chat panel */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-3 flex flex-col gap-2 overflow-hidden">
+      <div className="bg-white rounded-lg border border-[#E5E7EB] p-3 flex flex-col gap-2 overflow-hidden">
         <div className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider mb-1">
           AI Chat
         </div>
@@ -196,7 +196,7 @@ function BuilderMockup() {
       </div>
 
       {/* Preview panel */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] p-3 flex flex-col gap-2 overflow-hidden">
+      <div className="bg-white rounded-lg border border-[#E5E7EB] p-3 flex flex-col gap-2 overflow-hidden">
         <div className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider mb-1">
           Live Preview
         </div>
@@ -255,7 +255,7 @@ function ScoringMockup() {
               : { opacity: 0, x: -16 }
           }
           transition={{ duration: 0.35 }}
-          className="bg-white rounded-xl border border-[#E5E7EB] p-3 flex items-center justify-between"
+          className="bg-white rounded-lg border border-[#E5E7EB] p-3 flex items-center justify-between"
         >
           <span className="text-xs text-[#111827] font-medium">{card.q}</span>
           <span className="text-xs font-bold text-[#2D6A4F] bg-[#2D6A4F]/10 rounded-full px-2.5 py-1">
@@ -273,7 +273,7 @@ function ScoringMockup() {
             : { opacity: 0, scale: 0.9 }
         }
         transition={{ duration: 0.4, delay: 0.2 }}
-        className="bg-[#2D6A4F] rounded-xl p-4 flex items-center justify-between"
+        className="bg-[#2D6A4F] rounded-lg p-4 flex items-center justify-between"
       >
         <div>
           <div className="text-[10px] text-white/70 uppercase tracking-wider font-medium">
@@ -437,7 +437,7 @@ function RoutingMockup() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white border border-[#E5E7EB] rounded-xl p-3 text-center text-xs font-semibold text-[#111827]"
+        className="bg-white border border-[#E5E7EB] rounded-lg p-3 text-center text-xs font-semibold text-[#111827]"
       >
         Lead Submits Quiz
       </motion.div>
@@ -449,7 +449,7 @@ function RoutingMockup() {
         transition={{ duration: 0.35 }}
         className="flex items-center justify-center"
       >
-        <div className="bg-[#2D6A4F] text-white rounded-xl px-4 py-2.5 text-xs font-bold flex items-center gap-2">
+        <div className="bg-[#2D6A4F] text-white rounded-lg px-4 py-2.5 text-xs font-bold flex items-center gap-2">
           <Target className="w-3.5 h-3.5" />
           AI Scores: 72 points
         </div>
@@ -475,7 +475,7 @@ function RoutingMockup() {
               step >= 3 ? { opacity: 1, x: 0 } : { opacity: 0, x: -12 }
             }
             transition={{ duration: 0.3, delay: i * 0.12 }}
-            className={`rounded-xl border p-3 flex items-center justify-between ${route.color} ${
+            className={`rounded-lg border p-3 flex items-center justify-between ${route.color} ${
               i === 0 && step >= 3 ? "ring-2 ring-emerald-400/50" : ""
             }`}
           >
@@ -534,7 +534,7 @@ function IntegrationsMockup() {
         transition={{ duration: 0.4 }}
         className="flex items-center justify-center mb-2"
       >
-        <div className="bg-[#2D6A4F] text-white text-xs font-bold rounded-xl px-4 py-2">
+        <div className="bg-[#2D6A4F] text-white text-xs font-bold rounded-lg px-4 py-2">
           MyVSL
         </div>
       </motion.div>
@@ -554,7 +554,7 @@ function IntegrationsMockup() {
             {row.items.map((item) => (
               <div
                 key={item.name}
-                className="flex-1 bg-white border border-[#E5E7EB] rounded-xl p-3 flex items-center justify-center"
+                className="flex-1 bg-white border border-[#E5E7EB] rounded-lg p-3 flex items-center justify-center"
               >
                 <span className={`text-sm font-semibold ${item.color}`}>
                   {item.name}
@@ -622,7 +622,7 @@ function EmailsMockup() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="bg-white border border-[#E5E7EB] rounded-xl p-3 text-center"
+        className="bg-white border border-[#E5E7EB] rounded-lg p-3 text-center"
       >
         <div className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-semibold mb-1">Trigger</div>
         <div className="text-xs font-medium text-[#111827]">Lead submits quiz (Score &lt; 40)</div>
@@ -633,7 +633,7 @@ function EmailsMockup() {
           initial={{ opacity: 0, y: 12 }}
           animate={i < step ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={{ duration: 0.3 }}
-          className="bg-white border border-[#E5E7EB] rounded-xl p-3"
+          className="bg-white border border-[#E5E7EB] rounded-lg p-3"
         >
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[9px] text-[#9CA3AF] font-medium">{email.delay}</span>
@@ -690,12 +690,12 @@ export function ProductDemo() {
 
         {/* Fillout-style frosted glass tab bar */}
         <div className="flex items-center justify-center mb-10">
-          <div className="inline-flex items-center gap-0.5 bg-[#F3F4F6]/80 backdrop-blur-sm rounded-2xl p-1.5 border border-[#E5E7EB]/60 overflow-x-auto scrollbar-hide">
+          <div className="inline-flex items-center gap-0.5 bg-[#F3F4F6]/80 backdrop-blur-sm rounded-xl p-1.5 border border-[#E5E7EB]/60 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-white text-[#111827] shadow-sm"
                     : "text-[#6B7280] hover:text-[#111827]"
@@ -708,19 +708,32 @@ export function ProductDemo() {
           </div>
         </div>
 
-        {/* Content area */}
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden min-h-[480px]">
+        {/* Browser chrome wrapper */}
+        <div className="bg-white border border-[#E5E7EB] rounded-lg overflow-hidden shadow-sm">
+          {/* Browser bar */}
+          <div className="h-10 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center px-4 gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
+            <div className="flex-1 mx-8">
+              <div className="bg-white border border-[#E5E7EB] rounded px-3 py-1 text-[10px] text-[#9CA3AF] text-center max-w-[220px] mx-auto">
+                app.getmyvsl.com
+              </div>
+            </div>
+          </div>
+
+          {/* Content area */}
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
-              className="grid md:grid-cols-2 min-h-[480px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="grid md:grid-cols-2 min-h-[460px]"
             >
               {/* LEFT: Copy */}
-              <div className="p-8 md:p-12 flex flex-col justify-center">
+              <div className="p-8 md:p-10 flex flex-col justify-center">
                 <LeftContent tab={activeTab} />
               </div>
               {/* RIGHT: Interactive mockup */}
