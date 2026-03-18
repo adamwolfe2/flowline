@@ -9,6 +9,8 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+export const revalidate = 60; // Regenerate every 60 seconds
+
 const getCachedFunnel = unstable_cache(
   async (hostname: string) => getFunnelByCustomDomain(hostname),
   ["funnel-by-domain"],

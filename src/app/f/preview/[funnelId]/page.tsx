@@ -4,6 +4,8 @@ import { FunnelClient } from "@/components/funnel/FunnelClient";
 import { FunnelConfig } from "@/types";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ funnelId: string }>;
 }

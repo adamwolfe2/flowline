@@ -1,9 +1,6 @@
 "use client";
 import { useRef, useCallback, useEffect } from "react";
 
-// Failed events retry queue (module-level for persistence across re-renders)
-const MAX_RETRY_QUEUE = 20;
-
 function getDeviceType(): "mobile" | "desktop" | "tablet" {
   if (typeof navigator === "undefined") return "desktop";
   const ua = navigator.userAgent;
@@ -35,6 +32,9 @@ function getStepKey(index: number, totalQuestions: number, hasVideo: boolean): s
   return `step_${index}`;
 }
 
+// Critical events that should be sent immediately, not batched
+const IMMEDIATE_EVENT_TYPES = ["lead_created", "funnel_completed"];
+
 interface TrackingConfig {
   funnelId: string;
   sessionId: string;
@@ -50,7 +50,10 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
   const device = useRef<string>("desktop");
   const cumScore = useRef(0);
   const hasFiredView = useRef(false);
-  const failedQueue = useRef<Array<Record<string, unknown>>>([]);
+
+  // Batch event queue
+  const eventQueueRef = useRef<Array<Record<string, unknown>>>([]);
+  const flushTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Store in refs so callbacks don't need them as deps
   const totalQRef = useRef(totalQuestions);
@@ -62,6 +65,73 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
     utmParams.current = getUTMParams();
     device.current = getDeviceType();
   }, []);
+
+  // Flush function — sends all queued events in one batch
+  const flushEvents = useCallback(() => {
+    const queue = eventQueueRef.current;
+    if (queue.length === 0) return;
+
+    const batch = [...queue];
+    eventQueueRef.current = [];
+
+    if (flushTimeoutRef.current) {
+      clearTimeout(flushTimeoutRef.current);
+      flushTimeoutRef.current = null;
+    }
+
+    // Use sendBeacon if available (more reliable on unload)
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      navigator.sendBeacon("/api/events/batch", JSON.stringify({ events: batch }));
+    } else {
+      fetch("/api/events/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ events: batch }),
+        keepalive: true,
+      }).catch(() => {});
+    }
+  }, []);
+
+  // Queue an event instead of sending immediately
+  const queueEvent = useCallback((event: Record<string, unknown>) => {
+    eventQueueRef.current.push(event);
+
+    // Auto-flush after 10 events
+    if (eventQueueRef.current.length >= 10) {
+      flushEvents();
+      return;
+    }
+
+    // Set/reset 5-second flush timer
+    if (flushTimeoutRef.current) clearTimeout(flushTimeoutRef.current);
+    flushTimeoutRef.current = setTimeout(flushEvents, 5000);
+  }, [flushEvents]);
+
+  // Send an event immediately (for critical events)
+  const sendImmediate = useCallback((payload: Record<string, unknown>) => {
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+      navigator.sendBeacon("/api/events", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+    } else {
+      fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    }
+  }, []);
+
+  // Flush on unload
+  useEffect(() => {
+    const handleUnload = () => flushEvents();
+    window.addEventListener("beforeunload", handleUnload);
+    window.addEventListener("pagehide", handleUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+      window.removeEventListener("pagehide", handleUnload);
+      flushEvents(); // Flush on unmount too
+    };
+  }, [flushEvents]);
 
   const track = useCallback(
     (payload: Record<string, unknown>) => {
@@ -80,23 +150,29 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
         ...payload,
       };
 
-      if (payload.eventType === "funnel_abandoned" && typeof navigator !== "undefined" && navigator.sendBeacon) {
-        navigator.sendBeacon("/api/events", new Blob([JSON.stringify(base)], { type: "application/json" }));
+      const eventType = payload.eventType as string;
+
+      // Critical events and abandon events are sent immediately
+      if (IMMEDIATE_EVENT_TYPES.includes(eventType)) {
+        sendImmediate(base);
+      } else if (eventType === "funnel_abandoned") {
+        // Abandon events use sendBeacon directly for reliability
+        if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+          navigator.sendBeacon("/api/events", new Blob([JSON.stringify(base)], { type: "application/json" }));
+        } else {
+          fetch("/api/events", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(base),
+            keepalive: true,
+          }).catch(() => {});
+        }
       } else {
-        fetch("/api/events", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(base),
-          keepalive: true,
-        }).catch(() => {
-          // Queue for retry (max 20 events in queue)
-          if (failedQueue.current.length < MAX_RETRY_QUEUE) {
-            failedQueue.current.push(base);
-          }
-        });
+        // All other events are batched
+        queueEvent(base);
       }
     },
-    [funnelId, sessionId]
+    [funnelId, sessionId, sendImmediate, queueEvent]
   );
 
   useEffect(() => {
@@ -105,33 +181,12 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
     track({ eventType: "funnel_viewed", stepIndex: 0, stepKey: "welcome" });
   }, [track]);
 
-  // Retry failed events periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (failedQueue.current.length === 0) return;
-      const events = [...failedQueue.current];
-      failedQueue.current = [];
-      events.forEach(event => {
-        fetch("/api/events", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(event),
-          keepalive: true,
-        }).catch(() => {
-          // Re-queue if still failing (but respect max)
-          if (failedQueue.current.length < MAX_RETRY_QUEUE) {
-            failedQueue.current.push(event);
-          }
-        });
-      });
-    }, 10000); // Retry every 10 seconds
-    return () => clearInterval(interval);
-  }, []);
-
   useEffect(() => {
     const videoOffset = hasVideoRef.current ? 1 : 0;
     const emailStepIndex = 1 + videoOffset + totalQRef.current;
     const handleAbandon = () => {
+      // Flush any queued events first
+      flushEvents();
       track({
         eventType: "funnel_abandoned",
         abandonedAtStep: currentStep.current,
@@ -141,7 +196,7 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
     };
     window.addEventListener("beforeunload", handleAbandon);
     return () => window.removeEventListener("beforeunload", handleAbandon);
-  }, [track]);
+  }, [track, flushEvents]);
 
   const trackPageView = useCallback(
     (stepIndex: number) => {
