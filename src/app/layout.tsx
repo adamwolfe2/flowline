@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MyVSL — AI Funnel Builder That Books Calls",
     description: "Three questions. Smart scoring. Automatic calendar routing.",
+    url: appUrl,
     images: [{ url: `${appUrl}/og.png`, width: 1200, height: 630 }],
     type: "website",
     siteName: "MyVSL",

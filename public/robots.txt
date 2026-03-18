@@ -7,5 +7,6 @@ Disallow: /settings
 Disallow: /admin
 Disallow: /api
 Disallow: /leads
+Disallow: /billing
 Disallow: /onboarding
 Sitemap: https://getmyvsl.com/sitemap.xml
