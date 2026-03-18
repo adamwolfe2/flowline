@@ -220,7 +220,7 @@ export function HeroSection() {
               </div>
             </div>
           </div>
-          <p className="text-xs text-white/60 mt-4 text-center" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.06)" }}>
+          <p className="text-xs text-[#6B7280] mt-4 text-center">
             Free to start. No account required to build.
           </p>
         </motion.div>
