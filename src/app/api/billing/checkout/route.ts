@@ -54,6 +54,7 @@ export async function POST(req: Request) {
       mode: "subscription",
       success_url: `${appUrl}/dashboard?upgraded=true`,
       cancel_url: `${appUrl}/pricing`,
+      metadata: { clerkUserId: userId },
       subscription_data: { metadata: { clerkUserId: userId } },
       allow_promotion_codes: true,
     });
