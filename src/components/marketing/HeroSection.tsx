@@ -1,12 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
+const QUICK_TEMPLATES = [
+  { label: "Coaching Qualifier", prompt: "I sell business coaching to 6-figure entrepreneurs" },
+  { label: "SaaS Demo Booker", prompt: "I run a B2B SaaS product for team collaboration" },
+  { label: "Agency Lead Gen", prompt: "I run a digital marketing agency for ecommerce brands" },
+  { label: "Real Estate", prompt: "I help first-time home buyers find properties" },
+  { label: "Fitness Program", prompt: "I sell online fitness coaching for busy professionals" },
+];
+
+const COLOR_PRESETS = [
+  { label: "Forest", color: "#2D6A4F" },
+  { label: "Ocean", color: "#2563EB" },
+  { label: "Violet", color: "#7C3AED" },
+  { label: "Coral", color: "#DC2626" },
+  { label: "Amber", color: "#D97706" },
+  { label: "Slate", color: "#0F172A" },
+];
 
 export function HeroSection() {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showStyles, setShowStyles] = useState(false);
+  const templateRef = useRef<HTMLDivElement>(null);
+  const styleRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (templateRef.current && !templateRef.current.contains(e.target as Node)) setShowTemplates(false);
+      if (styleRef.current && !styleRef.current.contains(e.target as Node)) setShowStyles(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   function handleSubmit() {
     if (prompt.length > 5) {
@@ -78,34 +109,95 @@ export function HeroSection() {
               style={{ fontSize: "16px" }}
             />
             <div className="flex items-center justify-between px-5 pb-4">
-              {/* Integration icons */}
+              {/* Integration logos */}
               <div className="flex items-center gap-1.5">
-                <div className="flex -space-x-1.5" title="Integrates with Cal.com, Zapier, HubSpot">
-                  {/* Cal.com */}
-                  <div className="w-7 h-7 rounded-full bg-[#111827] border-2 border-white flex items-center justify-center">
-                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                  </div>
-                  {/* Zapier */}
-                  <div className="w-7 h-7 rounded-full bg-[#FF4A00] border-2 border-white flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.2 13.2h-3.4l2.4 2.4-1.6 1.6-2.4-2.4v3.4h-2.4v-3.4l-2.4 2.4-1.6-1.6 2.4-2.4H4.8v-2.4h3.4L5.8 8.4l1.6-1.6 2.4 2.4V5.8h2.4v3.4l2.4-2.4 1.6 1.6-2.4 2.4h3.4v2.4z"/></svg>
-                  </div>
-                  {/* HubSpot */}
-                  <div className="w-7 h-7 rounded-full bg-[#FF7A59] border-2 border-white flex items-center justify-center">
-                    <span className="text-white text-[8px] font-bold">HS</span>
-                  </div>
+                <div className="flex -space-x-1" title="Integrates with Cal.com, Zapier, HubSpot">
+                  <img src="https://logo.clearbit.com/cal.com" alt="Cal.com" className="w-7 h-7 rounded-full border-2 border-white bg-white object-contain" />
+                  <img src="https://logo.clearbit.com/zapier.com" alt="Zapier" className="w-7 h-7 rounded-full border-2 border-white bg-white object-contain" />
+                  <img src="https://logo.clearbit.com/hubspot.com" alt="HubSpot" className="w-7 h-7 rounded-full border-2 border-white bg-white object-contain" />
                 </div>
                 <span className="text-[10px] text-[#9CA3AF] hidden sm:inline ml-1">+6 more</span>
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Template icon */}
-                <button type="button" className="w-8 h-8 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB] transition-colors" title="Templates">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                </button>
-                {/* Style icon */}
-                <button type="button" className="w-8 h-8 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB] transition-colors" title="Style">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
-                </button>
+                {/* Template dropdown */}
+                <div ref={templateRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => { setShowTemplates(!showTemplates); setShowStyles(false); }}
+                    className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${showTemplates ? "border-[#2D6A4F] text-[#2D6A4F] bg-[#2D6A4F]/5" : "border-[#E5E7EB] text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB]"}`}
+                    title="Templates"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                  </button>
+                  <AnimatePresence>
+                    {showTemplates && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-[#E5E7EB] overflow-hidden z-50"
+                      >
+                        <div className="px-3 py-2 border-b border-[#F3F4F6]">
+                          <p className="text-xs font-semibold text-[#111827]">Quick start templates</p>
+                          <p className="text-[10px] text-[#9CA3AF]">Click to prefill the prompt</p>
+                        </div>
+                        <div className="py-1">
+                          {QUICK_TEMPLATES.map((t) => (
+                            <button
+                              key={t.label}
+                              type="button"
+                              onClick={() => { setPrompt(t.prompt); setShowTemplates(false); }}
+                              className="w-full text-left px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {/* Style dropdown */}
+                <div ref={styleRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => { setShowStyles(!showStyles); setShowTemplates(false); }}
+                    className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${showStyles ? "border-[#2D6A4F] text-[#2D6A4F] bg-[#2D6A4F]/5" : "border-[#E5E7EB] text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB]"}`}
+                    title="Brand color"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
+                  </button>
+                  <AnimatePresence>
+                    {showStyles && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 4, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-xl shadow-lg border border-[#E5E7EB] overflow-hidden z-50"
+                      >
+                        <div className="px-3 py-2 border-b border-[#F3F4F6]">
+                          <p className="text-xs font-semibold text-[#111827]">Brand color</p>
+                        </div>
+                        <div className="p-2 grid grid-cols-3 gap-1.5">
+                          {COLOR_PRESETS.map((c) => (
+                            <button
+                              key={c.label}
+                              type="button"
+                              onClick={() => setShowStyles(false)}
+                              className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-[#F9FAFB] transition-colors"
+                            >
+                              <div className="w-6 h-6 rounded-full border border-black/10" style={{ backgroundColor: c.color }} />
+                              <span className="text-[9px] text-[#6B7280]">{c.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 {/* Build button */}
                 <button
                   onClick={handleSubmit}
