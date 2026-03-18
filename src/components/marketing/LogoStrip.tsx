@@ -37,28 +37,26 @@ export function LogoStrip() {
           </div>
         </div>
 
-        <p className="text-xs text-[#9CA3AF] text-center mb-4">Integrates with your favorite tools</p>
+        <p className="text-[11px] text-[#B0B0B0] text-center mb-5 uppercase tracking-widest">Integrates with your favorite tools</p>
       </div>
 
-      {/* Infinite scrolling logo ticker */}
+      {/* Infinite scrolling logo ticker — logos only */}
       <div className="relative">
-        {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
-        <div className="flex animate-scroll">
-          {/* Duplicate the logos for seamless loop */}
+        <div className="flex animate-scroll items-center">
           {[...logos, ...logos].map((logo, i) => (
             <div
               key={`${logo.name}-${i}`}
-              className="flex items-center gap-2.5 px-6 shrink-0"
+              className="shrink-0 mx-8"
+              title={logo.name}
             >
               <img
                 src={logo.src}
                 alt={logo.name}
-                className="h-6 w-auto object-contain opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300"
+                className="h-8 w-auto object-contain opacity-30 hover:opacity-80 transition-opacity duration-300"
               />
-              <span className="text-xs text-[#9CA3AF] font-medium whitespace-nowrap">{logo.name}</span>
             </div>
           ))}
         </div>

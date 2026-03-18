@@ -110,13 +110,19 @@ export function HeroSection() {
             />
             <div className="flex items-center justify-between px-5 pb-4">
               {/* Integration logos */}
-              <div className="flex items-center gap-1.5">
-                <div className="flex -space-x-1" title="Integrates with Cal.com, Zapier, HubSpot">
-                  <img src="https://logo.clearbit.com/cal.com" alt="Cal.com" className="w-7 h-7 rounded-full border-2 border-white bg-white object-contain" />
-                  <img src="https://logo.clearbit.com/zapier.com" alt="Zapier" className="w-7 h-7 rounded-full border-2 border-white bg-white object-contain" />
-                  <img src="https://logo.clearbit.com/hubspot.com" alt="HubSpot" className="w-7 h-7 rounded-full border-2 border-white bg-white object-contain" />
+              <div className="flex items-center gap-1">
+                <div className="flex -space-x-1" title="Integrates with Calendly, Slack, HubSpot">
+                  <div className="w-7 h-7 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                    <img src="/integrations/calendly.svg" alt="Calendly" className="w-4 h-4 object-contain" />
+                  </div>
+                  <div className="w-7 h-7 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                    <img src="/integrations/slack.svg" alt="Slack" className="w-4 h-4 object-contain" />
+                  </div>
+                  <div className="w-7 h-7 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                    <img src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" className="w-4 h-4 object-contain" />
+                  </div>
                 </div>
-                <span className="text-[10px] text-[#9CA3AF] hidden sm:inline ml-1">+6 more</span>
+                <span className="text-[10px] text-[#9CA3AF] hidden sm:inline ml-1.5">+9 more</span>
               </div>
 
               <div className="flex items-center gap-2">
