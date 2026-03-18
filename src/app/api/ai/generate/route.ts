@@ -42,6 +42,10 @@ export async function POST(req: NextRequest) {
 
   const { prompt } = await req.json();
 
+  if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
+    return NextResponse.json({ error: "Prompt is required and must be a non-empty string" }, { status: 400 });
+  }
+
   // If OpenAI key is available, use it
   if (process.env.OPENAI_API_KEY) {
     try {

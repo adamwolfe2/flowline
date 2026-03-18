@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Users, Plus, Trash2, Loader2, Mail } from "lucide-react";
+import { Users, Plus, Loader2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 interface TeamMember {
@@ -52,7 +52,10 @@ export function TeamSettings() {
           setLoading(false);
         }
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Failed to load teams:", err);
+        setLoading(false);
+      });
   }, []);
 
   async function loadMembers(teamId: string) {
@@ -61,8 +64,8 @@ export function TeamSettings() {
       const data = await res.json();
       setMembers(data.members || []);
       setInvites(data.invites || []);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error("Failed to load team members:", err);
     }
     setLoading(false);
   }

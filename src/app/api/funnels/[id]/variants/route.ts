@@ -36,7 +36,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
-    const { name, config, trafficWeight, isControl } = await req.json();
+    const { name, config, trafficWeight: rawWeight, isControl } = await req.json();
+    const trafficWeight = rawWeight != null ? Math.max(0, Math.min(100, Number(rawWeight))) : undefined;
 
     // Verify ownership
     const [funnel] = await db.select()

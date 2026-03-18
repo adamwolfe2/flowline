@@ -26,7 +26,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .returning();
 
     return NextResponse.json({ shareToken: updated.shareToken });
-  } catch {
+  } catch (error) {
+    console.error("POST /api/funnels/[id]/share error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -44,7 +45,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("DELETE /api/funnels/[id]/share error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

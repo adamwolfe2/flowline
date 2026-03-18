@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2, MessageSquareQuote, ImageIcon, Video, Type, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, MessageSquareQuote, ImageIcon, Video, Type, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ContentBlocksEditorProps {
   config: FunnelConfig;
@@ -92,6 +92,7 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
                   <button
                     onClick={(e) => { e.stopPropagation(); removeBlock(block.id); }}
                     className="p-1 text-gray-300 hover:text-red-400 transition-colors"
+                    aria-label="Remove content block"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>

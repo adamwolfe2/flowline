@@ -20,6 +20,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       if (!domainRegex.test(domain)) {
         return NextResponse.json({ error: "Invalid domain format" }, { status: 400 });
       }
+      if (domain.length > 255) {
+        return NextResponse.json({ error: "Domain exceeds maximum length of 255 characters" }, { status: 400 });
+      }
 
       const normalizedDomain = domain.toLowerCase();
 

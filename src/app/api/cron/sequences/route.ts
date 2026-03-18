@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { sequenceEnrollments, emailSteps, emailSequences, leads, funnels } from "@/db/schema";
-import { eq, and, lte, asc } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 function escapeHtml(str: string): string {

@@ -60,8 +60,8 @@ export default function LeadsPage() {
       setLeads(data.leads);
       setTotal(data.total);
       if (data.funnels) setFunnels(data.funnels);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error("Failed to fetch leads:", err);
     } finally {
       setLoading(false);
     }
@@ -201,6 +201,7 @@ export default function LeadsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
+            aria-label="Search leads by email"
           />
         </div>
         <select
@@ -313,6 +314,7 @@ export default function LeadsPage() {
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
                     className="p-1.5 rounded-md hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4 text-[#6B7280]" />
                   </button>
@@ -320,6 +322,7 @@ export default function LeadsPage() {
                     onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={page >= totalPages - 1}
                     className="p-1.5 rounded-md hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Next page"
                   >
                     <ChevronRight className="w-4 h-4 text-[#6B7280]" />
                   </button>
