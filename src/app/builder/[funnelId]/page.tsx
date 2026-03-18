@@ -7,12 +7,12 @@ import { ContentEditor } from "@/components/builder/ContentEditor";
 import { BrandEditor } from "@/components/builder/BrandEditor";
 import { CalendarEditor } from "@/components/builder/CalendarEditor";
 import { PublishPanel } from "@/components/builder/PublishPanel";
-import { ABTestEditor } from "@/components/builder/ABTestEditor";
+import { ABTestEditor, Variant } from "@/components/builder/ABTestEditor";
 import { SequenceEditor } from "@/components/builder/SequenceEditor";
 import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -32,6 +32,11 @@ export default function BuilderPage() {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingConfigRef = useRef<FunnelConfig | null>(null);
 
+  // A/B test variant editing state
+  const [variants, setVariants] = useState<Variant[]>([]);
+  const [editingVariantId, setEditingVariantId] = useState<string | null>(null); // null = control
+  const [variantDropdownOpen, setVariantDropdownOpen] = useState(false);
+
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
@@ -49,16 +54,58 @@ export default function BuilderPage() {
         setFunnel(data);
         setConfig(data.config);
       });
+    // Also fetch variants
+    fetch(`/api/funnels/${funnelId}/variants`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setVariants(data); })
+      .catch(() => {});
   }, [funnelId]);
+
+  // Switch editing context between control and variant
+  function switchToVariant(variantId: string | null) {
+    // Flush pending save before switching
+    if (pendingConfigRef.current && saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      flushSave(pendingConfigRef.current);
+      pendingConfigRef.current = null;
+    }
+    setEditingVariantId(variantId);
+    if (variantId === null) {
+      // Switch back to control
+      setConfig(funnel?.config as FunnelConfig);
+    } else {
+      const variant = variants.find(v => v.id === variantId);
+      if (variant) setConfig(variant.config);
+    }
+    setHasUnsavedChanges(false);
+    setSaveStatus("idle");
+    setVariantDropdownOpen(false);
+    setPreviewKey(k => k + 1);
+  }
 
   // Flush any pending save (used on unmount or immediate-save scenarios)
   const flushSave = useCallback(async (configToSave: FunnelConfig) => {
     setSaving(true);
-    const res = await fetch(`/api/funnels/${funnelId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ config: configToSave }),
-    });
+    let res;
+    if (editingVariantId) {
+      // Save variant config
+      res = await fetch(`/api/funnels/${funnelId}/variants/${editingVariantId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config: configToSave }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setVariants(prev => prev.map(v => v.id === editingVariantId ? updated : v));
+      }
+    } else {
+      // Save control config
+      res = await fetch(`/api/funnels/${funnelId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config: configToSave }),
+      });
+    }
     setSaving(false);
     if (res.ok) {
       setHasUnsavedChanges(false);
@@ -69,7 +116,7 @@ export default function BuilderPage() {
       setSaveStatus("failed");
       toast.error("Failed to save changes");
     }
-  }, [funnelId]);
+  }, [funnelId, editingVariantId]);
 
   // Debounced save: updates config immediately (for responsive UI), saves after 800ms of inactivity
   const saveConfig = useCallback((newConfig: FunnelConfig) => {
@@ -226,6 +273,56 @@ export default function BuilderPage() {
               <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none rounded-r-lg" />
               <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none rounded-l-lg" />
             </div>
+            {/* Variant selector bar */}
+            {variants.length > 0 && (
+              <div className="mx-3 mt-2 mb-0">
+                <div className="relative">
+                  <button
+                    onClick={() => setVariantDropdownOpen(!variantDropdownOpen)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
+                      editingVariantId
+                        ? "bg-purple-50 border-purple-200 text-purple-700"
+                        : "bg-green-50 border-green-200 text-green-700"
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <FlaskConical className="w-3 h-3" />
+                      Editing: {editingVariantId ? variants.find(v => v.id === editingVariantId)?.name || "Variant" : "Control (Original)"}
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${variantDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {variantDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
+                      <button
+                        onClick={() => switchToVariant(null)}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors flex items-center justify-between ${
+                          !editingVariantId ? "bg-green-50 font-medium text-green-700" : "text-gray-700"
+                        }`}
+                      >
+                        Control (Original)
+                        {!editingVariantId && <span className="text-[9px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">Editing</span>}
+                      </button>
+                      {variants.map(v => (
+                        <button
+                          key={v.id}
+                          onClick={() => switchToVariant(v.id)}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors flex items-center justify-between border-t border-gray-50 ${
+                            editingVariantId === v.id ? "bg-purple-50 font-medium text-purple-700" : "text-gray-700"
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5">
+                            {v.name}
+                            {!v.active && <span className="text-[9px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Paused</span>}
+                          </span>
+                          {editingVariantId === v.id && <span className="text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">Editing</span>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="flex-1 overflow-y-auto p-4">
               <TabsContent value="content" className="mt-0">
                 <ContentEditor config={config} onSave={saveConfig} />
@@ -243,7 +340,13 @@ export default function BuilderPage() {
                 <SequenceEditor funnel={funnel} />
               </TabsContent>
               <TabsContent value="ab-test" className="mt-0">
-                <ABTestEditor funnel={funnel} />
+                <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
+                  setVariants(v);
+                  // If editing variant was deleted, switch back to control
+                  if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
+                    switchToVariant(null);
+                  }
+                }} />
               </TabsContent>
               <TabsContent value="tracking" className="mt-0">
                 <TrackingEditor config={config} onSave={saveConfig} />

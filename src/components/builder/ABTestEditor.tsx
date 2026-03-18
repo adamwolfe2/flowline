@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Funnel } from "@/types";
+import { Funnel, FunnelConfig } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,10 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, FlaskConical, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface Variant {
+export interface Variant {
   id: string;
   name: string;
-  config: unknown;
+  config: FunnelConfig;
   trafficWeight: number;
   isControl: boolean;
   active: boolean;
@@ -21,9 +21,10 @@ interface Variant {
 
 interface ABTestEditorProps {
   funnel: Funnel;
+  onVariantsChange?: (variants: Variant[]) => void;
 }
 
-export function ABTestEditor({ funnel }: ABTestEditorProps) {
+export function ABTestEditor({ funnel, onVariantsChange }: ABTestEditorProps) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +51,9 @@ export function ABTestEditor({ funnel }: ABTestEditorProps) {
       });
       if (res.ok) {
         const variant = await res.json();
-        setVariants(prev => [...prev, variant]);
+        const newVariants = [...variants, variant];
+        setVariants(newVariants);
+        onVariantsChange?.(newVariants);
         toast.success("Variant created");
       } else {
         const data = await res.json();
@@ -70,7 +73,9 @@ export function ABTestEditor({ funnel }: ABTestEditorProps) {
       });
       if (res.ok) {
         const updated = await res.json();
-        setVariants(prev => prev.map(v => v.id === variantId ? updated : v));
+        const newVariants = variants.map(v => v.id === variantId ? updated : v);
+        setVariants(newVariants);
+        onVariantsChange?.(newVariants);
       }
     } catch {
       toast.error("Failed to update variant");
@@ -83,7 +88,9 @@ export function ABTestEditor({ funnel }: ABTestEditorProps) {
         method: "DELETE",
       });
       if (res.ok) {
-        setVariants(prev => prev.filter(v => v.id !== variantId));
+        const newVariants = variants.filter(v => v.id !== variantId);
+        setVariants(newVariants);
+        onVariantsChange?.(newVariants);
         toast.success("Variant deleted");
       }
     } catch {
@@ -194,7 +201,7 @@ export function ABTestEditor({ funnel }: ABTestEditorProps) {
                 </div>
 
                 <p className="text-[10px] text-gray-400 mt-2">
-                  Edit this variant&apos;s content in the Content tab after selecting it.
+                  Select this variant from the dropdown above to edit its content, brand, and calendars.
                 </p>
               </div>
             ))}
