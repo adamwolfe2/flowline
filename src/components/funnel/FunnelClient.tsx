@@ -58,7 +58,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
       setAnswers((prev) => ({ ...prev, [key]: id }));
       setTimeout(() => {
         setStep((prev) => prev + 1);
-      }, 350);
+      }, 200);
     },
     [config.quiz.questions, step, trackAnswer]
   );
@@ -144,7 +144,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.18 }}
             >
               <WelcomeStep config={config} onStart={handleStart} />
             </motion.div>
@@ -156,7 +156,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.18 }}
             >
               <VideoStep config={config} onContinue={() => setStep(2)} />
             </motion.div>
@@ -168,7 +168,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.18 }}
             >
               <QuestionStep
                 config={config}
@@ -188,7 +188,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.18 }}
             >
               <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onBack={handleBack} />
             </motion.div>
@@ -200,7 +200,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.18 }}
             >
               <SuccessStep
                 config={config}

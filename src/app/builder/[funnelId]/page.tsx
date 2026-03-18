@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Funnel, FunnelConfig } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentEditor } from "@/components/builder/ContentEditor";
@@ -27,6 +27,8 @@ export default function BuilderPage() {
   const [previewKey, setPreviewKey] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingConfigRef = useRef<FunnelConfig | null>(null);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -47,25 +49,61 @@ export default function BuilderPage() {
       });
   }, [funnelId]);
 
-  const saveConfig = useCallback(async (newConfig: FunnelConfig) => {
-    setConfig(newConfig);
-    setHasUnsavedChanges(true);
+  // Flush any pending save (used on unmount or immediate-save scenarios)
+  const flushSave = useCallback(async (configToSave: FunnelConfig) => {
     setSaving(true);
     const res = await fetch(`/api/funnels/${funnelId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ config: newConfig }),
+      body: JSON.stringify({ config: configToSave }),
     });
     setSaving(false);
-    setPreviewKey(k => k + 1);
     if (res.ok) {
       setHasUnsavedChanges(false);
       setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      setPreviewKey(k => k + 1);
+      setTimeout(() => setSaveStatus("idle"), 3000);
     } else {
       setSaveStatus("failed");
       toast.error("Failed to save changes");
     }
+  }, [funnelId]);
+
+  // Debounced save: updates config immediately (for responsive UI), saves after 800ms of inactivity
+  const saveConfig = useCallback((newConfig: FunnelConfig) => {
+    setConfig(newConfig);
+    setHasUnsavedChanges(true);
+    setSaveStatus("idle");
+    pendingConfigRef.current = newConfig;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      if (pendingConfigRef.current) {
+        flushSave(pendingConfigRef.current);
+        pendingConfigRef.current = null;
+      }
+    }, 800);
+  }, [flushSave]);
+
+  // Flush pending save on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      if (pendingConfigRef.current) {
+        // Fire-and-forget save on unmount
+        fetch(`/api/funnels/${funnelId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ config: pendingConfigRef.current }),
+          keepalive: true,
+        });
+      }
+    };
   }, [funnelId]);
 
   if (!funnel || !config) {
@@ -91,9 +129,10 @@ export default function BuilderPage() {
           <span className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
             {config.brand.name}
           </span>
-          {saving && <span className="text-xs text-gray-400">Saving...</span>}
+          {saving && <span className="text-xs text-gray-400 animate-pulse">Saving...</span>}
           {!saving && saveStatus === "saved" && <span className="text-xs text-green-600">Saved</span>}
           {!saving && saveStatus === "failed" && <span className="text-xs text-red-500">Save failed</span>}
+          {!saving && saveStatus === "idle" && hasUnsavedChanges && <span className="text-xs text-amber-500">Unsaved</span>}
         </div>
         <div className="flex items-center gap-2">
           <button

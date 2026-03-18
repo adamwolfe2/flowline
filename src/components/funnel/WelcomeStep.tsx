@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { FunnelConfig } from "@/types";
@@ -11,6 +12,7 @@ interface WelcomeStepProps {
 
 export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
   const { brand, quiz } = config;
+  const [ctaHover, setCtaHover] = useState(false);
 
   return (
     <div className="flex flex-col items-center text-center px-4">
@@ -78,16 +80,13 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
           whileTap={{ scale: 0.98 }}
           className="w-full py-4 px-8 rounded-xl text-white font-semibold text-base shadow-lg transition-shadow hover:shadow-xl"
           style={{
-            backgroundColor: brand.primaryColor,
+            backgroundColor: ctaHover ? brand.primaryColorDark : brand.primaryColor,
             fontFamily: brand.fontBody,
             minHeight: "48px",
+            transition: "background-color 0.15s ease",
           }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.backgroundColor = brand.primaryColorDark;
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.backgroundColor = brand.primaryColor;
-          }}
+          onMouseEnter={() => setCtaHover(true)}
+          onMouseLeave={() => setCtaHover(false)}
         >
           {quiz.ctaButtonText ?? "Take the Quiz — It Takes 60 Seconds"}
         </motion.button>

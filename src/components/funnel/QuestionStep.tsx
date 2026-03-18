@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { FunnelConfig, QuizQuestion } from "@/types";
 
@@ -23,6 +24,7 @@ export function QuestionStep({
   onBack,
 }: QuestionStepProps) {
   const { brand } = config;
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
     <div className="w-full px-4">
@@ -56,23 +58,13 @@ export function QuestionStep({
               onClick={() => onSelect(question.key, opt.id)}
               className="w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-150 flex items-center justify-between group"
               style={{
-                borderColor: isSelected ? brand.primaryColor : "#E5E7EB",
-                backgroundColor: isSelected ? brand.primaryColorLight : "#FFFFFF",
+                borderColor: isSelected || hoveredId === opt.id ? brand.primaryColor : "#E5E7EB",
+                backgroundColor: isSelected || hoveredId === opt.id ? brand.primaryColorLight : "#FFFFFF",
                 minHeight: "56px",
                 cursor: "pointer",
               }}
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = brand.primaryColor;
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = brand.primaryColorLight;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "#E5E7EB";
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#FFFFFF";
-                }
-              }}
+              onMouseEnter={() => setHoveredId(opt.id)}
+              onMouseLeave={() => setHoveredId(null)}
             >
               <div className="flex items-center gap-3">
                 <div
