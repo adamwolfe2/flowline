@@ -272,6 +272,17 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
 
         <div className="space-y-4">
           <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Badge Text</Label>
+            <Input
+              value={config.quiz.badgeText ?? ""}
+              onChange={e => updateField("quiz.badgeText", e.target.value)}
+              placeholder="Free Application"
+              className="text-xs"
+              maxLength={40}
+            />
+          </div>
+
+          <div>
             <Label className="text-[11px] text-gray-400 mb-1">CTA Button Text</Label>
             <Input
               value={config.quiz.ctaButtonText ?? ""}

@@ -55,8 +55,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
         const body = await res.json().catch(() => ({}));
         toast.error(body.error || "Failed to duplicate funnel");
       }
-    } catch (err) {
-      console.error("Failed to duplicate funnel:", err);
+    } catch {
       toast.error("Failed to duplicate funnel");
     } finally {
       setDuplicating(false);
@@ -73,8 +72,8 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
       } else {
         toast.error("Failed to delete funnel");
       }
-    } catch (err) {
-      console.error("Failed to delete funnel:", err);
+    } catch {
+      toast.error("Failed to delete funnel");
     } finally {
       setDeleting(false);
       setConfirmOpen(false);
