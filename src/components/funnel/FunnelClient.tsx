@@ -8,8 +8,10 @@ import { QuestionStep } from "./QuestionStep";
 import { EmailStep } from "./EmailStep";
 import { SuccessStep } from "./SuccessStep";
 import { VideoStep } from "./VideoStep";
+import { ContentBlockDisplay } from "./ContentBlockDisplay";
 import { ProgressBar } from "./ProgressBar";
 import { useTracking } from "./useTracking";
+import { TrackingPixels, fireConversionEvent, fireQuizStartEvent } from "./TrackingPixels";
 import { toast } from "sonner";
 
 interface FunnelClientProps {
@@ -21,9 +23,11 @@ interface FunnelClientProps {
 
 export function FunnelClient({ config, funnelId, sessionId, hideBranding }: FunnelClientProps) {
   const totalQuestions = config.quiz.questions.length;
+  const hasContentBlocks = !!(config.quiz.contentBlocks && config.quiz.contentBlocks.length > 0);
+  const contentBlocksOffset = hasContentBlocks ? 1 : 0;
   const hasVideo = !!(config.quiz.video?.enabled && config.quiz.video?.url);
   const videoOffset = hasVideo ? 1 : 0;
-  const questionStartStep = 1 + videoOffset;
+  const questionStartStep = 1 + contentBlocksOffset + videoOffset;
   const emailStep = questionStartStep + totalQuestions;
   const successStep = emailStep + 1;
 
@@ -31,6 +35,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
   const [calendarUrl, setCalendarUrl] = useState("");
+  const [leadScore, setLeadScore] = useState<number | undefined>();
+  const [leadTier, setLeadTier] = useState<string | undefined>();
 
   const {
     trackPageView, trackAnswer, trackCTAClick, trackFieldFocus,
@@ -44,8 +50,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
 
   const handleStart = useCallback(() => {
     trackCTAClick();
+    fireQuizStartEvent(config.tracking);
     setStep(1);
-  }, [trackCTAClick]);
+  }, [trackCTAClick, config.tracking]);
 
   const handleSelect = useCallback(
     (key: string, id: string) => {
@@ -93,16 +100,19 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
         if (data.calendarUrl) {
           setCalendarUrl(data.calendarUrl);
         }
+        if (data.score !== undefined) setLeadScore(data.score);
+        if (data.calendarTier) setLeadTier(data.calendarTier);
         if (data.leadId) {
           trackLeadCreated(data.leadId, data.score, data.calendarTier);
         }
+        fireConversionEvent(config.tracking);
 
         setStep(successStep);
       } catch {
         toast.error("Something went wrong. Please try again.");
       }
     },
-    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated]
+    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated, config.tracking]
   );
 
   // Track funnel completed when reaching success step
@@ -134,6 +144,11 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
       className="min-h-screen flex flex-col items-center justify-center bg-gray-50"
       style={{ fontFamily: config.brand.fontBody }}
     >
+      <TrackingPixels
+        fbPixelId={config.tracking?.fbPixelId}
+        tiktokPixelId={config.tracking?.tiktokPixelId}
+        ga4MeasurementId={config.tracking?.ga4MeasurementId}
+      />
       <div className="w-full max-w-lg mx-auto py-12 px-4">
         <ProgressBar config={config} step={progressStep} totalQuestions={totalQuestions} />
 
@@ -150,7 +165,23 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
             </motion.div>
           )}
 
-          {hasVideo && step === 1 && (
+          {hasContentBlocks && step === 1 && (
+            <motion.div
+              key="content-blocks"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.18 }}
+            >
+              <ContentBlockDisplay
+                blocks={config.quiz.contentBlocks!}
+                brand={config.brand}
+                onContinue={() => setStep(2)}
+              />
+            </motion.div>
+          )}
+
+          {hasVideo && step === (1 + contentBlocksOffset) && (
             <motion.div
               key="video"
               initial={{ opacity: 0, x: 20 }}
@@ -158,7 +189,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.18 }}
             >
-              <VideoStep config={config} onContinue={() => setStep(2)} />
+              <VideoStep config={config} onContinue={() => setStep(1 + contentBlocksOffset + 1)} />
             </motion.div>
           )}
 
@@ -206,6 +237,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
                 config={config}
                 calendarUrl={calendarUrl}
                 email={email}
+                score={leadScore}
+                tier={leadTier}
               />
             </motion.div>
           )}

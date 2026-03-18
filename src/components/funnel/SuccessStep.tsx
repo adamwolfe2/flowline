@@ -8,11 +8,18 @@ interface SuccessStepProps {
   config: FunnelConfig;
   calendarUrl: string;
   email: string;
+  score?: number;
+  tier?: string;
 }
 
-export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
+export function SuccessStep({ config, calendarUrl, email, score, tier }: SuccessStepProps) {
   const { brand } = config;
   const [calEmbedFailed, setCalEmbedFailed] = useState(false);
+
+  // Tier-specific results
+  const tierResults = config.quiz.results?.[tier as keyof typeof config.quiz.results];
+  const headline = tierResults?.headline || config.quiz.successHeadline || "You qualify!";
+  const subtext = tierResults?.subtext || config.quiz.successSubtext || "We sent a confirmation to {email}. Pick a time that works for you below.";
 
   // Auto-detect Cal.com from the calendar URL
   const isCalcom = useMemo(() => calendarUrl.includes("cal.com"), [calendarUrl]);
@@ -130,6 +137,15 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
           </svg>
         </motion.div>
 
+        {score !== undefined && (
+          <div
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+            style={{ backgroundColor: brand.primaryColorLight, color: brand.primaryColor }}
+          >
+            Score: {score}
+          </div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -139,10 +155,10 @@ export function SuccessStep({ config, calendarUrl, email }: SuccessStepProps) {
             className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
             style={{ fontFamily: brand.fontHeading }}
           >
-            {config.quiz.successHeadline ?? "You qualify!"}
+            {headline}
           </h2>
           <p className="text-sm text-gray-500">
-            {(config.quiz.successSubtext ?? "We sent a confirmation to {email}. Pick a time that works for you below.").split("{email}").map((part, i, arr) => (
+            {subtext.split("{email}").map((part, i, arr) => (
               <span key={i}>
                 {part}
                 {i < arr.length - 1 && <span className="font-medium text-gray-700">{email}</span>}

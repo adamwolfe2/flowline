@@ -352,6 +352,118 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
           </div>
         </div>
       </div>
+
+      <Separator />
+
+      <div>
+        <Label className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-3">
+          Personalized Results
+        </Label>
+        <p className="text-[11px] text-gray-400 mb-4">
+          Show different messages based on lead score tier. Leave blank to use the default success text above.
+        </p>
+
+        <div className="space-y-4">
+          <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <Label className="text-[11px] text-emerald-700 font-medium">High Score Result</Label>
+            </div>
+            <Input
+              value={config.quiz.results?.high?.headline ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.high) newConfig.quiz.results.high = {};
+                newConfig.quiz.results.high.headline = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="Perfect score — you're an ideal fit!"
+              className="text-xs mb-2"
+              maxLength={80}
+            />
+            <Input
+              value={config.quiz.results?.high?.subtext ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.high) newConfig.quiz.results.high = {};
+                newConfig.quiz.results.high.subtext = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="Book your VIP strategy session below."
+              className="text-xs"
+              maxLength={150}
+            />
+          </div>
+
+          <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <Label className="text-[11px] text-amber-700 font-medium">Mid Score Result</Label>
+            </div>
+            <Input
+              value={config.quiz.results?.mid?.headline ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.mid) newConfig.quiz.results.mid = {};
+                newConfig.quiz.results.mid.headline = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="Good potential — let's explore further"
+              className="text-xs mb-2"
+              maxLength={80}
+            />
+            <Input
+              value={config.quiz.results?.mid?.subtext ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.mid) newConfig.quiz.results.mid = {};
+                newConfig.quiz.results.mid.subtext = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="Book a discovery call to discuss your goals."
+              className="text-xs"
+              maxLength={150}
+            />
+          </div>
+
+          <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
+              <Label className="text-[11px] text-gray-600 font-medium">Low Score Result</Label>
+            </div>
+            <Input
+              value={config.quiz.results?.low?.headline ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.low) newConfig.quiz.results.low = {};
+                newConfig.quiz.results.low.headline = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="Thanks for your interest!"
+              className="text-xs mb-2"
+              maxLength={80}
+            />
+            <Input
+              value={config.quiz.results?.low?.subtext ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.low) newConfig.quiz.results.low = {};
+                newConfig.quiz.results.low.subtext = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="Book an intro call to learn more about what we offer."
+              className="text-xs"
+              maxLength={150}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

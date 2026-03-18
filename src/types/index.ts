@@ -37,7 +37,13 @@ export interface FunnelConfig {
     emailButtonText?: string;
     successHeadline?: string;
     successSubtext?: string;
+    results?: {
+      high?: { headline?: string; subtext?: string };
+      mid?: { headline?: string; subtext?: string };
+      low?: { headline?: string; subtext?: string };
+    };
     badgeText?: string;
+    contentBlocks?: ContentBlock[];
   };
   webhook: {
     url: string;
@@ -45,6 +51,30 @@ export interface FunnelConfig {
   meta: {
     title: string;
     description: string;
+  };
+  tracking?: {
+    fbPixelId?: string;
+    tiktokPixelId?: string;
+    ga4MeasurementId?: string;
+  };
+}
+
+export interface ContentBlock {
+  id: string;
+  type: "testimonial" | "image" | "video" | "text";
+  content: {
+    // Testimonial
+    quote?: string;
+    author?: string;
+    role?: string;
+    // Image
+    imageUrl?: string;
+    caption?: string;
+    // Video
+    videoUrl?: string;
+    // Text
+    heading?: string;
+    body?: string;
   };
 }
 

@@ -9,8 +9,10 @@ import { CalendarEditor } from "@/components/builder/CalendarEditor";
 import { PublishPanel } from "@/components/builder/PublishPanel";
 import { ABTestEditor } from "@/components/builder/ABTestEditor";
 import { SequenceEditor } from "@/components/builder/SequenceEditor";
+import { TrackingEditor } from "@/components/builder/TrackingEditor";
+import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -171,6 +173,10 @@ export default function BuilderPage() {
           <Tabs defaultValue="content" className="flex flex-col h-full">
             <TabsList className="mx-3 mt-3 mb-0 w-full flex overflow-x-auto gap-1 bg-gray-50 p-1 rounded-lg">
               <TabsTrigger value="content" className="text-xs shrink-0 whitespace-nowrap">Content</TabsTrigger>
+              <TabsTrigger value="blocks" className="text-xs gap-1 shrink-0 whitespace-nowrap">
+                <LayoutGrid className="w-3 h-3" />
+                Blocks
+              </TabsTrigger>
               <TabsTrigger value="brand" className="text-xs shrink-0 whitespace-nowrap">Brand</TabsTrigger>
               <TabsTrigger value="calendars" className="text-xs shrink-0 whitespace-nowrap">Calendars</TabsTrigger>
               <TabsTrigger value="emails" className="text-xs gap-1 shrink-0 whitespace-nowrap">
@@ -181,11 +187,18 @@ export default function BuilderPage() {
                 <FlaskConical className="w-3 h-3" />
                 A/B
               </TabsTrigger>
+              <TabsTrigger value="tracking" className="text-xs gap-1 shrink-0 whitespace-nowrap">
+                <BarChart3 className="w-3 h-3" />
+                Tracking
+              </TabsTrigger>
               <TabsTrigger value="publish" className="text-xs shrink-0 whitespace-nowrap">Publish</TabsTrigger>
             </TabsList>
             <div className="flex-1 overflow-y-auto p-4">
               <TabsContent value="content" className="mt-0">
                 <ContentEditor config={config} onSave={saveConfig} />
+              </TabsContent>
+              <TabsContent value="blocks" className="mt-0">
+                <ContentBlocksEditor config={config} onSave={saveConfig} />
               </TabsContent>
               <TabsContent value="brand" className="mt-0">
                 <BrandEditor config={config} onSave={saveConfig} />
@@ -198,6 +211,9 @@ export default function BuilderPage() {
               </TabsContent>
               <TabsContent value="ab-test" className="mt-0">
                 <ABTestEditor funnel={funnel} />
+              </TabsContent>
+              <TabsContent value="tracking" className="mt-0">
+                <TrackingEditor config={config} onSave={saveConfig} />
               </TabsContent>
               <TabsContent value="publish" className="mt-0">
                 <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />

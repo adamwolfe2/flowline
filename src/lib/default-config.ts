@@ -64,4 +64,9 @@ export const DEFAULT_FUNNEL_CONFIG: FunnelConfig = {
     title: "Apply | My Business",
     description: "See if you qualify for our program.",
   },
+  tracking: {
+    fbPixelId: "",
+    tiktokPixelId: "",
+    ga4MeasurementId: "",
+  },
 };
