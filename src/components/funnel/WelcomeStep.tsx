@@ -78,7 +78,7 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
           onClick={onStart}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="w-full py-4 px-8 rounded-xl text-white font-semibold text-base shadow-lg transition-shadow hover:shadow-xl"
+          className="w-full py-4 px-8 rounded-xl text-white font-semibold text-sm sm:text-base shadow-lg transition-shadow hover:shadow-xl"
           style={{
             backgroundColor: ctaHover ? brand.primaryColorDark : brand.primaryColor,
             fontFamily: brand.fontBody,

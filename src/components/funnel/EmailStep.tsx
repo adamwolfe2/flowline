@@ -99,17 +99,23 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onBack }: EmailStepP
               setEmail(e.target.value);
               if (error) setError("");
             }}
-            className="w-full px-4 py-3.5 rounded-xl border-2 text-base text-gray-900 placeholder-gray-400 outline-none transition-all duration-150 focus:ring-2"
+            className="w-full px-4 py-3.5 rounded-xl border-2 text-base text-gray-900 placeholder-gray-400 outline-none transition-all duration-150 focus:ring-2 focus:ring-offset-0"
             style={{
               borderColor: error ? "#EF4444" : "#E5E7EB",
               fontSize: "16px",
             }}
             onFocus={(e) => {
               onFieldFocus?.();
-              if (!error) (e.currentTarget as HTMLInputElement).style.borderColor = brand.primaryColor;
+              if (!error) {
+                (e.currentTarget as HTMLInputElement).style.borderColor = brand.primaryColor;
+                (e.currentTarget as HTMLInputElement).style.boxShadow = `0 0 0 3px ${brand.primaryColor}20`;
+              }
             }}
             onBlur={(e) => {
-              if (!error) (e.currentTarget as HTMLInputElement).style.borderColor = "#E5E7EB";
+              if (!error) {
+                (e.currentTarget as HTMLInputElement).style.borderColor = "#E5E7EB";
+                (e.currentTarget as HTMLInputElement).style.boxShadow = "none";
+              }
             }}
           />
           {error && (

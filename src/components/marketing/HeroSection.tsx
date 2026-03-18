@@ -31,7 +31,7 @@ export function HeroSection() {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 pt-28 md:pt-36 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <h1 className="text-[44px] sm:text-[56px] md:text-[68px] font-semibold leading-none text-white"
+          <h1 className="text-3xl sm:text-[44px] md:text-[56px] lg:text-[68px] font-semibold leading-none text-white"
             style={{ fontFamily: "var(--font-lora)", textShadow: "0 2px 24px rgba(0,0,0,0.12)" }}>
             Your VSL funnel.
             <br />

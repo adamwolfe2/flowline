@@ -134,6 +134,10 @@
   outline-offset: 2px;
 }
 
+/* Hide scrollbar for tab lists */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Subtle scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

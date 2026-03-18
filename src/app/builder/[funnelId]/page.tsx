@@ -131,17 +131,41 @@ export default function BuilderPage() {
           <span className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
             {config.brand.name}
           </span>
-          {saving && <span className="text-xs text-gray-400 animate-pulse">Saving...</span>}
-          {!saving && saveStatus === "saved" && <span className="text-xs text-green-600">Saved</span>}
-          {!saving && saveStatus === "failed" && <span className="text-xs text-red-500">Save failed</span>}
-          {!saving && saveStatus === "idle" && hasUnsavedChanges && <span className="text-xs text-amber-500">Unsaved</span>}
+          {saving && (
+            <span className="text-xs text-gray-400 animate-pulse flex items-center gap-1">
+              <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              Saving
+            </span>
+          )}
+          {!saving && saveStatus === "saved" && (
+            <span className="text-xs text-green-600 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+              Saved
+            </span>
+          )}
+          {!saving && saveStatus === "failed" && (
+            <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+              Save failed
+            </span>
+          )}
+          {!saving && saveStatus === "idle" && hasUnsavedChanges && (
+            <span className="text-xs text-amber-500 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
+              Unsaved
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
-            className="md:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 transition-colors"
+            className="md:hidden flex items-center gap-1 px-2 py-1.5 rounded-md text-xs text-gray-500 hover:bg-gray-100 transition-colors"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            {sidebarOpen ? <Eye className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+            {sidebarOpen ? (
+              <><Eye className="w-3.5 h-3.5" /> Preview</>
+            ) : (
+              <><Pencil className="w-3.5 h-3.5" /> Edit</>
+            )}
           </button>
           <div className="flex bg-gray-100 rounded-lg p-0.5">
             <button
@@ -171,28 +195,31 @@ export default function BuilderPage() {
         {/* Side panel */}
         <div className={`${sidebarOpen ? 'w-full md:w-[380px]' : 'hidden md:block md:w-[380px]'} border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0`}>
           <Tabs defaultValue="content" className="flex flex-col h-full">
-            <TabsList className="mx-3 mt-3 mb-0 w-full flex overflow-x-auto gap-1 bg-gray-50 p-1 rounded-lg">
-              <TabsTrigger value="content" className="text-xs shrink-0 whitespace-nowrap">Content</TabsTrigger>
-              <TabsTrigger value="blocks" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                <LayoutGrid className="w-3 h-3" />
-                Blocks
-              </TabsTrigger>
-              <TabsTrigger value="brand" className="text-xs shrink-0 whitespace-nowrap">Brand</TabsTrigger>
-              <TabsTrigger value="calendars" className="text-xs shrink-0 whitespace-nowrap">Calendars</TabsTrigger>
-              <TabsTrigger value="emails" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                <Mail className="w-3 h-3" />
-                Emails
-              </TabsTrigger>
-              <TabsTrigger value="ab-test" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                <FlaskConical className="w-3 h-3" />
-                A/B
-              </TabsTrigger>
-              <TabsTrigger value="tracking" className="text-xs gap-1 shrink-0 whitespace-nowrap">
-                <BarChart3 className="w-3 h-3" />
-                Tracking
-              </TabsTrigger>
-              <TabsTrigger value="publish" className="text-xs shrink-0 whitespace-nowrap">Publish</TabsTrigger>
-            </TabsList>
+            <div className="relative mx-3 mt-3 mb-0">
+              <TabsList className="w-full flex overflow-x-auto gap-1 bg-gray-50 p-1 rounded-lg scrollbar-hide">
+                <TabsTrigger value="content" className="text-xs shrink-0 whitespace-nowrap">Content</TabsTrigger>
+                <TabsTrigger value="blocks" className="text-xs gap-1 shrink-0 whitespace-nowrap">
+                  <LayoutGrid className="w-3 h-3" />
+                  Blocks
+                </TabsTrigger>
+                <TabsTrigger value="brand" className="text-xs shrink-0 whitespace-nowrap">Brand</TabsTrigger>
+                <TabsTrigger value="calendars" className="text-xs shrink-0 whitespace-nowrap">Calendars</TabsTrigger>
+                <TabsTrigger value="emails" className="text-xs gap-1 shrink-0 whitespace-nowrap">
+                  <Mail className="w-3 h-3" />
+                  Emails
+                </TabsTrigger>
+                <TabsTrigger value="ab-test" className="text-xs gap-1 shrink-0 whitespace-nowrap">
+                  <FlaskConical className="w-3 h-3" />
+                  A/B
+                </TabsTrigger>
+                <TabsTrigger value="tracking" className="text-xs gap-1 shrink-0 whitespace-nowrap">
+                  <BarChart3 className="w-3 h-3" />
+                  Tracking
+                </TabsTrigger>
+                <TabsTrigger value="publish" className="text-xs shrink-0 whitespace-nowrap">Publish</TabsTrigger>
+              </TabsList>
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none rounded-r-lg md:hidden" />
+            </div>
             <div className="flex-1 overflow-y-auto p-4">
               <TabsContent value="content" className="mt-0">
                 <ContentEditor config={config} onSave={saveConfig} />

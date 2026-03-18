@@ -327,7 +327,7 @@ export default function AnalyticsDashboard() {
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
+              className={`text-sm px-4 py-2 rounded-lg transition-colors ${
                 timeRange === range
                   ? 'bg-[#2D6A4F] text-white'
                   : 'bg-[#FBFBFB] text-[#737373] hover:bg-[#F0F0F0] border border-[#EBEBEB]'
@@ -558,7 +558,7 @@ export default function AnalyticsDashboard() {
                   <button
                     onClick={() => setLeadsPage((p) => Math.max(0, p - 1))}
                     disabled={leadsPage === 0}
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="w-3 h-3" />
                     Prev
@@ -569,7 +569,7 @@ export default function AnalyticsDashboard() {
                   <button
                     onClick={() => setLeadsPage((p) => Math.min(totalLeadPages - 1, p + 1))}
                     disabled={leadsPage >= totalLeadPages - 1}
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Next
                     <ChevronRight className="w-3 h-3" />
