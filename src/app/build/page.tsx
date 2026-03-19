@@ -3,7 +3,7 @@
 import { useState, useReducer, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
+import { Check, Loader2, ArrowRight, Sparkles, ChevronRight, Eye, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
@@ -301,6 +301,7 @@ function BuildContent() {
 
   const [textInput, setTextInput] = useState("");
   const [autoStarted, setAutoStarted] = useState(false);
+  const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   // Auto-start if prompt came from homepage
   useEffect(() => {
@@ -885,6 +886,58 @@ function BuildContent() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Mobile preview toggle button */}
+      {state.phase !== "prompt" && (
+        <button
+          onClick={() => setShowMobilePreview(true)}
+          className="lg:hidden fixed bottom-6 right-6 z-40 w-12 h-12 bg-[#2D6A4F] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#245840] transition-colors"
+          aria-label="Preview funnel"
+        >
+          <Eye className="w-5 h-5" />
+        </button>
+      )}
+
+      {/* Mobile preview overlay */}
+      <AnimatePresence>
+        {showMobilePreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowMobilePreview(false)}
+          >
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute bottom-0 left-0 right-0 bg-[#F9FAFB] rounded-t-2xl max-h-[85vh] overflow-y-auto p-6 pt-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-[#111827]">Preview</span>
+                <button onClick={() => setShowMobilePreview(false)} className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center" aria-label="Close preview">
+                  <X className="w-4 h-4 text-[#6B7280]" />
+                </button>
+              </div>
+              <div className="flex items-center justify-center">
+                {(state.phase === "planning" || state.phase === "questions") && <SkeletonPreview />}
+                {state.phase === "generating" && (
+                  <div className="text-center py-10">
+                    <div className="w-10 h-10 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-sm text-[#6B7280]">{state.reasoningSteps.find(s => s.status === "active")?.label || "Building..."}</p>
+                  </div>
+                )}
+                {state.phase === "preview" && state.generatedData && (
+                  <FunnelPreview data={state.generatedData} color={state.primaryColor} />
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

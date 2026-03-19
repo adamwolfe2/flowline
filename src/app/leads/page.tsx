@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, Download, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface LeadRow {
   id: string;
@@ -246,13 +247,28 @@ export default function LeadsPage() {
           </div>
         ) : displayedLeads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Users className="w-10 h-10 text-[#D1D5DB] mb-3" />
-            <p className="text-sm font-medium text-[#6B7280]">No leads found</p>
-            <p className="text-xs text-[#9CA3AF] mt-1">
-              {debouncedSearch || funnelFilter || tierFilter
-                ? "Try adjusting your filters."
-                : "Leads will appear here once your funnels start collecting them."}
-            </p>
+            {debouncedSearch || funnelFilter || tierFilter ? (
+              <>
+                <Users className="w-10 h-10 text-[#D1D5DB] mb-3" />
+                <p className="text-sm font-medium text-[#6B7280]">No leads match your filters</p>
+                <p className="text-xs text-[#9CA3AF] mt-1">Try adjusting your search or filter criteria.</p>
+              </>
+            ) : (
+              <>
+                <div className="w-14 h-14 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-4">
+                  <Users className="w-7 h-7 text-[#2D6A4F]" />
+                </div>
+                <p className="text-base font-semibold text-[#111827] mb-1">No leads yet</p>
+                <p className="text-sm text-[#9CA3AF] max-w-xs mb-5">
+                  Publish a funnel and share the link to start collecting qualified leads here.
+                </p>
+                <Link href="/dashboard"
+                  className="inline-flex items-center gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+                  Go to Dashboard
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <>

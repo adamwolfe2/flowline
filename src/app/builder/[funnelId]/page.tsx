@@ -349,7 +349,7 @@ export default function BuilderPage() {
                 }} />
               </TabsContent>
               <TabsContent value="tracking" className="mt-0">
-                <TrackingEditor config={config} onSave={saveConfig} />
+                <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
               </TabsContent>
               <TabsContent value="publish" className="mt-0">
                 <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />

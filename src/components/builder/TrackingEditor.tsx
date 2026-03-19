@@ -1,18 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { FunnelConfig } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, CheckCircle, XCircle, Clock } from "lucide-react";
 import Image from "next/image";
+
+interface WebhookDeliveryRow {
+  id: string;
+  statusCode: number | null;
+  success: boolean;
+  attempts: number;
+  errorMessage: string | null;
+  createdAt: string;
+}
 
 interface TrackingEditorProps {
   config: FunnelConfig;
   onSave: (config: FunnelConfig) => void;
+  funnelId?: string;
 }
 
-export function TrackingEditor({ config, onSave }: TrackingEditorProps) {
+export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps) {
+  const [deliveries, setDeliveries] = useState<WebhookDeliveryRow[]>([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+
+  useEffect(() => {
+    if (!funnelId || !config.webhook?.url) return;
+    setLoadingDeliveries(true);
+    fetch(`/api/funnels/${funnelId}/webhooks`)
+      .then(r => r.ok ? r.json() : [])
+      .then(d => setDeliveries(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoadingDeliveries(false));
+  }, [funnelId, config.webhook?.url]);
   function updateTracking(field: string, value: string) {
     const newConfig = JSON.parse(JSON.stringify(config));
     if (!newConfig.tracking) newConfig.tracking = {};
@@ -82,6 +105,56 @@ export function TrackingEditor({ config, onSave }: TrackingEditorProps) {
       </div>
 
       <Separator />
+
+      {/* Webhook Delivery Log */}
+      {config.webhook?.url && funnelId && (
+        <>
+          <div>
+            <Label className="text-xs text-gray-500 mb-1.5">Webhook URL</Label>
+            <div className="text-xs font-mono text-[#374151] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 truncate">
+              {config.webhook.url}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[11px] text-gray-500 font-medium mb-2">Recent Deliveries</p>
+            {loadingDeliveries ? (
+              <div className="text-xs text-[#9CA3AF] py-3">Loading...</div>
+            ) : deliveries.length === 0 ? (
+              <div className="bg-[#F9FAFB] rounded-lg p-3">
+                <p className="text-xs text-[#9CA3AF]">
+                  No webhook deliveries yet. Deliveries will appear here after your first lead submission.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                {deliveries.map((d) => (
+                  <div key={d.id} className="flex items-center gap-2 text-xs bg-[#F9FAFB] rounded-lg px-3 py-2">
+                    {d.success ? (
+                      <CheckCircle className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                    )}
+                    <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded ${
+                      d.success ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                    }`}>
+                      {d.statusCode || "ERR"}
+                    </span>
+                    <span className="text-[#9CA3AF] flex-1 truncate">
+                      {d.errorMessage || (d.success ? "OK" : "Failed")}
+                    </span>
+                    <span className="text-[10px] text-[#D1D5DB] flex-shrink-0 flex items-center gap-0.5">
+                      <Clock className="w-2.5 h-2.5" />
+                      {new Date(d.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <Separator />
+        </>
+      )}
 
       {/* Cursive SuperPixel Upsell */}
       <div className="border border-blue-200 rounded-xl overflow-hidden">

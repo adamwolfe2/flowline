@@ -187,6 +187,19 @@ export const teamInvites = pgTable('team_invites', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+export const webhookDeliveries = pgTable('webhook_deliveries', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  funnelId: uuid('funnel_id').notNull().references(() => funnels.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  statusCode: integer('status_code'),
+  success: boolean('success').notNull(),
+  attempts: integer('attempts').notNull().default(1),
+  errorMessage: text('error_message'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('webhook_deliveries_funnel_id_idx').on(t.funnelId),
+]);
+
 export type User = typeof users.$inferSelect;
 export type Funnel = typeof funnels.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
@@ -204,3 +217,4 @@ export type SequenceEnrollment = typeof sequenceEnrollments.$inferSelect;
 export type Team = typeof teams.$inferSelect;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type TeamInvite = typeof teamInvites.$inferSelect;
+export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;

@@ -22,6 +22,8 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [customDomain, setCustomDomain] = useState(funnel.customDomain || "");
   const [savingDomain, setSavingDomain] = useState(false);
+  const [checkingDns, setCheckingDns] = useState(false);
+  const [dnsStatus, setDnsStatus] = useState<"unknown" | "configured" | "pending" | "error">("unknown");
   const domain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
   const funnelUrl = `${domain}/f/${funnel.slug}`;
 
@@ -175,53 +177,127 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
       <div className="p-3 bg-gray-50 rounded-lg">
         <p className="text-[11px] text-gray-500 font-medium mb-2">Custom Domain</p>
         {funnel.published ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex gap-2">
               <Input
                 value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
+                onChange={(e) => { setCustomDomain(e.target.value); setDnsStatus("unknown"); }}
                 placeholder="app.yourdomain.com"
                 className="text-xs font-mono flex-1"
               />
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs shrink-0"
-                disabled={savingDomain}
-                onClick={async () => {
-                  setSavingDomain(true);
-                  try {
-                    const res = await fetch(`/api/funnels/${funnel.id}/domain`, {
-                      method: "PUT",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ domain: customDomain || null }),
-                    });
-                    if (res.ok) {
-                      const updated = await res.json();
-                      onUpdate(updated);
-                      toast.success(customDomain ? "Domain saved" : "Domain removed");
-                    } else {
-                      const data = await res.json();
-                      toast.error(data.error || "Failed to save domain");
-                    }
-                  } catch {
-                    toast.error("Failed to save domain");
-                  }
-                  setSavingDomain(false);
-                }}
-              >
-                {savingDomain ? "Saving..." : "Save"}
-              </Button>
+              {funnel.customDomain && customDomain === funnel.customDomain ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs shrink-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  disabled={savingDomain}
+                  onClick={async () => {
+                    setSavingDomain(true);
+                    try {
+                      const res = await fetch(`/api/funnels/${funnel.id}/domain`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ domain: null }),
+                      });
+                      if (res.ok) {
+                        const updated = await res.json();
+                        onUpdate(updated);
+                        setCustomDomain("");
+                        setDnsStatus("unknown");
+                        toast.success("Domain removed");
+                      }
+                    } catch { toast.error("Failed to remove domain"); }
+                    setSavingDomain(false);
+                  }}
+                >
+                  Remove
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs shrink-0"
+                  disabled={savingDomain || !customDomain.trim()}
+                  onClick={async () => {
+                    setSavingDomain(true);
+                    try {
+                      const res = await fetch(`/api/funnels/${funnel.id}/domain`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ domain: customDomain }),
+                      });
+                      if (res.ok) {
+                        const updated = await res.json();
+                        onUpdate(updated);
+                        setDnsStatus("pending");
+                        toast.success("Domain saved. Set up your DNS records below.");
+                      } else {
+                        const data = await res.json();
+                        toast.error(data.error || "Failed to save domain");
+                      }
+                    } catch { toast.error("Failed to save domain"); }
+                    setSavingDomain(false);
+                  }}
+                >
+                  {savingDomain ? "Saving..." : "Save"}
+                </Button>
+              )}
             </div>
+
+            {/* DNS instructions */}
             {funnel.customDomain && (
-              <div className="text-[10px] text-gray-400 space-y-1">
-                <p>Point a CNAME record to <span className="font-mono font-medium text-gray-500">cname.vercel-dns.com</span></p>
-                <p>It may take up to 48 hours for DNS to propagate.</p>
+              <div className="bg-white border border-[#E5E7EB] rounded-lg p-3 space-y-2.5">
+                <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">DNS Setup</p>
+                <div className="flex items-start gap-2">
+                  <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">CNAME</span>
+                  <div className="text-[11px] text-[#374151]">
+                    <p>Point <span className="font-mono font-medium">{funnel.customDomain}</span> to:</p>
+                    <p className="font-mono font-medium text-[#111827] mt-0.5">cname.vercel-dns.com</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-[10px] h-7"
+                    disabled={checkingDns}
+                    onClick={async () => {
+                      setCheckingDns(true);
+                      try {
+                        const res = await fetch(`/api/funnels/${funnel.id}/domain`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ domain: funnel.customDomain }),
+                        });
+                        if (res.ok) {
+                          setDnsStatus("configured");
+                          toast.success("DNS is configured correctly");
+                        } else {
+                          setDnsStatus("pending");
+                          toast("DNS not propagated yet. This can take up to 48 hours.");
+                        }
+                      } catch {
+                        setDnsStatus("error");
+                      }
+                      setCheckingDns(false);
+                    }}
+                  >
+                    {checkingDns ? "Checking..." : "Check DNS"}
+                  </Button>
+                  {dnsStatus === "configured" && (
+                    <span className="flex items-center gap-1 text-[10px] text-green-600">
+                      <CheckCircle className="w-3 h-3" /> DNS verified
+                    </span>
+                  )}
+                  {dnsStatus === "pending" && (
+                    <span className="text-[10px] text-amber-600">Waiting for DNS propagation</span>
+                  )}
+                </div>
               </div>
             )}
             {!customDomain && !funnel.customDomain && (
               <p className="text-[10px] text-gray-400">
-                Connect your own domain to this funnel.
+                Connect your own domain to this funnel. Requires Pro or Agency plan.
               </p>
             )}
           </div>

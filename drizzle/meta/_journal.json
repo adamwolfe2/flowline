@@ -15,6 +15,13 @@
       "when": 1773883990487,
       "tag": "0001_slimy_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773946851568,
+      "tag": "0002_deep_daredevil",
+      "breakpoints": true
     }
   ]
 }

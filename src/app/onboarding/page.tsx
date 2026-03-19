@@ -68,10 +68,19 @@ function OnboardingContent() {
     if (pending) {
       try {
         const { config: savedConfig, slug: savedSlug } = JSON.parse(pending);
-        setConfig(savedConfig);
-        setSlug(savedSlug);
-        setStep(4); // Go to URL/publish step
-        toast.success("Welcome back! Your funnel is ready to publish.");
+        // Deep merge with defaults to ensure no missing fields
+        setConfig(prev => ({
+          ...prev,
+          ...savedConfig,
+          brand: { ...prev.brand, ...savedConfig.brand },
+          quiz: { ...prev.quiz, ...savedConfig.quiz },
+          meta: { ...prev.meta, ...savedConfig.meta },
+          tracking: { ...prev.tracking, ...(savedConfig.tracking || {}) },
+        }));
+        if (savedSlug) setSlug(savedSlug);
+        setStep(2); // Go to brand step so they can upload logo & tweak colors
+        toast.success("Your funnel is ready! Review your brand settings, then publish.");
+        localStorage.removeItem("myvsl_pending_funnel");
       } catch {
         localStorage.removeItem("myvsl_pending_funnel");
       }

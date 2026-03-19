@@ -141,7 +141,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
         timestamp: new Date().toISOString(),
         source: config.brand.name,
         funnel_slug: funnel.slug,
-      }).catch(() => {}); // Final catch for the retry chain — truly best-effort
+      }, funnelId).catch(() => {}); // Final catch for the retry chain — truly best-effort
     }
 
     return NextResponse.json({
