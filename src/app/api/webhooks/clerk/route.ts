@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { sendWelcomeEmail } from "@/lib/resend";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -33,7 +34,8 @@ export async function POST(req: Request) {
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     }) as WebhookEvent;
-  } catch {
+  } catch (err) {
+    logger.error("Clerk webhook signature verification failed", { error: err instanceof Error ? err.message : String(err) });
     return new Response("Invalid signature", { status: 400 });
   }
 

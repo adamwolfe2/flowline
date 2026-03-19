@@ -35,7 +35,7 @@ export function ABTestEditor({ funnel, onVariantsChange }: ABTestEditorProps) {
         setVariants(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => { setLoading(false); toast.error("Failed to load variants"); });
   }, [funnel.id]);
 
   async function createVariant() {

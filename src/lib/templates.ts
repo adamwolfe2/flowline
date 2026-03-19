@@ -9,9 +9,6 @@ export interface FunnelTemplate {
   config: FunnelConfig;
 }
 
-/** @deprecated Use FunnelTemplate instead */
-export type Template = FunnelTemplate;
-
 export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
   {
     id: "coaching",
@@ -334,6 +331,3 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     },
   },
 ];
-
-/** @deprecated Use FUNNEL_TEMPLATES instead */
-export const TEMPLATES = FUNNEL_TEMPLATES;

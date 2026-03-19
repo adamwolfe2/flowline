@@ -52,6 +52,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tea
     const { teamId } = await params;
     const { email, role } = await req.json();
 
+    // Validate email format
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+    }
+
     // Verify admin/owner
     const [member] = await db.select()
       .from(teamMembers)

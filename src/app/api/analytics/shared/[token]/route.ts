@@ -3,11 +3,15 @@ import { db } from "@/db";
 import { funnels } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries } from "@/db/queries/analytics";
+import { logger } from "@/lib/logger";
+
+const VALID_TIME_RANGES = ["7d", "30d", "90d"];
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params;
-    const timeRange = req.nextUrl.searchParams.get("timeRange") ?? "30d";
+    const rawRange = req.nextUrl.searchParams.get("timeRange") ?? "30d";
+    const timeRange = VALID_TIME_RANGES.includes(rawRange) ? rawRange : "30d";
 
     const [funnel] = await db.select()
       .from(funnels)
@@ -33,7 +37,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       tiers,
       timeSeries,
     });
-  } catch {
+  } catch (error) {
+    logger.error("GET /api/analytics/shared error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

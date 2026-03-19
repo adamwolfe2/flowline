@@ -52,8 +52,8 @@ export function TeamSettings() {
           setLoading(false);
         }
       })
-      .catch((err) => {
-        console.error("Failed to load teams:", err);
+      .catch(() => {
+        toast.error("Failed to load teams");
         setLoading(false);
       });
   }, []);
@@ -64,8 +64,8 @@ export function TeamSettings() {
       const data = await res.json();
       setMembers(data.members || []);
       setInvites(data.invites || []);
-    } catch (err) {
-      console.error("Failed to load team members:", err);
+    } catch {
+      toast.error("Failed to load team members");
     }
     setLoading(false);
   }

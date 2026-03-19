@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight, ArrowLeft, Loader2, Palette, Calendar, Globe, Check, PartyPopper, Users, Briefcase, Laptop, Home, Dumbbell, LineChart, Upload } from "lucide-react";
 import { firePublishConfetti } from "@/lib/confetti";
 import Image from "next/image";
-import { TEMPLATES, Template } from "@/lib/templates";
+import { FUNNEL_TEMPLATES, FunnelTemplate } from "@/lib/templates";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -227,7 +227,7 @@ function OnboardingContent() {
     Users, Briefcase, Laptop, Home, Dumbbell, LineChart,
   };
 
-  function selectTemplate(template: Template) {
+  function selectTemplate(template: FunnelTemplate) {
     setConfig(template.config);
     setSlug(generateSlug(template.config.brand.name));
     setStep(1);
@@ -245,7 +245,7 @@ function OnboardingContent() {
             <p className="text-sm text-gray-500 mb-6">Pick an industry template to get started instantly, or describe your own below.</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-2">
-              {TEMPLATES.map((template) => {
+              {FUNNEL_TEMPLATES.map((template) => {
                 const Icon = ICON_MAP[template.icon];
                 return (
                   <button

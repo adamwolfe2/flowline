@@ -61,7 +61,7 @@ export default function LeadsPage() {
       setTotal(data.total);
       if (data.funnels) setFunnels(data.funnels);
     } catch (err) {
-      console.error("Failed to fetch leads:", err);
+      toast.error("Failed to load leads");
     } finally {
       setLoading(false);
     }

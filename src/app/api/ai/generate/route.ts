@@ -113,9 +113,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Mock/fallback response
+  logger.warn("AI generation falling back to mock response");
   const mock = {
-    _fallback: true,
-    _reason: "AI response was incomplete or unavailable",
     headline: "Discover If You Qualify for Accelerated Growth",
     subheadline: "Answer 3 quick questions to see if we're the right fit for your business.",
     brandName: "Your Business",

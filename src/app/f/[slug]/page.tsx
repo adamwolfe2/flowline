@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 export const revalidate = 60; // Regenerate every 60 seconds
 
@@ -63,7 +64,7 @@ export default async function FunnelPage({ params, searchParams }: Props) {
     const session = await insertSession(funnel.id, { utmSource, utmMedium, utmCampaign });
     sessionId = session.id;
   } catch (error) {
-    console.error("Failed to create session:", error);
+    logger.error("Failed to create session", { error: error instanceof Error ? error.message : String(error) });
     sessionId = crypto.randomUUID();
   }
 

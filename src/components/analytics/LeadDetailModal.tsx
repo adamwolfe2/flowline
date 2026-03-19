@@ -14,14 +14,19 @@ interface LeadDetailModalProps {
 export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!leadId) { setData(null); return; }
+    if (!leadId) { setData(null); setError(false); return; }
+    setError(false);
     setLoading(true);
     fetch(`/api/leads/${leadId}`)
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error("Failed to load lead");
+        return r.json();
+      })
       .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+      .catch(() => { setData(null); setLoading(false); setError(true); });
   }, [leadId]);
 
   const lead = data?.lead as Record<string, unknown> | undefined;
@@ -52,6 +57,11 @@ export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-40 w-full" />
             <Skeleton className="h-60 w-full" />
+          </div>
+        ) : error ? (
+          <div className="mt-6 text-center py-8">
+            <p className="text-sm text-red-600 mb-1">Failed to load lead details</p>
+            <p className="text-xs text-[#A3A3A3]">Please try again later.</p>
           </div>
         ) : lead ? (
           <div className="mt-6 space-y-6">
