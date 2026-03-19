@@ -1,9 +1,6 @@
-import { Outfit } from "next/font/google";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { PricingSection } from "@/components/marketing/PricingSection";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata = {
   title: "Pricing - MyVSL",
@@ -13,7 +10,7 @@ export const metadata = {
 
 export default function PricingPage() {
   return (
-    <div className={`${outfit.variable} bg-white min-h-screen flex flex-col`}>
+    <div className="bg-white min-h-screen flex flex-col" style={{ fontFamily: "var(--font-instrument-sans)" }}>
       <MarketingNav />
       <div className="flex-1 pt-8">
         <PricingSection standalone />

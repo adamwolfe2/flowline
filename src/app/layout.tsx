@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const instrumentSans = Instrument_Sans({ subsets: ["latin"], variable: "--font-instrument-sans", weight: ["400", "500", "600", "700"] });
+const instrumentSerif = Instrument_Serif({ subsets: ["latin"], variable: "--font-instrument-serif", weight: "400", style: ["normal", "italic"] });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
 
@@ -44,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <head>
           <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         </head>
-        <body className={`${inter.className} antialiased bg-white text-gray-900`}>
+        <body className={`${inter.className} ${instrumentSans.variable} ${instrumentSerif.variable} antialiased bg-white text-gray-900`}>
           {children}
           <Toaster />
         </body>

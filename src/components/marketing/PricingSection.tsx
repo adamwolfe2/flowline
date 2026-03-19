@@ -71,7 +71,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         <div className="text-center mb-12">
           <h2
             className="text-3xl sm:text-4xl font-semibold text-[#111827] mb-3"
-            style={{ fontFamily: "var(--font-lora, inherit)" }}
+            style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             {standalone ? "Simple, transparent pricing" : "Pricing"}
           </h2>

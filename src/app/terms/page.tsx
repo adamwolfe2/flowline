@@ -1,8 +1,5 @@
-import { Lora } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
 
 export const metadata = {
   title: "Terms of Service | MyVSL",
@@ -11,7 +8,7 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className={`${lora.variable} min-h-screen bg-white`}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "var(--font-instrument-sans)" }}>
       <nav className="border-b border-[#E5E7EB] py-4 px-6">
         <div className="max-w-3xl mx-auto flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
@@ -21,7 +18,7 @@ export default function TermsPage() {
         </div>
       </nav>
       <main className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold text-[#111827] mb-2" style={{ fontFamily: "var(--font-lora)" }}>Terms of Service</h1>
+        <h1 className="text-3xl font-bold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>Terms of Service</h1>
         <p className="text-sm text-[#9CA3AF] mb-8">Last updated: March 17, 2026</p>
 
         <div className="prose prose-sm prose-gray max-w-none space-y-6 text-[#6B7280]">

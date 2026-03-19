@@ -290,7 +290,7 @@ export function HowItWorks() {
               </span>
               <h3
                 className="text-xl font-semibold text-[#111827] mb-2"
-                style={{ fontFamily: "var(--font-lora)" }}
+                style={{ fontFamily: "var(--font-instrument-serif)" }}
               >
                 {step.title}
               </h3>

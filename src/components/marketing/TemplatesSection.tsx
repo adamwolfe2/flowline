@@ -103,7 +103,7 @@ export function TemplatesSection() {
           </SectionLabel>
           <h2
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-lora)" }}
+            style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             Start with a template. Live in minutes.
           </h2>

@@ -112,7 +112,7 @@ function LeftContent({ tab }: { tab: TabId }) {
     <>
       <h2
         className="text-2xl md:text-3xl font-bold text-[#111827] mb-6"
-        style={{ fontFamily: "var(--font-lora)" }}
+        style={{ fontFamily: "var(--font-instrument-serif)" }}
       >
         {data.headline}
       </h2>
@@ -685,7 +685,7 @@ export function ProductDemo() {
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-semibold text-[#111827] mb-3" style={{ fontFamily: "var(--font-lora)" }}>
+          <h2 className="text-3xl md:text-4xl font-semibold text-[#111827] mb-3" style={{ fontFamily: "var(--font-instrument-serif)" }}>
             Everything you need to convert
           </h2>
           <p className="text-base text-[#6B7280] max-w-lg mx-auto">

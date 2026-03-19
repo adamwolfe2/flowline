@@ -29,7 +29,7 @@ export function MarketingNav() {
           <Image src="/logo.png" alt="MyVSL" width={24} height={24} />
           <span
             className="text-lg font-semibold text-[#171717]"
-            style={{ fontFamily: "var(--font-lora)" }}
+            style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             MyVSL
           </span>

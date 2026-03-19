@@ -63,7 +63,7 @@ export function HeroSection() {
       <div className="relative z-10 flex flex-col items-center text-center px-6 pt-28 md:pt-36 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <h1 className="text-3xl sm:text-[44px] md:text-[56px] lg:text-[68px] font-semibold leading-none text-white"
-            style={{ fontFamily: "var(--font-lora)", textShadow: "0 2px 24px rgba(0,0,0,0.12)" }}>
+            style={{ fontFamily: "var(--font-instrument-serif)", textShadow: "0 2px 24px rgba(0,0,0,0.12)" }}>
             Your VSL funnel.
             <br />
             <span className="text-white/70">Built in 60 seconds.</span>
@@ -73,7 +73,7 @@ export function HeroSection() {
         <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
           className="text-white/80 max-w-2xl mt-5 mb-10"
-          style={{ textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}>
+          style={{ fontFamily: "var(--font-instrument-sans)", textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}>
           <span className="block text-lg sm:text-xl md:text-2xl leading-relaxed mb-2">Describe what you need and let AI handle the rest.</span>
           <span className="block text-base sm:text-lg md:text-xl leading-relaxed">Build{" "}
           <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-3 py-1 rounded-lg text-sm sm:text-base cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">

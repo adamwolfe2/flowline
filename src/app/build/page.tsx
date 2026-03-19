@@ -218,7 +218,7 @@ function BuildContent() {
                 <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-[#2D6A4F]" />
                 </div>
-                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-lora)" }}>Your funnel will appear here</p>
+                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>Your funnel will appear here</p>
                 <p className="text-sm text-[#9CA3AF]">Describe your business on the left and click Generate</p>
               </motion.div>
             )}

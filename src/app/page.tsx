@@ -1,4 +1,3 @@
-import { Lora } from "next/font/google";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { LogoStrip } from "@/components/marketing/LogoStrip";
@@ -10,11 +9,9 @@ import { TestimonialsSection } from "@/components/marketing/TestimonialsSection"
 import { BottomCTA } from "@/components/marketing/BottomCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
-
 export default function HomePage() {
   return (
-    <div className={`${lora.variable} bg-white`}>
+    <div className="bg-white" style={{ fontFamily: "var(--font-instrument-sans)" }}>
       <MarketingNav />
       <HeroSection />
       <LogoStrip />

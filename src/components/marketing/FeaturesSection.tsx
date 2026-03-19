@@ -75,7 +75,7 @@ export function FeaturesSection() {
           </SectionLabel>
           <h2
             className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-lora)" }}
+            style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             Everything you need to convert
           </h2>
