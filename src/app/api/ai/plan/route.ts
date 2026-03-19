@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
 
   const { prompt } = await req.json();
 
-  if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
-    return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+  if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0 || prompt.length > 2000) {
+    return NextResponse.json({ error: "Prompt must be 1-2000 characters" }, { status: 400 });
   }
 
   if (process.env.OPENAI_API_KEY) {

@@ -5,6 +5,8 @@ import { eq, sql } from "drizzle-orm";
 import { eventLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const VALID_EVENT_TYPES = [
   "funnel_viewed",
   "page_viewed",
@@ -36,13 +38,13 @@ export async function POST(req: Request) {
       leadId, calendarTier, score,
     } = body;
 
-    // Validate required fields
-    if (!sessionId || typeof sessionId !== "string") {
-      logger.warn("Event dropped: missing sessionId", { eventType: body?.eventType });
+    // Validate required fields with UUID format check
+    if (!sessionId || typeof sessionId !== "string" || !UUID_RE.test(sessionId)) {
+      logger.warn("Event dropped: missing or invalid sessionId", { eventType: body?.eventType });
       return NextResponse.json({ success: false, reason: "missing or invalid sessionId" });
     }
-    if (!funnelId || typeof funnelId !== "string") {
-      logger.warn("Event dropped: missing funnelId", { eventType: body?.eventType });
+    if (!funnelId || typeof funnelId !== "string" || !UUID_RE.test(funnelId)) {
+      logger.warn("Event dropped: missing or invalid funnelId", { eventType: body?.eventType });
       return NextResponse.json({ success: false, reason: "missing or invalid funnelId" });
     }
     if (!eventType || !VALID_EVENT_TYPES.includes(eventType)) {

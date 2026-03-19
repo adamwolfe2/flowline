@@ -4,11 +4,18 @@ import { funnels } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries } from "@/db/queries/analytics";
 import { logger } from "@/lib/logger";
+import { ogLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 const VALID_TIME_RANGES = ["7d", "30d", "90d"];
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+    const { limited } = await checkRateLimit(ogLimiter, ip);
+    if (limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { token } = await params;
     const rawRange = req.nextUrl.searchParams.get("timeRange") ?? "30d";
     const timeRange = VALID_TIME_RANGES.includes(rawRange) ? rawRange : "30d";

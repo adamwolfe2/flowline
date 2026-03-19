@@ -4,12 +4,19 @@ import { db } from "@/db";
 import { teamInvites, teamMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 // POST accept invite
 export async function POST(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+    const { limited } = await checkRateLimit(submitLimiter, ip);
+    if (limited) {
+      return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
+    }
 
     const { token } = await params;
 

@@ -69,12 +69,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Too many questions (max 10)" }, { status: 400 });
     }
 
-    // Webhook URL validation
+    // Webhook URL validation with SSRF protection
     if (config.webhook?.url) {
       try {
-        const webhookParsed = new URL(config.webhook.url);
-        if (webhookParsed.protocol !== "https:") {
+        const parsed = new URL(config.webhook.url);
+        if (parsed.protocol !== "https:") {
           return NextResponse.json({ error: "Webhook URL must use HTTPS" }, { status: 400 });
+        }
+        const h = parsed.hostname;
+        if (h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0" || h === "[::1]" ||
+            h === "169.254.169.254" || h.startsWith("10.") || h.startsWith("192.168.") ||
+            h.startsWith("169.254.") || h.startsWith("fd") || h.startsWith("fc") ||
+            /^172\.(1[6-9]|2\d|3[01])\./.test(h)) {
+          return NextResponse.json({ error: "Internal URLs are not allowed" }, { status: 400 });
         }
       } catch {
         return NextResponse.json({ error: "Invalid webhook URL" }, { status: 400 });

@@ -17,15 +17,17 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function GET(req: Request) {
-  // Verify cron secret
+  // Verify cron authorization
+  // Vercel crons: validated at platform level, header cannot be spoofed externally
+  // Manual triggers: require CRON_SECRET bearer token
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
-
-  // Vercel crons send this header automatically
   const isVercelCron = req.headers.get("x-vercel-cron") === "true";
 
-  if (!isVercelCron && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isVercelCron) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   try {

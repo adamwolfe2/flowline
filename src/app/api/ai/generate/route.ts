@@ -75,8 +75,8 @@ export async function POST(req: NextRequest) {
     context?: { businessType?: string; targetAudience?: string; offering?: string; calendarUrl?: string; brandColor?: string };
   };
 
-  if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
-    return NextResponse.json({ error: "Prompt is required and must be a non-empty string" }, { status: 400 });
+  if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0 || prompt.length > 2000) {
+    return NextResponse.json({ error: "Prompt must be 1-2000 characters" }, { status: 400 });
   }
 
   const systemPrompt = buildSystemPrompt(context);

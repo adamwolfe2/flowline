@@ -41,6 +41,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     // Update steps if provided — wrapped in transaction to prevent data loss
     if (body.steps && Array.isArray(body.steps)) {
+      if (body.steps.length > 10) {
+        return NextResponse.json({ error: "Maximum 10 steps per sequence" }, { status: 400 });
+      }
+      for (const step of body.steps) {
+        if (step.subject && step.subject.length > 200) {
+          return NextResponse.json({ error: "Subject must be under 200 characters" }, { status: 400 });
+        }
+        if (step.body && step.body.length > 10000) {
+          return NextResponse.json({ error: "Email body must be under 10,000 characters" }, { status: 400 });
+        }
+      }
       try {
         await db.transaction(async (tx) => {
           await tx.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));

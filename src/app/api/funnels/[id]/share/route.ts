@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const token = crypto.randomBytes(16).toString("hex");
+    const token = crypto.randomBytes(32).toString("hex");
 
     const [updated] = await db.update(funnels)
       .set({ shareToken: token })
