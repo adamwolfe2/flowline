@@ -1,11 +1,20 @@
 "use client";
 
+import Image from "next/image";
+
 const logos = [
-  { src: "/integrations/calcom.svg", name: "Cal.com" },
   { src: "/integrations/calendly.svg", name: "Calendly" },
   { src: "/integrations/zapier.svg", name: "Zapier" },
   { src: "/integrations/make.svg", name: "Make" },
   { src: "/integrations/openai-svgrepo-com.svg", name: "OpenAI" },
+  { src: "/integrations/hubspot-svgrepo-com.svg", name: "HubSpot" },
+  { src: "/integrations/slack.svg", name: "Slack" },
+  { src: "/integrations/notion.svg", name: "Notion" },
+  { src: "/integrations/google-calendar.svg", name: "Google Calendar" },
+  { src: "/integrations/gmail.svg", name: "Gmail" },
+  { src: "/integrations/shopify.svg", name: "Shopify" },
+  { src: "/integrations/linkedin.svg", name: "LinkedIn" },
+  { src: "/integrations/salesforce.svg", name: "Salesforce" },
 ];
 
 export function LogoStrip() {
@@ -33,24 +42,28 @@ export function LogoStrip() {
         <p className="text-[11px] text-[#B0B0B0] text-center mb-8 uppercase tracking-widest">Integrates with your favorite tools</p>
       </div>
 
-      {/* Infinite scrolling logo ticker — logos only */}
+      {/* Infinite scrolling logo ticker */}
       <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
-        <div className="flex animate-scroll items-center">
+        <div className="flex animate-scroll items-center w-max">
           {[...logos, ...logos].map((logo, i) => (
             <div
               key={`${logo.name}-${i}`}
-              className="shrink-0 mx-10"
+              className="shrink-0 mx-8 flex items-center gap-2.5 group"
               title={logo.name}
             >
-              <img
+              <Image
                 src={logo.src}
                 alt={logo.name}
-                className="h-8 w-auto object-contain opacity-30 hover:opacity-80 transition-opacity duration-300"
-                loading="lazy"
+                width={28}
+                height={28}
+                className="w-7 h-7 object-contain opacity-40 group-hover:opacity-90 transition-opacity duration-300"
               />
+              <span className="text-sm font-medium text-[#B0B0B0] group-hover:text-[#6B7280] transition-colors duration-300">
+                {logo.name}
+              </span>
             </div>
           ))}
         </div>
