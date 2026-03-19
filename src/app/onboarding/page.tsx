@@ -35,32 +35,11 @@ function OnboardingContent() {
   const initialPrompt = searchParams.get("prompt") || "";
   const [step, setStep] = useState(0);
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [generating, setGenerating] = useState(false);
   const [config, setConfig] = useState<FunnelConfig>(DEFAULT_FUNNEL_CONFIG);
   const [slug, setSlug] = useState("");
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [createdFunnelId, setCreatedFunnelId] = useState<string | null>(null);
-
-  // Rotating generating messages
-  const [genMessage, setGenMessage] = useState("Analyzing your business...");
-
-  useEffect(() => {
-    if (!generating) return;
-    const messages = [
-      "Analyzing your business...",
-      "Writing your headline...",
-      "Crafting qualifying questions...",
-      "Setting up scoring rules...",
-      "Configuring calendar routing...",
-    ];
-    let i = 0;
-    const interval = setInterval(() => {
-      i = (i + 1) % messages.length;
-      setGenMessage(messages[i]);
-    }, 1500);
-    return () => clearInterval(interval);
-  }, [generating]);
 
   // Resume pending funnel after sign-up redirect
   useEffect(() => {
@@ -101,62 +80,18 @@ function OnboardingContent() {
     { icon: Check, label: "Publish" },
   ];
 
-  async function handleGenerate() {
-    setGenerating(true);
-    try {
-      const res = await fetch("/api/ai/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Failed to generate funnel");
-        setGenerating(false);
-        return;
-      }
-
-      // Validate generated config has questions with options
-      if (!data.questions?.length || !data.questions.every((q: { options?: unknown[] }) => (q.options?.length ?? 0) >= 2)) {
-        toast.error("Generated funnel was incomplete. Please try again with more detail.");
-        setGenerating(false);
-        return;
-      }
-
-      setConfig(prev => ({
-        ...prev,
-        brand: {
-          ...prev.brand,
-          name: data.brandName || prev.brand.name,
-        },
-        quiz: {
-          ...prev.quiz,
-          headline: data.headline,
-          subheadline: data.subheadline,
-          questions: data.questions,
-          thresholds: data.thresholds,
-        },
-        meta: {
-          title: data.metaTitle || prev.meta.title,
-          description: data.metaDescription || prev.meta.description,
-        },
-      }));
-
-      setSlug(generateSlug(data.brandName || "my-funnel"));
-      setStep(1);
-    } catch {
-      toast.error("Something went wrong. Try again.");
-    }
-    setGenerating(false);
+  function handleGenerate() {
+    if (prompt.length < 20) return;
+    // Redirect to the conversational AI builder at /build
+    router.push(`/build?prompt=${encodeURIComponent(prompt)}`);
   }
 
-  // Auto-trigger generation if prompt was passed via query params
+  // Auto-redirect to /build if prompt was passed via query params
   const autoTriggered = useRef(false);
   useEffect(() => {
     if (initialPrompt && initialPrompt.length > 10 && !autoTriggered.current) {
       autoTriggered.current = true;
-      handleGenerate();
+      router.push(`/build?prompt=${encodeURIComponent(initialPrompt)}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -283,31 +218,13 @@ function OnboardingContent() {
             />
             <Button
               onClick={handleGenerate}
-              disabled={prompt.length < 20 || generating}
+              disabled={prompt.length < 20}
               className="w-full gap-2"
               size="lg"
             >
-              {generating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating your funnel...
-                </>
-              ) : (
-                <>
-                  <Image src="/logo.png" alt="" width={16} height={16} />
-                  Generate My Funnel
-                </>
-              )}
+              <Image src="/logo.png" alt="" width={16} height={16} />
+              Generate My Funnel
             </Button>
-            {generating && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 space-y-1"
-              >
-                <p className="text-xs text-[#6B7280] animate-pulse">{genMessage}</p>
-              </motion.div>
-            )}
           </div>
         );
 
