@@ -25,8 +25,14 @@ const aiOutputSchema = z.object({
   metaDescription: z.string().optional(),
 });
 
-const SYSTEM_PROMPT = `You are a VSL funnel copywriter and conversion strategist.
-Given a business description, generate a complete lead qualification quiz funnel.
+function buildSystemPrompt(context?: { businessType?: string; targetAudience?: string; offering?: string }) {
+  const base = `You are a VSL funnel copywriter and conversion strategist.`;
+
+  const contextBlock = context?.businessType
+    ? `\nYou are building a quiz funnel for a "${context.businessType}" business${context.targetAudience ? ` that serves "${context.targetAudience}"` : ""}.${context.offering ? `\nTheir offer: "${context.offering}".` : ""}\n\nGenerate copy and questions specifically tailored to this business and audience.`
+    : `\nGiven a business description, generate a complete lead qualification quiz funnel.`;
+
+  return `${base}${contextBlock}
 
 Return ONLY valid JSON matching this exact schema:
 {
@@ -51,6 +57,7 @@ Return ONLY valid JSON matching this exact schema:
 }
 
 Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/sophistication. Points 0-3 per option. Do not include calendar URLs, colors, or logo. Do not use em dashes in any generated text. Return JSON only, no markdown, no backticks.`;
+}
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -62,11 +69,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "AI generation limit reached. Try again later." }, { status: 429 });
   }
 
-  const { prompt } = await req.json();
+  const body = await req.json();
+  const { prompt, context } = body as {
+    prompt: string;
+    context?: { businessType?: string; targetAudience?: string; offering?: string; calendarUrl?: string; brandColor?: string };
+  };
 
   if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
     return NextResponse.json({ error: "Prompt is required and must be a non-empty string" }, { status: 400 });
   }
+
+  const systemPrompt = buildSystemPrompt(context);
+
+  // Build a richer user message when context is available
+  const userMessage = context
+    ? `${prompt}\n\nAdditional context:\n- Business type: ${context.businessType || "Not specified"}\n- Target audience: ${context.targetAudience || "Not specified"}\n- Offering: ${context.offering || "Not specified"}`
+    : prompt;
 
   // If OpenAI key is available, use it
   if (process.env.OPENAI_API_KEY) {
@@ -80,8 +98,8 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: prompt },
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
           ],
           temperature: 0.7,
           max_tokens: 1000,
