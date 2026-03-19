@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { leads, funnels, events, funnelSessions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ leadId: string }> }) {
   try {
@@ -41,7 +42,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ lea
       events: sessionEvents,
     });
   } catch (error) {
-    console.error("GET /api/leads error:", error);
+    logger.error("GET /api/leads error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

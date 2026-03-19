@@ -8,6 +8,13 @@
       "when": 1773787319234,
       "tag": "0000_bitter_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773883990487,
+      "tag": "0001_slimy_impossible_man",
+      "breakpoints": true
     }
   ]
 }

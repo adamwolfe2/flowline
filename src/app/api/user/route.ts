@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -17,7 +18,7 @@ export async function GET() {
       email: user?.email ?? null,
     });
   } catch (error) {
-    console.error("GET /api/user error:", error);
+    logger.error("GET /api/user error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

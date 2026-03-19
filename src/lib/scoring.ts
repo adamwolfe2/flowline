@@ -10,8 +10,11 @@ export function calculateScore(config: FunnelConfig, answers: Record<string, str
 export function getCalendarTier(config: FunnelConfig, answers: Record<string, string>): 'high' | 'mid' | 'low' {
   const score = calculateScore(config, answers);
   const { thresholds } = config.quiz;
-  if (score >= thresholds.high) return 'high';
-  if (score >= thresholds.mid) return 'mid';
+  // Defensive: if thresholds are inverted (high < mid), swap them
+  const high = Math.max(thresholds.high, thresholds.mid);
+  const mid = Math.min(thresholds.high, thresholds.mid);
+  if (score >= high) return 'high';
+  if (score >= mid) return 'mid';
   return 'low';
 }
 

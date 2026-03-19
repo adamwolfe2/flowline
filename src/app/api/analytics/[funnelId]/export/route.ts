@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { leads } from "@/db/schema";
 import { eq, and, gte, sql } from "drizzle-orm";
 import { getFunnelById } from "@/db/queries/funnels";
+import { logger } from "@/lib/logger";
 
 function getDateCutoff(timeRange: string): Date | null {
   const now = new Date();
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
       },
     });
   } catch (error) {
-    console.error("GET /api/analytics/export error:", error);
+    logger.error("GET /api/analytics/export error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

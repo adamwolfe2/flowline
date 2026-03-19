@@ -81,8 +81,9 @@ export async function checkSlugAvailable(slug: string): Promise<boolean> {
 }
 
 export async function getFunnelCount(userId: string): Promise<number> {
-  const result = await db.select().from(funnels).where(eq(funnels.userId, userId));
-  return result.length;
+  const result = await db.select({ count: sql<number>`count(*)::int` })
+    .from(funnels).where(eq(funnels.userId, userId));
+  return Number(result[0]?.count ?? 0);
 }
 
 export async function getFunnelsWithStats(userId: string) {

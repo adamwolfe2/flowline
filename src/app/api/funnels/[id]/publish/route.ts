@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { publishFunnel } from "@/db/queries/funnels";
+import { logger } from "@/lib/logger";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,7 +12,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(funnel);
   } catch (error) {
-    console.error("POST /api/funnels/[id]/publish error:", error);
+    logger.error("POST /api/funnels/[id]/publish error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

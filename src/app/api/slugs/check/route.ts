@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkSlugAvailable } from "@/db/queries/funnels";
 import { checkRateLimit, ogLimiter } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
     const available = await checkSlugAvailable(slug);
     return NextResponse.json({ available, slug });
   } catch (error) {
-    console.error("GET /api/slugs/check error:", error);
+    logger.error("GET /api/slugs/check error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

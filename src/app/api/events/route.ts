@@ -39,15 +39,15 @@ export async function POST(req: Request) {
     // Validate required fields
     if (!sessionId || typeof sessionId !== "string") {
       logger.warn("Event dropped: missing sessionId", { eventType: body?.eventType });
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: false, reason: "missing or invalid sessionId" });
     }
     if (!funnelId || typeof funnelId !== "string") {
       logger.warn("Event dropped: missing funnelId", { eventType: body?.eventType });
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: false, reason: "missing or invalid funnelId" });
     }
     if (!eventType || !VALID_EVENT_TYPES.includes(eventType)) {
       logger.warn("Event dropped: invalid eventType", { eventType: body?.eventType });
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: false, reason: "invalid eventType" });
     }
 
     await db.insert(events).values({
@@ -92,11 +92,11 @@ export async function POST(req: Request) {
     }
     if (stepIndex !== undefined) {
       await db.update(funnelSessions)
-        .set({ furthestStepReached: sql`greatest(${funnelSessions.furthestStepReached}, ${stepIndex})` })
+        .set({ furthestStepReached: sql`greatest(COALESCE(${funnelSessions.furthestStepReached}, 0), ${stepIndex})` })
         .where(eq(funnelSessions.id, sessionId));
     }
   } catch (err) {
-    console.error("[events] tracking error:", err);
+    logger.error("[events] tracking error", { error: err instanceof Error ? err.message : String(err) });
   }
 
   return NextResponse.json({ success: true });

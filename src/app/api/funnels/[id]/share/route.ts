@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { funnels } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+import { logger } from "@/lib/logger";
 
 // POST generate/regenerate share link
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     return NextResponse.json({ shareToken: updated.shareToken });
   } catch (error) {
-    console.error("POST /api/funnels/[id]/share error:", error);
+    logger.error("POST /api/funnels/[id]/share error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -46,7 +47,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE /api/funnels/[id]/share error:", error);
+    logger.error("DELETE /api/funnels/[id]/share error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

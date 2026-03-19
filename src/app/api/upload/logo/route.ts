@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { put } from "@vercel/blob";
 import { uploadLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: blob.url });
   } catch (error) {
-    console.error("POST /api/upload/logo error:", error);
+    logger.error("POST /api/upload/logo error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

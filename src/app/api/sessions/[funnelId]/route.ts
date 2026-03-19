@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { insertSession, completeSession, convertSession } from "@/db/queries/sessions";
 import { sessionLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
+
+function isValidUUID(str: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
@@ -11,6 +16,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     }
 
     const { funnelId } = await params;
+
+    if (!isValidUUID(funnelId)) {
+      return NextResponse.json({ error: "Invalid funnel ID" }, { status: 400 });
+    }
     const body = await req.json();
     const { event, sessionId } = body;
 
@@ -27,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
 
     return NextResponse.json({ error: "Invalid event" }, { status: 400 });
   } catch (error) {
-    console.error("POST /api/sessions error:", error);
+    logger.error("POST /api/sessions error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

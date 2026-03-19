@@ -8,7 +8,7 @@ import { fireWebhook } from "@/lib/webhook";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { leads, users, emailSequences, sequenceEnrollments } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, gte } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
 
 function isValidUUID(str: string): boolean {
@@ -51,6 +51,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
 
     const funnel = await getFunnelById(funnelId);
     if (!funnel) return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
+
+    // Free plan submission limit: 100/month
+    const [funnelOwner] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, funnel.userId));
+    if (funnelOwner?.plan === "free") {
+      const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` })
+        .from(leads)
+        .where(and(eq(leads.funnelId, funnelId), gte(leads.createdAt, monthAgo)));
+      if (Number(count) >= 100) {
+        return NextResponse.json({ error: "Free plan limit reached (100 submissions/month). Ask the funnel owner to upgrade." }, { status: 403 });
+      }
+    }
 
     const config = funnel.config as FunnelConfig;
     const score = calculateScore(config, answers);

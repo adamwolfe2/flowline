@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getFullAnalytics } from "@/db/queries/analytics";
 import { getFunnelById } from "@/db/queries/funnels";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
   } catch (error) {
-    console.error("GET /api/analytics error:", error);
+    logger.error("GET /api/analytics error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

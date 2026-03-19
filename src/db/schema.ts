@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer, jsonb, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, boolean, integer, jsonb, timestamp, pgEnum, index } from 'drizzle-orm/pg-core';
 
 export const planEnum = pgEnum('plan', ['free', 'pro', 'agency']);
 export const tierEnum = pgEnum('calendar_tier', ['high', 'mid', 'low']);
@@ -30,7 +30,9 @@ export const funnels = pgTable('funnels', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   shareToken: text('share_token').unique(),
-});
+}, (t) => [
+  index('funnels_user_id_idx').on(t.userId),
+]);
 
 export const leads = pgTable('leads', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -45,7 +47,10 @@ export const leads = pgTable('leads', {
   utmCampaign: text('utm_campaign'),
   deviceType: deviceTypeEnum('device_type'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('leads_funnel_id_idx').on(t.funnelId),
+  index('leads_funnel_id_created_at_idx').on(t.funnelId, t.createdAt),
+]);
 
 export const funnelSessions = pgTable('funnel_sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -62,7 +67,10 @@ export const funnelSessions = pgTable('funnel_sessions', {
   totalDurationMs: integer('total_duration_ms'),
   endedAt: timestamp('ended_at'),
   startedAt: timestamp('started_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('funnel_sessions_funnel_id_idx').on(t.funnelId),
+  index('funnel_sessions_funnel_id_started_at_idx').on(t.funnelId, t.startedAt),
+]);
 
 export const events = pgTable('events', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -90,7 +98,10 @@ export const events = pgTable('events', {
   calendarTier: tierEnum('calendar_tier'),
   score: integer('score'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('events_funnel_id_idx').on(t.funnelId),
+  index('events_session_id_idx').on(t.sessionId),
+]);
 
 export const funnelVariants = pgTable('funnel_variants', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -109,7 +120,10 @@ export const variantAssignments = pgTable('variant_assignments', {
   funnelId: uuid('funnel_id').notNull().references(() => funnels.id, { onDelete: 'cascade' }),
   variantId: uuid('variant_id').notNull().references(() => funnelVariants.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('variant_assignments_variant_id_idx').on(t.variantId),
+  index('variant_assignments_funnel_id_idx').on(t.funnelId),
+]);
 
 export const emailSequences = pgTable('email_sequences', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -140,7 +154,9 @@ export const sequenceEnrollments = pgTable('sequence_enrollments', {
   nextSendAt: timestamp('next_send_at'),
   completedAt: timestamp('completed_at'),
   enrolledAt: timestamp('enrolled_at').defaultNow().notNull(),
-});
+}, (t) => [
+  index('sequence_enrollments_status_next_send_at_idx').on(t.status, t.nextSendAt),
+]);
 
 export const teamRoleEnum = pgEnum('team_role', ['owner', 'admin', 'member']);
 

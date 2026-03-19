@@ -43,6 +43,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const { name, triggerTier } = await req.json();
 
+    // Validate triggerTier if provided
+    const validTiers = ['high', 'mid', 'low'] as const;
+    if (triggerTier !== undefined && triggerTier !== null && !validTiers.includes(triggerTier)) {
+      return NextResponse.json({ error: "triggerTier must be 'high', 'mid', 'low', or null" }, { status: 400 });
+    }
+
     const [funnel] = await db.select({ id: funnels.id })
       .from(funnels)
       .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));

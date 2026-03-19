@@ -30,6 +30,18 @@ export async function GET(req: Request) {
 
   try {
     const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    // Dead-letter recovery: revert enrollments stuck in "processing" for >1 hour
+    const stuckRecovered = await db.execute(sql`
+      UPDATE ${sequenceEnrollments}
+      SET status = 'active'
+      WHERE status = 'processing'
+      AND ${sequenceEnrollments.nextSendAt} <= ${oneHourAgo}
+    `);
+    if (stuckRecovered.rowCount && stuckRecovered.rowCount > 0) {
+      logger.warn("Dead-letter recovery: reverted stuck enrollments", { count: stuckRecovered.rowCount });
+    }
 
     // Find enrollments ready to send and atomically claim them
     // by setting status to "processing" to prevent double-sends from overlapping cron runs

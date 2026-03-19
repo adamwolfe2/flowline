@@ -19,6 +19,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const body = await req.json();
 
+    // Validate triggerTier if provided
+    if (body.triggerTier !== undefined && body.triggerTier !== null) {
+      const validTiers = ['high', 'mid', 'low'] as const;
+      if (!validTiers.includes(body.triggerTier)) {
+        return NextResponse.json({ error: "triggerTier must be 'high', 'mid', 'low', or null" }, { status: 400 });
+      }
+    }
+
     // Update sequence metadata
     if (body.name !== undefined || body.active !== undefined || body.triggerTier !== undefined) {
       const updates: Record<string, unknown> = {};
@@ -31,21 +39,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         .where(and(eq(emailSequences.id, sequenceId), eq(emailSequences.funnelId, id)));
     }
 
-    // Update steps if provided
+    // Update steps if provided — wrapped in transaction to prevent data loss
     if (body.steps && Array.isArray(body.steps)) {
       try {
-        await db.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));
+        await db.transaction(async (tx) => {
+          await tx.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));
 
-        for (let i = 0; i < body.steps.length; i++) {
-          const step = body.steps[i];
-          await db.insert(emailSteps).values({
-            sequenceId,
-            stepOrder: i + 1,
-            subject: step.subject || "Follow up",
-            body: step.body || "",
-            delayHours: step.delayHours ?? 24,
-          });
-        }
+          for (let i = 0; i < body.steps.length; i++) {
+            const step = body.steps[i];
+            await tx.insert(emailSteps).values({
+              sequenceId,
+              stepOrder: i + 1,
+              subject: step.subject || "Follow up",
+              body: step.body || "",
+              delayHours: step.delayHours ?? 24,
+            });
+          }
+        });
       } catch (stepError) {
         logger.error("Failed to update sequence steps", {
           sequenceId,

@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { users, funnels, leads, funnelSessions, events } from "@/db/schema";
 import { sql, gte } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 const ADMIN_USER_ID = process.env.ADMIN_USER_ID;
 
@@ -65,7 +66,7 @@ export async function GET() {
       topFunnels,
     });
   } catch (error) {
-    console.error("Admin stats error:", error);
+    logger.error("Admin stats error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

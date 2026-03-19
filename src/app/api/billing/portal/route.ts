@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 export async function POST() {
   try {
@@ -28,7 +29,7 @@ export async function POST() {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("Portal error:", error);
+    logger.error("Portal error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

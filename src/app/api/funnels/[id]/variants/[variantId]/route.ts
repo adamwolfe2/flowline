@@ -20,6 +20,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const body = await req.json();
+
+    // Validate trafficWeight bounds
+    if (body.trafficWeight !== undefined) {
+      const w = Number(body.trafficWeight);
+      if (!Number.isInteger(w) || w < 0 || w > 100) {
+        return NextResponse.json({ error: "trafficWeight must be an integer between 0 and 100" }, { status: 400 });
+      }
+    }
+
     const updates: Record<string, unknown> = {};
     if (body.name !== undefined) updates.name = body.name;
     if (body.config !== undefined) updates.config = body.config;
