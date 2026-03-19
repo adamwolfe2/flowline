@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity, Globe, CheckCircle, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface AdminStats {
   totalUsers: number;
@@ -265,8 +266,14 @@ export default function AdminPage() {
                               body: JSON.stringify({ action: "verify", domain: d.domain }),
                             });
                             const data = await res.json();
-                            alert(JSON.stringify(data, null, 2));
-                          } catch {}
+                            if (data.verified) {
+                              toast.success(`${d.domain} verified`);
+                            } else {
+                              toast.error(data.error || "Verification pending");
+                            }
+                          } catch {
+                            toast.error("Verification request failed");
+                          }
                           setDomainAction(null);
                         }}
                         className="text-[10px] px-2 py-1 border border-[#EBEBEB] rounded hover:bg-gray-50 transition-colors"
