@@ -42,6 +42,11 @@ export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
         toast.success(`Created "${template.name}" funnel`);
         onCreated?.();
         router.push(`/builder/${funnel.id}`);
+      } else if (res.status === 403) {
+        toast.error("Free plan is limited to 1 funnel. Upgrade to Pro for unlimited funnels.", {
+          action: { label: "Upgrade", onClick: () => router.push("/pricing") },
+          duration: 6000,
+        });
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to create funnel");

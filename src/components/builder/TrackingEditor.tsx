@@ -106,16 +106,31 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
 
       <Separator />
 
+      {/* Webhook */}
+      <div>
+        <div className="flex items-center gap-2 mb-1.5">
+          <Label className="text-xs text-gray-500">Webhook URL</Label>
+          <span className="text-[9px] text-[#9CA3AF] bg-[#F3F4F6] px-1.5 py-0.5 rounded">Optional</span>
+        </div>
+        <Input
+          value={config.webhook?.url ?? ""}
+          onChange={e => {
+            const newConfig = JSON.parse(JSON.stringify(config));
+            if (!newConfig.webhook) newConfig.webhook = {};
+            newConfig.webhook.url = e.target.value;
+            onSave(newConfig);
+          }}
+          placeholder="https://hooks.zapier.com/..."
+          className="text-sm font-mono"
+        />
+        <p className="text-[10px] text-gray-400 mt-1">
+          Receives a POST with lead data (email, score, tier, answers) on every submission.
+        </p>
+      </div>
+
       {/* Webhook Delivery Log */}
       {config.webhook?.url && funnelId && (
         <>
-          <div>
-            <Label className="text-xs text-gray-500 mb-1.5">Webhook URL</Label>
-            <div className="text-xs font-mono text-[#374151] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2 truncate">
-              {config.webhook.url}
-            </div>
-          </div>
-
           <div>
             <p className="text-[11px] text-gray-500 font-medium mb-2">Recent Deliveries</p>
             {loadingDeliveries ? (

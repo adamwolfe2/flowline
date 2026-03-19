@@ -117,10 +117,15 @@ export async function GET(req: Request) {
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";
 
           // Replace placeholders in body
+          const quizConfig = funnelConfig?.quiz as Record<string, unknown> | undefined;
+          const calendars = quizConfig?.calendars as Record<string, string> | undefined;
+          const calendarUrl = calendars?.[lead.calendarTier] || "";
+
           const emailBody = step.body
             .replace(/\{email\}/g, escapeHtml(lead.email))
             .replace(/\{score\}/g, escapeHtml(String(lead.score)))
-            .replace(/\{tier\}/g, escapeHtml(lead.calendarTier));
+            .replace(/\{tier\}/g, escapeHtml(lead.calendarTier))
+            .replace(/\{calendar_url\}/g, escapeHtml(calendarUrl));
 
           const unsubscribeUrl = `${appUrl}/api/sequences/unsubscribe?token=${enrollmentId}`;
 

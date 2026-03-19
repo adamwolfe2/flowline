@@ -117,10 +117,6 @@ function OnboardingContent() {
         return;
       }
 
-      if (data._fallback) {
-        toast.warning("Used example template. Try a more detailed description for better results.");
-      }
-
       // Validate generated config has questions with options
       if (!data.questions?.length || !data.questions.every((q: { options?: unknown[] }) => (q.options?.length ?? 0) >= 2)) {
         toast.error("Generated funnel was incomplete. Please try again with more detail.");

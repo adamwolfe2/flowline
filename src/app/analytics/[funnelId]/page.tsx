@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   ExternalLink,
@@ -271,6 +272,55 @@ export default function AnalyticsDashboard() {
 
   /* ---------- Answer helpers ---------- */
   const answerKeys = Object.keys(answers);
+
+  /* ---------- Zero traffic state ---------- */
+  if (stats.totalSessions === 0) {
+    const funnelConfig = funnel?.config as { brand?: { name?: string } } | undefined;
+    const funnelSlug = (funnel as Record<string, unknown>)?.slug as string;
+    const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "getmyvsl.com";
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white border-b border-gray-100 px-6 lg:px-10 py-4">
+          <div className="max-w-7xl mx-auto flex items-center gap-3">
+            <Link href="/dashboard" className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
+              <ArrowLeft className="w-4 h-4 text-gray-500" />
+            </Link>
+            <h1 className="text-sm font-semibold text-gray-900">
+              {funnelConfig?.brand?.name || "Funnel"} Analytics
+            </h1>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+          <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-5">
+            <BarChart3 className="w-8 h-8 text-[#2D6A4F]" />
+          </div>
+          <h2 className="text-lg font-semibold text-[#111827] mb-2">Waiting for your first visitor</h2>
+          <p className="text-sm text-[#9CA3AF] max-w-md mb-6">
+            Share your funnel URL to start seeing analytics data. Traffic, conversions, and lead data will appear here in real time.
+          </p>
+          {funnelSlug && (
+            <div className="flex items-center gap-2 mb-4">
+              <code className="text-xs font-mono bg-[#F3F4F6] text-[#374151] px-3 py-2 rounded-lg">
+                {platformDomain}/f/{funnelSlug}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://${platformDomain}/f/${funnelSlug}`);
+                  toast.success("URL copied");
+                }}
+                className="text-xs bg-[#2D6A4F] text-white px-3 py-2 rounded-lg hover:bg-[#245840] transition-colors"
+              >
+                Copy URL
+              </button>
+            </div>
+          )}
+          <Link href="/dashboard" className="text-sm text-[#2D6A4F] hover:underline">
+            Back to dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
