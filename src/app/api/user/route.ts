@@ -19,6 +19,8 @@ export async function GET() {
       stripeCustomerId: user?.stripeCustomerId ?? null,
       email: user?.email ?? null,
       isAdmin,
+    }, {
+      headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=120" },
     });
   } catch (error) {
     logger.error("GET /api/user error:", { error: error instanceof Error ? error.message : String(error) });

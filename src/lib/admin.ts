@@ -5,19 +5,34 @@ import { eq } from "drizzle-orm";
 // Hardcoded super admin — full unrestricted access to everything
 const SUPER_ADMIN_EMAIL = "adamwolfe102@gmail.com";
 
+// Cache the admin userId after first lookup to avoid repeated DB queries
+let cachedAdminUserId: string | null = null;
+
 /**
  * Check if a userId belongs to the super admin.
- * Uses email lookup from the DB (Clerk userId -> users table -> email).
+ * First checks env var, then cached userId, then falls back to DB lookup.
  */
 export async function isSuperAdmin(userId: string): Promise<boolean> {
-  // Fast path: check env var first (avoids DB call for non-admin)
+  // Fast path 1: env var
   if (process.env.ADMIN_USER_ID && userId === process.env.ADMIN_USER_ID) {
     return true;
   }
 
-  // Check email in DB
+  // Fast path 2: cached from previous lookup
+  if (cachedAdminUserId && userId === cachedAdminUserId) {
+    return true;
+  }
+  if (cachedAdminUserId && userId !== cachedAdminUserId) {
+    return false;
+  }
+
+  // DB lookup (only happens once per server instance)
   const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId));
-  return user?.email === SUPER_ADMIN_EMAIL;
+  if (user?.email === SUPER_ADMIN_EMAIL) {
+    cachedAdminUserId = userId;
+    return true;
+  }
+  return false;
 }
 
 /**

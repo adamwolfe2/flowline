@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const QUICK_TEMPLATES = [
   { label: "Coaching Qualifier", prompt: "I sell business coaching to 6-figure entrepreneurs" },
@@ -50,11 +51,17 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden pb-24">
       {/* Forest background */}
-      <div className="absolute inset-0" style={{
-        backgroundImage: "url(/hero-bg.jpg)",
-        backgroundSize: "cover",
-        backgroundPosition: "center top",
-      }} />
+      <div className="absolute inset-0">
+        <Image
+          src="/hero-bg.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-top"
+          sizes="100vw"
+          quality={75}
+        />
+      </div>
       <div className="absolute inset-0" style={{
         background: "linear-gradient(180deg, transparent 0%, transparent 40%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0.7) 80%, #FFFFFF 100%)",
       }} />

@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { WaterfallChart } from "@/components/analytics/WaterfallChart";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
 
 const LeadsChart = dynamic(
@@ -33,6 +32,14 @@ const LeadsChart = dynamic(
   {
     ssr: false,
     loading: () => <div className="h-64 bg-gray-50 rounded-xl animate-pulse" />,
+  }
+);
+
+const WaterfallChart = dynamic(
+  () => import("@/components/analytics/WaterfallChart").then((m) => m.WaterfallChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 bg-gray-50 rounded-xl animate-pulse" />,
   }
 );
 
