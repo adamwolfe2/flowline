@@ -204,25 +204,82 @@ function ColorPickerInput({ selected, onSelect }: { selected?: string; onSelect:
   );
 }
 
-function SkeletonPreview() {
+function LivePreview({ answers, description }: { answers: Record<string, string>; description: string }) {
+  const color = answers.brand_color || "#2D6A4F";
+  const businessType = answers.business_type || "";
+  const audience = answers.target_audience || "";
+  const offering = answers.offering || "";
+  const hasContent = businessType || audience || offering;
+
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-lg">
       <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-lg overflow-hidden">
         <div className="h-9 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center px-3 gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
+          <div className="flex-1 mx-4">
+            <div className="bg-white border border-[#E5E7EB] rounded px-2 py-0.5 text-[9px] text-[#9CA3AF] text-center max-w-[180px] mx-auto">
+              getmyvsl.com/f/your-funnel
+            </div>
+          </div>
         </div>
-        <div className="p-8 space-y-4 animate-pulse">
-          <div className="w-12 h-12 bg-[#E5E7EB] rounded-xl mx-auto" />
-          <div className="h-3 bg-[#E5E7EB] rounded w-24 mx-auto" />
-          <div className="h-6 bg-[#E5E7EB] rounded w-3/4 mx-auto" />
-          <div className="h-4 bg-[#E5E7EB] rounded w-1/2 mx-auto" />
-          <div className="h-12 bg-[#E5E7EB] rounded-xl w-full mt-6" />
-          <div className="space-y-2 pt-4 border-t border-[#F3F4F6]">
-            <div className="h-10 bg-[#F3F4F6] rounded-lg" />
-            <div className="h-10 bg-[#F3F4F6] rounded-lg" />
-            <div className="h-10 bg-[#F3F4F6] rounded-lg" />
+        <div className="p-8 text-center">
+          {/* Logo placeholder */}
+          <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center text-white font-bold transition-colors duration-300"
+            style={{ backgroundColor: color }}>
+            {(businessType || description || "M")[0].toUpperCase()}
+          </div>
+
+          {/* Badge */}
+          <div className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full mb-3 transition-colors duration-300"
+            style={{ backgroundColor: color + "15", color }}>
+            Free Assessment
+          </div>
+
+          {/* Headline — real or skeleton */}
+          {hasContent ? (
+            <motion.h3 key={businessType + audience} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-lg font-bold text-[#111827] leading-tight mb-2">
+              {offering
+                ? `Discover If You Qualify for ${offering.split(" ").slice(0, 4).join(" ")}`
+                : audience
+                  ? `Built for ${audience}`
+                  : `Your ${businessType} Funnel`}
+            </motion.h3>
+          ) : (
+            <div className="h-6 bg-[#E5E7EB] rounded w-3/4 mx-auto mb-2 animate-pulse" />
+          )}
+
+          {/* Subheadline */}
+          {audience ? (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-sm text-[#6B7280] mb-6">
+              Answer 3 quick questions to see if we are the right fit.
+            </motion.p>
+          ) : (
+            <div className="h-4 bg-[#E5E7EB] rounded w-1/2 mx-auto mb-6 animate-pulse" />
+          )}
+
+          {/* CTA Button */}
+          <button className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-colors duration-300"
+            style={{ backgroundColor: color }}>
+            Take the Quiz
+          </button>
+        </div>
+
+        {/* Question preview */}
+        <div className="border-t border-[#E5E7EB] p-6">
+          <div className={hasContent ? "opacity-50" : "opacity-30 animate-pulse"}>
+            <p className="text-xs text-[#9CA3AF] mb-1">Question 1 of 3</p>
+            <p className="text-sm font-medium text-[#111827] mb-3">
+              {businessType ? `What stage is your ${businessType.toLowerCase()} business?` : "Loading question..."}
+            </p>
+            <div className="space-y-1.5">
+              <div className="text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-[#6B7280]">Just starting out</div>
+              <div className="text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-[#6B7280]">Growing steadily</div>
+              <div className="text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-[#6B7280]">Ready to scale</div>
+            </div>
           </div>
         </div>
       </div>
@@ -232,7 +289,7 @@ function SkeletonPreview() {
 
 function FunnelPreview({ data, color }: { data: Record<string, unknown>; color: string }) {
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-lg">
       <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-lg overflow-hidden">
         <div className="h-9 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center px-3 gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
@@ -862,8 +919,8 @@ function BuildContent() {
             )}
 
             {(state.phase === "planning" || state.phase === "questions") && (
-              <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <SkeletonPreview />
+              <motion.div key="live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <LivePreview answers={state.answers} description={state.businessDescription} />
               </motion.div>
             )}
 
@@ -923,7 +980,7 @@ function BuildContent() {
                 </button>
               </div>
               <div className="flex items-center justify-center">
-                {(state.phase === "planning" || state.phase === "questions") && <SkeletonPreview />}
+                {(state.phase === "planning" || state.phase === "questions") && <LivePreview answers={state.answers} description={state.businessDescription} />}
                 {state.phase === "generating" && (
                   <div className="text-center py-10">
                     <div className="w-10 h-10 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-3" />
