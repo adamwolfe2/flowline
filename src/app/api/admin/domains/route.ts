@@ -5,14 +5,13 @@ import { funnels } from "@/db/schema";
 import { isNotNull } from "drizzle-orm";
 import { listProjectDomains, addDomainToVercel, removeDomainFromVercel, verifyDomain, getDomainConfig, isVercelConfigured } from "@/lib/vercel-domains";
 import { logger } from "@/lib/logger";
-
-const ADMIN_USER_ID = process.env.ADMIN_USER_ID;
+import { isSuperAdmin } from "@/lib/admin";
 
 // GET all custom domains + Vercel status
 export async function GET() {
   try {
     const { userId } = await auth();
-    if (!userId || userId !== ADMIN_USER_ID) {
+    if (!userId || !(await isSuperAdmin(userId))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -67,7 +66,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-    if (!userId || userId !== ADMIN_USER_ID) {
+    if (!userId || !(await isSuperAdmin(userId))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

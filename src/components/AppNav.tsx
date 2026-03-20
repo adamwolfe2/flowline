@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
@@ -16,6 +17,14 @@ const navLinks = [
 
 export function AppNav() {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/user")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.isAdmin) setIsAdmin(true); })
+      .catch(() => {});
+  }, []);
 
   return (
     <nav className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
@@ -42,6 +51,19 @@ export function AppNav() {
                 </Link>
               );
             })}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={`text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+                  pathname === "/admin"
+                    ? "text-[#2D6A4F] font-medium bg-[#2D6A4F]/5"
+                    : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]"
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Admin
+              </Link>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-3">

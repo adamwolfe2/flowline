@@ -10,6 +10,7 @@ import { logger } from "@/lib/logger";
 import { leads, users, emailSequences, sequenceEnrollments } from "@/db/schema";
 import { eq, and, sql, gte } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
+import { isSuperAdmin } from "@/lib/admin";
 
 function isValidUUID(str: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -52,9 +53,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     const funnel = await getFunnelById(funnelId);
     if (!funnel) return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
 
-    // Free plan submission limit: 100/month
+    // Free plan submission limit: 100/month — super admin bypasses
     const [funnelOwner] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, funnel.userId));
-    if (funnelOwner?.plan === "free") {
+    const ownerIsAdmin = await isSuperAdmin(funnel.userId);
+    if (funnelOwner?.plan === "free" && !ownerIsAdmin) {
       const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const [{ count }] = await db.select({ count: sql<number>`count(*)::int` })
         .from(leads)

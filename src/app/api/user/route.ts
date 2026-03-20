@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { isSuperAdmin } from "@/lib/admin";
 
 export async function GET() {
   try {
@@ -11,11 +12,13 @@ export async function GET() {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const [user] = await db.select().from(users).where(eq(users.id, userId));
+    const isAdmin = await isSuperAdmin(userId);
 
     return NextResponse.json({
-      plan: user?.plan ?? "free",
+      plan: isAdmin ? "agency" : (user?.plan ?? "free"),
       stripeCustomerId: user?.stripeCustomerId ?? null,
       email: user?.email ?? null,
+      isAdmin,
     });
   } catch (error) {
     logger.error("GET /api/user error:", { error: error instanceof Error ? error.message : String(error) });

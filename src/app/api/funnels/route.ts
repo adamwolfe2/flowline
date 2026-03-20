@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { isSuperAdmin } from "@/lib/admin";
 
 export async function GET() {
   try {
@@ -36,12 +37,15 @@ export async function POST(req: NextRequest) {
       await db.insert(users).values({ id: userId, email: "unknown@getmyvsl.com" }).onConflictDoNothing();
     }
 
-    // Free plan check
-    const count = await getFunnelCount(userId);
-    const userRow = existingUser[0];
-    const plan = userRow?.plan ?? "free";
-    if (plan === "free" && count >= 1) {
-      return NextResponse.json({ error: "Free plan limited to 1 funnel. Upgrade to Pro." }, { status: 403 });
+    // Free plan check — super admin bypasses all limits
+    const isAdmin = await isSuperAdmin(userId);
+    if (!isAdmin) {
+      const count = await getFunnelCount(userId);
+      const userRow = existingUser[0];
+      const plan = userRow?.plan ?? "free";
+      if (plan === "free" && count >= 1) {
+        return NextResponse.json({ error: "Free plan limited to 1 funnel. Upgrade to Pro." }, { status: 403 });
+      }
     }
 
     const body = await req.json();

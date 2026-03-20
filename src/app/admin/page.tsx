@@ -14,7 +14,15 @@ interface AdminStats {
   totalEvents: number;
   leadsToday: number;
   leadsThisWeek: number;
+  leadsThisMonth: number;
   sessionsToday: number;
+  sessionsThisWeek: number;
+  conversionRate: number;
+  planBreakdown: { free: number; pro: number; agency: number };
+  usersThisWeek: number;
+  usersThisMonth: number;
+  activeEnrollments: number;
+  totalWebhookDeliveries: number;
   recentUsers: {
     id: string;
     email: string;
@@ -82,22 +90,41 @@ export default function AdminPage() {
 
   if (!stats) return null;
 
-  const cards = [
-    { label: "Total Users", value: stats.totalUsers, icon: Users },
+  const primaryCards = [
+    { label: "Total Users", value: stats.totalUsers, sub: `${stats.usersThisWeek} this week / ${stats.usersThisMonth} this month`, icon: Users },
     { label: "Funnels", value: `${stats.publishedFunnels} / ${stats.totalFunnels}`, sub: "published / total", icon: Layers },
-    { label: "Total Leads", value: stats.totalLeads, icon: Mail },
-    { label: "Leads Today", value: stats.leadsToday, sub: `${stats.leadsThisWeek} this week`, icon: CalendarDays },
-    { label: "Sessions", value: stats.totalSessions, sub: `${stats.sessionsToday} today`, icon: Activity },
-    { label: "Total Events", value: stats.totalEvents, icon: MousePointerClick },
+    { label: "Total Leads", value: stats.totalLeads.toLocaleString(), sub: `${stats.leadsToday} today / ${stats.leadsThisWeek} this week`, icon: Mail },
+    { label: "Conversion Rate", value: `${stats.conversionRate}%`, sub: `${stats.totalSessions.toLocaleString()} sessions total`, icon: Activity },
+    { label: "Sessions Today", value: stats.sessionsToday.toLocaleString(), sub: `${stats.sessionsThisWeek.toLocaleString()} this week`, icon: MousePointerClick },
+    { label: "Total Events", value: stats.totalEvents.toLocaleString(), icon: CalendarDays },
   ];
 
   return (
     <div className="space-y-8">
-      <h1 className="text-lg font-semibold text-[#333333]">Platform Overview</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-[#333333]">Platform Overview</h1>
+        <span className="text-[10px] text-[#9CA3AF]">Super Admin</span>
+      </div>
 
-      {/* Stats cards */}
+      {/* Plan breakdown */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white border border-[#EBEBEB] rounded-lg p-4">
+          <p className="text-xs text-[#9CA3AF] mb-1">Free Users</p>
+          <p className="text-2xl font-bold text-[#333333]">{stats.planBreakdown.free}</p>
+        </div>
+        <div className="bg-white border border-[#EBEBEB] rounded-lg p-4">
+          <p className="text-xs text-[#2D6A4F] mb-1">Pro Users</p>
+          <p className="text-2xl font-bold text-[#2D6A4F]">{stats.planBreakdown.pro}</p>
+        </div>
+        <div className="bg-white border border-[#EBEBEB] rounded-lg p-4">
+          <p className="text-xs text-[#7C3AED] mb-1">Agency Users</p>
+          <p className="text-2xl font-bold text-[#7C3AED]">{stats.planBreakdown.agency}</p>
+        </div>
+      </div>
+
+      {/* Primary stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {cards.map((card) => (
+        {primaryCards.map((card) => (
           <div
             key={card.label}
             className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4 space-y-1"
@@ -110,6 +137,18 @@ export default function AdminPage() {
             {card.sub && <div className="text-[10px] text-[#999999]">{card.sub}</div>}
           </div>
         ))}
+      </div>
+
+      {/* System health */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+          <p className="text-xs text-[#737373] mb-1">Active Email Enrollments</p>
+          <p className="text-lg font-semibold text-[#333333]">{stats.activeEnrollments}</p>
+        </div>
+        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+          <p className="text-xs text-[#737373] mb-1">Webhook Deliveries Logged</p>
+          <p className="text-lg font-semibold text-[#333333]">{stats.totalWebhookDeliveries}</p>
+        </div>
       </div>
 
       {/* Recent Users */}
