@@ -4,20 +4,30 @@ import { eq } from "drizzle-orm";
 
 // Hardcoded super admin — full unrestricted access to everything
 const SUPER_ADMIN_EMAIL = "adamwolfe102@gmail.com";
+const SUPER_ADMIN_USER_ID = "user_3BDXaPSL6jBfBefM44mC1PldhHz";
 
 /**
  * Check if a userId belongs to the super admin.
- * Checks env var first, then looks up email in DB.
+ * Triple-check: hardcoded user ID, env var, then DB email lookup.
  */
 export async function isSuperAdmin(userId: string): Promise<boolean> {
-  // Fast path: env var match
+  // Fast path 1: hardcoded user ID (cannot fail)
+  if (userId === SUPER_ADMIN_USER_ID) {
+    return true;
+  }
+
+  // Fast path 2: env var match
   if (process.env.ADMIN_USER_ID && userId === process.env.ADMIN_USER_ID) {
     return true;
   }
 
-  // DB lookup: check if user's email matches super admin
-  const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId));
-  return user?.email === SUPER_ADMIN_EMAIL;
+  // Fallback: DB lookup by email
+  try {
+    const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId));
+    return user?.email === SUPER_ADMIN_EMAIL;
+  } catch {
+    return false;
+  }
 }
 
 /**
