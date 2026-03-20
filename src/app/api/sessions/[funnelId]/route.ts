@@ -24,8 +24,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     const { event, sessionId } = body;
 
     if (event === "start") {
-      const session = await insertSession(funnelId);
-      return NextResponse.json({ sessionId: session.id });
+      try {
+        const session = await insertSession(funnelId);
+        return NextResponse.json({ sessionId: session.id });
+      } catch {
+        // FK constraint failure = funnel doesn't exist
+        return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
+      }
     }
 
     if (event === "complete" && sessionId) {

@@ -11,7 +11,8 @@ import { isSuperAdmin } from "@/lib/admin";
 export async function GET() {
   try {
     const { userId } = await auth();
-    if (!userId || !(await isSuperAdmin(userId))) {
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await isSuperAdmin(userId))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -66,7 +67,8 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
-    if (!userId || !(await isSuperAdmin(userId))) {
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await isSuperAdmin(userId))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
