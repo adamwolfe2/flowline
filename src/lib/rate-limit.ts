@@ -30,14 +30,6 @@ export interface RateLimitResult {
   limit?: number;
 }
 
-/** Build X-RateLimit-* headers from a RateLimitResult */
-export function rateLimitHeaders(result: RateLimitResult): Record<string, string> {
-  const headers: Record<string, string> = {};
-  if (result.limit !== undefined) headers["X-RateLimit-Limit"] = String(result.limit);
-  if (result.remaining !== undefined) headers["X-RateLimit-Remaining"] = String(result.remaining);
-  return headers;
-}
-
 function cleanupMemoryStore() {
   if (memoryStore.size > MAX_MEMORY_STORE_SIZE) {
     const now = Date.now();
