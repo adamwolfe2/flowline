@@ -110,16 +110,16 @@ export function HeroSection() {
             />
             <div className="flex items-center justify-between px-5 pb-4">
               {/* Integration logos */}
-              <div className="flex items-center gap-1">
-                <div className="flex -space-x-1" title="Integrates with Calendly, Slack, HubSpot">
-                  <div className="w-7 h-7 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                    <img src="/integrations/calendly.svg" alt="Calendly" className="w-4 h-4 object-contain" />
+              <div className="flex items-center">
+                <div className="flex -space-x-1.5" title="Integrates with Calendly, Slack, HubSpot">
+                  <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                    <img src="/integrations/calendly.svg" alt="Calendly" className="w-3.5 h-3.5 object-contain" />
                   </div>
-                  <div className="w-7 h-7 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                    <img src="/integrations/slack.svg" alt="Slack" className="w-4 h-4 object-contain" />
+                  <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                    <img src="/integrations/slack.svg" alt="Slack" className="w-3.5 h-3.5 object-contain" />
                   </div>
-                  <div className="w-7 h-7 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                    <img src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" className="w-4 h-4 object-contain" />
+                  <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                    <img src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" className="w-3.5 h-3.5 object-contain" />
                   </div>
                 </div>
                 <span className="text-[10px] text-[#9CA3AF] hidden sm:inline ml-1.5">+9 more</span>

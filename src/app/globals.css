@@ -139,7 +139,12 @@ h2, h3 {
 }
 
 /* Focus states for keyboard navigation */
-*:focus-visible {
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid #2D6A4F;
   outline-offset: 2px;
 }
