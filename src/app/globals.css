@@ -130,6 +130,14 @@
   }
 }
 
+/* Instrument Serif headings — wider tracking for readability at large sizes */
+h1 {
+  letter-spacing: 0.02em;
+}
+h2, h3 {
+  letter-spacing: 0.01em;
+}
+
 /* Focus states for keyboard navigation */
 *:focus-visible {
   outline: 2px solid #2D6A4F;
