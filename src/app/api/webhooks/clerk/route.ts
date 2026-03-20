@@ -43,16 +43,17 @@ export async function POST(req: Request) {
     const { id, email_addresses } = evt.data;
     const email = email_addresses[0]?.email_address ?? "";
 
-    // Check if user already exists
-    const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.id, id));
+    // Check if user already exists (may have been created by funnel API with placeholder email)
+    const [existing] = await db.select({ id: users.id, email: users.email }).from(users).where(eq(users.id, id));
 
     if (!existing) {
       await db.insert(users).values({ id, email }).onConflictDoNothing();
-
-      // Only send welcome email for genuinely new users
       if (email) {
         sendWelcomeEmail(email).catch(() => {});
       }
+    } else if (email && existing.email !== email) {
+      // User exists but with placeholder email — update to real Clerk email
+      await db.update(users).set({ email }).where(eq(users.id, id));
     }
   }
 

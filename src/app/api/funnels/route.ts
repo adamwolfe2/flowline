@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
 import { generateSlug } from "@/lib/utils";
@@ -31,10 +31,19 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Ensure user exists in DB
+    // Ensure user exists in DB with real email from Clerk
     const existingUser = await db.select().from(users).where(eq(users.id, userId));
     if (existingUser.length === 0) {
-      await db.insert(users).values({ id: userId, email: "unknown@getmyvsl.com" }).onConflictDoNothing();
+      const clerkUser = await currentUser();
+      const email = clerkUser?.emailAddresses?.[0]?.emailAddress || "unknown@getmyvsl.com";
+      await db.insert(users).values({ id: userId, email }).onConflictDoNothing();
+    } else if (existingUser[0].email === "unknown@getmyvsl.com") {
+      // Fix placeholder email if it was set before Clerk webhook ran
+      const clerkUser = await currentUser();
+      const email = clerkUser?.emailAddresses?.[0]?.emailAddress;
+      if (email) {
+        await db.update(users).set({ email }).where(eq(users.id, userId));
+      }
     }
 
     // Free plan check — super admin bypasses all limits
