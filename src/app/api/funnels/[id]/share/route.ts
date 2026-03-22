@@ -20,13 +20,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
     const [updated] = await db.update(funnels)
-      .set({ shareToken: token })
+      .set({ shareToken: token, shareTokenExpiresAt: expiresAt })
       .where(eq(funnels.id, id))
       .returning();
 
-    return NextResponse.json({ shareToken: updated.shareToken });
+    return NextResponse.json({ shareToken: updated.shareToken, shareTokenExpiresAt: updated.shareTokenExpiresAt });
   } catch (error) {
     logger.error("POST /api/funnels/[id]/share error:", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -42,7 +43,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const { id } = await params;
 
     await db.update(funnels)
-      .set({ shareToken: null })
+      .set({ shareToken: null, shareTokenExpiresAt: null })
       .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
 
     return NextResponse.json({ success: true });

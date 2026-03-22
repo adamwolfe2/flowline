@@ -28,6 +28,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    // Check share token expiry
+    if (funnel.shareTokenExpiresAt && new Date() > new Date(funnel.shareTokenExpiresAt)) {
+      return NextResponse.json({ error: "Share link has expired" }, { status: 410 });
+    }
+
     const config = funnel.config as { brand?: { name?: string } };
 
     const [stats, dropoff, tiers, timeSeries] = await Promise.all([

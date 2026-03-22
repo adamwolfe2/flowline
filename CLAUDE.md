@@ -98,11 +98,18 @@ DATABASE_URL, CLERK keys (4), BLOB_READ_WRITE_TOKEN, NEXT_PUBLIC_PLATFORM_DOMAIN
 13. E2E API testing (25 endpoints, 3 bugs fixed)
 14. Mobile optimization for 375px (10 components, all grids stack)
 
+## What Was Done in QA Pass (Mar 21, 2026)
+1. Webhook HMAC signing — outgoing webhooks now include X-Webhook-Signature and X-Webhook-Timestamp headers when WEBHOOK_SIGNING_SECRET is set
+2. Share token expiry — share tokens now expire after 30 days, enforced in the shared analytics API
+3. SQL injection fix — leads search now escapes LIKE special characters (%_\)
+4. Rate limiting added to /api/og/funnel/[funnelId] (was missing)
+5. Admin domains POST no longer leaks raw error messages to client
+6. Added WEBHOOK_SIGNING_SECRET to .env.example
+7. Schema updated with shareTokenExpiresAt column (run `npx drizzle-kit push` to apply)
+
 ## What Still Needs Work
-- Stripe price IDs not configured (checkout returns 500)
+- Stripe price IDs not configured (checkout returns 500) — set STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_ANNUAL_PRICE_ID, STRIPE_AGENCY_MONTHLY_PRICE_ID, STRIPE_AGENCY_ANNUAL_PRICE_ID env vars in Vercel
 - No test suite
 - No eslint config
 - Builder editor unusable on mobile (<640px) — needs dedicated mobile redesign
-- A/B test pause/stop UI incomplete
-- Webhook payloads not signed (no HMAC)
-- Share tokens never expire
+- Database migration needed: run `npx drizzle-kit push` or `npx drizzle-kit generate && npx drizzle-kit migrate` to add share_token_expires_at column

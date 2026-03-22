@@ -1,12 +1,19 @@
 import { ImageResponse } from "next/og";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { funnels } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { ogLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "edge";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  const { limited } = await checkRateLimit(ogLimiter, ip, 30);
+  if (limited) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { funnelId } = await params;
 
   try {

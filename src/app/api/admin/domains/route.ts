@@ -103,8 +103,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    return NextResponse.json({
-      error: error instanceof Error ? error.message : "Action failed",
-    }, { status: 500 });
+    logger.error("Admin domain action failed", { error: error instanceof Error ? error.message : String(error) });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

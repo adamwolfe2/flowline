@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,10 +51,20 @@ export async function POST(req: NextRequest) {
     const timeout = setTimeout(() => controller.abort(), 10000);
 
     try {
+      const body = JSON.stringify(testPayload);
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const signingSecret = process.env.WEBHOOK_SIGNING_SECRET;
+      if (signingSecret) {
+        const timestamp = Math.floor(Date.now() / 1000).toString();
+        const signaturePayload = `${timestamp}.${body}`;
+        headers["X-Webhook-Signature"] = crypto.createHmac("sha256", signingSecret).update(signaturePayload, "utf8").digest("hex");
+        headers["X-Webhook-Timestamp"] = timestamp;
+      }
+
       const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(testPayload),
+        headers,
+        body,
         signal: controller.signal,
       });
       clearTimeout(timeout);

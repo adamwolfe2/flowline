@@ -40,7 +40,9 @@ export async function GET(req: NextRequest) {
       conditions.push(sql`${leads.calendarTier} = ${tier}`);
     }
     if (search) {
-      conditions.push(ilike(leads.email, `%${search}%`));
+      // Sanitize search input: escape SQL LIKE special characters and limit length
+      const sanitizedSearch = search.slice(0, 100).replace(/[%_\\]/g, "\\$&");
+      conditions.push(ilike(leads.email, `%${sanitizedSearch}%`));
     }
 
     const whereClause = and(...conditions);

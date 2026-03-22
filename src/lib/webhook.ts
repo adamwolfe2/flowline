@@ -2,21 +2,41 @@ import { logger } from "@/lib/logger";
 import { db } from "@/db";
 import { webhookDeliveries } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import crypto from "crypto";
+
+/**
+ * Compute HMAC-SHA256 signature for webhook payload.
+ * If WEBHOOK_SIGNING_SECRET is set, the signature is included as X-Webhook-Signature header.
+ * Recipients can verify: HMAC-SHA256(secret, body) === header value.
+ */
+function computeSignature(body: string, secret: string): string {
+  return crypto.createHmac("sha256", secret).update(body, "utf8").digest("hex");
+}
 
 export async function fireWebhook(url: string, payload: Record<string, unknown>, funnelId?: string, retries = 3): Promise<boolean> {
   let lastStatusCode: number | null = null;
   let lastError: string | null = null;
   let success = false;
+  const body = JSON.stringify(payload);
+  const signingSecret = process.env.WEBHOOK_SIGNING_SECRET;
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (signingSecret) {
+        const timestamp = Math.floor(Date.now() / 1000).toString();
+        const signaturePayload = `${timestamp}.${body}`;
+        headers["X-Webhook-Signature"] = computeSignature(signaturePayload, signingSecret);
+        headers["X-Webhook-Timestamp"] = timestamp;
+      }
+
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers,
+        body,
         signal: controller.signal,
       });
       clearTimeout(timeout);
