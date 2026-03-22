@@ -50,7 +50,7 @@ export function BottomCTA() {
 
   return (
     <section className="bg-[#F9FAFB] py-8 px-4">
-      <div className="bg-white/60 backdrop-blur-xl border border-[#E5E7EB] rounded-[40px] max-w-6xl mx-auto py-20 md:py-28 px-6">
+      <div className="bg-white/60 backdrop-blur-xl border border-[#E5E7EB] rounded-2xl sm:rounded-[40px] max-w-6xl mx-auto py-12 sm:py-20 md:py-28 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -59,7 +59,7 @@ export function BottomCTA() {
           transition={{ duration: 0.6 }}
         >
           <h2
-            className="text-[36px] sm:text-[48px] md:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
+            className="text-2xl sm:text-[36px] md:text-[48px] lg:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
             style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             Ready to build your first funnel?

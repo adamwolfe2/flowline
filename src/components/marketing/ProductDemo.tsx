@@ -164,7 +164,7 @@ function BuilderMockup() {
   ];
 
   return (
-    <div className="w-full max-w-[420px] grid grid-cols-2 gap-3 h-full">
+    <div className="w-full max-w-[360px] sm:max-w-[420px] grid grid-cols-1 sm:grid-cols-2 gap-3 h-full">
       {/* Chat panel */}
       <div className="bg-white rounded-lg border border-[#E5E7EB] p-3 flex flex-col gap-2 overflow-hidden">
         <div className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider mb-1">
@@ -325,7 +325,7 @@ function AnalyticsMockup() {
   }, []);
 
   return (
-    <div className="w-full max-w-[400px]">
+    <div className="w-full max-w-[340px] sm:max-w-[400px]">
       <div className="flex items-end gap-2 h-[240px]">
         {steps.map((step, i) => {
           const heightPct = (step.value / maxVal) * 100;
@@ -681,7 +681,7 @@ export function ProductDemo() {
   const [activeTab, setActiveTab] = useState<TabId>("builder");
 
   return (
-    <section id="features" className="bg-[#FAFAFA] py-24 px-6">
+    <section id="features" className="bg-[#FAFAFA] py-14 sm:py-24 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-12">

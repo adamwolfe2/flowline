@@ -64,7 +64,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
 
   return (
     <section
-      className={standalone ? "py-20 px-6" : "py-24 px-6 bg-white"}
+      className={standalone ? "py-12 sm:py-20 px-4 sm:px-6" : "py-14 sm:py-24 px-4 sm:px-6 bg-white"}
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
@@ -119,7 +119,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         </div>
 
         {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 max-w-5xl mx-auto">
           {plans.map((plan) => {
             const price = annual ? plan.annualPrice : plan.monthlyPrice;
 

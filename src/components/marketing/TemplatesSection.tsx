@@ -95,14 +95,14 @@ export function TemplatesSection() {
   const [activeCategory, setActiveCategory] = useState("Coaching");
 
   return (
-    <section className="border-t border-[#E5E7EB] bg-white py-20 px-6">
+    <section className="border-t border-[#E5E7EB] bg-white py-12 sm:py-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-8">
           <SectionLabel icon={<LayoutGrid className="w-3.5 h-3.5" />}>
             Templates
           </SectionLabel>
           <h2
-            className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
+            className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             Start with a template. Live in minutes.
@@ -130,7 +130,7 @@ export function TemplatesSection() {
         </div>
 
         {/* Template grid — filtered by category */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {templates
             .filter((t) => t.category === activeCategory)
             .map((t, i) => (

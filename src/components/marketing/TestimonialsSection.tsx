@@ -56,14 +56,14 @@ const ratings = [
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-white border-t border-[#E5E7EB] py-20 px-6">
+    <section className="bg-white border-t border-[#E5E7EB] py-12 sm:py-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<Heart className="w-3.5 h-3.5" />}>
             Results
           </SectionLabel>
           <h2
-            className="text-[32px] sm:text-[40px] font-semibold text-[#111827] leading-tight"
+            className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
             style={{ fontFamily: "var(--font-instrument-serif)" }}
           >
             What happens when you go live
@@ -71,7 +71,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Testimonial cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}

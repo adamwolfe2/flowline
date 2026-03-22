@@ -67,9 +67,9 @@ export function HeroSection() {
       }} />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 pt-28 md:pt-36 max-w-4xl mx-auto">
+      <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6 pt-20 sm:pt-28 md:pt-36 max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <h1 className="text-3xl sm:text-[44px] md:text-[56px] lg:text-[68px] font-semibold leading-none text-white"
+          <h1 className="text-[26px] sm:text-[44px] md:text-[56px] lg:text-[68px] font-semibold leading-tight sm:leading-none text-white"
             style={{ fontFamily: "var(--font-instrument-serif)", textShadow: "0 2px 24px rgba(0,0,0,0.12)" }}>
             Your VSL funnel.
             <br />
@@ -81,19 +81,19 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="text-white/80 max-w-2xl mt-5 mb-10"
           style={{ fontFamily: "var(--font-instrument-sans)", textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}>
-          <span className="block text-lg sm:text-xl md:text-2xl leading-relaxed mb-2">Describe what you need and let AI handle the rest.</span>
-          <span className="block text-base sm:text-lg md:text-xl leading-relaxed">Build{" "}
-          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-3 py-1 rounded-lg text-sm sm:text-base cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
+          <span className="block text-base sm:text-xl md:text-2xl leading-relaxed mb-2">Describe what you need and let AI handle the rest.</span>
+          <span className="block text-sm sm:text-lg md:text-xl leading-relaxed">Build{" "}
+          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-xs sm:text-sm cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
             <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Quiz Funnels
           </span>
           {", "}
-          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-3 py-1 rounded-lg text-sm sm:text-base cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
+          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-xs sm:text-sm cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
             <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
             Lead Scoring
           </span>
           {" and "}
-          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-3 py-1 rounded-lg text-sm sm:text-base cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
+          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-xs sm:text-sm cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
             <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             Calendar Routing
           </span>

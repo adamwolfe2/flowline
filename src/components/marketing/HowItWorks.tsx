@@ -273,9 +273,9 @@ function BuilderMockup() {
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-20 px-6">
+    <section className="bg-white py-12 sm:py-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
           {steps.map((step, i) => (
             <motion.div
               key={step.num}
