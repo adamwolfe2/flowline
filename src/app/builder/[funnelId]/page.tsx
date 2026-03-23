@@ -243,8 +243,8 @@ export default function BuilderPage() {
       {/* Main area — tabs on top, content + preview below */}
       <Tabs defaultValue="content" className="flex-1 flex flex-col overflow-hidden">
         {/* Tab bar */}
-        <div className="border-b border-gray-100 flex items-center gap-2 px-4 flex-shrink-0">
-          <div className="overflow-x-auto scrollbar-hide flex-1">
+        <div className="border-b border-gray-100 flex items-center justify-center gap-2 px-4 flex-shrink-0">
+          <div className="overflow-x-auto scrollbar-hide">
             <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
               <TabsTrigger value="content" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Content</TabsTrigger>
               <TabsTrigger value="blocks" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
