@@ -425,19 +425,23 @@ function BuildContent() {
 
   function handleNext() {
     const currentQ = state.questions[state.currentQuestionIndex];
-    if (currentQ && !state.answers[currentQ.id] && currentQ.type !== "color" && currentQ.type !== "url") {
-      return; // Don't advance without an answer for required questions
-    }
-    // If text input, save it
-    if (currentQ?.type === "text" || currentQ?.type === "url") {
+    if (!currentQ) return;
+
+    // Save text/url input before checking advancement
+    if (currentQ.type === "text" || currentQ.type === "url") {
       if (textInput.trim()) {
         dispatch({ type: "ANSWER_QUESTION", questionId: currentQ.id, answer: textInput.trim() });
       }
       setTextInput("");
     }
     // Default color if not picked
-    if (currentQ?.type === "color" && !state.answers[currentQ.id]) {
+    if (currentQ.type === "color" && !state.answers[currentQ.id]) {
       dispatch({ type: "ANSWER_QUESTION", questionId: currentQ.id, answer: "#2D6A4F" });
+    }
+
+    // Guard: require an answer for multiple_choice questions
+    if (currentQ.type === "multiple_choice" && !state.answers[currentQ.id]) {
+      return;
     }
 
     const isLast = state.currentQuestionIndex >= state.questions.length - 1;

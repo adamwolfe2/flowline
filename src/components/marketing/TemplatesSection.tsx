@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { LayoutGrid, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 function SectionLabel({
   icon,
@@ -161,10 +162,10 @@ export function TemplatesSection() {
 
         {/* View all */}
         <div className="flex justify-center mt-10">
-          <button className="inline-flex items-center gap-2 text-sm font-medium text-[#111827] border border-[#E5E7EB] rounded-full px-6 py-2.5 hover:bg-[#F9FAFB] transition-colors">
+          <Link href="/sign-up" className="inline-flex items-center gap-2 text-sm font-medium text-[#111827] border border-[#E5E7EB] rounded-full px-6 py-2.5 hover:bg-[#F9FAFB] transition-colors">
             View all templates
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
       </div>
     </section>
