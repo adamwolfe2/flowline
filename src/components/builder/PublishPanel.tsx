@@ -248,11 +248,27 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
             {funnel.customDomain && (
               <div className="bg-white border border-[#E5E7EB] rounded-lg p-3 space-y-2.5">
                 <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">DNS Setup</p>
-                <div className="flex items-start gap-2">
-                  <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">CNAME</span>
-                  <div className="text-[11px] text-[#374151]">
-                    <p>Point <span className="font-mono font-medium">{funnel.customDomain}</span> to:</p>
-                    <p className="font-mono font-medium text-[#111827] mt-0.5">cname.vercel-dns.com</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">Type</span>
+                    <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">CNAME</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText("CNAME"); toast.success("Copied CNAME"); }}>
+                      <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">Name</span>
+                    <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{funnel.customDomain}</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(funnel.customDomain || ""); toast.success("Copied domain"); }}>
+                      <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">Value</span>
+                    <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">cname.vercel-dns.com</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText("cname.vercel-dns.com"); toast.success("Copied value"); }}>
+                      <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                    </Button>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

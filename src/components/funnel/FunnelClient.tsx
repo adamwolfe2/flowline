@@ -148,6 +148,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
         fbPixelId={config.tracking?.fbPixelId}
         tiktokPixelId={config.tracking?.tiktokPixelId}
         ga4MeasurementId={config.tracking?.ga4MeasurementId}
+        cursivePixelId={config.tracking?.cursivePixelId}
       />
       <div className="w-full max-w-lg mx-auto py-12 px-4">
         <ProgressBar config={config} step={progressStep} totalQuestions={totalQuestions} />

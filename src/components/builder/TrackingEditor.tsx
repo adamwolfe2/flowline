@@ -171,7 +171,7 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
         </>
       )}
 
-      {/* Cursive SuperPixel Upsell */}
+      {/* Cursive SuperPixel */}
       <div className="border border-blue-200 rounded-xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
           <div className="flex items-center gap-3 mb-3">
@@ -183,43 +183,21 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
           </div>
           <p className="text-xs text-gray-600 leading-relaxed mb-3">
             Unmask up to <span className="font-semibold text-blue-700">60% of anonymous visitors</span> on
-            your funnel pages, even if they never submit the quiz. Get full contact info (name, email, phone)
-            for every visitor that lands on your funnel.
+            your funnel pages. Get full contact info (name, email, phone) for every visitor.
           </p>
-          <ul className="text-[11px] text-gray-500 space-y-1.5 mb-4">
-            <li className="flex items-start gap-1.5">
-              <span className="text-blue-500 mt-0.5">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-              </span>
-              Resolve anonymous visitors into real leads with name, email, phone
-            </li>
-            <li className="flex items-start gap-1.5">
-              <span className="text-blue-500 mt-0.5">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-              </span>
-              Works on all funnel page visitors, no form fill required
-            </li>
-            <li className="flex items-start gap-1.5">
-              <span className="text-blue-500 mt-0.5">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-              </span>
-              Sync leads to your CRM, email platform, or ad audiences automatically
-            </li>
-            <li className="flex items-start gap-1.5">
-              <span className="text-blue-500 mt-0.5">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-              </span>
-              Capture 3-5x more leads from the same funnel traffic
-            </li>
-          </ul>
-          <a
-            href={`mailto:adam@meetcursive.com?subject=SuperPixel%20Request%20for%20MyVSL&body=Hi%20Cursive%20team%2C%0A%0AI%27d%20like%20to%20add%20the%20SuperPixel%20to%20my%20MyVSL%20funnel.%0A%0AFunnel%20URL%3A%20%0AMy%20email%3A%20%0A%0AThanks!`}
-            className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors"
-          >
-            Apply for SuperPixel
-            <ExternalLink className="w-3 h-3" />
-          </a>
-          <p className="text-center text-[9px] text-gray-400 mt-2">
+          <div className="mb-3">
+            <Label className="text-xs text-gray-500 mb-1.5">SuperPixel ID</Label>
+            <Input
+              value={config.tracking?.cursivePixelId ?? ""}
+              onChange={e => updateTracking("cursivePixelId", e.target.value)}
+              placeholder="Your Cursive pixel ID"
+              className="text-sm font-mono bg-white"
+            />
+            <p className="text-[10px] text-gray-400 mt-1">
+              Get your pixel ID from your <a href="https://app.meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive dashboard</a>.
+            </p>
+          </div>
+          <p className="text-center text-[9px] text-gray-400">
             Powered by <a href="https://meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive</a>. Identity Resolution for Performance Marketers
           </p>
         </div>

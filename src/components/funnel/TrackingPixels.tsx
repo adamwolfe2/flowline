@@ -15,11 +15,21 @@ interface TrackingPixelsProps {
   fbPixelId?: string;
   tiktokPixelId?: string;
   ga4MeasurementId?: string;
+  cursivePixelId?: string;
 }
 
-export function TrackingPixels({ fbPixelId, tiktokPixelId, ga4MeasurementId }: TrackingPixelsProps) {
+export function TrackingPixels({ fbPixelId, tiktokPixelId, ga4MeasurementId, cursivePixelId }: TrackingPixelsProps) {
   return (
     <>
+      {/* Cursive SuperPixel */}
+      {cursivePixelId && (
+        <Script
+          id="cursive-pixel"
+          strategy="afterInteractive"
+          src={`https://t.meetcursive.com/pixel/${cursivePixelId}`}
+        />
+      )}
+
       {/* Facebook Pixel */}
       {fbPixelId && (
         <>

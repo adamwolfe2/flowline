@@ -3,7 +3,7 @@
 import { useState, useReducer, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, ArrowRight, Sparkles, ChevronRight, Eye, X } from "lucide-react";
+import { Check, Loader2, ArrowRight, Sparkles, ChevronRight, Eye, X, Upload, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
@@ -14,7 +14,7 @@ import { toast } from "sonner";
 interface PlanQuestion {
   id: string;
   text: string;
-  type: "multiple_choice" | "text" | "url" | "color";
+  type: "multiple_choice" | "text" | "url" | "color" | "logo";
   options?: string[];
 }
 
@@ -86,6 +86,7 @@ function reducer(state: BuilderState, action: BuilderAction): BuilderState {
         thinking: action.thinking,
         questions: [
           ...action.questions,
+          { id: "logo_url", text: "Upload your logo (optional)", type: "logo" },
           { id: "calendar_url", text: "Do you have a booking link? (Cal.com, Calendly, etc.)", type: "url" },
           { id: "brand_color", text: "Pick a brand color for your funnel", type: "color" },
         ],
@@ -204,8 +205,65 @@ function ColorPickerInput({ selected, onSelect }: { selected?: string; onSelect:
   );
 }
 
+function LogoUploadInput({ logoUrl, onUpload, onRemove }: { logoUrl: string; onUpload: (url: string) => void; onRemove: () => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo must be under 2MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload/logo", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      onUpload(data.url);
+    } catch {
+      toast.error("Failed to upload logo");
+    }
+    setUploading(false);
+  }
+
+  if (logoUrl) {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="w-16 h-16 rounded-xl border border-[#E5E7EB] overflow-hidden bg-[#F9FAFB] flex items-center justify-center">
+          <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+        </div>
+        <div className="flex-1">
+          <p className="text-xs text-[#6B7280] mb-2">Logo uploaded</p>
+          <button onClick={onRemove} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 transition-colors">
+            <Trash2 className="w-3 h-3" /> Remove
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <label className={`flex flex-col items-center gap-2 border-2 border-dashed border-[#E5E7EB] rounded-xl p-6 cursor-pointer hover:border-[#2D6A4F] hover:bg-[#F9FAFB] transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+      <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} />
+      {uploading ? (
+        <Loader2 className="w-6 h-6 text-[#2D6A4F] animate-spin" />
+      ) : (
+        <Upload className="w-6 h-6 text-[#9CA3AF]" />
+      )}
+      <span className="text-xs text-[#6B7280]">{uploading ? "Uploading..." : "Click to upload or drag & drop"}</span>
+      <span className="text-[10px] text-[#9CA3AF]">PNG, JPG, SVG up to 2MB</span>
+    </label>
+  );
+}
+
 function LivePreview({ answers, description }: { answers: Record<string, string>; description: string }) {
   const color = answers.brand_color || "#2D6A4F";
+  const logoUrl = answers.logo_url || "";
   const businessType = answers.business_type || "";
   const audience = answers.target_audience || "";
   const offering = answers.offering || "";
@@ -225,11 +283,17 @@ function LivePreview({ answers, description }: { answers: Record<string, string>
           </div>
         </div>
         <div className="p-8 text-center">
-          {/* Logo placeholder */}
-          <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center text-white font-bold transition-colors duration-300"
-            style={{ backgroundColor: color }}>
-            {(businessType || description || "M")[0].toUpperCase()}
-          </div>
+          {/* Logo */}
+          {logoUrl ? (
+            <div className="w-12 h-12 rounded-xl mx-auto mb-4 overflow-hidden border border-[#E5E7EB]">
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+            </div>
+          ) : (
+            <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center text-white font-bold transition-colors duration-300"
+              style={{ backgroundColor: color }}>
+              {(businessType || description || "M")[0].toUpperCase()}
+            </div>
+          )}
 
           {/* Badge */}
           <div className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full mb-3 transition-colors duration-300"
@@ -287,7 +351,7 @@ function LivePreview({ answers, description }: { answers: Record<string, string>
   );
 }
 
-function FunnelPreview({ data, color }: { data: Record<string, unknown>; color: string }) {
+function FunnelPreview({ data, color, logoUrl }: { data: Record<string, unknown>; color: string; logoUrl?: string }) {
   return (
     <div className="w-full max-w-lg">
       <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-lg overflow-hidden">
@@ -302,10 +366,16 @@ function FunnelPreview({ data, color }: { data: Record<string, unknown>; color: 
           </div>
         </div>
         <div className="p-8 text-center">
-          <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center text-white font-bold"
-            style={{ backgroundColor: color }}>
-            {((data.brandName as string) || "M")[0].toUpperCase()}
-          </div>
+          {logoUrl ? (
+            <div className="w-12 h-12 rounded-xl mx-auto mb-4 overflow-hidden border border-[#E5E7EB]">
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+            </div>
+          ) : (
+            <div className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center text-white font-bold"
+              style={{ backgroundColor: color }}>
+              {((data.brandName as string) || "M")[0].toUpperCase()}
+            </div>
+          )}
           <div className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full mb-3"
             style={{ backgroundColor: deriveLightColor(color), color }}>
             Free Assessment
@@ -515,7 +585,7 @@ function BuildContent() {
         config: {
           brand: {
             name: data.brandName || state.businessDescription.split(" ").slice(0, 3).join(" "),
-            logoUrl: "",
+            logoUrl: state.answers.logo_url || "",
             primaryColor: color,
             primaryColorLight: deriveLightColor(color),
             primaryColorDark: deriveDarkColor(color),
@@ -549,6 +619,7 @@ function BuildContent() {
     state.answers[currentQ.id] ||
     currentQ.type === "color" ||
     currentQ.type === "url" ||
+    currentQ.type === "logo" ||
     (currentQ.type === "text" && textInput.trim().length > 0)
   );
 
@@ -756,12 +827,22 @@ function BuildContent() {
                           onSelect={(v) => handleAnswer(currentQ.id, v)}
                         />
                       )}
+
+                      {currentQ.type === "logo" && (
+                        <LogoUploadInput
+                          logoUrl={state.answers[currentQ.id] || ""}
+                          onUpload={(url) => handleAnswer(currentQ.id, url)}
+                          onRemove={() => {
+                            dispatch({ type: "ANSWER_QUESTION", questionId: currentQ.id, answer: "" });
+                          }}
+                        />
+                      )}
                     </motion.div>
                   </AnimatePresence>
 
                   {/* Navigation buttons */}
                   <div className="flex items-center gap-3 mt-6 pt-4 border-t border-[#E5E7EB]">
-                    {(currentQ.type === "url" || currentQ.type === "color") && (
+                    {(currentQ.type === "url" || currentQ.type === "color" || currentQ.type === "logo") && (
                       <button onClick={handleSkip} className="text-sm text-[#9CA3AF] hover:text-[#6B7280] transition-colors">
                         Skip
                       </button>
@@ -847,6 +928,12 @@ function BuildContent() {
 
                 {/* Summary of what was gathered */}
                 <div className="space-y-3 mb-6">
+                  {state.answers.logo_url && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-[#9CA3AF]">Logo:</span>
+                      <img src={state.answers.logo_url} alt="Logo" className="w-8 h-8 rounded-lg border border-[#E5E7EB] object-contain p-0.5" />
+                    </div>
+                  )}
                   {state.answers.business_type && (
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-[#9CA3AF]">Business:</span>
@@ -941,7 +1028,7 @@ function BuildContent() {
 
             {state.phase === "preview" && state.generatedData && (
               <motion.div key="preview" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                <FunnelPreview data={state.generatedData} color={state.primaryColor} />
+                <FunnelPreview data={state.generatedData} color={state.primaryColor} logoUrl={state.answers.logo_url} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -992,7 +1079,7 @@ function BuildContent() {
                   </div>
                 )}
                 {state.phase === "preview" && state.generatedData && (
-                  <FunnelPreview data={state.generatedData} color={state.primaryColor} />
+                  <FunnelPreview data={state.generatedData} color={state.primaryColor} logoUrl={state.answers.logo_url} />
                 )}
               </div>
             </motion.div>

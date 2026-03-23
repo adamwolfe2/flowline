@@ -240,152 +240,144 @@ export default function BuilderPage() {
         </div>
       </div>
 
-      {/* Main area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Side panel */}
-        <div className={`${sidebarOpen ? 'w-full md:w-[380px]' : 'hidden md:block md:w-[380px]'} border-r border-gray-100 flex flex-col overflow-hidden flex-shrink-0`}>
-          <Tabs defaultValue="content" className="flex flex-col h-full">
-            <div className="relative mx-3 mt-3 mb-0">
-              <div className="overflow-x-auto scrollbar-hide">
-                <TabsList className="inline-flex w-max gap-0.5 bg-gray-50 p-1 rounded-lg">
-                  <TabsTrigger value="content" className="text-[11px] px-2.5 py-1.5 shrink-0">Content</TabsTrigger>
-                  <TabsTrigger value="blocks" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
-                    <LayoutGrid className="w-3 h-3" />
-                    Blocks
-                  </TabsTrigger>
-                  <TabsTrigger value="brand" className="text-[11px] px-2.5 py-1.5 shrink-0">Brand</TabsTrigger>
-                  <TabsTrigger value="calendars" className="text-[11px] px-2.5 py-1.5 shrink-0">Calendars</TabsTrigger>
-                  <TabsTrigger value="emails" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
-                    <Mail className="w-3 h-3" />
-                    Emails
-                  </TabsTrigger>
-                  <TabsTrigger value="ab-test" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
-                    <FlaskConical className="w-3 h-3" />
-                    A/B
-                  </TabsTrigger>
-                  <TabsTrigger value="tracking" className="text-[11px] px-2.5 py-1.5 gap-1 shrink-0">
-                    <BarChart3 className="w-3 h-3" />
-                    Tracking
-                  </TabsTrigger>
-                  <TabsTrigger value="publish" className="text-[11px] px-2.5 py-1.5 shrink-0">Publish</TabsTrigger>
-                </TabsList>
-              </div>
-              <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none rounded-r-lg" />
-              <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none rounded-l-lg" />
-            </div>
-            {/* Variant selector bar */}
-            {variants.length > 0 && (
-              <div className="mx-3 mt-2 mb-0">
-                <div className="relative">
+      {/* Main area — tabs on top, content + preview below */}
+      <Tabs defaultValue="content" className="flex-1 flex flex-col overflow-hidden">
+        {/* Tab bar */}
+        <div className="border-b border-gray-100 flex items-center gap-2 px-4 flex-shrink-0">
+          <div className="overflow-x-auto scrollbar-hide flex-1">
+            <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
+              <TabsTrigger value="content" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Content</TabsTrigger>
+              <TabsTrigger value="blocks" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <LayoutGrid className="w-3 h-3" />
+                Blocks
+              </TabsTrigger>
+              <TabsTrigger value="brand" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Brand</TabsTrigger>
+              <TabsTrigger value="calendars" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Calendars</TabsTrigger>
+              <TabsTrigger value="emails" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <Mail className="w-3 h-3" />
+                Emails
+              </TabsTrigger>
+              <TabsTrigger value="ab-test" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <FlaskConical className="w-3 h-3" />
+                A/B
+              </TabsTrigger>
+              <TabsTrigger value="tracking" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <BarChart3 className="w-3 h-3" />
+                Tracking
+              </TabsTrigger>
+              <TabsTrigger value="publish" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Publish</TabsTrigger>
+            </TabsList>
+          </div>
+          {/* Variant selector */}
+          {variants.length > 0 && (
+            <div className="relative flex-shrink-0">
+              <button
+                onClick={() => setVariantDropdownOpen(!variantDropdownOpen)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  editingVariantId
+                    ? "bg-purple-50 border-purple-200 text-purple-700"
+                    : "bg-green-50 border-green-200 text-green-700"
+                }`}
+              >
+                <FlaskConical className="w-3 h-3" />
+                {editingVariantId ? variants.find(v => v.id === editingVariantId)?.name || "Variant" : "Control"}
+                <ChevronDown className={`w-3 h-3 transition-transform ${variantDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+              {variantDropdownOpen && (
+                <div className="absolute top-full right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
                   <button
-                    onClick={() => setVariantDropdownOpen(!variantDropdownOpen)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
-                      editingVariantId
-                        ? "bg-purple-50 border-purple-200 text-purple-700"
-                        : "bg-green-50 border-green-200 text-green-700"
+                    onClick={() => switchToVariant(null)}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors flex items-center justify-between ${
+                      !editingVariantId ? "bg-green-50 font-medium text-green-700" : "text-gray-700"
                     }`}
                   >
-                    <span className="flex items-center gap-1.5">
-                      <FlaskConical className="w-3 h-3" />
-                      Editing: {editingVariantId ? variants.find(v => v.id === editingVariantId)?.name || "Variant" : "Control (Original)"}
-                    </span>
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${variantDropdownOpen ? "rotate-180" : ""}`} />
+                    Control (Original)
+                    {!editingVariantId && <span className="text-[9px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">Editing</span>}
                   </button>
-                  {variantDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden">
-                      <button
-                        onClick={() => switchToVariant(null)}
-                        className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors flex items-center justify-between ${
-                          !editingVariantId ? "bg-green-50 font-medium text-green-700" : "text-gray-700"
-                        }`}
-                      >
-                        Control (Original)
-                        {!editingVariantId && <span className="text-[9px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">Editing</span>}
-                      </button>
-                      {variants.map(v => (
-                        <button
-                          key={v.id}
-                          onClick={() => switchToVariant(v.id)}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors flex items-center justify-between border-t border-gray-50 ${
-                            editingVariantId === v.id ? "bg-purple-50 font-medium text-purple-700" : "text-gray-700"
-                          }`}
-                        >
-                          <span className="flex items-center gap-1.5">
-                            {v.name}
-                            {!v.active && <span className="text-[9px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Paused</span>}
-                          </span>
-                          {editingVariantId === v.id && <span className="text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">Editing</span>}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {variants.map(v => (
+                    <button
+                      key={v.id}
+                      onClick={() => switchToVariant(v.id)}
+                      className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors flex items-center justify-between border-t border-gray-50 ${
+                        editingVariantId === v.id ? "bg-purple-50 font-medium text-purple-700" : "text-gray-700"
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        {v.name}
+                        {!v.active && <span className="text-[9px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Paused</span>}
+                      </span>
+                      {editingVariantId === v.id && <span className="text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">Editing</span>}
+                    </button>
+                  ))}
                 </div>
-              </div>
-            )}
-
-            <div className="flex-1 overflow-y-auto p-4">
-              <TabsContent value="content" className="mt-0">
-                <ContentEditor config={config} onSave={saveConfig} />
-              </TabsContent>
-              <TabsContent value="blocks" className="mt-0">
-                <ContentBlocksEditor config={config} onSave={saveConfig} />
-              </TabsContent>
-              <TabsContent value="brand" className="mt-0">
-                <BrandEditor config={config} onSave={saveConfig} />
-              </TabsContent>
-              <TabsContent value="calendars" className="mt-0">
-                <CalendarEditor config={config} onSave={saveConfig} />
-              </TabsContent>
-              <TabsContent value="emails" className="mt-0">
-                <SequenceEditor funnel={funnel} />
-              </TabsContent>
-              <TabsContent value="ab-test" className="mt-0">
-                <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
-                  setVariants(v);
-                  // If editing variant was deleted, switch back to control
-                  if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
-                    switchToVariant(null);
-                  }
-                }} />
-              </TabsContent>
-              <TabsContent value="tracking" className="mt-0">
-                <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
-              </TabsContent>
-              <TabsContent value="publish" className="mt-0">
-                <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />
-              </TabsContent>
+              )}
             </div>
-          </Tabs>
+          )}
         </div>
 
-        {/* Preview pane */}
-        <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-6" : "p-3"}`}>
-          <ErrorBoundary>
-            <div
-              className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
-              style={{
-                width: previewMode === "mobile" ? "min(375px, 100%)" : "100%",
-                maxWidth: previewMode === "desktop" ? "100%" : "375px",
-                height: "100%",
-              }}
-            >
-              {/* Loading skeleton behind iframe */}
-              <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
-                <div className="text-center">
-                  <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
-                  <p className="text-xs text-[#9CA3AF]">Loading preview</p>
+        {/* Content + Preview side by side */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Editor panel */}
+          <div className={`${sidebarOpen ? 'w-full md:w-[420px]' : 'hidden md:block md:w-[420px]'} border-r border-gray-100 overflow-y-auto p-4 flex-shrink-0`}>
+            <TabsContent value="content" className="mt-0">
+              <ContentEditor config={config} onSave={saveConfig} />
+            </TabsContent>
+            <TabsContent value="blocks" className="mt-0">
+              <ContentBlocksEditor config={config} onSave={saveConfig} />
+            </TabsContent>
+            <TabsContent value="brand" className="mt-0">
+              <BrandEditor config={config} onSave={saveConfig} />
+            </TabsContent>
+            <TabsContent value="calendars" className="mt-0">
+              <CalendarEditor config={config} onSave={saveConfig} />
+            </TabsContent>
+            <TabsContent value="emails" className="mt-0">
+              <SequenceEditor funnel={funnel} />
+            </TabsContent>
+            <TabsContent value="ab-test" className="mt-0">
+              <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
+                setVariants(v);
+                if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
+                  switchToVariant(null);
+                }
+              }} />
+            </TabsContent>
+            <TabsContent value="tracking" className="mt-0">
+              <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
+            </TabsContent>
+            <TabsContent value="publish" className="mt-0">
+              <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />
+            </TabsContent>
+          </div>
+
+          {/* Preview pane */}
+          <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-6" : "p-3"}`}>
+            <ErrorBoundary>
+              <div
+                className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
+                style={{
+                  width: previewMode === "mobile" ? "min(375px, 100%)" : "100%",
+                  maxWidth: previewMode === "desktop" ? "100%" : "375px",
+                  height: "100%",
+                }}
+              >
+                <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
+                  <div className="text-center">
+                    <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
+                    <p className="text-xs text-[#9CA3AF]">Loading preview</p>
+                  </div>
                 </div>
+                <iframe
+                  key={previewKey}
+                  src={`/f/preview/${funnelId}`}
+                  className="w-full h-full border-0 relative z-10"
+                  title="Funnel preview"
+                />
               </div>
-              <iframe
-                key={previewKey}
-                src={`/f/preview/${funnelId}`}
-                className="w-full h-full border-0 relative z-10"
-                title="Funnel preview"
-              />
-            </div>
-          </ErrorBoundary>
+            </ErrorBoundary>
+          </div>
         </div>
-      </div>
+      </Tabs>
     </div>
   );
 }
