@@ -12,7 +12,7 @@ import { SequenceEditor } from "@/components/builder/SequenceEditor";
 import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -266,13 +266,22 @@ export default function BuilderPage() {
         <div className="border-b border-gray-100 flex items-center justify-center gap-2 px-4 flex-shrink-0">
           <div className="overflow-x-auto scrollbar-hide">
             <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
-              <TabsTrigger value="content" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Content</TabsTrigger>
+              <TabsTrigger value="content" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <FileText className="w-3 h-3" />
+                Content
+              </TabsTrigger>
               <TabsTrigger value="blocks" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <LayoutGrid className="w-3 h-3" />
                 Blocks
               </TabsTrigger>
-              <TabsTrigger value="brand" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Brand</TabsTrigger>
-              <TabsTrigger value="calendars" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Calendars</TabsTrigger>
+              <TabsTrigger value="brand" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <Palette className="w-3 h-3" />
+                Brand
+              </TabsTrigger>
+              <TabsTrigger value="calendars" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <Calendar className="w-3 h-3" />
+                Calendars
+              </TabsTrigger>
               <TabsTrigger value="emails" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <Mail className="w-3 h-3" />
                 Emails
@@ -285,7 +294,10 @@ export default function BuilderPage() {
                 <BarChart3 className="w-3 h-3" />
                 Tracking
               </TabsTrigger>
-              <TabsTrigger value="publish" className="text-xs px-3 py-2 rounded-md data-[state=active]:bg-gray-100">Publish</TabsTrigger>
+              <TabsTrigger value="publish" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+                <Send className="w-3 h-3" />
+                Publish
+              </TabsTrigger>
             </TabsList>
           </div>
           {/* Variant selector */}
