@@ -21,8 +21,11 @@ export async function GET() {
       headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" }
     });
   } catch (error) {
-    logger.error("GET /api/funnels error", { error: error instanceof Error ? error.message : String(error) });
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStack = error instanceof Error ? error.stack?.split('\n').slice(0, 3).join(' | ') : undefined;
+    const errCause = error instanceof Error && 'cause' in error ? String((error as Record<string, unknown>).cause) : undefined;
+    logger.error("GET /api/funnels error", { error: errMsg, stack: errStack, cause: errCause });
+    return NextResponse.json({ error: "Internal server error", debug: errMsg }, { status: 500 });
   }
 }
 
