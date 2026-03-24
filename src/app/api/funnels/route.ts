@@ -9,17 +9,11 @@ import { logger } from "@/lib/logger";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
-import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
-    if (rateLimitResult.limited) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
 
     const funnelsWithStats = await getFunnelsWithStats(userId);
 
@@ -36,11 +30,6 @@ export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
-    if (rateLimitResult.limited) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-    }
 
     // Ensure user exists in DB with real email from Clerk
     const existingUser = await db.select().from(users).where(eq(users.id, userId));
