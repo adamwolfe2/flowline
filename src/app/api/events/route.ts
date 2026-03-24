@@ -18,6 +18,7 @@ const VALID_EVENT_TYPES = [
   "funnel_completed",
   "funnel_abandoned",
   "back_navigated",
+  "email_captured",
 ] as const;
 
 export async function POST(req: Request) {
@@ -36,6 +37,7 @@ export async function POST(req: Request) {
       deviceType, timeOnStepMs, sessionDurationMs,
       abandonedAtStep, reachedEmail,
       leadId, calendarTier, score,
+      email,
     } = body;
 
     // Validate required fields with UUID format check
@@ -90,6 +92,11 @@ export async function POST(req: Request) {
     if (eventType === "lead_created" && leadId) {
       await db.update(funnelSessions)
         .set({ converted: true, leadId })
+        .where(eq(funnelSessions.id, sessionId));
+    }
+    if (eventType === "email_captured" && email && typeof email === "string") {
+      await db.update(funnelSessions)
+        .set({ partialEmail: email })
         .where(eq(funnelSessions.id, sessionId));
     }
     if (stepIndex !== undefined) {

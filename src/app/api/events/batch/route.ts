@@ -8,7 +8,7 @@ import { logger } from "@/lib/logger";
 const VALID_EVENT_TYPES = [
   "funnel_viewed", "page_viewed", "answer_selected", "field_focused",
   "form_submitted", "lead_created", "funnel_completed", "funnel_abandoned",
-  "back_navigated", "cta_clicked",
+  "back_navigated", "cta_clicked", "email_captured",
 ] as const;
 
 type EventType = (typeof VALID_EVENT_TYPES)[number];
@@ -81,6 +81,11 @@ export async function POST(req: NextRequest) {
         if (e.eventType === "lead_created" && e.leadId) {
           await db.update(funnelSessions)
             .set({ converted: true, leadId: e.leadId })
+            .where(eq(funnelSessions.id, e.sessionId));
+        }
+        if (e.eventType === "email_captured" && e.email && typeof e.email === "string") {
+          await db.update(funnelSessions)
+            .set({ partialEmail: e.email })
             .where(eq(funnelSessions.id, e.sessionId));
         }
         if (e.stepIndex !== undefined) {

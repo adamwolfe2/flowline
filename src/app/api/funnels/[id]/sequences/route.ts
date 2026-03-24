@@ -41,12 +41,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
-    const { name, triggerTier } = await req.json();
+    const { name, triggerTier, triggerType } = await req.json();
 
     // Validate triggerTier if provided
     const validTiers = ['high', 'mid', 'low'] as const;
     if (triggerTier !== undefined && triggerTier !== null && !validTiers.includes(triggerTier)) {
       return NextResponse.json({ error: "triggerTier must be 'high', 'mid', 'low', or null" }, { status: 400 });
+    }
+
+    // Validate triggerType if provided
+    const validTriggerTypes = ['lead_created', 'abandoned'] as const;
+    if (triggerType !== undefined && !validTriggerTypes.includes(triggerType)) {
+      return NextResponse.json({ error: "triggerType must be 'lead_created' or 'abandoned'" }, { status: 400 });
     }
 
     const [funnel] = await db.select({ id: funnels.id })
@@ -67,15 +73,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       userId,
       name: name || "Follow-up Sequence",
       triggerTier: triggerTier || null,
+      triggerType: triggerType || "lead_created",
     }).returning();
 
-    // Create default first step
+    // Create default first step — content varies by trigger type
+    const isAbandoned = triggerType === "abandoned";
     const [step] = await db.insert(emailSteps).values({
       sequenceId: sequence.id,
       stepOrder: 1,
-      subject: "Thanks for your interest!",
-      body: "Hi there,\n\nThanks for taking the time to complete our quiz. We noticed you haven't booked a call yet.\n\nClick here to schedule: {calendar_url}\n\nBest regards",
-      delayHours: 24,
+      subject: isAbandoned
+        ? "You didn't finish your quiz!"
+        : "Thanks for your interest!",
+      body: isAbandoned
+        ? "Hi there,\n\nWe noticed you started the {funnel_name} quiz but didn't get to finish.\n\nYour personalized results are just a few clicks away. Come back and complete the quiz to see what we recommend for you.\n\nBest regards"
+        : "Hi there,\n\nThanks for taking the time to complete our quiz. We noticed you haven't booked a call yet.\n\nClick here to schedule: {calendar_url}\n\nBest regards",
+      delayHours: isAbandoned ? 1 : 24,
     }).returning();
 
     return NextResponse.json({ ...sequence, steps: [step] }, { status: 201 });

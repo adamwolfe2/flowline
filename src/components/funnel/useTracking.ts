@@ -33,7 +33,7 @@ function getStepKey(index: number, totalQuestions: number, hasVideo: boolean): s
 }
 
 // Critical events that should be sent immediately, not batched
-const IMMEDIATE_EVENT_TYPES = ["lead_created", "funnel_completed"];
+const IMMEDIATE_EVENT_TYPES = ["lead_created", "funnel_completed", "email_captured"];
 
 interface TrackingConfig {
   funnelId: string;
@@ -259,5 +259,12 @@ export function useTracking({ funnelId, sessionId, totalQuestions, hasVideo }: T
     [track]
   );
 
-  return { trackPageView, trackAnswer, trackCTAClick, trackFieldFocus, trackFormSubmit, trackLeadCreated, trackFunnelCompleted, trackBackNavigation };
+  const trackEmailCapture = useCallback(
+    (email: string) => {
+      track({ eventType: "email_captured", stepIndex: currentStep.current, stepKey: "email", email });
+    },
+    [track]
+  );
+
+  return { trackPageView, trackAnswer, trackCTAClick, trackFieldFocus, trackFormSubmit, trackLeadCreated, trackFunnelCompleted, trackBackNavigation, trackEmailCapture };
 }

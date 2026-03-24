@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Mail, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Mail, Loader2, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface Step {
@@ -24,6 +24,7 @@ interface Sequence {
   name: string;
   active: boolean;
   triggerTier: string | null;
+  triggerType: string;
   steps: Step[];
 }
 
@@ -78,6 +79,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
           name: seq.name,
           active: seq.active,
           triggerTier: seq.triggerTier,
+          triggerType: seq.triggerType,
           steps: seq.steps,
         }),
       });
@@ -156,8 +158,8 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
       <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
         <p className="text-xs text-blue-700 font-medium mb-1">Email Sequences</p>
         <p className="text-[11px] text-blue-600 leading-relaxed">
-          Automatically send follow-up emails to leads after they complete your funnel.
-          Use placeholders: {"{email}"}, {"{score}"}, {"{tier}"}.
+          Automatically send follow-up emails to leads after they complete your funnel,
+          or recover abandoned quiz visitors. Use placeholders: {"{email}"}, {"{score}"}, {"{tier}"}, {"{funnel_name}"}.
         </p>
       </div>
 
@@ -187,6 +189,11 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
                   <Badge variant={seq.active ? "default" : "secondary"} className="text-[10px]">
                     {seq.active ? "Active" : "Draft"}
                   </Badge>
+                  {seq.triggerType === "abandoned" && (
+                    <Badge variant="outline" className="text-[10px] border-amber-200 text-amber-600 bg-amber-50">
+                      Abandoned
+                    </Badge>
+                  )}
                   <span className="text-[10px] text-gray-400">{seq.steps.length} step{seq.steps.length !== 1 ? "s" : ""}</span>
                 </div>
                 {expandedSeq === seq.id ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
@@ -194,7 +201,28 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
 
               {expandedSeq === seq.id && (
                 <div className="px-3 pb-3 space-y-3 border-t border-gray-50">
-                  <div className="grid grid-cols-2 gap-2 pt-3">
+                  <div className="pt-3">
+                    <Label className="text-[10px] text-gray-400">Trigger Type</Label>
+                    <select
+                      value={seq.triggerType || "lead_created"}
+                      onChange={e => updateLocal(seq.id, { triggerType: e.target.value })}
+                      className="w-full border border-gray-200 rounded-md px-2 py-1 text-xs bg-white mt-1 h-7"
+                    >
+                      <option value="lead_created">Lead Created</option>
+                      <option value="abandoned">Quiz Abandoned</option>
+                    </select>
+                    {seq.triggerType === "abandoned" && (
+                      <div className="flex items-start gap-1.5 mt-2 p-2 bg-amber-50 rounded-md border border-amber-100">
+                        <AlertCircle className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-[10px] text-amber-700 leading-relaxed">
+                          Sends to visitors who started the quiz and entered their email but didn&apos;t complete it.
+                          Emails are sent 30 minutes after abandonment.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label className="text-[10px] text-gray-400">Sequence Name</Label>
                       <Input

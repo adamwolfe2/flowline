@@ -41,6 +41,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
   const {
     trackPageView, trackAnswer, trackCTAClick, trackFieldFocus,
     trackFormSubmit, trackLeadCreated, trackFunnelCompleted, trackBackNavigation,
+    trackEmailCapture,
   } = useTracking({ funnelId, sessionId, totalQuestions, hasVideo });
 
   // Track page views on step change
@@ -78,6 +79,12 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
   const handleEmailFocus = useCallback(() => {
     trackFieldFocus();
   }, [trackFieldFocus]);
+
+  const handleEmailBlur = useCallback((emailValue: string) => {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      trackEmailCapture(emailValue);
+    }
+  }, [trackEmailCapture]);
 
   const handleEmailSubmit = useCallback(
     async (submittedEmail: string) => {
@@ -222,7 +229,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.18 }}
             >
-              <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onBack={handleBack} />
+              <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onEmailBlur={handleEmailBlur} onBack={handleBack} />
             </motion.div>
           )}
 

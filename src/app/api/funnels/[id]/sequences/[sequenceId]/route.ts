@@ -27,12 +27,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
+    // Validate triggerType if provided
+    if (body.triggerType !== undefined) {
+      const validTriggerTypes = ['lead_created', 'abandoned'] as const;
+      if (!validTriggerTypes.includes(body.triggerType)) {
+        return NextResponse.json({ error: "triggerType must be 'lead_created' or 'abandoned'" }, { status: 400 });
+      }
+    }
+
     // Update sequence metadata
-    if (body.name !== undefined || body.active !== undefined || body.triggerTier !== undefined) {
+    if (body.name !== undefined || body.active !== undefined || body.triggerTier !== undefined || body.triggerType !== undefined) {
       const updates: Record<string, unknown> = {};
       if (body.name !== undefined) updates.name = body.name;
       if (body.active !== undefined) updates.active = body.active;
       if (body.triggerTier !== undefined) updates.triggerTier = body.triggerTier;
+      if (body.triggerType !== undefined) updates.triggerType = body.triggerType;
 
       await db.update(emailSequences)
         .set(updates)

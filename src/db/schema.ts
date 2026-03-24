@@ -1,3 +1,10 @@
+// Migration needed: run `npx drizzle-kit push` to add:
+// - funnel_sessions.partial_email column
+// - email_sequences.trigger_type column
+// - sequence_enrollments.session_id column
+// - sequence_enrollments.recipient_email column
+// - sequence_enrollments.lead_id nullable change
+// - event_type enum: 'email_captured' value
 import { pgTable, uuid, text, boolean, integer, jsonb, timestamp, pgEnum, index } from 'drizzle-orm/pg-core';
 
 export const planEnum = pgEnum('plan', ['free', 'pro', 'agency']);
@@ -6,7 +13,7 @@ export const tierEnum = pgEnum('calendar_tier', ['high', 'mid', 'low']);
 export const eventTypeEnum = pgEnum('event_type', [
   'funnel_viewed', 'page_viewed', 'answer_selected', 'field_focused',
   'form_submitted', 'lead_created', 'funnel_completed', 'funnel_abandoned',
-  'back_navigated', 'cta_clicked',
+  'back_navigated', 'cta_clicked', 'email_captured',
 ]);
 
 export const deviceTypeEnum = pgEnum('device_type', ['mobile', 'desktop', 'tablet']);
@@ -65,6 +72,7 @@ export const funnelSessions = pgTable('funnel_sessions', {
   utmMedium: text('utm_medium'),
   utmCampaign: text('utm_campaign'),
   deviceType: deviceTypeEnum('device_type'),
+  partialEmail: text('partial_email'),
   totalDurationMs: integer('total_duration_ms'),
   endedAt: timestamp('ended_at'),
   startedAt: timestamp('started_at').defaultNow().notNull(),
@@ -133,6 +141,9 @@ export const emailSequences = pgTable('email_sequences', {
   name: text('name').notNull(),
   active: boolean('active').default(false).notNull(),
   triggerTier: tierEnum('trigger_tier'),
+  // 'lead_created' = standard follow-up after form submission
+  // 'abandoned' = sent to visitors who entered email but didn't complete the quiz
+  triggerType: text('trigger_type').default('lead_created').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -149,7 +160,9 @@ export const emailSteps = pgTable('email_steps', {
 export const sequenceEnrollments = pgTable('sequence_enrollments', {
   id: uuid('id').primaryKey().defaultRandom(),
   sequenceId: uuid('sequence_id').notNull().references(() => emailSequences.id, { onDelete: 'cascade' }),
-  leadId: uuid('lead_id').notNull().references(() => leads.id, { onDelete: 'cascade' }),
+  leadId: uuid('lead_id').references(() => leads.id, { onDelete: 'cascade' }),
+  sessionId: uuid('session_id').references(() => funnelSessions.id, { onDelete: 'cascade' }),
+  recipientEmail: text('recipient_email'),
   currentStep: integer('current_step').default(0).notNull(),
   status: text('status').default('active').notNull(),
   nextSendAt: timestamp('next_send_at'),

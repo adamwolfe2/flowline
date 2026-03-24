@@ -9,10 +9,11 @@ interface EmailStepProps {
   config: FunnelConfig;
   onSubmit: (email: string) => void;
   onFieldFocus?: () => void;
+  onEmailBlur?: (email: string) => void;
   onBack?: () => void;
 }
 
-export function EmailStep({ config, onSubmit, onFieldFocus, onBack }: EmailStepProps) {
+export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack }: EmailStepProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -117,6 +118,7 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onBack }: EmailStepP
                 (e.currentTarget as HTMLInputElement).style.borderColor = "#E5E7EB";
                 (e.currentTarget as HTMLInputElement).style.boxShadow = "none";
               }
+              onEmailBlur?.(e.currentTarget.value);
             }}
           />
           {error && (

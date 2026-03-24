@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { sequenceEnrollments, emailSteps, emailSequences, leads, funnels } from "@/db/schema";
-import { eq, and, lte, sql } from "drizzle-orm";
+import { sequenceEnrollments, emailSteps, emailSequences, leads, funnels, funnelSessions } from "@/db/schema";
+import { eq, and, lte, sql, isNotNull, isNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 function escapeHtml(str: string): string {
@@ -61,7 +61,8 @@ export async function GET(req: Request) {
     for (const row of pendingEnrollments.rows as Array<Record<string, unknown>>) {
       const enrollmentId = row.id as string;
       const enrollmentSequenceId = row.sequence_id as string;
-      const enrollmentLeadId = row.lead_id as string;
+      const enrollmentLeadId = row.lead_id as string | null;
+      const enrollmentRecipientEmail = row.recipient_email as string | null;
       const enrollmentCurrentStep = row.current_step as number;
       try {
         // Get the next step
@@ -80,11 +81,27 @@ export async function GET(req: Request) {
           continue;
         }
 
-        // Get lead email and funnel info
-        const [lead] = await db.select().from(leads)
-          .where(eq(leads.id, enrollmentLeadId));
-        if (!lead) {
-          // Revert to active so it can be retried
+        // Determine recipient email — either from lead or from recipientEmail (abandoned)
+        let recipientEmail: string | null = enrollmentRecipientEmail;
+        let leadScore = 0;
+        let leadTier = "low";
+        let calendarUrl = "";
+
+        if (enrollmentLeadId) {
+          const [lead] = await db.select().from(leads)
+            .where(eq(leads.id, enrollmentLeadId));
+          if (!lead) {
+            await db.update(sequenceEnrollments)
+              .set({ status: "active" })
+              .where(eq(sequenceEnrollments.id, enrollmentId));
+            continue;
+          }
+          recipientEmail = lead.email;
+          leadScore = lead.score;
+          leadTier = lead.calendarTier;
+        }
+
+        if (!recipientEmail) {
           await db.update(sequenceEnrollments)
             .set({ status: "active" })
             .where(eq(sequenceEnrollments.id, enrollmentId));
@@ -111,25 +128,29 @@ export async function GET(req: Request) {
           const funnelConfig = funnel?.config as Record<string, unknown> | undefined;
           const brand = funnelConfig?.brand as Record<string, string> | undefined;
           const fromName = brand?.name || "MyVSL";
+          const funnelName = brand?.name || "our quiz";
           const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";
 
           // Replace placeholders in body
           const quizConfig = funnelConfig?.quiz as Record<string, unknown> | undefined;
           const calendars = quizConfig?.calendars as Record<string, string> | undefined;
-          const calendarUrl = calendars?.[lead.calendarTier] || "";
+          if (leadTier && calendars) {
+            calendarUrl = calendars[leadTier] || "";
+          }
 
           const emailBody = step.body
-            .replace(/\{email\}/g, escapeHtml(lead.email))
-            .replace(/\{score\}/g, escapeHtml(String(lead.score)))
-            .replace(/\{tier\}/g, escapeHtml(lead.calendarTier))
-            .replace(/\{calendar_url\}/g, escapeHtml(calendarUrl));
+            .replace(/\{email\}/g, escapeHtml(recipientEmail))
+            .replace(/\{score\}/g, escapeHtml(String(leadScore)))
+            .replace(/\{tier\}/g, escapeHtml(leadTier))
+            .replace(/\{calendar_url\}/g, escapeHtml(calendarUrl))
+            .replace(/\{funnel_name\}/g, escapeHtml(funnelName));
 
           const unsubscribeUrl = `${appUrl}/api/sequences/unsubscribe?token=${enrollmentId}`;
 
           try {
             await resend.emails.send({
               from: `${fromName} <noreply@getmyvsl.com>`,
-              to: lead.email,
+              to: recipientEmail,
               subject: escapeHtml(step.subject),
               html: `
                 <!DOCTYPE html>
@@ -178,7 +199,7 @@ export async function GET(req: Request) {
           } catch (sendErr) {
             logger.error("Email send failed — will retry on next cron run", {
               enrollmentId,
-              leadEmail: lead.email,
+              recipientEmail,
               error: sendErr instanceof Error ? sendErr.message : String(sendErr),
             });
             // Revert to active so it retries on next cron run
@@ -223,7 +244,83 @@ export async function GET(req: Request) {
       }
     }
 
-    return NextResponse.json({ processed: pendingEnrollments.rows.length, sent, completed });
+    // --- Abandoned quiz recovery: enroll sessions with partial emails ---
+    let abandonedEnrolled = 0;
+    try {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+      // Find abandoned sessions with partial emails that haven't converted
+      // and started at least 30 minutes ago
+      const abandonedSessions = await db.execute(sql`
+        SELECT fs.id, fs.funnel_id, fs.partial_email
+        FROM ${funnelSessions} fs
+        WHERE fs.partial_email IS NOT NULL
+        AND fs.converted = false
+        AND fs.started_at <= ${thirtyMinAgo}
+        AND NOT EXISTS (
+          SELECT 1 FROM ${sequenceEnrollments} se
+          WHERE se.session_id = fs.id
+        )
+        LIMIT 100
+      `);
+
+      // Group by funnel to batch-lookup sequences
+      const sessionsByFunnel = new Map<string, Array<{ sessionId: string; partialEmail: string }>>();
+      for (const row of abandonedSessions.rows as Array<Record<string, unknown>>) {
+        const funnelId = row.funnel_id as string;
+        const sessionId = row.id as string;
+        const partialEmail = row.partial_email as string;
+        const existing = sessionsByFunnel.get(funnelId) || [];
+        sessionsByFunnel.set(funnelId, [...existing, { sessionId, partialEmail }]);
+      }
+
+      for (const [funnelId, sessions] of sessionsByFunnel) {
+        // Find active abandoned sequences for this funnel
+        const abandonedSequences = await db.select().from(emailSequences)
+          .where(and(
+            eq(emailSequences.funnelId, funnelId),
+            eq(emailSequences.active, true),
+            eq(emailSequences.triggerType, "abandoned"),
+          ));
+
+        if (abandonedSequences.length === 0) continue;
+
+        for (const session of sessions) {
+          for (const seq of abandonedSequences) {
+            // Get first step to determine initial send time
+            const [firstStep] = await db.select().from(emailSteps)
+              .where(and(
+                eq(emailSteps.sequenceId, seq.id),
+                eq(emailSteps.stepOrder, 1),
+              ));
+
+            if (!firstStep) continue;
+
+            const nextSendAt = new Date(now.getTime() + firstStep.delayHours * 60 * 60 * 1000);
+
+            await db.insert(sequenceEnrollments).values({
+              sequenceId: seq.id,
+              sessionId: session.sessionId,
+              recipientEmail: session.partialEmail,
+              currentStep: 0,
+              status: "active",
+              nextSendAt,
+            });
+            abandonedEnrolled++;
+          }
+        }
+      }
+
+      if (abandonedEnrolled > 0) {
+        logger.info("Abandoned quiz recovery: enrolled sessions", { count: abandonedEnrolled });
+      }
+    } catch (abandonErr) {
+      logger.error("Abandoned quiz recovery error", {
+        error: abandonErr instanceof Error ? abandonErr.message : String(abandonErr),
+      });
+    }
+
+    return NextResponse.json({ processed: pendingEnrollments.rows.length, sent, completed, abandonedEnrolled });
   } catch (error) {
     logger.error("Cron sequences error", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
