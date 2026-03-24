@@ -22,9 +22,7 @@ export async function GET() {
     });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    const errStack = error instanceof Error ? error.stack?.split('\n').slice(0, 3).join(' | ') : undefined;
-    const errCause = error instanceof Error && 'cause' in error ? String((error as Record<string, unknown>).cause) : undefined;
-    logger.error("GET /api/funnels error", { error: errMsg, stack: errStack, cause: errCause });
+    logger.error("GET /api/funnels error", { error: errMsg });
     return NextResponse.json({ error: "Internal server error", debug: errMsg }, { status: 500 });
   }
 }
