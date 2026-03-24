@@ -44,7 +44,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
 
   return (
     <div className="space-y-5">
-      <div>
+      <div id="editor-branding">
         <Label className="text-xs text-gray-500 mb-1.5">Business Name</Label>
         <Input
           value={config.brand.name}
@@ -59,7 +59,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
       </div>
 
       {/* Logo Upload */}
-      <div>
+      <div id="editor-logo">
         <Label className="text-xs text-gray-500 mb-1.5">Logo</Label>
         {config.brand.logoUrl ? (
           <div className="flex items-center gap-3 mb-2">

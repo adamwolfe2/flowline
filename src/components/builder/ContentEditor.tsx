@@ -110,7 +110,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
 
       <Separator />
 
-      <div>
+      <div id="editor-headline">
         <Label className="text-xs text-gray-500 mb-1.5">Headline</Label>
         <Textarea
           value={config.quiz.headline}
@@ -121,7 +121,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
         />
       </div>
 
-      <div>
+      <div id="editor-subheadline">
         <Label className="text-xs text-gray-500 mb-1.5">Subheadline</Label>
         <Input
           value={config.quiz.subheadline}
@@ -133,7 +133,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
 
       <Separator />
 
-      <div>
+      <div id="editor-questions">
         <div className="flex items-center justify-between mb-3">
           <Label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
             Questions <span className="text-gray-400 font-normal normal-case">(max 7)</span>
@@ -285,7 +285,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
         </p>
 
         <div className="space-y-4">
-          <div>
+          <div id="editor-badge">
             <Label className="text-[11px] text-gray-400 mb-1">Badge Text</Label>
             <Input
               value={config.quiz.badgeText ?? ""}
@@ -296,7 +296,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
             />
           </div>
 
-          <div>
+          <div id="editor-cta">
             <Label className="text-[11px] text-gray-400 mb-1">CTA Button Text</Label>
             <Input
               value={config.quiz.ctaButtonText ?? ""}

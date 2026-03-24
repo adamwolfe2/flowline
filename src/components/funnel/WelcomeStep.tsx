@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { FunnelConfig } from "@/types";
+import { EditableOverlay } from "./EditableOverlay";
 
 interface WelcomeStepProps {
   config: FunnelConfig;
@@ -22,27 +23,29 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
         className="mb-8"
       >
-        {brand.logoUrl ? (
-          <div className="inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-3">
-            <Image
-              src={brand.logoUrl}
-              alt={brand.name}
-              width={120}
-              height={40}
-              style={{ objectFit: "contain" }}
-              priority
-            />
-          </div>
-        ) : (
-          <div className="inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-3">
-            <span
-              className="text-lg font-bold"
-              style={{ color: brand.primaryColor, fontFamily: brand.fontHeading }}
-            >
-              {brand.name}
-            </span>
-          </div>
-        )}
+        <EditableOverlay section="brand" field="logo">
+          {brand.logoUrl ? (
+            <div className="inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-3">
+              <Image
+                src={brand.logoUrl}
+                alt={brand.name}
+                width={120}
+                height={40}
+                style={{ objectFit: "contain" }}
+                priority
+              />
+            </div>
+          ) : (
+            <div className="inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-3">
+              <span
+                className="text-lg font-bold"
+                style={{ color: brand.primaryColor, fontFamily: brand.fontHeading }}
+              >
+                {brand.name}
+              </span>
+            </div>
+          )}
+        </EditableOverlay>
       </motion.div>
 
       <motion.div
@@ -51,21 +54,27 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
         transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
         className="mb-4"
       >
-        <div
-          className="inline-block text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full mb-4"
-          style={{ backgroundColor: brand.primaryColorLight, color: brand.primaryColor }}
-        >
-          {quiz.badgeText ?? "Free Application"}
-        </div>
-        <h1
-          className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4"
-          style={{ fontFamily: brand.fontHeading }}
-        >
-          {quiz.headline}
-        </h1>
-        <p className="text-base text-gray-500 max-w-sm mx-auto leading-relaxed">
-          {quiz.subheadline}
-        </p>
+        <EditableOverlay section="content" field="badge">
+          <div
+            className="inline-block text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full mb-4"
+            style={{ backgroundColor: brand.primaryColorLight, color: brand.primaryColor }}
+          >
+            {quiz.badgeText ?? "Free Application"}
+          </div>
+        </EditableOverlay>
+        <EditableOverlay section="content" field="headline">
+          <h1
+            className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4"
+            style={{ fontFamily: brand.fontHeading }}
+          >
+            {quiz.headline}
+          </h1>
+        </EditableOverlay>
+        <EditableOverlay section="content" field="subheadline">
+          <p className="text-base text-gray-500 max-w-sm mx-auto leading-relaxed">
+            {quiz.subheadline}
+          </p>
+        </EditableOverlay>
       </motion.div>
 
       <motion.div
@@ -74,22 +83,24 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
         transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
         className="w-full mt-6"
       >
-        <motion.button
-          onClick={onStart}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full py-4 px-8 rounded-xl text-white font-semibold text-sm sm:text-base shadow-lg transition-shadow hover:shadow-xl"
-          style={{
-            backgroundColor: ctaHover ? brand.primaryColorDark : brand.primaryColor,
-            fontFamily: brand.fontBody,
-            minHeight: "48px",
-            transition: "background-color 0.15s ease",
-          }}
-          onMouseEnter={() => setCtaHover(true)}
-          onMouseLeave={() => setCtaHover(false)}
-        >
-          {quiz.ctaButtonText ?? "Take the Quiz. It Takes 60 Seconds"}
-        </motion.button>
+        <EditableOverlay section="content" field="cta">
+          <motion.button
+            onClick={onStart}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-4 px-8 rounded-xl text-white font-semibold text-sm sm:text-base shadow-lg transition-shadow hover:shadow-xl"
+            style={{
+              backgroundColor: ctaHover ? brand.primaryColorDark : brand.primaryColor,
+              fontFamily: brand.fontBody,
+              minHeight: "48px",
+              transition: "background-color 0.15s ease",
+            }}
+            onMouseEnter={() => setCtaHover(true)}
+            onMouseLeave={() => setCtaHover(false)}
+          >
+            {quiz.ctaButtonText ?? "Take the Quiz. It Takes 60 Seconds"}
+          </motion.button>
+        </EditableOverlay>
 
         <div className="flex items-center justify-center gap-4 mt-4">
           <div className="flex items-center gap-1.5 text-xs text-gray-400">

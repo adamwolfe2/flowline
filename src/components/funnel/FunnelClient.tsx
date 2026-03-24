@@ -13,6 +13,7 @@ import { ProgressBar } from "./ProgressBar";
 import { useTracking } from "./useTracking";
 import { TrackingPixels, fireConversionEvent, fireQuizStartEvent } from "./TrackingPixels";
 import { toast } from "sonner";
+import { EditableOverlay } from "./EditableOverlay";
 
 interface FunnelClientProps {
   config: FunnelConfig;
@@ -209,15 +210,17 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.18 }}
             >
-              <QuestionStep
-                config={config}
-                question={currentQuestion}
-                questionNumber={currentQuestionIndex + 1}
-                totalQuestions={totalQuestions}
-                selectedOptionId={answers[currentQuestion.key]}
-                onSelect={handleSelect}
-                onBack={step > questionStartStep ? handleBack : undefined}
-              />
+              <EditableOverlay section="content" field="questions">
+                <QuestionStep
+                  config={config}
+                  question={currentQuestion}
+                  questionNumber={currentQuestionIndex + 1}
+                  totalQuestions={totalQuestions}
+                  selectedOptionId={answers[currentQuestion.key]}
+                  onSelect={handleSelect}
+                  onBack={step > questionStartStep ? handleBack : undefined}
+                />
+              </EditableOverlay>
             </motion.div>
           )}
 
@@ -254,22 +257,24 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
 
         {/* Powered by badge — hidden for Pro+ plans */}
         {!hideBranding && (
-          <div className="mt-8 text-center">
-            <a
-              href="https://getmyvsl.com?utm_source=powered_by&utm_medium=funnel&utm_campaign=badge"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z" />
-                <path d="M6 18h12" />
-                <path d="M6 14h12" />
-                <path d="m11.6 4 .4 4 .4-4" />
-              </svg>
-              Powered by MyVSL
-            </a>
-          </div>
+          <EditableOverlay section="brand" field="branding">
+            <div className="mt-8 text-center">
+              <a
+                href="https://getmyvsl.com?utm_source=powered_by&utm_medium=funnel&utm_campaign=badge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                  <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z" />
+                  <path d="M6 18h12" />
+                  <path d="M6 14h12" />
+                  <path d="m11.6 4 .4 4 .4-4" />
+                </svg>
+                Powered by MyVSL
+              </a>
+            </div>
+          </EditableOverlay>
         )}
       </div>
     </div>

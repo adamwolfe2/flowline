@@ -29,6 +29,7 @@ export default function BuilderPage() {
   const [previewKey, setPreviewKey] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState("content");
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingConfigRef = useRef<FunnelConfig | null>(null);
 
@@ -46,6 +47,25 @@ export default function BuilderPage() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
+
+  // Listen for click-to-edit messages from the preview iframe
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.data?.type !== "myvsl:edit") return;
+      const { section, field } = event.data;
+      setActiveTab(section);
+      setTimeout(() => {
+        const el = document.getElementById(`editor-${field}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-[#2D6A4F]", "ring-offset-2");
+          setTimeout(() => el.classList.remove("ring-2", "ring-[#2D6A4F]", "ring-offset-2"), 2000);
+        }
+      }, 100);
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   useEffect(() => {
     fetch(`/api/funnels/${funnelId}`)
@@ -241,7 +261,7 @@ export default function BuilderPage() {
       </div>
 
       {/* Main area — tabs on top, content + preview below */}
-      <Tabs defaultValue="content" className="flex-1 flex flex-col overflow-hidden">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         {/* Tab bar */}
         <div className="border-b border-gray-100 flex items-center justify-center gap-2 px-4 flex-shrink-0">
           <div className="overflow-x-auto scrollbar-hide">
