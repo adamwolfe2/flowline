@@ -144,21 +144,21 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Eye className="w-3 h-3 text-gray-400" />
             </div>
-            <p className="text-lg font-bold text-gray-900">{stats.totalSessions}</p>
+            <p className="text-lg font-bold text-gray-900">{stats?.totalSessions ?? 0}</p>
             <p className="text-[10px] text-gray-400">Views</p>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Users className="w-3 h-3 text-gray-400" />
             </div>
-            <p className="text-lg font-bold text-gray-900">{stats.leadsThisMonth}</p>
+            <p className="text-lg font-bold text-gray-900">{stats?.leadsThisMonth ?? 0}</p>
             <p className="text-[10px] text-gray-400">Leads</p>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-center gap-1 mb-0.5">
               <Target className="w-3 h-3 text-gray-400" />
             </div>
-            <p className="text-lg font-bold text-gray-900">{stats.totalSessions === 0 ? "--" : `${stats.conversionRate}%`}</p>
+            <p className="text-lg font-bold text-gray-900">{!stats || stats.totalSessions === 0 ? "--" : `${stats.conversionRate}%`}</p>
             <p className="text-[10px] text-gray-400">Conv.</p>
           </div>
         </div>

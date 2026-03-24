@@ -73,10 +73,10 @@ function DashboardContent() {
         result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case "leads":
-        result.sort((a, b) => b.stats.leadsThisMonth - a.stats.leadsThisMonth);
+        result.sort((a, b) => (b.stats?.leadsThisMonth ?? 0) - (a.stats?.leadsThisMonth ?? 0));
         break;
       case "views":
-        result.sort((a, b) => b.stats.totalSessions - a.stats.totalSessions);
+        result.sort((a, b) => (b.stats?.totalSessions ?? 0) - (a.stats?.totalSessions ?? 0));
         break;
       case "az":
         result.sort((a, b) => a.config.brand.name.localeCompare(b.config.brand.name));
