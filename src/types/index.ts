@@ -57,6 +57,7 @@ export interface FunnelConfig {
     tiktokPixelId?: string;
     ga4MeasurementId?: string;
     cursivePixelId?: string;
+    customScripts?: string[];
   };
 }
 

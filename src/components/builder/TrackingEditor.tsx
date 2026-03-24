@@ -186,21 +186,72 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
             your funnel pages. Get full contact info (name, email, phone) for every visitor.
           </p>
           <div className="mb-3">
-            <Label className="text-xs text-gray-500 mb-1.5">SuperPixel ID</Label>
+            <Label className="text-xs text-gray-500 mb-1.5">Pixel Script URL</Label>
             <Input
               value={config.tracking?.cursivePixelId ?? ""}
               onChange={e => updateTracking("cursivePixelId", e.target.value)}
-              placeholder="Your Cursive pixel ID"
+              placeholder="https://cdn.idpixel.app/v1/idp-analytics-xxx.min.js"
               className="text-sm font-mono bg-white"
             />
             <p className="text-[10px] text-gray-400 mt-1">
-              Get your pixel ID from your <a href="https://app.meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive dashboard</a>.
+              Paste the full script URL from your <a href="https://app.meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive dashboard</a>. Supports any <code className="bg-gray-100 px-1 rounded">src</code> URL.
             </p>
           </div>
           <p className="text-center text-[9px] text-gray-400">
             Powered by <a href="https://meetcursive.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Cursive</a>. Identity Resolution for Performance Marketers
           </p>
         </div>
+      </div>
+
+      <Separator />
+
+      {/* Custom Tracking Scripts */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <Label className="text-xs text-gray-500">Custom Tracking Scripts</Label>
+          <button
+            type="button"
+            onClick={() => {
+              const newConfig = JSON.parse(JSON.stringify(config));
+              if (!newConfig.tracking) newConfig.tracking = {};
+              if (!newConfig.tracking.customScripts) newConfig.tracking.customScripts = [];
+              newConfig.tracking.customScripts.push("");
+              onSave(newConfig);
+            }}
+            className="text-[10px] text-[#2D6A4F] font-medium hover:underline"
+          >
+            + Add script
+          </button>
+        </div>
+        <p className="text-[10px] text-gray-400 mb-3">
+          Add any JavaScript pixel or tracking script URL. Each gets injected as a <code className="bg-gray-100 px-1 rounded">&lt;script src=&quot;...&quot;&gt;</code> on your funnel page.
+        </p>
+        {(config.tracking?.customScripts ?? []).map((script, i) => (
+          <div key={i} className="flex gap-2 mb-2">
+            <Input
+              value={script}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                newConfig.tracking.customScripts[i] = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="https://example.com/pixel.js"
+              className="text-sm font-mono flex-1"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                newConfig.tracking.customScripts.splice(i, 1);
+                onSave(newConfig);
+              }}
+              className="text-xs text-red-400 hover:text-red-600 px-2"
+              aria-label="Remove script"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

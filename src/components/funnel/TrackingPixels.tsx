@@ -16,19 +16,41 @@ interface TrackingPixelsProps {
   tiktokPixelId?: string;
   ga4MeasurementId?: string;
   cursivePixelId?: string;
+  customScripts?: string[];
 }
 
-export function TrackingPixels({ fbPixelId, tiktokPixelId, ga4MeasurementId, cursivePixelId }: TrackingPixelsProps) {
+function isValidScriptUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function TrackingPixels({ fbPixelId, tiktokPixelId, ga4MeasurementId, cursivePixelId, customScripts }: TrackingPixelsProps) {
   return (
     <>
-      {/* Cursive SuperPixel */}
+      {/* Cursive SuperPixel — supports full script URL or just an ID */}
       {cursivePixelId && (
         <Script
           id="cursive-pixel"
           strategy="afterInteractive"
-          src={`https://t.meetcursive.com/pixel/${cursivePixelId}`}
+          src={isValidScriptUrl(cursivePixelId) ? cursivePixelId : `https://t.meetcursive.com/pixel/${cursivePixelId}`}
+          defer
         />
       )}
+
+      {/* Custom tracking scripts */}
+      {customScripts?.filter(isValidScriptUrl).map((src, i) => (
+        <Script
+          key={`custom-${i}`}
+          id={`custom-pixel-${i}`}
+          strategy="afterInteractive"
+          src={src}
+          defer
+        />
+      ))}
 
       {/* Facebook Pixel */}
       {fbPixelId && (
