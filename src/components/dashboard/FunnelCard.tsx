@@ -85,12 +85,18 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
       <Card className="p-5 hover:shadow-md transition-shadow border-gray-100 group">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: funnel.config.brand.primaryColor }}
-            >
-              {funnel.config.brand.name.charAt(0).toUpperCase()}
-            </div>
+            {funnel.config.brand.logoUrl ? (
+              <div className="w-10 h-10 rounded-xl border border-[#E5E7EB] overflow-hidden bg-white flex items-center justify-center">
+                <img src={funnel.config.brand.logoUrl} alt="" className="w-full h-full object-contain p-1" />
+              </div>
+            ) : (
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+                style={{ backgroundColor: funnel.config.brand.primaryColor }}
+              >
+                {funnel.config.brand.name.charAt(0).toUpperCase()}
+              </div>
+            )}
             <div>
               <h3 className="font-semibold text-gray-900 text-sm leading-tight">
                 {funnel.config.brand.name}
@@ -99,12 +105,12 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <Badge variant={funnel.published ? "default" : "secondary"} className="text-[10px]">
+            <Badge variant="secondary" className={`text-[10px] ${funnel.published ? "bg-white border border-[#E5E7EB] text-[#2D6A4F]" : ""}`}>
               {funnel.published ? (
                 <span className="flex items-center gap-1">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#2D6A4F]" />
                   </span>
                   Live
                 </span>

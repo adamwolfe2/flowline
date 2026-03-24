@@ -97,31 +97,34 @@ function DashboardContent() {
         <p className="text-sm text-gray-500 mt-1">Create, manage, and monitor your booking funnels.</p>
       </div>
 
-      <TemplateGallery onCreated={loadFunnels} />
-
-      {!loading && funnels.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 mb-6">
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
-          >
-            <option value="newest">Newest</option>
-            <option value="leads">Most leads</option>
-            <option value="views">Most views</option>
-            <option value="az">A-Z</option>
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
-          >
-            <option value="all">All</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
-        </div>
-      )}
+      <div className="flex items-center gap-4 mb-6">
+        <TemplateGallery onCreated={loadFunnels} />
+        {!loading && funnels.length > 0 && (
+          <>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
+              aria-label="Sort funnels"
+            >
+              <option value="newest">Newest</option>
+              <option value="leads">Most leads</option>
+              <option value="views">Most views</option>
+              <option value="az">A-Z</option>
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
+              aria-label="Filter by status"
+            >
+              <option value="all">All</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </>
+        )}
+      </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
