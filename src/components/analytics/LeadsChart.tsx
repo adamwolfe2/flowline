@@ -26,8 +26,8 @@ export function LeadsChart({ data, timeRange }: LeadsChartProps) {
         <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="leadGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#6366F1" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+              <stop offset="5%" stopColor="#2D6A4F" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#2D6A4F" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
@@ -59,7 +59,7 @@ export function LeadsChart({ data, timeRange }: LeadsChartProps) {
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#6366F1"
+            stroke="#2D6A4F"
             strokeWidth={2}
             fill="url(#leadGradient)"
           />

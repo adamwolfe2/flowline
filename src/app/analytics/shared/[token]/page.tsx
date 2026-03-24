@@ -62,8 +62,8 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
   ];
 
   const tierColors: Record<string, string> = {
-    high: "bg-emerald-100 text-emerald-700",
-    mid: "bg-amber-100 text-amber-700",
+    high: "bg-[#2D6A4F]/10 text-[#2D6A4F]",
+    mid: "bg-[#D97706]/10 text-[#D97706]",
     low: "bg-gray-100 text-gray-600",
   };
 

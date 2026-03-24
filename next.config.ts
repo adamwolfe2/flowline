@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.vercel-insights.com https://va.vercel-scripts.com https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.accounts.dev https://*.clerk.com; font-src 'self' https://fonts.gstatic.com https://*.clerk.com; img-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com; frame-ancestors 'self'; worker-src 'self' blob:",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.vercel-insights.com https://va.vercel-scripts.com https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com https://connect.facebook.net https://www.facebook.com https://analytics.tiktok.com https://www.googletagmanager.com https://www.google-analytics.com https://t.meetcursive.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.clerk.accounts.dev https://*.clerk.com; font-src 'self' https://fonts.gstatic.com https://*.clerk.com; img-src 'self' https: data:; connect-src 'self' https: wss:; frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com; frame-ancestors 'self'; worker-src 'self' blob:",
           },
         ],
       },

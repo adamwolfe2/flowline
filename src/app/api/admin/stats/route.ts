@@ -5,11 +5,17 @@ import { users, funnels, leads, funnelSessions, events, sequenceEnrollments, web
 import { sql, gte, eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { isSuperAdmin } from "@/lib/admin";
+import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
+    if (rateLimitResult.limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
 
     const isAdmin = await isSuperAdmin(userId);
     if (!isAdmin) {

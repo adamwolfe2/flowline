@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
 import { AppNav } from "@/components/AppNav";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Billing | MyVSL",
   description: "Manage your MyVSL subscription and billing.",
   robots: { index: false, follow: false },

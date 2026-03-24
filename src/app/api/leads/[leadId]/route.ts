@@ -4,12 +4,25 @@ import { db } from "@/db";
 import { leads, funnels, events, funnelSessions } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ leadId: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
+    if (rateLimitResult.limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { leadId } = await params;
+
+    if (!uuidRegex.test(leadId)) {
+      return NextResponse.json({ error: "Invalid lead ID" }, { status: 400 });
+    }
 
     // Get lead
     const lead = await db.select().from(leads).where(eq(leads.id, leadId));

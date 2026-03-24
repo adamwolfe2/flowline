@@ -103,7 +103,7 @@ export default function SettingsPage() {
               <span className="text-sm font-medium text-[#333333]">
                 {plan.charAt(0).toUpperCase() + plan.slice(1)} Plan
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-green-100 text-green-700">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#2D6A4F]/10 text-[#2D6A4F]">
                 {plan.charAt(0).toUpperCase() + plan.slice(1)}
               </span>
             </div>

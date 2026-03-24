@@ -77,17 +77,17 @@ export async function POST(req: NextRequest) {
           error: `Webhook returned ${response.status}`
         });
       }
-    } catch (error) {
+    } catch {
       clearTimeout(timeout);
       return NextResponse.json({
         success: false,
-        error: error instanceof Error ? error.message : "Connection failed"
+        error: "Connection failed"
       });
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : "Connection failed"
+      error: "Connection failed"
     });
   }
 }

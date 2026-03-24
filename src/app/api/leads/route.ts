@@ -4,11 +4,17 @@ import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { leads, funnels } from "@/db/schema";
 import { eq, desc, sql, and, ilike } from "drizzle-orm";
+import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
+    if (rateLimitResult.limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
 
     const page = Math.max(0, parseInt(req.nextUrl.searchParams.get("page") || "0") || 0);
     const funnelId = req.nextUrl.searchParams.get("funnelId");
@@ -66,6 +72,8 @@ export async function GET(req: NextRequest) {
       leads: allLeads,
       total: Number(countResult?.count ?? 0),
       funnels: userFunnels,
+    }, {
+      headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" },
     });
   } catch (error) {
     logger.error("GET /api/leads error", { error: error instanceof Error ? error.message : String(error) });

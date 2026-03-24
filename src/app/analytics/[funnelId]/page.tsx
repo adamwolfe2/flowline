@@ -132,8 +132,8 @@ function SkeletonBlock({ className }: { className?: string }) {
 }
 
 function tierBadgeColor(tier: string) {
-  if (tier === "high") return "bg-green-100 text-green-700";
-  if (tier === "mid") return "bg-yellow-100 text-yellow-700";
+  if (tier === "high") return "bg-[#2D6A4F]/10 text-[#2D6A4F]";
+  if (tier === "mid") return "bg-[#D97706]/10 text-[#D97706]";
   return "bg-gray-100 text-gray-600";
 }
 
@@ -593,7 +593,7 @@ export default function AnalyticsDashboard() {
                               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Control</span>
                             )}
                             {winner && winner.variantId === v.variantId && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">Winner</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#2D6A4F]/10 text-[#2D6A4F] font-medium">Winner</span>
                             )}
                           </span>
                         </td>

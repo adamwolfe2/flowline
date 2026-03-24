@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
 import { AppNav } from "@/components/AppNav";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Dashboard | MyVSL",
   description: "Manage your VSL funnels, view analytics, and track leads.",
   robots: { index: false, follow: false },

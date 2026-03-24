@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Admin | MyVSL",
+  description: "MyVSL admin dashboard.",
   robots: { index: false, follow: false },
 };
 

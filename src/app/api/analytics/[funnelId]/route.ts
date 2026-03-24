@@ -3,11 +3,18 @@ import { auth } from "@clerk/nextjs/server";
 import { getFullAnalytics } from "@/db/queries/analytics";
 import { getFunnelById } from "@/db/queries/funnels";
 import { logger } from "@/lib/logger";
+import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
+    if (rateLimitResult.limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { funnelId } = await params;
 
     const funnel = await getFunnelById(funnelId, userId);

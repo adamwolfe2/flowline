@@ -4,13 +4,25 @@ import { db } from "@/db";
 import { funnels, webhookDeliveries } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const rateLimitResult = await checkRateLimit(apiLimiter, userId);
+    if (rateLimitResult.limited) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { id } = await params;
+
+    if (!uuidRegex.test(id)) {
+      return NextResponse.json({ error: "Invalid funnel ID" }, { status: 400 });
+    }
 
     // Verify ownership
     const [funnel] = await db.select({ id: funnels.id })

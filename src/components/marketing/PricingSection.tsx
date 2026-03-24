@@ -36,7 +36,7 @@ const plans = [
       "Priority support",
     ],
     cta: "Start Free Trial",
-    href: "/sign-up",
+    href: "/sign-up?plan=pro",
     popular: true,
   },
   {
@@ -54,7 +54,7 @@ const plans = [
       "Dedicated account manager",
     ],
     cta: "Start Free Trial",
-    href: "/sign-up",
+    href: "/sign-up?plan=agency",
     popular: false,
   },
 ];

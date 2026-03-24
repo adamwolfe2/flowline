@@ -35,6 +35,7 @@ export default function LeadsPage() {
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dateRange, setDateRange] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   // Debounce search
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function LeadsPage() {
   // Reset to page 0 when filters change
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, funnelFilter, tierFilter, dateRange]);
+  }, [debouncedSearch, funnelFilter, tierFilter, dateRange, sortBy]);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -81,8 +82,8 @@ export default function LeadsPage() {
 
   const tierBadge = (tier: string) => {
     const styles: Record<string, string> = {
-      high: "bg-emerald-100 text-emerald-700",
-      mid: "bg-amber-100 text-amber-700",
+      high: "bg-[#2D6A4F]/10 text-[#2D6A4F]",
+      mid: "bg-[#D97706]/10 text-[#D97706]",
       low: "bg-gray-100 text-gray-600",
     };
     return (
@@ -93,12 +94,29 @@ export default function LeadsPage() {
   };
 
   const displayedLeads = useMemo(() => {
-    if (dateRange === "all") return leads;
-    const now = new Date();
-    const days = dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90;
-    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    return leads.filter((l) => new Date(l.createdAt) >= cutoff);
-  }, [leads, dateRange]);
+    let filtered = leads;
+    if (dateRange !== "all") {
+      const now = new Date();
+      const days = dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90;
+      const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      filtered = leads.filter((l) => new Date(l.createdAt) >= cutoff);
+    }
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case "oldest":
+        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case "score_high":
+        sorted.sort((a, b) => b.score - a.score);
+        break;
+      case "score_low":
+        sorted.sort((a, b) => a.score - b.score);
+        break;
+      default: // newest
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    return sorted;
+  }, [leads, dateRange, sortBy]);
 
   async function exportCSV() {
     try {
@@ -231,11 +249,23 @@ export default function LeadsPage() {
           value={dateRange}
           onChange={(e) => setDateRange(e.target.value)}
           className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
+          aria-label="Filter by date range"
         >
           <option value="all">All time</option>
           <option value="7d">Last 7 days</option>
           <option value="30d">Last 30 days</option>
           <option value="90d">Last 90 days</option>
+        </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors"
+          aria-label="Sort leads"
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="score_high">Highest score</option>
+          <option value="score_low">Lowest score</option>
         </select>
       </div>
 

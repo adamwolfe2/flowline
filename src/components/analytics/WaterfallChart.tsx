@@ -54,12 +54,12 @@ export function WaterfallChart({ steps }: WaterfallChartProps) {
                   width={70}
                   height={0}
                   rx={4}
-                  fill="#6366F1"
+                  fill="#2D6A4F"
                   animate={{ y, height: barHeight }}
                   transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
                 />
                 {/* Retention % above bar */}
-                <text x={x + 35} y={y - 6} textAnchor="middle" className="text-[10px]" fill="#6366F1" fontWeight={600}>
+                <text x={x + 35} y={y - 6} textAnchor="middle" className="text-[10px]" fill="#2D6A4F" fontWeight={600}>
                   {step.retentionFromTop}%
                 </text>
               </g>
