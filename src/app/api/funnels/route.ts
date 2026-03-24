@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
+import { getFunnelsByUser, getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
 import { generateSlug } from "@/lib/utils";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
-import { users } from "@/db/schema";
+import { users, funnels } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
 
@@ -15,11 +15,28 @@ export async function GET() {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const funnelsWithStats = await getFunnelsWithStats(userId);
-
-    return NextResponse.json(funnelsWithStats, {
-      headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" }
-    });
+    try {
+      const funnelsWithStats = await getFunnelsWithStats(userId);
+      return NextResponse.json(funnelsWithStats, {
+        headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" }
+      });
+    } catch (statsError) {
+      // Stats query failed — return funnels without stats as fallback
+      logger.error("getFunnelsWithStats failed, falling back to basic query", {
+        error: statsError instanceof Error ? statsError.message : String(statsError),
+      });
+      try {
+        const basicFunnels = await getFunnelsByUser(userId);
+        return NextResponse.json(basicFunnels.map(f => ({ ...f, stats: null })));
+      } catch (basicError) {
+        // Even basic query failed — try raw SQL
+        logger.error("getFunnelsByUser also failed, trying raw query", {
+          error: basicError instanceof Error ? basicError.message : String(basicError),
+        });
+        const rawFunnels = await db.select().from(funnels).where(eq(funnels.userId, userId));
+        return NextResponse.json(rawFunnels.map(f => ({ ...f, stats: null })));
+      }
+    }
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     logger.error("GET /api/funnels error", { error: errMsg });
