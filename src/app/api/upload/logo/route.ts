@@ -26,16 +26,30 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Images only" }, { status: 400 });
+    const ALLOWED_TYPES: Record<string, string> = {
+      "image/png": "png",
+      "image/jpeg": "jpg",
+      "image/jpg": "jpg",
+      "image/gif": "gif",
+      "image/webp": "webp",
+      "image/svg+xml": "svg",
+      "image/x-icon": "ico",
+      "image/vnd.microsoft.icon": "ico",
+    };
+
+    const ext = ALLOWED_TYPES[file.type];
+    if (!ext) {
+      return NextResponse.json({ error: "Supported formats: PNG, JPG, SVG, GIF, WebP" }, { status: 400 });
     }
     if (file.size > 2 * 1024 * 1024) {
       return NextResponse.json({ error: "Max 2MB" }, { status: 400 });
     }
 
-    const ext = file.type.split("/")[1] || "png";
     const filename = `logos/${uploaderId}-${Date.now()}.${ext}`;
-    const blob = await put(filename, file, { access: "public" });
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
     return NextResponse.json({ url: blob.url });
   } catch (error) {
