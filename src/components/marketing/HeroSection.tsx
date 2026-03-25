@@ -1,43 +1,102 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { Sparkles, ArrowRight, Zap, BarChart3, Calendar, CheckCircle2 } from "lucide-react";
 
-const QUICK_TEMPLATES = [
-  { label: "Coaching Qualifier", prompt: "I sell business coaching to 6-figure entrepreneurs" },
-  { label: "SaaS Demo Booker", prompt: "I run a B2B SaaS product for team collaboration" },
-  { label: "Agency Lead Gen", prompt: "I run a digital marketing agency for ecommerce brands" },
-  { label: "Real Estate", prompt: "I help first-time home buyers find properties" },
-  { label: "Fitness Program", prompt: "I sell online fitness coaching for busy professionals" },
+const DEMO_PROMPTS = [
+  "I sell business coaching to 6-figure entrepreneurs",
+  "I run a digital marketing agency for ecommerce brands",
+  "I help first-time home buyers find properties",
 ];
 
-const COLOR_PRESETS = [
-  { label: "Forest", color: "#2D6A4F" },
-  { label: "Ocean", color: "#2563EB" },
-  { label: "Violet", color: "#7C3AED" },
-  { label: "Coral", color: "#DC2626" },
-  { label: "Amber", color: "#D97706" },
-  { label: "Slate", color: "#0F172A" },
+const DEMO_STEPS = [
+  { label: "Analyzing business...", delay: 800 },
+  { label: "Generating quiz questions...", delay: 1200 },
+  { label: "Building lead scoring...", delay: 1000 },
+  { label: "Setting up calendar routing...", delay: 800 },
 ];
+
+const DEMO_QUIZ = {
+  headline: "Find Your Perfect Growth Strategy",
+  badge: "FREE ASSESSMENT",
+  questions: [
+    { text: "What stage is your business?", options: ["Just starting out", "Growing steadily", "Ready to scale"] },
+    { text: "What is your biggest challenge?", options: ["Getting leads", "Converting leads", "Retaining clients"] },
+    { text: "What is your monthly revenue?", options: ["Under $10K", "$10K-$50K", "$50K+"] },
+  ],
+};
 
 export function HeroSection() {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [showStyles, setShowStyles] = useState(false);
-  const templateRef = useRef<HTMLDivElement>(null);
-  const styleRef = useRef<HTMLDivElement>(null);
+  const [demoActive, setDemoActive] = useState(false);
+  const [demoStep, setDemoStep] = useState(-1);
+  const [demoQuizStep, setDemoQuizStep] = useState(-1);
+  const [selectedAnswer, setSelectedAnswer] = useState(-1);
+  const [isAutoTyping, setIsAutoTyping] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const demoStarted = useRef(false);
 
-  // Close dropdowns on outside click
+  const startDemo = useCallback(() => {
+    setDemoActive(true);
+    setDemoStep(0);
+
+    // Step through the build phases
+    let accDelay = 0;
+    DEMO_STEPS.forEach((s, i) => {
+      accDelay += s.delay;
+      timeoutRef.current = setTimeout(() => setDemoStep(i + 1), accDelay);
+    });
+
+    // After build completes, show the quiz preview
+    accDelay += 600;
+    timeoutRef.current = setTimeout(() => {
+      setDemoQuizStep(0);
+    }, accDelay);
+
+    // Auto-advance through quiz
+    accDelay += 1500;
+    timeoutRef.current = setTimeout(() => { setSelectedAnswer(1); }, accDelay);
+    accDelay += 800;
+    timeoutRef.current = setTimeout(() => { setDemoQuizStep(1); setSelectedAnswer(-1); }, accDelay);
+    accDelay += 1200;
+    timeoutRef.current = setTimeout(() => { setSelectedAnswer(0); }, accDelay);
+    accDelay += 800;
+    timeoutRef.current = setTimeout(() => { setDemoQuizStep(2); setSelectedAnswer(-1); }, accDelay);
+    accDelay += 1200;
+    timeoutRef.current = setTimeout(() => { setSelectedAnswer(2); }, accDelay);
+    accDelay += 800;
+    timeoutRef.current = setTimeout(() => { setDemoQuizStep(3); }, accDelay); // success
+  }, []);
+
+  // Auto-type demo prompt on first load
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (templateRef.current && !templateRef.current.contains(e.target as Node)) setShowTemplates(false);
-      if (styleRef.current && !styleRef.current.contains(e.target as Node)) setShowStyles(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    if (demoStarted.current) return;
+    demoStarted.current = true;
+    const targetText = DEMO_PROMPTS[0];
+    const delay = setTimeout(() => {
+      setIsAutoTyping(true);
+      let i = 0;
+      const typeInterval = setInterval(() => {
+        if (i <= targetText.length) {
+          setPrompt(targetText.slice(0, i));
+
+          i++;
+        } else {
+          clearInterval(typeInterval);
+          setIsAutoTyping(false);
+          setTimeout(() => startDemo(), 600);
+        }
+      }, 35);
+      return () => clearInterval(typeInterval);
+    }, 1200);
+    return () => clearTimeout(delay);
+  }, [startDemo]);
+
+  useEffect(() => {
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, []);
 
   function handleSubmit() {
@@ -49,187 +108,276 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative overflow-hidden pb-24">
-      {/* Forest background */}
-      <div className="absolute inset-0">
-        <Image
-          src="/hero-bg.jpg"
-          alt=""
-          fill
-          priority
-          className="object-cover object-top"
-          sizes="100vw"
-          quality={75}
-        />
-      </div>
-      <div className="absolute inset-0" style={{
-        background: "linear-gradient(180deg, transparent 0%, transparent 40%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0.7) 80%, #FFFFFF 100%)",
-      }} />
+    <section className="relative overflow-hidden bg-[#FAFBFC]">
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-[#F0FDF4]/30 to-white" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#10B981]/8 via-transparent to-transparent rounded-full blur-3xl" />
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6 pt-20 sm:pt-28 md:pt-36 max-w-4xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <h1 className="text-[26px] sm:text-[44px] md:text-[56px] lg:text-[68px] font-semibold leading-tight sm:leading-none text-white"
-            style={{ fontFamily: "var(--font-instrument-serif)", textShadow: "0 2px 24px rgba(0,0,0,0.12)" }}>
-            Your VSL funnel.
-            <br />
-            <span className="text-white/70">Built in 60 seconds.</span>
-          </h1>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-20 sm:pb-28">
+        {/* Top badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-center mb-8"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20">
+            <Zap className="w-3.5 h-3.5 text-[#10B981]" />
+            <span className="text-xs font-medium text-[#059669]">AI-powered quiz funnels</span>
+          </div>
         </motion.div>
 
-        <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+        {/* Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="text-center text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#111827] leading-[1.1]"
+        >
+          Describe your business.
+          <br />
+          <span className="bg-gradient-to-r from-[#059669] to-[#10B981] bg-clip-text text-transparent">
+            Get a funnel in 60 seconds.
+          </span>
+        </motion.h1>
+
+        {/* Subheadline */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="text-white/80 max-w-2xl mt-5 mb-10"
-          style={{ fontFamily: "var(--font-instrument-sans)", textShadow: "0 1px 10px rgba(0,0,0,0.08)" }}>
-          <span className="block text-base sm:text-xl md:text-2xl leading-relaxed mb-2">Describe what you need and let AI handle the rest.</span>
-          <span className="block text-base sm:text-lg md:text-xl leading-relaxed">Build{" "}
-          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-2.5 sm:px-3 py-1 sm:py-1 rounded-lg text-sm cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
-            <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Quiz Funnels
-          </span>
-          {", "}
-          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-2.5 sm:px-3 py-1 sm:py-1 rounded-lg text-sm cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
-            <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-            Lead Scoring
-          </span>
-          {" and "}
-          <span className="group/pill inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white font-semibold px-2.5 sm:px-3 py-1 sm:py-1 rounded-lg text-sm cursor-default transition-all duration-200 hover:bg-white/30 hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10">
-            <svg className="w-4 h-4 transition-transform duration-200 group-hover/pill:scale-125 group-hover/pill:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            Calendar Routing
-          </span>
-          <span className="whitespace-nowrap">{" "}for your business.</span></span>
+          className="text-center text-base sm:text-lg text-[#6B7280] mt-5 mb-12 max-w-2xl mx-auto leading-relaxed"
+        >
+          AI builds your quiz, scores your leads, and routes them to the right calendar.
+          No code. No design skills. Just results.
         </motion.p>
 
-        {/* Clean prompt box — Zite style */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="w-full max-w-2xl">
-          <div className="bg-white rounded-2xl shadow-xl border border-white/20">
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-              placeholder="I sell business coaching to 6-figure entrepreneurs..."
-              rows={3}
-              className="w-full px-6 py-5 text-base text-[#111827] placeholder-[#9CA3AF] bg-transparent resize-none outline-none border-none focus:ring-0 focus:outline-none"
-              style={{ fontSize: "16px" }}
-              aria-label="Describe your business to generate a funnel"
-            />
-            <div className="flex items-center justify-between px-5 pb-4">
-              {/* Integration logos */}
-              <div className="flex items-center">
-                <div className="flex -space-x-1.5" title="Integrates with Calendly, Slack, HubSpot">
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                    <img src="/integrations/calendly.svg" alt="Calendly" className="w-3.5 h-3.5 object-contain" />
-                  </div>
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                    <img src="/integrations/slack.svg" alt="Slack" className="w-3.5 h-3.5 object-contain" />
-                  </div>
-                  <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                    <img src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" className="w-3.5 h-3.5 object-contain" />
-                  </div>
-                </div>
-                <span className="text-[10px] text-[#9CA3AF] hidden sm:inline ml-1.5">+9 more</span>
+        {/* Two-column: Prompt + Live Demo */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto"
+        >
+          {/* Left: Prompt input + build progress */}
+          <div className="flex flex-col">
+            <div className="bg-white rounded-2xl shadow-lg border border-[#E5E7EB] overflow-hidden flex-1 flex flex-col">
+              {/* Mini toolbar */}
+              <div className="flex items-center gap-2 px-5 py-3 border-b border-[#F3F4F6] bg-[#FAFAFA]">
+                <Sparkles className="w-4 h-4 text-[#10B981]" />
+                <span className="text-xs font-medium text-[#374151]">AI Funnel Builder</span>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Template dropdown */}
-                <div ref={templateRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => { setShowTemplates(!showTemplates); setShowStyles(false); }}
-                    className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${showTemplates ? "border-[#2D6A4F] text-[#2D6A4F] bg-[#2D6A4F]/5" : "border-[#E5E7EB] text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB]"}`}
-                    title="Templates"
-                    aria-label="Quick start templates"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                  </button>
-                  <AnimatePresence>
-                    {showTemplates && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 4, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 4, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-xl shadow-lg border border-[#E5E7EB] overflow-hidden z-50"
-                      >
-                        <div className="px-3 py-2 border-b border-[#F3F4F6]">
-                          <p className="text-xs font-semibold text-[#111827]">Quick start templates</p>
-                          <p className="text-[10px] text-[#9CA3AF]">Click to prefill the prompt</p>
-                        </div>
-                        <div className="py-1">
-                          {QUICK_TEMPLATES.map((t) => (
-                            <button
-                              key={t.label}
-                              type="button"
-                              onClick={() => { setPrompt(t.prompt); setShowTemplates(false); }}
-                              className="w-full text-left px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
-                            >
-                              {t.label}
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+              <div className="flex-1 flex flex-col p-5">
+                <textarea
+                  value={prompt}
+                  onChange={(e) => { if (!isAutoTyping) setPrompt(e.target.value); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+                  placeholder="Describe your business in one sentence..."
+                  rows={3}
+                  className="w-full text-[15px] text-[#111827] placeholder-[#9CA3AF] bg-transparent resize-none outline-none border-none focus:ring-0 flex-1"
+                  aria-label="Describe your business to generate a funnel"
+                />
+
+                {/* Build progress indicators */}
+                <AnimatePresence>
+                  {demoActive && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="mt-3 space-y-2"
+                    >
+                      {DEMO_STEPS.map((s, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: demoStep > i ? 1 : demoStep === i ? 0.7 : 0.3, x: 0 }}
+                          transition={{ delay: 0.1 * i }}
+                          className="flex items-center gap-2"
+                        >
+                          {demoStep > i ? (
+                            <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                          ) : demoStep === i ? (
+                            <div className="w-4 h-4 border-2 border-[#10B981] border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full border border-[#E5E7EB]" />
+                          )}
+                          <span className={`text-xs ${demoStep > i ? "text-[#059669] font-medium" : "text-[#9CA3AF]"}`}>
+                            {s.label}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Bottom bar */}
+              <div className="flex items-center justify-between px-5 py-3 border-t border-[#F3F4F6]">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#9CA3AF]">
+                    <BarChart3 className="w-3 h-3" /> Lead scoring
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#9CA3AF]">
+                    <Calendar className="w-3 h-3" /> Calendar routing
+                  </div>
                 </div>
-                {/* Style dropdown */}
-                <div ref={styleRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => { setShowStyles(!showStyles); setShowTemplates(false); }}
-                    className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${showStyles ? "border-[#2D6A4F] text-[#2D6A4F] bg-[#2D6A4F]/5" : "border-[#E5E7EB] text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB]"}`}
-                    title="Brand color"
-                    aria-label="Brand color picker"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
-                  </button>
-                  <AnimatePresence>
-                    {showStyles && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 4, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 4, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-xl shadow-lg border border-[#E5E7EB] overflow-hidden z-50"
-                      >
-                        <div className="px-3 py-2 border-b border-[#F3F4F6]">
-                          <p className="text-xs font-semibold text-[#111827]">Brand color</p>
-                        </div>
-                        <div className="p-2 grid grid-cols-3 gap-1.5">
-                          {COLOR_PRESETS.map((c) => (
-                            <button
-                              key={c.label}
-                              type="button"
-                              onClick={() => setShowStyles(false)}
-                              className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-[#F9FAFB] transition-colors"
-                            >
-                              <div className="w-6 h-6 rounded-full border border-black/10" style={{ backgroundColor: c.color }} />
-                              <span className="text-[9px] text-[#6B7280]">{c.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                {/* Build button */}
                 <button
                   onClick={handleSubmit}
-                  className="flex items-center gap-2 text-sm font-semibold pl-5 pr-4 py-2.5 rounded-xl transition-all hover:brightness-95 shadow-sm"
-                  style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
+                  className="flex items-center gap-2 text-sm font-semibold pl-5 pr-4 py-2.5 rounded-xl bg-[#111827] text-white hover:bg-[#1F2937] transition-colors shadow-sm"
                 >
                   Build it
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
+
+            <p className="text-xs text-[#9CA3AF] mt-3 text-center">
+              Free to start. No account required to build.
+            </p>
           </div>
-          <p className="text-xs text-[#6B7280] mt-4 text-center">
-            Free to start. No account required to build.
-          </p>
+
+          {/* Right: Live demo preview */}
+          <div className="bg-white rounded-2xl shadow-lg border border-[#E5E7EB] overflow-hidden">
+            {/* Browser chrome */}
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#F3F4F6] bg-[#FAFAFA]">
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#FCA5A5]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#FCD34D]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#86EFAC]" />
+              </div>
+              <div className="flex-1 mx-4">
+                <div className="bg-[#F3F4F6] rounded-md px-3 py-1 text-[10px] text-[#9CA3AF] text-center font-mono">
+                  getmyvsl.com/f/your-funnel
+                </div>
+              </div>
+            </div>
+
+            {/* Quiz preview area */}
+            <div className="p-6 sm:p-8 min-h-[360px] flex flex-col items-center justify-center">
+              <AnimatePresence mode="wait">
+                {demoQuizStep < 0 ? (
+                  /* Waiting / Building state */
+                  <motion.div
+                    key="building"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="text-center"
+                  >
+                    {demoActive ? (
+                      <div className="space-y-4">
+                        <div className="w-10 h-10 mx-auto border-2 border-[#E5E7EB] border-t-[#10B981] rounded-full animate-spin" />
+                        <p className="text-sm text-[#6B7280]">Building your funnel...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-[#10B981]/20 to-[#059669]/20 flex items-center justify-center">
+                          <Sparkles className="w-6 h-6 text-[#10B981]" />
+                        </div>
+                        <p className="text-sm font-medium text-[#374151]">Your funnel preview will appear here</p>
+                        <p className="text-xs text-[#9CA3AF]">Type a prompt and watch AI build it live</p>
+                      </div>
+                    )}
+                  </motion.div>
+                ) : demoQuizStep < 3 ? (
+                  /* Quiz question */
+                  <motion.div
+                    key={`q-${demoQuizStep}`}
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full max-w-sm"
+                  >
+                    {demoQuizStep === 0 && (
+                      <div className="text-center mb-6">
+                        <span className="inline-block text-[10px] font-semibold tracking-wider uppercase text-[#10B981] bg-[#10B981]/10 px-3 py-1 rounded-full mb-3">
+                          {DEMO_QUIZ.badge}
+                        </span>
+                        <h3 className="text-lg font-bold text-[#111827]">{DEMO_QUIZ.headline}</h3>
+                      </div>
+                    )}
+
+                    <div className="mb-2">
+                      <span className="text-[10px] text-[#9CA3AF]">Question {demoQuizStep + 1} of {DEMO_QUIZ.questions.length}</span>
+                    </div>
+                    <p className="text-sm font-medium text-[#111827] mb-4">
+                      {DEMO_QUIZ.questions[demoQuizStep].text}
+                    </p>
+                    <div className="space-y-2">
+                      {DEMO_QUIZ.questions[demoQuizStep].options.map((opt, oi) => (
+                        <motion.div
+                          key={oi}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 + oi * 0.08 }}
+                          className={`px-4 py-3 rounded-xl border text-sm cursor-default transition-all ${
+                            selectedAnswer === oi
+                              ? "border-[#10B981] bg-[#10B981]/10 text-[#059669] font-medium"
+                              : "border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB]"
+                          }`}
+                        >
+                          {opt}
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mt-6 h-1 bg-[#F3F4F6] rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-[#10B981] to-[#059669] rounded-full"
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${((demoQuizStep + 1) / DEMO_QUIZ.questions.length) * 100}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* Success state */
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center space-y-4"
+                  >
+                    <div className="w-12 h-12 mx-auto rounded-full bg-[#10B981]/10 flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-[#10B981]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#111827]">Lead captured &amp; scored</p>
+                      <p className="text-xs text-[#6B7280] mt-1">Score: 87/100 — High tier</p>
+                    </div>
+                    <div className="inline-block bg-[#10B981] text-white text-xs font-semibold px-6 py-2.5 rounded-xl">
+                      Routed to VIP Calendar
+                    </div>
+                    <p className="text-[10px] text-[#9CA3AF]">This is exactly what your leads will see</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Bottom feature pills */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-wrap items-center justify-center gap-3 mt-10"
+        >
+          {[
+            { icon: <Sparkles className="w-3.5 h-3.5" />, text: "AI-Generated Quizzes" },
+            { icon: <BarChart3 className="w-3.5 h-3.5" />, text: "Lead Scoring" },
+            { icon: <Calendar className="w-3.5 h-3.5" />, text: "Calendar Routing" },
+          ].map((pill) => (
+            <div
+              key={pill.text}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#E5E7EB] text-xs font-medium text-[#374151] shadow-sm"
+            >
+              <span className="text-[#10B981]">{pill.icon}</span>
+              {pill.text}
+            </div>
+          ))}
         </motion.div>
       </div>
     </section>
