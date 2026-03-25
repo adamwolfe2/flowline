@@ -107,21 +107,21 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            No spam, ever
+            {quiz.trustBadges?.[0] ?? "No spam, ever"}
           </div>
           <div className="w-1 h-1 bg-gray-200 rounded-full" />
           <div className="flex items-center gap-1.5 text-xs text-gray-400">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Only 60 seconds
+            {quiz.trustBadges?.[1] ?? "Only 60 seconds"}
           </div>
           <div className="w-1 h-1 bg-gray-200 rounded-full" />
           <div className="flex items-center gap-1.5 text-xs text-gray-400">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            100% free
+            {quiz.trustBadges?.[2] ?? "100% free"}
           </div>
         </div>
       </motion.div>

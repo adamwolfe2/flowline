@@ -18,7 +18,7 @@ interface ContentEditorProps {
 export function ContentEditor({ config, onSave }: ContentEditorProps) {
   const [expandedQ, setExpandedQ] = useState<number | null>(0);
 
-  function updateField(path: string, value: string) {
+  function updateField(path: string, value: string | string[]) {
     const parts = path.split(".");
     const newConfig = JSON.parse(JSON.stringify(config));
     let obj = newConfig as Record<string, unknown>;
@@ -305,6 +305,55 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
               className="text-xs"
               maxLength={80}
             />
+          </div>
+
+          <div id="editor-trust-badges">
+            <Label className="text-[11px] text-gray-400 mb-1">Trust Badges</Label>
+            <p className="text-[10px] text-gray-400 mb-2">Three short phrases shown below the CTA button.</p>
+            <div className="space-y-2">
+              <Input
+                value={config.quiz.trustBadges?.[0] ?? ""}
+                onChange={e => {
+                  const badges: [string, string, string] = [
+                    e.target.value,
+                    config.quiz.trustBadges?.[1] ?? "Only 60 seconds",
+                    config.quiz.trustBadges?.[2] ?? "100% free",
+                  ];
+                  updateField("quiz.trustBadges", badges);
+                }}
+                placeholder="No spam, ever"
+                className="text-xs"
+                maxLength={30}
+              />
+              <Input
+                value={config.quiz.trustBadges?.[1] ?? ""}
+                onChange={e => {
+                  const badges: [string, string, string] = [
+                    config.quiz.trustBadges?.[0] ?? "No spam, ever",
+                    e.target.value,
+                    config.quiz.trustBadges?.[2] ?? "100% free",
+                  ];
+                  updateField("quiz.trustBadges", badges);
+                }}
+                placeholder="Only 60 seconds"
+                className="text-xs"
+                maxLength={30}
+              />
+              <Input
+                value={config.quiz.trustBadges?.[2] ?? ""}
+                onChange={e => {
+                  const badges: [string, string, string] = [
+                    config.quiz.trustBadges?.[0] ?? "No spam, ever",
+                    config.quiz.trustBadges?.[1] ?? "Only 60 seconds",
+                    e.target.value,
+                  ];
+                  updateField("quiz.trustBadges", badges);
+                }}
+                placeholder="100% free"
+                className="text-xs"
+                maxLength={30}
+              />
+            </div>
           </div>
 
           <div>

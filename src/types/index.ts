@@ -43,6 +43,7 @@ export interface FunnelConfig {
       low?: { headline?: string; subtext?: string };
     };
     badgeText?: string;
+    trustBadges?: [string, string, string];
     contentBlocks?: ContentBlock[];
   };
   webhook: {
