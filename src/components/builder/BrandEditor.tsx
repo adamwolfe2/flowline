@@ -115,7 +115,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
 
       <div>
         <Label className="text-xs text-gray-500 mb-2">Brand Color</Label>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="relative">
             <input
               type="color"
@@ -129,11 +129,17 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
           <Input
             value={config.brand.primaryColor}
             onChange={e => {
-              if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
-                updateColor(e.target.value);
+              const v = e.target.value.startsWith("#") ? e.target.value : `#${e.target.value}`;
+              if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+                updateColor(v);
               }
             }}
+            onBlur={e => {
+              const v = e.target.value.startsWith("#") ? e.target.value : `#${e.target.value}`;
+              if (/^#[0-9a-fA-F]{6}$/.test(v)) updateColor(v);
+            }}
             className="text-sm font-mono w-28"
+            placeholder="#2D6A4F"
             maxLength={7}
           />
           <div className="flex gap-1">
@@ -141,6 +147,24 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
             <div className="w-6 h-6 rounded border border-gray-200" style={{ backgroundColor: config.brand.primaryColorLight }} title="Light" />
             <div className="w-6 h-6 rounded border border-gray-200" style={{ backgroundColor: config.brand.primaryColorDark }} title="Dark" />
           </div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            "#2D6A4F", "#1B4332", "#0B6E4F", "#0077B6", "#023E8A",
+            "#7209B7", "#9B2226", "#DC2626", "#E63946", "#D97706",
+            "#F59E0B", "#FBBF24", "#16A34A", "#0D9488", "#6366F1",
+            "#8B5CF6", "#EC4899", "#F43F5E", "#1E293B", "#111827",
+          ].map(hex => (
+            <button
+              key={hex}
+              type="button"
+              onClick={() => updateColor(hex)}
+              className={`w-6 h-6 rounded-md border-2 transition-transform hover:scale-110 ${config.brand.primaryColor === hex ? "border-gray-900 scale-110" : "border-transparent"}`}
+              style={{ backgroundColor: hex }}
+              title={hex}
+              aria-label={`Set color to ${hex}`}
+            />
+          ))}
         </div>
       </div>
 
