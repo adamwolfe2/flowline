@@ -31,6 +31,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid or unconfigured plan" }, { status: 400 });
     }
 
+    if (!resolvedPriceId.startsWith("price_")) {
+      return NextResponse.json(
+        { error: "Stripe price not configured. Set STRIPE_*_PRICE_ID env vars with valid Stripe price IDs." },
+        { status: 400 }
+      );
+    }
+
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) {
       return NextResponse.json({ error: "Account not ready. Please refresh and try again." }, { status: 400 });

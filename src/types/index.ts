@@ -37,10 +37,11 @@ export interface FunnelConfig {
     emailButtonText?: string;
     successHeadline?: string;
     successSubtext?: string;
+    successRedirectUrl?: string;
     results?: {
-      high?: { headline?: string; subtext?: string };
-      mid?: { headline?: string; subtext?: string };
-      low?: { headline?: string; subtext?: string };
+      high?: { headline?: string; subtext?: string; redirectUrl?: string };
+      mid?: { headline?: string; subtext?: string; redirectUrl?: string };
+      low?: { headline?: string; subtext?: string; redirectUrl?: string };
     };
     badgeText?: string;
     trustBadges?: [string, string, string];

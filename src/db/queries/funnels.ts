@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { funnels, funnelSessions, leads } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 import type { NewFunnel } from '@/db/schema';
 
 export async function getFunnelsByUser(userId: string) {
@@ -99,7 +99,7 @@ export async function getFunnelsWithStats(userId: string) {
     completed: sql<number>`coalesce(sum(case when ${funnelSessions.completed} then 1 else 0 end), 0)::int`,
     converted: sql<number>`coalesce(sum(case when ${funnelSessions.converted} then 1 else 0 end), 0)::int`,
   }).from(funnelSessions)
-    .where(sql`${funnelSessions.funnelId} = ANY(${funnelIds})`)
+    .where(inArray(funnelSessions.funnelId, funnelIds))
     .groupBy(funnelSessions.funnelId);
 
   // Batch: get lead counts for all funnels in ONE query
@@ -113,7 +113,7 @@ export async function getFunnelsWithStats(userId: string) {
     thisWeek: sql<number>`coalesce(sum(case when ${leads.createdAt} >= ${weekAgo} then 1 else 0 end), 0)::int`,
     thisMonth: sql<number>`coalesce(sum(case when ${leads.createdAt} >= ${monthAgo} then 1 else 0 end), 0)::int`,
   }).from(leads)
-    .where(sql`${leads.funnelId} = ANY(${funnelIds})`)
+    .where(inArray(leads.funnelId, funnelIds))
     .groupBy(leads.funnelId);
 
   // Batch: get tier breakdown for all funnels in ONE query
@@ -122,7 +122,7 @@ export async function getFunnelsWithStats(userId: string) {
     tier: leads.calendarTier,
     count: sql<number>`count(*)::int`,
   }).from(leads)
-    .where(sql`${leads.funnelId} = ANY(${funnelIds})`)
+    .where(inArray(leads.funnelId, funnelIds))
     .groupBy(leads.funnelId, leads.calendarTier);
 
   // Map results to funnels

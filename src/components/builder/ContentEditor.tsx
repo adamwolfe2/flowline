@@ -413,6 +413,19 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
               Use {"{email}"} as a placeholder for the lead&apos;s email address.
             </p>
           </div>
+
+          <div>
+            <Label className="text-[11px] text-gray-400 mb-1">Redirect URL (optional)</Label>
+            <Input
+              value={config.quiz.successRedirectUrl ?? ""}
+              onChange={e => updateField("quiz.successRedirectUrl", e.target.value)}
+              placeholder="https://cal.com/you/call"
+              className="text-xs font-mono"
+            />
+            <p className="text-[10px] text-gray-300 mt-1">
+              Redirect leads to this URL after submission instead of showing the success page. Leave blank to show the default success page.
+            </p>
+          </div>
         </div>
       </div>
 

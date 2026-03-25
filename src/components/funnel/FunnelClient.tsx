@@ -115,6 +115,16 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
         }
         fireConversionEvent(config.tracking);
 
+        // Check for tier-specific or global redirect URL
+        const tierRedirect = data.calendarTier && config.quiz.results?.[data.calendarTier as keyof typeof config.quiz.results]?.redirectUrl;
+        const globalRedirect = config.quiz.successRedirectUrl;
+        const redirectUrl = tierRedirect || globalRedirect;
+
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        }
+
         setStep(successStep);
       } catch {
         toast.error("Something went wrong. Please try again.");

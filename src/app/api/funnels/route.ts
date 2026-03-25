@@ -40,7 +40,7 @@ export async function GET() {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     logger.error("GET /api/funnels error", { error: errMsg });
-    return NextResponse.json({ error: "Internal server error", debug: errMsg }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
