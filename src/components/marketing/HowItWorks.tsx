@@ -1,306 +1,268 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { Zap } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, BarChart3, Calendar, MessageSquare, ArrowRight, CheckCircle2, Users, Zap } from "lucide-react";
+import Link from "next/link";
 
-const steps = [
+const features = [
   {
-    num: "01",
-    title: "Build your funnel",
-    description:
-      "Use AI or templates to create a qualifying quiz in minutes. Describe your business and let AI generate questions, scoring, and branding.",
+    id: "build",
+    icon: <Sparkles className="w-5 h-5" />,
+    title: "Build with AI",
+    description: "Describe your business in one sentence. AI generates your quiz questions, lead scoring, and calendar routing automatically.",
+    bullets: ["AI-generated quiz questions", "Automatic lead scoring", "Brand customization"],
+    mockup: "build",
   },
   {
-    num: "02",
-    title: "Share your link",
-    description:
-      "Publish and share your funnel link anywhere. Custom domains, embed on your site, or send directly to prospects.",
+    id: "score",
+    icon: <BarChart3 className="w-5 h-5" />,
+    title: "Score every lead",
+    description: "Each quiz answer earns points. Leads are automatically scored and sorted into tiers so you know who's ready to buy.",
+    bullets: ["Point-based scoring system", "High / Mid / Low tiers", "Custom score thresholds"],
+    mockup: "score",
   },
   {
-    num: "03",
-    title: "Book qualified calls",
-    description:
-      "Leads get scored and routed to the right calendar. Hot leads book your premium slots. Cold leads get filtered out automatically.",
+    id: "route",
+    icon: <Calendar className="w-5 h-5" />,
+    title: "Route to the right calendar",
+    description: "Hot leads get your VIP booking link. Warm leads get a discovery call. Cold leads get nurtured via email sequences.",
+    bullets: ["Tier-based calendar routing", "Custom redirect URLs", "Automated email follow-ups"],
+    mockup: "route",
+  },
+  {
+    id: "analyze",
+    icon: <MessageSquare className="w-5 h-5" />,
+    title: "Analyze and optimize",
+    description: "See exactly where leads drop off. Track conversion rates, device types, UTM sources, and A/B test different versions.",
+    bullets: ["Step-by-step drop-off analysis", "UTM tracking built in", "A/B testing with variants"],
+    mockup: "analyze",
   },
 ];
 
-const questions = [
-  "What is your current revenue?",
-  "How many clients do you serve?",
-  "What is your biggest challenge?",
-];
-
-const answerOptions = ["Under $5k", "$5k - $20k", "$20k - $50k", "$50k+"];
-
-function BuilderMockup() {
-  const [stage, setStage] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
-  const hasPlayed = useRef(false);
-
-  useEffect(() => {
-    if (!isInView || hasPlayed.current) return;
-    hasPlayed.current = true;
-
-    const timers = [
-      setTimeout(() => setStage(1), 600),
-      setTimeout(() => setStage(2), 2000),
-      setTimeout(() => setStage(3), 3200),
-      setTimeout(() => setStage(4), 4500),
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, [isInView]);
-
+function BuildMockup() {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: 0.2 }}
-      className="mt-16 bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm"
-    >
-      {/* Browser chrome */}
-      <div className="h-10 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center px-4 gap-2">
-        <div className="w-3 h-3 rounded-full bg-[#D1D5DB]" />
-        <div className="w-3 h-3 rounded-full bg-[#D1D5DB]" />
-        <div className="w-3 h-3 rounded-full bg-[#D1D5DB]" />
-        <div className="flex-1 mx-8">
-          <div className="bg-white rounded border border-[#E5E7EB] px-3 py-1 text-xs text-[#9CA3AF] text-center max-w-[240px] mx-auto">
-            app.getmyvsl.com/builder
-          </div>
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-[#2D6A4F]" />
         </div>
+        <span className="text-sm font-medium text-[#111827]">AI Builder</span>
       </div>
-
-      {/* Split view */}
-      <div className="grid md:grid-cols-2 min-h-[340px]">
-        {/* Left: AI Chat — messages appear one by one */}
-        <div className="bg-white p-6 flex flex-col gap-3 border-r border-[#E5E7EB]">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full bg-[#2D6A4F]" />
-            <span className="text-xs text-[#6B7280] font-medium">
-              AI Builder
-            </span>
-          </div>
-
-          {/* User message */}
-          {stage >= 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-[#F9FAFB] rounded-xl px-4 py-3 border border-[#E5E7EB]"
-            >
-              <p className="text-sm text-[#111827]">
-                Build a quiz funnel for my coaching business
-              </p>
-            </motion.div>
-          )}
-
-          {/* Typing indicator before "Built" */}
-          {stage === 1 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-1 px-4 py-3"
-            >
-              <motion.div
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0 }}
-                className="w-1.5 h-1.5 rounded-full bg-[#2D6A4F]"
-              />
-              <motion.div
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-                className="w-1.5 h-1.5 rounded-full bg-[#2D6A4F]"
-              />
-              <motion.div
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-                className="w-1.5 h-1.5 rounded-full bg-[#2D6A4F]"
-              />
-            </motion.div>
-          )}
-
-          {/* Built response */}
-          {stage >= 2 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-[#2D6A4F]/5 rounded-xl px-4 py-3 border border-[#2D6A4F]/20"
-            >
-              <p className="text-xs text-[#2D6A4F] font-medium mb-1">Built</p>
-              <p className="text-sm text-[#6B7280]">
-                3 qualifying questions, scoring rules, and calendar routing
-                created.
-              </p>
-            </motion.div>
-          )}
-
-          {/* Generated questions list */}
-          {stage >= 3 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-[#F9FAFB] rounded-xl px-4 py-3 border border-[#E5E7EB]"
-            >
-              <p className="text-xs text-[#9CA3AF] mb-2">
-                Generated questions:
-              </p>
-              {questions.map((q, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.15, duration: 0.25 }}
-                  className="flex items-center gap-2 text-xs text-[#6B7280] py-0.5"
-                >
-                  <span className="text-[#9CA3AF]">{i + 1}.</span> {q}
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </div>
-
-        {/* Right: Live Preview — quiz UI animates in */}
-        <div className="bg-[#F9FAFB] p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wider">
-              Live Preview
-            </span>
-            <div className="flex items-center gap-1.5">
-              <div
-                className={`w-2 h-2 rounded-full transition-colors duration-500 ${stage >= 2 ? "bg-emerald-400" : "bg-[#D1D5DB]"}`}
-              />
-              <span className="text-[10px] text-[#9CA3AF]">
-                {stage >= 2 ? "Synced" : "Waiting"}
-              </span>
-            </div>
-          </div>
-
-          {stage < 2 && (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-sm text-[#D1D5DB]">
-                Waiting for AI to build...
-              </p>
-            </div>
-          )}
-
-          {stage >= 2 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="bg-white rounded-xl border border-[#E5E7EB] p-5 flex-1"
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <div className="w-10 h-10 rounded-lg bg-[#2D6A4F]/20 flex items-center justify-center mb-4">
-                  <Zap className="w-5 h-5 text-[#2D6A4F]" />
-                </div>
-                <h4 className="text-sm font-semibold text-[#111827] mb-1">
-                  Coaching Qualifier
-                </h4>
-                <p className="text-xs text-[#9CA3AF] mb-4">
-                  Question 1 of 3
-                </p>
-              </motion.div>
-
-              {stage >= 3 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
-                >
-                  <p className="text-sm font-medium text-[#111827] mb-3">
-                    What is your current monthly revenue?
-                  </p>
-                </motion.div>
-              )}
-
-              {stage >= 3 && (
-                <div className="space-y-2">
-                  {answerOptions.map((opt, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: 12 }}
-                      animate={{
-                        opacity: 1,
-                        x: 0,
-                        backgroundColor:
-                          stage >= 4 && i === 2
-                            ? "rgba(45, 106, 79, 0.1)"
-                            : "#ffffff",
-                        borderColor:
-                          stage >= 4 && i === 2 ? "#2D6A4F" : "#E5E7EB",
-                      }}
-                      transition={{
-                        opacity: { delay: i * 0.1, duration: 0.25 },
-                        x: { delay: i * 0.1, duration: 0.25 },
-                        backgroundColor: { delay: 0, duration: 0.4 },
-                        borderColor: { delay: 0, duration: 0.4 },
-                      }}
-                      className="text-sm px-4 py-2.5 rounded-lg border text-[#6B7280]"
-                    >
-                      {opt}
-                      {stage >= 4 && i === 2 && (
-                        <motion.span
-                          initial={{ opacity: 0, scale: 0 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="ml-2 text-[#2D6A4F] text-xs font-medium"
-                        >
-                          +25 pts
-                        </motion.span>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </div>
+      <div className="bg-[#F9FAFB] rounded-lg p-4 mb-4 border border-[#E5E7EB]">
+        <p className="text-sm text-[#374151]">I sell business coaching to 6-figure entrepreneurs who want to scale past 7 figures</p>
       </div>
-    </motion.div>
+      <div className="space-y-2.5">
+        {["Analyzing business type...", "Generating 3 qualifying questions...", "Setting up lead scoring..."].map((step, i) => (
+          <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.15 }} className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#2D6A4F]" />
+            <span className="text-xs text-[#2D6A4F] font-medium">{step}</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
 }
 
-export function HowItWorks() {
+function ScoreMockup() {
+  const tiers = [
+    { label: "Hot Lead", score: "8-10", color: "#2D6A4F", bg: "#2D6A4F/10", count: "38%" },
+    { label: "Warm Lead", score: "4-7", color: "#D97706", bg: "#D97706/10", count: "34%" },
+    { label: "Cold Lead", score: "0-3", color: "#6B7280", bg: "#6B7280/10", count: "28%" },
+  ];
   return (
-    <section className="bg-white py-12 sm:py-20 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
-          {steps.map((step, i) => (
-            <motion.div
-              key={step.num}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.12 }}
-            >
-              <div className="h-0.5 w-16 bg-[#2D6A4F] mb-6" />
-              <span className="text-sm font-semibold text-[#9CA3AF] mb-2 block">
-                {step.num}
-              </span>
-              <h3
-                className="text-xl font-semibold text-[#111827] mb-2"
-                style={{ fontFamily: "var(--font-instrument-serif)" }}
-              >
-                {step.title}
-              </h3>
-              <p className="text-sm text-[#6B7280] leading-relaxed">
-                {step.description}
-              </p>
-            </motion.div>
-          ))}
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
+      <p className="text-sm font-medium text-[#111827] mb-4">Lead Score Distribution</p>
+      <div className="space-y-3">
+        {tiers.map((t, i) => (
+          <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.12 }} className="flex items-center gap-3">
+            <div className="w-16 text-xs font-medium" style={{ color: t.color }}>{t.label}</div>
+            <div className="flex-1 h-8 bg-[#F3F4F6] rounded-lg overflow-hidden">
+              <motion.div
+                className="h-full rounded-lg"
+                style={{ backgroundColor: t.color }}
+                initial={{ width: "0%" }}
+                animate={{ width: t.count }}
+                transition={{ delay: 0.3 + i * 0.15, duration: 0.5 }}
+              />
+            </div>
+            <span className="text-xs font-medium text-[#6B7280] w-8">{t.count}</span>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-4 pt-4 border-t border-[#F3F4F6] flex items-center justify-between">
+        <span className="text-xs text-[#9CA3AF]">Score range: 0-10</span>
+        <span className="text-xs font-medium text-[#2D6A4F]">147 leads scored</span>
+      </div>
+    </div>
+  );
+}
+
+function RouteMockup() {
+  const routes = [
+    { tier: "Hot", calendar: "VIP Strategy Call", time: "30 min", color: "#2D6A4F" },
+    { tier: "Warm", calendar: "Discovery Call", time: "15 min", color: "#D97706" },
+    { tier: "Cold", calendar: "Email Nurture Sequence", time: "Auto", color: "#6B7280" },
+  ];
+  return (
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
+      <p className="text-sm font-medium text-[#111827] mb-4">Calendar Routing Rules</p>
+      <div className="space-y-2.5">
+        {routes.map((r, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.1 }}
+            className="flex items-center gap-3 p-3 rounded-lg border border-[#E5E7EB]">
+            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} />
+            <div className="flex-1">
+              <p className="text-xs font-medium text-[#111827]">{r.calendar}</p>
+              <p className="text-[10px] text-[#9CA3AF]">{r.tier} tier leads</p>
+            </div>
+            <span className="text-[10px] text-[#9CA3AF] bg-[#F3F4F6] px-2 py-0.5 rounded">{r.time}</span>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AnalyzeMockup() {
+  const steps = [
+    { label: "Page View", pct: 100 },
+    { label: "Quiz Started", pct: 78 },
+    { label: "Completed", pct: 56 },
+    { label: "Email Submitted", pct: 41 },
+  ];
+  return (
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
+      <p className="text-sm font-medium text-[#111827] mb-4">Funnel Drop-off</p>
+      <div className="space-y-2">
+        {steps.map((s, i) => (
+          <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 + i * 0.1 }}>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-[#6B7280]">{s.label}</span>
+              <span className="text-xs font-medium text-[#111827]">{s.pct}%</span>
+            </div>
+            <div className="h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-[#2D6A4F] rounded-full"
+                initial={{ width: "0%" }}
+                animate={{ width: `${s.pct}%` }}
+                transition={{ delay: 0.2 + i * 0.1, duration: 0.4 }}
+              />
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-4 pt-4 border-t border-[#F3F4F6]">
+        <div className="flex items-center gap-2">
+          <Zap className="w-3.5 h-3.5 text-[#D97706]" />
+          <span className="text-xs text-[#6B7280]">22% drop at Question 2 — consider simplifying</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const MOCKUP_MAP: Record<string, React.ReactNode> = {
+  build: <BuildMockup />,
+  score: <ScoreMockup />,
+  route: <RouteMockup />,
+  analyze: <AnalyzeMockup />,
+};
+
+export function HowItWorks() {
+  const [active, setActive] = useState("build");
+
+  return (
+    <section id="features" className="bg-white py-20 sm:py-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div className="max-w-2xl mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
+            Everything you need to convert visitors into booked calls
+          </h2>
+          <p className="mt-4 text-lg text-[#6B7280]">
+            From AI-powered quiz generation to automated calendar routing — all in one platform.
+          </p>
         </div>
 
+        {/* Two-column: left steps, right mockup */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+          {/* Left: Feature list */}
+          <div className="space-y-1">
+            {features.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setActive(f.id)}
+                className={`w-full text-left p-5 rounded-xl transition-all ${
+                  active === f.id
+                    ? "bg-[#F9FAFB] border border-[#E5E7EB]"
+                    : "border border-transparent hover:bg-[#FAFAFA]"
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    active === f.id ? "bg-[#2D6A4F] text-white" : "bg-[#F3F4F6] text-[#9CA3AF]"
+                  }`}>
+                    {f.icon}
+                  </div>
+                  <div>
+                    <h3 className={`text-sm font-semibold mb-1 ${active === f.id ? "text-[#111827]" : "text-[#6B7280]"}`}>
+                      {f.title}
+                    </h3>
+                    {active === f.id && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
+                        <p className="text-sm text-[#6B7280] mb-3">{f.description}</p>
+                        <ul className="space-y-1.5">
+                          {f.bullets.map((b, i) => (
+                            <li key={i} className="flex items-center gap-2 text-xs text-[#374151]">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#2D6A4F] flex-shrink-0" />
+                              {b}
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+                {active === f.id && (
+                  <motion.div
+                    className="h-0.5 bg-[#2D6A4F] rounded-full mt-4"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 5 }}
+                    key={f.id}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Right: Animated mockup */}
+          <div className="sticky top-24">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.2 }}
+              >
+                {MOCKUP_MAP[active]}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="mt-16 text-center">
+          <Link
+            href="/build"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2D6A4F] text-white text-sm font-semibold rounded-xl hover:bg-[#245840] transition-colors"
+          >
+            Try the AI builder
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );
