@@ -92,8 +92,20 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-28 lg:pt-36 pb-20 sm:pb-28">
+    <section className="relative overflow-hidden">
+      {/* Forest background */}
+      <div className="absolute inset-0">
+        <img
+          src="/hero-bg.jpg"
+          alt=""
+          className="w-full h-full object-cover object-top"
+        />
+      </div>
+      <div className="absolute inset-0" style={{
+        background: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.88) 50%, rgba(255,255,255,0.95) 80%, #FFFFFF 100%)",
+      }} />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-28 lg:pt-36 pb-20 sm:pb-28">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* LEFT: Headline + CTA */}
@@ -102,10 +114,10 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08]"
+              className="text-3xl sm:text-[44px] lg:text-[52px] font-bold tracking-tight leading-[1.1]"
             >
               <span className="text-[#111827]">Describe your business.</span>
-              <br />
+              {" "}
               <span className="text-[#2D6A4F]">Get a funnel in 60 seconds.</span>
             </motion.h1>
 
