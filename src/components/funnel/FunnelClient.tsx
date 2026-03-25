@@ -23,10 +23,23 @@ interface FunnelClientProps {
 }
 
 export function FunnelClient({ config, funnelId, sessionId, hideBranding }: FunnelClientProps) {
-  const totalQuestions = config.quiz.questions.length;
-  const hasContentBlocks = !!(config.quiz.contentBlocks && config.quiz.contentBlocks.length > 0);
+  // Local config state that can be updated via postMessage from the builder
+  const [activeConfig, setActiveConfig] = useState(config);
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.data?.type === 'myvsl:config-update' && event.data.config) {
+        setActiveConfig(event.data.config);
+      }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const totalQuestions = activeConfig.quiz.questions.length;
+  const hasContentBlocks = !!(activeConfig.quiz.contentBlocks && activeConfig.quiz.contentBlocks.length > 0);
   const contentBlocksOffset = hasContentBlocks ? 1 : 0;
-  const hasVideo = !!(config.quiz.video?.enabled && config.quiz.video?.url);
+  const hasVideo = !!(activeConfig.quiz.video?.enabled && activeConfig.quiz.video?.url);
   const videoOffset = hasVideo ? 1 : 0;
   const questionStartStep = 1 + contentBlocksOffset + videoOffset;
   const emailStep = questionStartStep + totalQuestions;
@@ -52,13 +65,13 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
 
   const handleStart = useCallback(() => {
     trackCTAClick();
-    fireQuizStartEvent(config.tracking);
+    fireQuizStartEvent(activeConfig.tracking);
     setStep(1);
-  }, [trackCTAClick, config.tracking]);
+  }, [trackCTAClick, activeConfig.tracking]);
 
   const handleSelect = useCallback(
     (key: string, id: string) => {
-      const question = config.quiz.questions.find((q) => q.key === key);
+      const question = activeConfig.quiz.questions.find((q) => q.key === key);
       const option = question?.options.find((o) => o.id === id);
       if (question && option) {
         trackAnswer(step, key, id, option.label, option.points);
@@ -69,7 +82,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
         setStep((prev) => prev + 1);
       }, 200);
     },
-    [config.quiz.questions, step, trackAnswer]
+    [activeConfig.quiz.questions, step, trackAnswer]
   );
 
   const handleBack = useCallback(() => {
@@ -113,11 +126,11 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
         if (data.leadId) {
           trackLeadCreated(data.leadId, data.score, data.calendarTier);
         }
-        fireConversionEvent(config.tracking);
+        fireConversionEvent(activeConfig.tracking);
 
         // Check for tier-specific or global redirect URL
-        const tierRedirect = data.calendarTier && config.quiz.results?.[data.calendarTier as keyof typeof config.quiz.results]?.redirectUrl;
-        const globalRedirect = config.quiz.successRedirectUrl;
+        const tierRedirect = data.calendarTier && activeConfig.quiz.results?.[data.calendarTier as keyof typeof activeConfig.quiz.results]?.redirectUrl;
+        const globalRedirect = activeConfig.quiz.successRedirectUrl;
         const redirectUrl = tierRedirect || globalRedirect;
 
         if (redirectUrl) {
@@ -130,7 +143,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
         toast.error("Something went wrong. Please try again.");
       }
     },
-    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated, config.tracking]
+    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated, activeConfig.tracking]
   );
 
   // Track funnel completed when reaching success step
@@ -144,7 +157,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
   const currentQuestionIndex = step - questionStartStep;
   const currentQuestion =
     step >= questionStartStep && step < emailStep
-      ? config.quiz.questions[currentQuestionIndex]
+      ? activeConfig.quiz.questions[currentQuestionIndex]
       : undefined;
 
   // For progress bar, map question steps to 1..totalQuestions range
@@ -160,17 +173,17 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center bg-gray-50"
-      style={{ fontFamily: config.brand.fontBody }}
+      style={{ fontFamily: activeConfig.brand.fontBody }}
     >
       <TrackingPixels
-        fbPixelId={config.tracking?.fbPixelId}
-        tiktokPixelId={config.tracking?.tiktokPixelId}
-        ga4MeasurementId={config.tracking?.ga4MeasurementId}
-        cursivePixelId={config.tracking?.cursivePixelId}
-        customScripts={config.tracking?.customScripts}
+        fbPixelId={activeConfig.tracking?.fbPixelId}
+        tiktokPixelId={activeConfig.tracking?.tiktokPixelId}
+        ga4MeasurementId={activeConfig.tracking?.ga4MeasurementId}
+        cursivePixelId={activeConfig.tracking?.cursivePixelId}
+        customScripts={activeConfig.tracking?.customScripts}
       />
       <div className="w-full max-w-lg mx-auto py-12 px-4">
-        <ProgressBar config={config} step={progressStep} totalQuestions={totalQuestions} />
+        <ProgressBar config={activeConfig} step={progressStep} totalQuestions={totalQuestions} />
 
         <AnimatePresence mode="wait">
           {step === 0 && (
@@ -181,7 +194,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.18 }}
             >
-              <WelcomeStep config={config} onStart={handleStart} />
+              <WelcomeStep config={activeConfig} onStart={handleStart} />
             </motion.div>
           )}
 
@@ -194,8 +207,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               transition={{ duration: 0.18 }}
             >
               <ContentBlockDisplay
-                blocks={config.quiz.contentBlocks!}
-                brand={config.brand}
+                blocks={activeConfig.quiz.contentBlocks!}
+                brand={activeConfig.brand}
                 onContinue={() => setStep(2)}
               />
             </motion.div>
@@ -209,7 +222,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.18 }}
             >
-              <VideoStep config={config} onContinue={() => setStep(1 + contentBlocksOffset + 1)} />
+              <VideoStep config={activeConfig} onContinue={() => setStep(1 + contentBlocksOffset + 1)} />
             </motion.div>
           )}
 
@@ -223,7 +236,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
             >
               <EditableOverlay section="content" field="questions">
                 <QuestionStep
-                  config={config}
+                  config={activeConfig}
                   question={currentQuestion}
                   questionNumber={currentQuestionIndex + 1}
                   totalQuestions={totalQuestions}
@@ -243,7 +256,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.18 }}
             >
-              <EmailStep config={config} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onEmailBlur={handleEmailBlur} onBack={handleBack} />
+              <EmailStep config={activeConfig} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onEmailBlur={handleEmailBlur} onBack={handleBack} />
             </motion.div>
           )}
 
@@ -256,7 +269,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
               transition={{ duration: 0.18 }}
             >
               <SuccessStep
-                config={config}
+                config={activeConfig}
                 calendarUrl={calendarUrl}
                 email={email}
                 score={leadScore}

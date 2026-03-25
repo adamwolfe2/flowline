@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Funnel, FunnelStats } from "@/types";
 import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -17,10 +17,57 @@ interface FunnelWithStats extends Funnel {
 
 function DashboardContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [funnels, setFunnels] = useState<FunnelWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<string>("newest");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const claimAttempted = useRef(false);
+
+  // Claim pending funnel from localStorage (saved before sign-up)
+  useEffect(() => {
+    if (claimAttempted.current) return;
+    claimAttempted.current = true;
+
+    const pending = localStorage.getItem("myvsl_pending_funnel");
+    if (!pending) return;
+
+    try {
+      const { config: savedConfig, slug: savedSlug } = JSON.parse(pending);
+      if (!savedConfig?.brand || !savedConfig?.quiz) {
+        localStorage.removeItem("myvsl_pending_funnel");
+        return;
+      }
+
+      fetch("/api/funnels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config: savedConfig, slug: savedSlug }),
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 403) {
+              toast.error("Free plan limited to 1 funnel. Upgrade to create more.");
+            } else {
+              toast.error(data.error || "Failed to save your funnel.");
+            }
+            localStorage.removeItem("myvsl_pending_funnel");
+            return;
+          }
+          const funnel = await res.json();
+          localStorage.removeItem("myvsl_pending_funnel");
+          toast.success("Your funnel was saved!");
+          router.push(`/builder/${funnel.id}`);
+        })
+        .catch(() => {
+          localStorage.removeItem("myvsl_pending_funnel");
+          toast.error("Failed to save your funnel. Please try again.");
+        });
+    } catch {
+      localStorage.removeItem("myvsl_pending_funnel");
+    }
+  }, [router]);
 
   useEffect(() => {
     if (searchParams.get("upgraded") === "true") {

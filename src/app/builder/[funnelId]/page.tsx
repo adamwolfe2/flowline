@@ -130,7 +130,6 @@ export default function BuilderPage() {
     if (res.ok) {
       setHasUnsavedChanges(false);
       setSaveStatus("saved");
-      setPreviewKey(k => k + 1);
       setTimeout(() => setSaveStatus("idle"), 3000);
     } else {
       setSaveStatus("failed");
@@ -138,12 +137,23 @@ export default function BuilderPage() {
     }
   }, [funnelId, editingVariantId]);
 
+  // Send config to the preview iframe via postMessage (no reload needed)
+  const postConfigToPreview = useCallback((configToPost: FunnelConfig) => {
+    const iframe = document.querySelector('iframe[title="Funnel preview"]') as HTMLIFrameElement;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'myvsl:config-update', config: configToPost }, '*');
+    }
+  }, []);
+
   // Debounced save: updates config immediately (for responsive UI), saves after 800ms of inactivity
   const saveConfig = useCallback((newConfig: FunnelConfig) => {
     setConfig(newConfig);
     setHasUnsavedChanges(true);
     setSaveStatus("idle");
     pendingConfigRef.current = newConfig;
+
+    // Immediately push to preview iframe for instant feedback
+    postConfigToPreview(newConfig);
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -155,7 +165,7 @@ export default function BuilderPage() {
         pendingConfigRef.current = null;
       }
     }, 800);
-  }, [flushSave]);
+  }, [flushSave, postConfigToPreview]);
 
   // Flush pending save on unmount
   useEffect(() => {
