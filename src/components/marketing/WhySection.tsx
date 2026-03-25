@@ -221,7 +221,7 @@ export function WhySection() {
           </SectionLabel>
           <h2
             className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-instrument-serif)" }}
+            style={{ fontFamily: "var(--font-plus-jakarta)" }}
           >
             Know exactly why leads don&apos;t book
           </h2>

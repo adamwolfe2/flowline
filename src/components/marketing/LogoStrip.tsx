@@ -59,7 +59,7 @@ export function LogoStrip() {
                 alt={logo.name}
                 width={28}
                 height={28}
-                className="w-7 h-7 object-contain opacity-40 group-hover:opacity-90 transition-opacity duration-300"
+                className="w-7 h-7 object-contain opacity-60 group-hover:opacity-90 transition-opacity duration-300"
               />
               <span className="hidden sm:inline text-sm font-medium text-[#B0B0B0] group-hover:text-[#6B7280] transition-colors duration-300">
                 {logo.name}

@@ -64,7 +64,7 @@ export function TestimonialsSection() {
           </SectionLabel>
           <h2
             className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-instrument-serif)" }}
+            style={{ fontFamily: "var(--font-plus-jakarta)" }}
           >
             What happens when you go live
           </h2>

@@ -6,9 +6,10 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const PROMPTS = [
-  "build a quiz funnel that qualifies coaching leads",
-  "create a lead scorer for my digital agency",
-  "make a booking page for real estate showings",
+  "I sell business coaching to 6-figure entrepreneurs",
+  "I run a digital marketing agency for ecommerce brands",
+  "I help first-time home buyers find properties",
+  "I sell online fitness coaching for busy professionals",
 ];
 
 export function BottomCTA() {
@@ -60,7 +61,7 @@ export function BottomCTA() {
         >
           <h2
             className="text-2xl sm:text-[36px] md:text-[48px] lg:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
-            style={{ fontFamily: "var(--font-instrument-serif)" }}
+            style={{ fontFamily: "var(--font-plus-jakarta)" }}
           >
             Ready to build your first funnel?
           </h2>
@@ -92,15 +93,15 @@ export function BottomCTA() {
 
             {/* Bottom bar */}
             <div className="flex items-center justify-between px-5 pb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded bg-emerald-50 flex items-center justify-center text-[10px] text-emerald-600">
-                  Q
+              <div className="flex -space-x-1.5" title="Integrates with Calendly, Slack, HubSpot">
+                <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                  <img src="/integrations/calendly.svg" alt="Calendly" className="w-3.5 h-3.5 object-contain" />
                 </div>
-                <div className="w-5 h-5 rounded bg-blue-50 flex items-center justify-center text-[10px] text-blue-600">
-                  B
+                <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                  <img src="/integrations/slack.svg" alt="Slack" className="w-3.5 h-3.5 object-contain" />
                 </div>
-                <div className="w-5 h-5 rounded bg-orange-50 flex items-center justify-center text-[10px] text-orange-600">
-                  L
+                <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
+                  <img src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" className="w-3.5 h-3.5 object-contain" />
                 </div>
               </div>
               <button

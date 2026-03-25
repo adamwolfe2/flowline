@@ -42,21 +42,19 @@ const features = [
 
 function BuildMockup() {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-[#2D6A4F]" />
-        </div>
-        <span className="text-sm font-medium text-[#111827]">AI Builder</span>
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-8 shadow-sm">
+      <div className="flex items-center gap-2 mb-5">
+        <Sparkles className="w-5 h-5 text-[#2D6A4F]" />
+        <span className="text-base font-semibold text-[#111827]">AI Builder</span>
       </div>
-      <div className="bg-[#F9FAFB] rounded-lg p-4 mb-4 border border-[#E5E7EB]">
-        <p className="text-sm text-[#374151]">I sell business coaching to 6-figure entrepreneurs who want to scale past 7 figures</p>
+      <div className="bg-[#F9FAFB] rounded-lg p-5 mb-5 border border-[#E5E7EB]">
+        <p className="text-sm text-[#374151] leading-relaxed">I sell business coaching to 6-figure entrepreneurs who want to scale past 7 figures</p>
       </div>
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {["Analyzing business type...", "Generating 3 qualifying questions...", "Setting up lead scoring..."].map((step, i) => (
-          <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.15 }} className="flex items-center gap-2">
+          <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.15 }} className="flex items-center gap-2.5">
             <CheckCircle2 className="w-4 h-4 text-[#2D6A4F]" />
-            <span className="text-xs text-[#2D6A4F] font-medium">{step}</span>
+            <span className="text-sm text-[#2D6A4F] font-medium">{step}</span>
           </motion.div>
         ))}
       </div>
@@ -71,13 +69,13 @@ function ScoreMockup() {
     { label: "Cold Lead", score: "0-3", color: "#6B7280", bg: "#6B7280/10", count: "28%" },
   ];
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <p className="text-sm font-medium text-[#111827] mb-4">Lead Score Distribution</p>
-      <div className="space-y-3">
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-8 shadow-sm">
+      <p className="text-base font-semibold text-[#111827] mb-5">Lead Score Distribution</p>
+      <div className="space-y-4">
         {tiers.map((t, i) => (
           <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.12 }} className="flex items-center gap-3">
-            <div className="w-16 text-xs font-medium" style={{ color: t.color }}>{t.label}</div>
-            <div className="flex-1 h-8 bg-[#F3F4F6] rounded-lg overflow-hidden">
+            <div className="w-20 text-sm font-medium" style={{ color: t.color }}>{t.label}</div>
+            <div className="flex-1 h-9 bg-[#F3F4F6] rounded-lg overflow-hidden">
               <motion.div
                 className="h-full rounded-lg"
                 style={{ backgroundColor: t.color }}
@@ -86,13 +84,13 @@ function ScoreMockup() {
                 transition={{ delay: 0.3 + i * 0.15, duration: 0.5 }}
               />
             </div>
-            <span className="text-xs font-medium text-[#6B7280] w-8">{t.count}</span>
+            <span className="text-sm font-medium text-[#6B7280] w-10">{t.count}</span>
           </motion.div>
         ))}
       </div>
-      <div className="mt-4 pt-4 border-t border-[#F3F4F6] flex items-center justify-between">
-        <span className="text-xs text-[#9CA3AF]">Score range: 0-10</span>
-        <span className="text-xs font-medium text-[#2D6A4F]">147 leads scored</span>
+      <div className="mt-5 pt-5 border-t border-[#F3F4F6] flex items-center justify-between">
+        <span className="text-sm text-[#9CA3AF]">Score range: 0-10</span>
+        <span className="text-sm font-medium text-[#2D6A4F]">147 leads scored</span>
       </div>
     </div>
   );
@@ -105,18 +103,18 @@ function RouteMockup() {
     { tier: "Cold", calendar: "Email Nurture Sequence", time: "Auto", color: "#6B7280" },
   ];
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <p className="text-sm font-medium text-[#111827] mb-4">Calendar Routing Rules</p>
-      <div className="space-y-2.5">
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-8 shadow-sm">
+      <p className="text-base font-semibold text-[#111827] mb-5">Calendar Routing Rules</p>
+      <div className="space-y-3">
         {routes.map((r, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.1 }}
-            className="flex items-center gap-3 p-3 rounded-lg border border-[#E5E7EB]">
-            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} />
+            className="flex items-center gap-3 p-4 rounded-lg border border-[#E5E7EB]">
+            <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} />
             <div className="flex-1">
-              <p className="text-xs font-medium text-[#111827]">{r.calendar}</p>
-              <p className="text-[10px] text-[#9CA3AF]">{r.tier} tier leads</p>
+              <p className="text-sm font-medium text-[#111827]">{r.calendar}</p>
+              <p className="text-xs text-[#9CA3AF]">{r.tier} tier leads</p>
             </div>
-            <span className="text-[10px] text-[#9CA3AF] bg-[#F3F4F6] px-2 py-0.5 rounded">{r.time}</span>
+            <span className="text-xs text-[#9CA3AF] bg-[#F3F4F6] px-3 py-1 rounded">{r.time}</span>
           </motion.div>
         ))}
       </div>
@@ -132,8 +130,8 @@ function AnalyzeMockup() {
     { label: "Email Submitted", pct: 41 },
   ];
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm">
-      <p className="text-sm font-medium text-[#111827] mb-4">Funnel Drop-off</p>
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-8 shadow-sm">
+      <p className="text-base font-semibold text-[#111827] mb-5">Funnel Drop-off</p>
       <div className="space-y-2">
         {steps.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 + i * 0.1 }}>
@@ -200,10 +198,10 @@ export function HowItWorks() {
                 }`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    active === f.id ? "bg-[#2D6A4F] text-white" : "bg-[#F3F4F6] text-[#9CA3AF]"
-                  }`}>
-                    {f.icon}
+                  <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
+                    <div className={active === f.id ? "text-[#2D6A4F]" : "text-[#9CA3AF]"}>
+                      {f.icon}
+                    </div>
                   </div>
                   <div>
                     <h3 className={`text-sm font-semibold mb-1 ${active === f.id ? "text-[#111827]" : "text-[#6B7280]"}`}>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, ArrowRight } from "lucide-react";
+import { LayoutGrid, ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 function SectionLabel({
@@ -30,24 +30,24 @@ const categories = [
 ];
 
 const templates = [
-  { title: "Life Coach Qualifier", author: "MyVSL", clones: 89, color: "#F6C744", questions: 4, category: "Coaching" },
-  { title: "Executive Coach Intake", author: "MyVSL", clones: 34, color: "#4BC0A0", questions: 5, category: "Coaching" },
-  { title: "Group Coaching Screener", author: "MyVSL", clones: 41, color: "#9B6FE8", questions: 3, category: "Coaching" },
-  { title: "Agency Lead Scorer", author: "MyVSL", clones: 63, color: "#E85D75", questions: 6, category: "Agencies" },
-  { title: "Creative Agency Qualifier", author: "MyVSL", clones: 27, color: "#2D6A4F", questions: 4, category: "Agencies" },
-  { title: "Marketing Agency Intake", author: "MyVSL", clones: 55, color: "#4A90D9", questions: 5, category: "Agencies" },
-  { title: "SaaS Discovery Call", author: "MyVSL", clones: 47, color: "#4A90D9", questions: 5, category: "SaaS" },
-  { title: "Product Demo Qualifier", author: "MyVSL", clones: 38, color: "#9B6FE8", questions: 4, category: "SaaS" },
-  { title: "Enterprise Sales Funnel", author: "MyVSL", clones: 22, color: "#333333", questions: 6, category: "SaaS" },
-  { title: "Real Estate Booking", author: "MyVSL", clones: 31, color: "#4BC0A0", questions: 3, category: "Real Estate" },
-  { title: "Luxury Home Qualifier", author: "MyVSL", clones: 19, color: "#F6C744", questions: 5, category: "Real Estate" },
-  { title: "Investment Property Lead", author: "MyVSL", clones: 26, color: "#E85D75", questions: 4, category: "Real Estate" },
-  { title: "Fitness Assessment", author: "MyVSL", clones: 52, color: "#9B6FE8", questions: 5, category: "Fitness" },
-  { title: "Personal Training Intake", author: "MyVSL", clones: 44, color: "#4BC0A0", questions: 3, category: "Fitness" },
-  { title: "Nutrition Coach Screener", author: "MyVSL", clones: 33, color: "#2D6A4F", questions: 4, category: "Fitness" },
-  { title: "Consulting Intake", author: "MyVSL", clones: 28, color: "#2D6A4F", questions: 7, category: "& more" },
-  { title: "Legal Consultation Funnel", author: "MyVSL", clones: 15, color: "#333333", questions: 4, category: "& more" },
-  { title: "Financial Advisor Qualifier", author: "MyVSL", clones: 36, color: "#4A90D9", questions: 5, category: "& more" },
+  { title: "Life Coach Qualifier", color: "#F6C744", questions: 4, category: "Coaching", prompt: "I'm a life coach who helps professionals find clarity and purpose" },
+  { title: "Executive Coach Intake", color: "#4BC0A0", questions: 5, category: "Coaching", prompt: "I provide executive coaching for C-suite leaders at mid-size companies" },
+  { title: "Group Coaching Screener", color: "#9B6FE8", questions: 3, category: "Coaching", prompt: "I run group coaching programs for entrepreneurs scaling to 7 figures" },
+  { title: "Agency Lead Scorer", color: "#E85D75", questions: 6, category: "Agencies", prompt: "I run a digital marketing agency for ecommerce brands" },
+  { title: "Creative Agency Qualifier", color: "#2D6A4F", questions: 4, category: "Agencies", prompt: "I run a creative agency specializing in brand identity and web design" },
+  { title: "Marketing Agency Intake", color: "#4A90D9", questions: 5, category: "Agencies", prompt: "I run a marketing agency helping B2B SaaS companies grow" },
+  { title: "SaaS Discovery Call", color: "#4A90D9", questions: 5, category: "SaaS", prompt: "I sell a B2B SaaS product for team collaboration and project management" },
+  { title: "Product Demo Qualifier", color: "#9B6FE8", questions: 4, category: "SaaS", prompt: "I sell an AI-powered analytics platform for ecommerce stores" },
+  { title: "Enterprise Sales Funnel", color: "#333333", questions: 6, category: "SaaS", prompt: "I sell enterprise software to large organizations with complex procurement" },
+  { title: "Real Estate Booking", color: "#4BC0A0", questions: 3, category: "Real Estate", prompt: "I help first-time home buyers find properties in their budget" },
+  { title: "Luxury Home Qualifier", color: "#F6C744", questions: 5, category: "Real Estate", prompt: "I sell luxury homes and estates to high-net-worth buyers" },
+  { title: "Investment Property Lead", color: "#E85D75", questions: 4, category: "Real Estate", prompt: "I help real estate investors find and evaluate rental properties" },
+  { title: "Fitness Assessment", color: "#9B6FE8", questions: 5, category: "Fitness", prompt: "I sell online fitness coaching for busy professionals" },
+  { title: "Personal Training Intake", color: "#4BC0A0", questions: 3, category: "Fitness", prompt: "I'm a personal trainer specializing in strength training and nutrition" },
+  { title: "Nutrition Coach Screener", color: "#2D6A4F", questions: 4, category: "Fitness", prompt: "I'm a nutrition coach helping clients with meal planning and weight loss" },
+  { title: "Consulting Intake", color: "#2D6A4F", questions: 7, category: "& more", prompt: "I provide business consulting for small to mid-size companies" },
+  { title: "Legal Consultation Funnel", color: "#333333", questions: 4, category: "& more", prompt: "I'm a lawyer offering legal consultation for small businesses" },
+  { title: "Financial Advisor Qualifier", color: "#4A90D9", questions: 5, category: "& more", prompt: "I'm a financial advisor helping professionals plan for retirement" },
 ];
 
 function TemplateMockup({
@@ -104,7 +104,7 @@ export function TemplatesSection() {
           </SectionLabel>
           <h2
             className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-instrument-serif)" }}
+            style={{ fontFamily: "var(--font-plus-jakarta)" }}
           >
             Start with a template. Live in minutes.
           </h2>
@@ -140,22 +140,27 @@ export function TemplatesSection() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
               >
-                <TemplateMockup color={t.color} questions={t.questions} />
-                <div className="p-5 border-t border-[#E5E7EB]">
-                  <h3 className="text-sm font-semibold text-[#111827] mb-1">
-                    {t.title}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#9CA3AF]">
-                      by {t.author}
-                    </span>
-                    <span className="text-xs text-[#9CA3AF]">
-                      {t.clones} clones
-                    </span>
+                <Link
+                  href={`/build?prompt=${encodeURIComponent(t.prompt)}`}
+                  className="group block bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#D1D5DB] transition-all duration-200"
+                >
+                  <TemplateMockup color={t.color} questions={t.questions} />
+                  <div className="p-5 border-t border-[#E5E7EB]">
+                    <h3 className="text-sm font-semibold text-[#111827] mb-1">
+                      {t.title}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#9CA3AF]">
+                        {t.questions} questions
+                      </span>
+                      <span className="flex items-center gap-1 text-xs font-medium text-[#2D6A4F] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        Use this template
+                        <ArrowUpRight className="w-3 h-3" />
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             ))}
         </div>

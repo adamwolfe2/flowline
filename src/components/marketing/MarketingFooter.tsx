@@ -48,7 +48,7 @@ export function MarketingFooter() {
               <Image src="/logo.png" alt="MyVSL" width={20} height={20} />
               <span
                 className="text-lg font-semibold text-[#171717]"
-                style={{ fontFamily: "var(--font-instrument-serif)" }}
+                style={{ fontFamily: "var(--font-plus-jakarta)" }}
               >
                 MyVSL
               </span>
