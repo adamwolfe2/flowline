@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ArrowUp, ArrowDown, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
 interface ContentEditorProps {
   config: FunnelConfig;
@@ -53,6 +53,16 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
     const newConfig = JSON.parse(JSON.stringify(config));
     newConfig.quiz.questions[qIndex].options.splice(oIndex, 1);
     onSave(newConfig);
+  }
+
+  function moveQuestion(fromIndex: number, direction: "up" | "down") {
+    const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
+    if (toIndex < 0 || toIndex >= config.quiz.questions.length) return;
+    const newConfig = JSON.parse(JSON.stringify(config));
+    const questions = newConfig.quiz.questions;
+    [questions[fromIndex], questions[toIndex]] = [questions[toIndex], questions[fromIndex]];
+    onSave(newConfig);
+    setExpandedQ(toIndex);
   }
 
   function addQuestion() {
@@ -152,15 +162,37 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
         <div className="space-y-2">
           {config.quiz.questions.map((q: QuizQuestion, qi: number) => (
             <div key={q.key} className="border border-gray-100 rounded-lg overflow-hidden">
-              <button
-                onClick={() => setExpandedQ(expandedQ === qi ? null : qi)}
-                className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-xs font-medium text-gray-700 truncate flex-1 mr-2">
-                  Q{qi + 1}: {q.text}
-                </span>
-                {expandedQ === qi ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
-              </button>
+              <div className="flex items-center p-3 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => setExpandedQ(expandedQ === qi ? null : qi)}
+                  className="flex items-center flex-1 text-left min-w-0"
+                >
+                  <span className="text-xs font-medium text-gray-700 truncate flex-1 mr-2">
+                    Q{qi + 1}: {q.text}
+                  </span>
+                </button>
+                <div className="flex items-center gap-0.5 mr-1">
+                  <button
+                    onClick={() => moveQuestion(qi, "up")}
+                    disabled={qi === 0}
+                    className="p-1 rounded hover:bg-gray-200 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Move question up"
+                  >
+                    <ArrowUp className="w-3 h-3 text-gray-400" />
+                  </button>
+                  <button
+                    onClick={() => moveQuestion(qi, "down")}
+                    disabled={qi === config.quiz.questions.length - 1}
+                    className="p-1 rounded hover:bg-gray-200 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Move question down"
+                  >
+                    <ArrowDown className="w-3 h-3 text-gray-400" />
+                  </button>
+                </div>
+                <button onClick={() => setExpandedQ(expandedQ === qi ? null : qi)}>
+                  {expandedQ === qi ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                </button>
+              </div>
 
               {expandedQ === qi && (
                 <div className="px-3 pb-3 space-y-3 border-t border-gray-50">
@@ -468,8 +500,20 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                 onSave(newConfig);
               }}
               placeholder="Book your VIP strategy session below."
-              className="text-xs"
+              className="text-xs mb-2"
               maxLength={150}
+            />
+            <Input
+              value={config.quiz.results?.high?.redirectUrl ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.high) newConfig.quiz.results.high = {};
+                newConfig.quiz.results.high.redirectUrl = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="https://cal.com/you/vip-call (optional redirect)"
+              className="text-xs font-mono"
             />
           </div>
 
@@ -501,8 +545,20 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                 onSave(newConfig);
               }}
               placeholder="Book a discovery call to discuss your goals."
-              className="text-xs"
+              className="text-xs mb-2"
               maxLength={150}
+            />
+            <Input
+              value={config.quiz.results?.mid?.redirectUrl ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.mid) newConfig.quiz.results.mid = {};
+                newConfig.quiz.results.mid.redirectUrl = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="https://cal.com/you/discovery (optional redirect)"
+              className="text-xs font-mono"
             />
           </div>
 
@@ -534,8 +590,20 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                 onSave(newConfig);
               }}
               placeholder="Book an intro call to learn more about what we offer."
-              className="text-xs"
+              className="text-xs mb-2"
               maxLength={150}
+            />
+            <Input
+              value={config.quiz.results?.low?.redirectUrl ?? ""}
+              onChange={e => {
+                const newConfig = JSON.parse(JSON.stringify(config));
+                if (!newConfig.quiz.results) newConfig.quiz.results = {};
+                if (!newConfig.quiz.results.low) newConfig.quiz.results.low = {};
+                newConfig.quiz.results.low.redirectUrl = e.target.value;
+                onSave(newConfig);
+              }}
+              placeholder="https://yourdomain.com/resources (optional redirect)"
+              className="text-xs font-mono"
             />
           </div>
         </div>
