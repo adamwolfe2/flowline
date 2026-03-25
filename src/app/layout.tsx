@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Sans, Instrument_Serif } from "next/font/google";
+import { Inter, Instrument_Sans, Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -7,6 +7,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"] });
 const instrumentSans = Instrument_Sans({ subsets: ["latin"], variable: "--font-instrument-sans", weight: ["400", "500", "600"] });
 const instrumentSerif = Instrument_Serif({ subsets: ["latin"], variable: "--font-instrument-serif", weight: "400", style: ["normal", "italic"] });
+const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-plus-jakarta", weight: ["500", "600", "700", "800"] });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
 
@@ -49,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <link rel="dns-prefetch" href="https://clerk.com" />
           <link rel="dns-prefetch" href="https://api.clerk.com" />
         </head>
-        <body className={`${inter.className} ${instrumentSans.variable} ${instrumentSerif.variable} antialiased bg-white text-gray-900`}>
+        <body className={`${inter.className} ${instrumentSans.variable} ${instrumentSerif.variable} ${plusJakarta.variable} antialiased bg-white text-gray-900`}>
           {children}
           <Toaster />
         </body>

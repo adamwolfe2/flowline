@@ -28,8 +28,8 @@ export function MarketingNav() {
         <Link href="/" className="flex items-center gap-2.5">
           <Image src="/logo.png" alt="MyVSL" width={24} height={24} />
           <span
-            className="text-lg font-semibold text-[#171717]"
-            style={{ fontFamily: "var(--font-instrument-serif)" }}
+            className="text-lg font-bold text-[#171717]"
+            style={{ fontFamily: "var(--font-plus-jakarta)" }}
           >
             MyVSL
           </span>
