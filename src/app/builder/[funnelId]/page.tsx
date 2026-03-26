@@ -11,6 +11,7 @@ import { ABTestEditor, Variant } from "@/components/builder/ABTestEditor";
 import { SequenceEditor } from "@/components/builder/SequenceEditor";
 import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
+import { UpgradeGate } from "@/components/builder/UpgradeGate";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send } from "lucide-react";
 import Link from "next/link";
@@ -32,6 +33,8 @@ export default function BuilderPage() {
   const [activeTab, setActiveTab] = useState("content");
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingConfigRef = useRef<FunnelConfig | null>(null);
+
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   // A/B test variant editing state
   const [variants, setVariants] = useState<Variant[]>([]);
@@ -80,6 +83,16 @@ export default function BuilderPage() {
       .then(data => { if (Array.isArray(data)) setVariants(data); })
       .catch(() => {});
   }, [funnelId]);
+
+  // Fetch user plan for feature gating
+  useEffect(() => {
+    fetch("/api/user")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.plan) setUserPlan(data.plan);
+      })
+      .catch(() => {});
+  }, []);
 
   // Switch editing context between control and variant
   function switchToVariant(variantId: string | null) {
@@ -374,18 +387,24 @@ export default function BuilderPage() {
               <CalendarEditor config={config} onSave={saveConfig} />
             </TabsContent>
             <TabsContent value="emails" className="mt-0">
-              <SequenceEditor funnel={funnel} />
+              <UpgradeGate feature="Email Sequences" plan={userPlan}>
+                <SequenceEditor funnel={funnel} />
+              </UpgradeGate>
             </TabsContent>
             <TabsContent value="ab-test" className="mt-0">
-              <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
-                setVariants(v);
-                if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
-                  switchToVariant(null);
-                }
-              }} />
+              <UpgradeGate feature="A/B Testing" plan={userPlan}>
+                <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
+                  setVariants(v);
+                  if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
+                    switchToVariant(null);
+                  }
+                }} />
+              </UpgradeGate>
             </TabsContent>
             <TabsContent value="tracking" className="mt-0">
-              <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
+              <UpgradeGate feature="Tracking & Webhooks" plan={userPlan}>
+                <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
+              </UpgradeGate>
             </TabsContent>
             <TabsContent value="publish" className="mt-0">
               <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />

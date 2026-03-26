@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { funnels, emailSequences, emailSteps } from "@/db/schema";
+import { funnels, emailSequences, emailSteps, users } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { isSuperAdmin } from "@/lib/admin";
+import { getPlanLimits } from "@/lib/plan-limits";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -41,6 +43,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
+
+    // Plan enforcement — email sequences require Pro or Agency
+    const isAdmin = await isSuperAdmin(userId);
+    if (!isAdmin) {
+      const [user] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId));
+      const limits = getPlanLimits(user?.plan ?? "free");
+      if (!limits.emailSequences) {
+        return NextResponse.json(
+          { error: "Email sequences require a Pro plan. Upgrade to unlock this feature.", upgrade: true },
+          { status: 403 }
+        );
+      }
+    }
+
     const { name, triggerTier, triggerType } = await req.json();
 
     // Validate triggerTier if provided

@@ -48,7 +48,10 @@ function DashboardContent() {
           if (!res.ok) {
             const data = await res.json().catch(() => ({}));
             if (res.status === 403) {
-              toast.error("Free plan limited to 1 funnel. Upgrade to create more.");
+              toast.error("You've reached your free plan limit. Upgrade to Pro for unlimited funnels.", {
+                action: { label: "Upgrade", onClick: () => router.push("/billing") },
+                duration: 6000,
+              });
             } else {
               toast.error(data.error || "Failed to save your funnel.");
             }

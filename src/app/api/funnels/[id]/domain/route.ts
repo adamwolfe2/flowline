@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { funnels } from "@/db/schema";
+import { funnels, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { addDomainToVercel, removeDomainFromVercel, isVercelConfigured } from "@/lib/vercel-domains";
+import { isSuperAdmin } from "@/lib/admin";
+import { getPlanLimits } from "@/lib/plan-limits";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,6 +15,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const { domain } = await req.json();
+
+    // Plan enforcement — custom domains require Pro or Agency
+    const isAdmin = await isSuperAdmin(userId);
+    if (!isAdmin && domain) {
+      const [user] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId));
+      const limits = getPlanLimits(user?.plan ?? "free");
+      if (!limits.customDomains) {
+        return NextResponse.json(
+          { error: "Custom domains require a Pro plan. Upgrade to unlock this feature.", upgrade: true },
+          { status: 403 }
+        );
+      }
+    }
 
     // Validate domain format
     if (domain) {

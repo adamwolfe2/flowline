@@ -10,6 +10,7 @@ import { logger } from "@/lib/logger";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
+import { canCreateFunnel } from "@/lib/plan-limits";
 
 export async function GET() {
   try {
@@ -46,14 +47,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Free plan check — super admin bypasses all limits
+    // Plan enforcement — super admin bypasses all limits
     const isAdmin = await isSuperAdmin(userId);
     if (!isAdmin) {
       const count = await getFunnelCount(userId);
       const userRow = existingUser[0];
       const plan = userRow?.plan ?? "free";
-      if (plan === "free" && count >= 1) {
-        return NextResponse.json({ error: "Free plan limited to 1 funnel. Upgrade to Pro." }, { status: 403 });
+      if (!canCreateFunnel(plan, count)) {
+        const limitMsg = plan === "free"
+          ? "Free plan allows 1 funnel. Upgrade to Pro for unlimited."
+          : `Your ${plan} plan allows ${plan === "pro" ? 25 : 0} funnels. Upgrade for more.`;
+        return NextResponse.json({ error: limitMsg, upgrade: true }, { status: 403 });
       }
     }
 

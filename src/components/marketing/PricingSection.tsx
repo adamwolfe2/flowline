@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 const plans = [
   {
@@ -58,6 +58,65 @@ const plans = [
     popular: false,
   },
 ];
+
+const faqs = [
+  {
+    question: "Can I try before I buy?",
+    answer:
+      "Yes, the free plan lets you create 1 funnel with full functionality. No credit card required.",
+  },
+  {
+    question: "Can I upgrade or downgrade anytime?",
+    answer:
+      "Yes, changes take effect immediately. If you downgrade, you keep access to your current features until the end of your billing period.",
+  },
+  {
+    question: "Do you charge per lead?",
+    answer:
+      "Never. All plans include unlimited leads. You only pay a flat monthly fee based on your plan.",
+  },
+  {
+    question: "Can I use my own domain?",
+    answer:
+      "Yes, Pro and Agency plans support custom domains. Connect your domain in the funnel settings after publishing.",
+  },
+  {
+    question: "Is there a contract?",
+    answer:
+      "No contracts. Cancel anytime with one click from your billing settings. No questions asked.",
+  },
+];
+
+function FAQItem({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-[#F9FAFB] transition-colors"
+      >
+        <span className="text-sm font-medium text-[#111827]">{question}</span>
+        <ChevronDown
+          className={`w-4 h-4 text-[#9CA3AF] transition-transform flex-shrink-0 ml-4 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <div className="px-4 pb-4">
+          <p className="text-sm text-[#6B7280] leading-relaxed">{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function PricingSection({ standalone = false }: { standalone?: boolean }) {
   const [annual, setAnnual] = useState(true);
@@ -161,6 +220,11 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                       Billed annually (${price * 12}/yr)
                     </p>
                   )}
+                  {price > 0 && !annual && (
+                    <p className="text-xs text-[#2D6A4F] mt-1">
+                      Switch to annual and save 20%
+                    </p>
+                  )}
                   {price === 0 && (
                     <p className="text-xs text-[#9CA3AF] mt-1">
                       Free forever
@@ -193,6 +257,25 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
               </div>
             );
           })}
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-20 max-w-2xl mx-auto">
+          <h3
+            className="text-2xl font-semibold text-[#111827] text-center mb-8"
+            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+          >
+            Frequently asked questions
+          </h3>
+          <div className="space-y-3">
+            {faqs.map((faq) => (
+              <FAQItem
+                key={faq.question}
+                question={faq.question}
+                answer={faq.answer}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

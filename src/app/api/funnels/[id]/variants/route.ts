@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { funnels, funnelVariants } from "@/db/schema";
+import { funnels, funnelVariants, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { isSuperAdmin } from "@/lib/admin";
+import { getPlanLimits } from "@/lib/plan-limits";
 
 // GET all variants for a funnel
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +38,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
+
+    // Plan enforcement — A/B testing requires Pro or Agency
+    const isAdmin = await isSuperAdmin(userId);
+    if (!isAdmin) {
+      const [user] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId));
+      const limits = getPlanLimits(user?.plan ?? "free");
+      if (!limits.abTesting) {
+        return NextResponse.json(
+          { error: "A/B testing requires a Pro plan. Upgrade to unlock this feature.", upgrade: true },
+          { status: 403 }
+        );
+      }
+    }
+
     const { name, config, trafficWeight: rawWeight, isControl } = await req.json();
     const trafficWeight = rawWeight != null ? Math.max(0, Math.min(100, Number(rawWeight))) : undefined;
 
