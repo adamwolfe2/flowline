@@ -5,6 +5,16 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 const FROM = "MyVSL <noreply@getmyvsl.com>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
 
+/** Escape HTML special characters to prevent XSS in email templates */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function sendLeadNotification(params: {
   toEmail: string;
   funnelName: string;
@@ -19,7 +29,7 @@ export async function sendLeadNotification(params: {
       from: FROM,
       to: params.toEmail,
       subject: `New lead on ${params.funnelName} (${params.calendarTier} tier)`,
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${params.calendarTier} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${params.funnelName}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${params.leadEmail}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${params.calendarTier}</p></div><a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com"}/analytics/${params.funnelId}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a></div>`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${escapeHtml(params.calendarTier)} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${escapeHtml(params.calendarTier)}</p></div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a></div>`,
     });
   } catch (err) {
     logger.error("[resend] lead notification failed", { error: err instanceof Error ? err.message : String(err) });
@@ -60,16 +70,16 @@ export async function sendClientInviteEmail(params: {
             <tr><td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
                 <tr><td style="padding:24px 32px;border-bottom:1px solid #f3f4f6;">
-                  <span style="font-size:16px;font-weight:600;color:#111827;">${params.brandName}</span>
+                  <span style="font-size:16px;font-weight:600;color:#111827;">${escapeHtml(params.brandName)}</span>
                 </td></tr>
                 <tr><td style="padding:32px;color:#374151;font-size:15px;line-height:1.6;">
                   <p style="margin:0 0 16px 0;">Hi,</p>
-                  <p style="margin:0 0 16px 0;">You've been invited to view the analytics for <strong>${params.brandName}</strong>. Click below to see your funnel's performance.</p>
-                  <a href="${params.shareUrl}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Analytics</a>
+                  <p style="margin:0 0 16px 0;">You've been invited to view the analytics for <strong>${escapeHtml(params.brandName)}</strong>. Click below to see your funnel's performance.</p>
+                  <a href="${escapeHtml(params.shareUrl)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Analytics</a>
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
-                    Powered by <a href="${APP_URL}" style="color:#9ca3af;">MyVSL</a>
+                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">MyVSL</a>
                   </p>
                 </td></tr>
               </table>
@@ -120,7 +130,7 @@ export async function sendDailyDigestEmail(params: {
             <tr><td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
                 <tr><td style="padding:24px 32px;border-bottom:1px solid #f3f4f6;">
-                  <span style="font-size:16px;font-weight:600;color:#111827;">${params.brandName} — Daily Report</span>
+                  <span style="font-size:16px;font-weight:600;color:#111827;">${escapeHtml(params.brandName)} — Daily Report</span>
                 </td></tr>
                 <tr><td style="padding:32px;color:#374151;font-size:15px;line-height:1.6;">
                   <p style="margin:0 0 20px 0;">Here's how your funnel performed yesterday:</p>
@@ -145,11 +155,11 @@ export async function sendDailyDigestEmail(params: {
                       </td>
                     </tr>
                   </table>
-                  <a href="${params.shareUrl}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Full Analytics</a>
+                  <a href="${escapeHtml(params.shareUrl)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Full Analytics</a>
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
-                    Powered by <a href="${APP_URL}" style="color:#9ca3af;">MyVSL</a>
+                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">MyVSL</a>
                   </p>
                 </td></tr>
               </table>

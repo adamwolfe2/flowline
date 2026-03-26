@@ -24,6 +24,7 @@ export const sessionLimiter = createRateLimiter(60, "1 m");  // 60 session start
 export const uploadLimiter = createRateLimiter(10, "1 h");   // 10 uploads per user per hour
 export const ogLimiter = createRateLimiter(30, "1 m");       // 30 OG image requests per IP per minute
 export const apiLimiter = createRateLimiter(30, "1 m");      // 30 authenticated API requests per user per minute
+export const sharedAnalyticsLimiter = createRateLimiter(20, "1 m"); // 20 shared analytics requests per IP per minute
 
 export interface RateLimitResult {
   limited: boolean;

@@ -207,13 +207,43 @@ export default function AnalyticsDashboard() {
   const handleCopyShareLink = async () => {
     if (!shareToken) return;
     const url = `${window.location.origin}/analytics/shared/${shareToken}`;
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast.success("Link copied to clipboard");
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast.success("Link copied to clipboard");
+    } catch {
+      // Fallback for browsers that block clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = url;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast.success("Link copied to clipboard");
+      } catch {
+        toast.error("Failed to copy link — please copy it manually");
+      } finally {
+        document.body.removeChild(textArea);
+      }
+    }
   };
 
+  const [savingSettings, setSavingSettings] = useState(false);
   const handleUpdateShareSettings = async () => {
+    // Validate email if provided
+    if (shareClientEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(shareClientEmail)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+    }
+    setSavingSettings(true);
     try {
       const res = await fetch(`/api/funnels/${funnelId}/share`, {
         method: "POST",
@@ -229,12 +259,20 @@ export default function AnalyticsDashboard() {
       toast.success("Share settings updated");
     } catch {
       toast.error("Failed to update settings");
+    } finally {
+      setSavingSettings(false);
     }
   };
 
   const handleSendInvite = async () => {
     if (!shareClientEmail) {
       toast.error("Enter a client email first");
+      return;
+    }
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(shareClientEmail)) {
+      toast.error("Please enter a valid email address");
       return;
     }
     setSendingInvite(true);
@@ -251,7 +289,11 @@ export default function AnalyticsDashboard() {
       if (!res.ok) throw new Error();
       const result = await res.json();
       setShareToken(result.shareToken);
-      toast.success(`Invite sent to ${shareClientEmail}`);
+      if (result.inviteSent === false) {
+        toast.error("Share settings saved but invite email could not be sent. Please try again.");
+      } else {
+        toast.success(`Invite sent to ${shareClientEmail}`);
+      }
     } catch {
       toast.error("Failed to send invite");
     } finally {
@@ -259,9 +301,12 @@ export default function AnalyticsDashboard() {
     }
   };
 
+  const [revoking, setRevoking] = useState(false);
   const handleRevokeShare = async () => {
+    setRevoking(true);
     try {
-      await fetch(`/api/funnels/${funnelId}/share`, { method: "DELETE" });
+      const res = await fetch(`/api/funnels/${funnelId}/share`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
       setShareToken(null);
       setShareClientEmail("");
       setShareDailyDigest(false);
@@ -269,6 +314,8 @@ export default function AnalyticsDashboard() {
       toast.success("Share link revoked");
     } catch {
       toast.error("Failed to revoke link");
+    } finally {
+      setRevoking(false);
     }
   };
 
@@ -874,10 +921,11 @@ export default function AnalyticsDashboard() {
               <div className="flex items-center gap-2 pt-2">
                 <button
                   onClick={handleUpdateShareSettings}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors"
+                  disabled={savingSettings}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check className="w-3 h-3" />
-                  Save Settings
+                  {savingSettings ? "Saving..." : "Save Settings"}
                 </button>
                 <button
                   onClick={handleSendInvite}
@@ -894,10 +942,11 @@ export default function AnalyticsDashboard() {
             <div className="px-6 py-3 border-t border-[#E5E7EB] flex justify-end">
               <button
                 onClick={handleRevokeShare}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                disabled={revoking}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Link2Off className="w-3 h-3" />
-                Revoke link
+                {revoking ? "Revoking..." : "Revoke link"}
               </button>
             </div>
           </div>

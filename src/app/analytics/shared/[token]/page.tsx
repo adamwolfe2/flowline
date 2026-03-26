@@ -38,7 +38,11 @@ interface SharedAnalytics {
 }
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  try {
+    return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  } catch {
+    return "--";
+  }
 }
 
 function tierBadgeColor(tier: string): string {
@@ -53,49 +57,79 @@ function deviceIcon(type: string | null) {
   return Monitor;
 }
 
+/** Validate brand color is a safe CSS color value */
+function sanitizeColor(color: string): string {
+  if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  return "#2D6A4F";
+}
+
 export default function SharedAnalyticsPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params);
   const [data, setData] = useState<SharedAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/analytics/shared/${token}`)
+    let cancelled = false;
+
+    fetch(`/api/analytics/shared/${encodeURIComponent(token)}`)
       .then(r => {
-        if (!r.ok) throw new Error();
+        if (r.status === 410) throw new Error("expired");
+        if (r.status === 429) throw new Error("rate_limited");
+        if (!r.ok) throw new Error("not_found");
         return r.json();
       })
-      .then(setData)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .then((json) => {
+        if (!cancelled) setData(json);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          if (err.message === "expired") {
+            setErrorMessage("This analytics link has expired. Please ask for a new link.");
+          } else if (err.message === "rate_limited") {
+            setErrorMessage("Too many requests. Please wait a moment and try again.");
+          } else {
+            setErrorMessage("This analytics link is invalid or has expired.");
+          }
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
   }, [token]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <BarChart3 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">This analytics link is invalid or has expired.</p>
+          <div className="w-6 h-6 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-xs text-gray-400">Loading analytics...</p>
         </div>
       </div>
     );
   }
 
-  const accentColor = data.brandColor || "#2D6A4F";
+  if (errorMessage || !data) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-sm px-4">
+          <BarChart3 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-sm text-gray-500">{errorMessage ?? "This analytics link is invalid or has expired."}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const accentColor = sanitizeColor(data.brandColor || "#2D6A4F");
+  const funnelName = data.funnelName || "Funnel";
 
   const statCards = [
     { label: "Sessions", value: data.stats.totalSessions.toLocaleString(), icon: TrendingUp },
     { label: "Leads", value: data.stats.totalLeads.toLocaleString(), icon: Users },
-    { label: "Completion Rate", value: `${data.stats.completionRate}%`, icon: Target },
-    { label: "Conversion Rate", value: `${data.stats.conversionRate}%`, icon: BarChart3 },
+    { label: "Completion Rate", value: `${data.stats.completionRate ?? 0}%`, icon: Target },
+    { label: "Conversion Rate", value: `${data.stats.conversionRate ?? 0}%`, icon: BarChart3 },
     {
       label: "Avg. Time",
       value: data.stats.avgCompletionTimeSec > 0
@@ -107,12 +141,14 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
     },
   ];
 
-  // Device breakdown
-  const totalDevices = data.devices.reduce((s, d) => s + d.count, 0) || 1;
+  // Device breakdown — safe against division by zero
+  const totalDevices = data.devices.reduce((s, d) => s + d.count, 0);
   const deviceMap: Record<string, number> = {};
   data.devices.forEach((d) => {
     deviceMap[d.deviceType ?? "unknown"] = d.count;
   });
+
+  const hasNoData = data.stats.totalSessions === 0 && data.stats.totalLeads === 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,21 +159,25 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
             {data.brandLogoUrl ? (
               <Image
                 src={data.brandLogoUrl}
-                alt={data.funnelName}
+                alt={funnelName}
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-lg object-contain"
+                onError={(e) => {
+                  // Hide broken image and show fallback
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
               />
             ) : (
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
                 style={{ backgroundColor: accentColor }}
               >
-                {data.funnelName.charAt(0).toUpperCase()}
+                {funnelName.charAt(0).toUpperCase()}
               </div>
             )}
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">{data.funnelName} Analytics</h1>
+              <h1 className="text-lg font-semibold text-gray-900">{funnelName} Analytics</h1>
               <p className="text-xs text-gray-400">Last 30 days</p>
             </div>
           </div>
@@ -158,102 +198,125 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
           ))}
         </div>
 
+        {/* Empty state when no data at all */}
+        {hasNoData && (
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-12 text-center">
+            <BarChart3 className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500">No traffic data yet.</p>
+            <p className="text-xs text-gray-400 mt-1">Analytics will appear once the funnel receives visitors.</p>
+          </div>
+        )}
+
         {/* Dropoff waterfall */}
-        {data.dropoff.length > 0 && (
+        {!hasNoData && (
           <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
-            <div className="space-y-2">
-              {data.dropoff.map((step) => (
-                <div key={step.stepLabel} className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 w-24 shrink-0 truncate">{step.stepLabel}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                    <div
-                      className="h-full rounded-full flex items-center justify-end px-2 transition-all"
-                      style={{ width: `${Math.max(step.retentionFromTop, 2)}%`, backgroundColor: accentColor }}
-                    >
-                      {step.retentionFromTop >= 10 && (
-                        <span className="text-[10px] text-white font-medium">{step.visitors}</span>
-                      )}
+            {data.dropoff.length > 0 ? (
+              <div className="space-y-2">
+                {data.dropoff.map((step) => (
+                  <div key={step.stepLabel} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500 w-24 shrink-0 truncate">{step.stepLabel}</span>
+                    <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                      <div
+                        className="h-full rounded-full flex items-center justify-end px-2 transition-all"
+                        style={{ width: `${Math.max(step.retentionFromTop, 2)}%`, backgroundColor: accentColor }}
+                      >
+                        {step.retentionFromTop >= 10 && (
+                          <span className="text-[10px] text-white font-medium">{step.visitors}</span>
+                        )}
+                      </div>
                     </div>
+                    <span className="text-xs text-gray-400 w-10 text-right">{step.retentionFromTop}%</span>
                   </div>
-                  <span className="text-xs text-gray-400 w-10 text-right">{step.retentionFromTop}%</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-6">No drop-off data yet</p>
+            )}
           </div>
         )}
 
         {/* Device breakdown + Tier distribution row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Device Breakdown */}
-          {data.devices.length > 0 && (
+        {!hasNoData && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Device Breakdown */}
             <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Device Breakdown</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {(["desktop", "mobile", "tablet"] as const).map((type) => {
-                  const count = deviceMap[type] ?? 0;
-                  const pct = Math.round((count / totalDevices) * 100);
-                  const DeviceIcon = deviceIcon(type);
-                  return (
-                    <div key={type} className="text-center p-3 bg-gray-50 rounded-lg">
-                      <DeviceIcon className="w-5 h-5 text-gray-400 mx-auto mb-1" />
-                      <p className="text-lg font-bold text-gray-900">{pct}%</p>
-                      <p className="text-[10px] text-gray-400 capitalize">{type}</p>
-                    </div>
-                  );
-                })}
-              </div>
+              {totalDevices > 0 ? (
+                <div className="grid grid-cols-3 gap-3">
+                  {(["desktop", "mobile", "tablet"] as const).map((type) => {
+                    const count = deviceMap[type] ?? 0;
+                    const pct = totalDevices > 0 ? Math.round((count / totalDevices) * 100) : 0;
+                    const DeviceIcon = deviceIcon(type);
+                    return (
+                      <div key={type} className="text-center p-3 bg-gray-50 rounded-lg">
+                        <DeviceIcon className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                        <p className="text-lg font-bold text-gray-900">{pct}%</p>
+                        <p className="text-[10px] text-gray-400 capitalize">{type}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 text-center py-4">No device data yet</p>
+              )}
             </div>
-          )}
 
-          {/* Tier distribution */}
-          {data.tiers.length > 0 && (
+            {/* Tier distribution */}
             <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Quality</h3>
-              <div className="flex gap-3">
-                {data.tiers.map(({ tier, count }) => (
-                  <div key={tier} className="flex-1 text-center p-3 rounded-lg bg-gray-50">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${tierBadgeColor(tier)}`}>
-                      {tier.toUpperCase()}
-                    </span>
-                    <p className="text-2xl font-bold text-gray-900 mt-2">{count}</p>
-                  </div>
-                ))}
-              </div>
+              {data.tiers.length > 0 ? (
+                <div className="flex gap-3">
+                  {data.tiers.map(({ tier, count }) => (
+                    <div key={tier} className="flex-1 text-center p-3 rounded-lg bg-gray-50">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${tierBadgeColor(tier)}`}>
+                        {tier.toUpperCase()}
+                      </span>
+                      <p className="text-2xl font-bold text-gray-900 mt-2">{count}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 text-center py-4">No leads yet</p>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Recent Leads Table */}
-        {data.recentLeads.length > 0 && (
+        {!hasNoData && (
           <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Leads</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-gray-400 border-b border-gray-100">
-                    <th className="text-left py-2 font-medium">Email</th>
-                    <th className="text-center py-2 font-medium">Score</th>
-                    <th className="text-center py-2 font-medium">Tier</th>
-                    <th className="text-right py-2 font-medium">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.recentLeads.map((lead) => (
-                    <tr key={lead.id} className="border-b border-gray-50">
-                      <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
-                      <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
-                      <td className="py-2.5 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}>
-                          {lead.calendarTier}
-                        </span>
-                      </td>
-                      <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
+            {data.recentLeads.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left py-2 font-medium">Email</th>
+                      <th className="text-center py-2 font-medium">Score</th>
+                      <th className="text-center py-2 font-medium">Tier</th>
+                      <th className="text-right py-2 font-medium">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {data.recentLeads.map((lead) => (
+                      <tr key={lead.id} className="border-b border-gray-50">
+                        <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
+                        <td className="py-2.5 text-center text-gray-700">{lead.score ?? "--"}</td>
+                        <td className="py-2.5 text-center">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier ?? "low")}`}>
+                            {lead.calendarTier ?? "unknown"}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-8">No leads captured yet</p>
+            )}
           </div>
         )}
       </div>

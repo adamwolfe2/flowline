@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { db } from "@/db";
 import { funnels, funnelSessions, leads } from "@/db/schema";
 import { eq, and, gte, lt, sql, isNotNull } from "drizzle-orm";
@@ -46,11 +47,20 @@ async function getDayStats(funnelId: string, dayStart: Date, dayEnd: Date) {
 }
 
 export async function GET(req: Request) {
-  // Verify cron authorization
+  // Verify cron authorization with timing-safe comparison
   const authHeader = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || !authHeader) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const expected = `Bearer ${cronSecret}`;
+  const isValid =
+    authHeader.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
+
+  if (!isValid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

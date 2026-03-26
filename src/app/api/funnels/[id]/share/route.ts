@@ -54,20 +54,33 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         shareClientEmail: clientEmail ?? null,
         shareDailyDigest: dailyDigest,
       })
-      .where(eq(funnels.id, id))
+      .where(and(eq(funnels.id, id), eq(funnels.userId, userId)))
       .returning();
 
+    if (!updated) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     // Send invite email if requested
+    let inviteSent = false;
     if (sendInvite && clientEmail) {
-      const config = funnel.config as { brand?: { name?: string } };
-      const brandName = config.brand?.name || "Funnel";
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
-      const shareUrl = `${appUrl}/analytics/shared/${token}`;
-      await sendClientInviteEmail({
-        toEmail: clientEmail,
-        brandName,
-        shareUrl,
-      });
+      try {
+        const config = funnel.config as { brand?: { name?: string } };
+        const brandName = config.brand?.name || "Funnel";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
+        const shareUrl = `${appUrl}/analytics/shared/${token}`;
+        await sendClientInviteEmail({
+          toEmail: clientEmail,
+          brandName,
+          shareUrl,
+        });
+        inviteSent = true;
+      } catch (err) {
+        logger.error("Failed to send client invite email", {
+          funnelId: id,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
 
     return NextResponse.json({
@@ -75,6 +88,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       shareTokenExpiresAt: updated.shareTokenExpiresAt,
       shareClientEmail: updated.shareClientEmail,
       shareDailyDigest: updated.shareDailyDigest,
+      inviteSent,
     });
   } catch (error) {
     logger.error("POST /api/funnels/[id]/share error:", { error: error instanceof Error ? error.message : String(error) });

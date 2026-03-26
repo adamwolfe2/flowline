@@ -2,22 +2,41 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { funnels, leads } from "@/db/schema";
 import { eq, and, gte, desc } from "drizzle-orm";
-import { sql } from "drizzle-orm";
 import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries, getDeviceBreakdown } from "@/db/queries/analytics";
 import { logger } from "@/lib/logger";
-import { ogLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { sharedAnalyticsLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 const VALID_TIME_RANGES = ["7d", "30d", "90d"];
 
+/** Mask email for privacy: "john@example.com" → "j***@example.com" */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return "***@***";
+  if (local.length <= 1) return `${local}***@${domain}`;
+  return `${local.charAt(0)}***@${domain}`;
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-    const { limited } = await checkRateLimit(ogLimiter, ip);
-    if (limited) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rateLimitResult = await checkRateLimit(sharedAnalyticsLimiter, `shared:${ip}`);
+    if (rateLimitResult.limited) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: { "Retry-After": "60" },
+        }
+      );
     }
 
     const { token } = await params;
+
+    // Validate token format (must be 64 hex chars from crypto.randomBytes(32))
+    if (!token || !/^[a-f0-9]{64}$/.test(token)) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     const rawRange = req.nextUrl.searchParams.get("timeRange") ?? "30d";
     const timeRange = VALID_TIME_RANGES.includes(rawRange) ? rawRange : "30d";
 
@@ -38,7 +57,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       brand?: { name?: string; logoUrl?: string; primaryColor?: string };
     };
 
-    // Fetch recent leads (without answers for privacy)
     function getDateCutoff(range: string): Date | null {
       const now = new Date();
       switch (range) {
@@ -84,7 +102,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       devices,
       recentLeads: recentLeads.map((l) => ({
         id: l.id,
-        email: l.email,
+        email: maskEmail(l.email),
         score: l.score,
         calendarTier: l.calendarTier,
         createdAt: l.createdAt,
