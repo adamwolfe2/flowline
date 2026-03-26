@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
+// URL generation redirects to /build?url=... for the full animated experience
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Loader2, Globe } from "lucide-react";
@@ -27,12 +27,11 @@ const COLOR_PRESETS = [
 
 export function HeroSection() {
   const router = useRouter();
-  const { isSignedIn } = useAuth();
+
   const [prompt, setPrompt] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
   const [showStyles, setShowStyles] = useState(false);
-  const [urlLoading, setUrlLoading] = useState(false);
-  const [urlStatus, setUrlStatus] = useState("");
+  const urlLoading = false; // Loading happens on /build page
   const templateRef = useRef<HTMLDivElement>(null);
   const styleRef = useRef<HTMLDivElement>(null);
 
@@ -50,48 +49,14 @@ export function HeroSection() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  async function handleUrlGenerate() {
+  function handleUrlGenerate() {
     let url = prompt.trim();
     if (!/^https?:\/\//i.test(url)) {
       url = `https://${url}`;
     }
+    // Redirect to the build page which has the full animated build experience
+    router.push(`/build?url=${encodeURIComponent(url)}`);
 
-    setUrlLoading(true);
-    setUrlStatus("Analyzing website...");
-
-    try {
-      const res = await fetch("/api/ai/url-to-funnel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to generate from URL");
-      }
-
-      setUrlStatus("Building your funnel...");
-      const data = await res.json();
-
-      localStorage.setItem(
-        "myvsl_pending_funnel",
-        JSON.stringify({
-          config: data.config,
-          slug: data.slug,
-        })
-      );
-
-      if (isSignedIn) {
-        router.push("/dashboard");
-      } else {
-        router.push("/sign-up");
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to generate from URL");
-      setUrlLoading(false);
-      setUrlStatus("");
-    }
   }
 
   function handleSubmit() {
@@ -183,12 +148,7 @@ export function HeroSection() {
                 </span>
               </div>
             )}
-            {urlLoading && (
-              <div className="flex items-center gap-2 px-6 pb-2">
-                <Loader2 className="w-3.5 h-3.5 text-[#2D6A4F] animate-spin" />
-                <span className="text-xs text-[#2D6A4F] font-medium">{urlStatus}</span>
-              </div>
-            )}
+            {/* Loading animation happens on /build page */}
             <div className="flex items-center justify-between px-5 pb-4">
               {/* Integration logos */}
               <div className="flex items-center">

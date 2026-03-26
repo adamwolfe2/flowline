@@ -51,18 +51,22 @@ function extractDomain(url: string): string {
   }
 }
 
-function buildPrompt(scrapedContent: string): string {
+function buildPrompt(scrapedContent: string, extractedColors: string[]): string {
+  const colorHint = extractedColors.length > 0
+    ? `\n\nColors found on the website (most common first): ${extractedColors.join(", ")}. Use the FIRST color as the primary brand color unless it clearly doesn't match the brand.`
+    : "";
+
   return `You are an expert funnel builder. Analyze this website content and create a complete quiz-to-calendar booking funnel.
 
 Website content:
-${scrapedContent}
+${scrapedContent}${colorHint}
 
 Extract and generate:
 1. Company name
 2. Industry/niche
 3. What they sell (products/services)
 4. Target audience (who visits this site)
-5. Primary brand color (pick from any hex colors in the content, or suggest one that matches the brand)
+5. Primary brand color — MUST use one of the extracted website colors if available. Pick the one that best represents the brand identity (usually the most prominent non-gray color).
 6. A compelling headline for a qualifying quiz (max 60 chars)
 7. A subheadline explaining the value prop (max 120 chars)
 8. Badge text (e.g., "FREE ASSESSMENT", "QUALIFICATION QUIZ")
@@ -153,6 +157,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Step 1b: Fetch raw HTML for color extraction
+    let extractedColors: string[] = [];
+    try {
+      const htmlRes = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; MyVSLBot/1.0)" },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (htmlRes.ok) {
+        const html = await htmlRes.text();
+        // Extract hex colors from theme-color meta, CSS custom properties, and inline styles
+        const themeMatch = html.match(/meta[^>]*name=["']theme-color["'][^>]*content=["'](#[0-9a-fA-F]{3,6})["']/i);
+        if (themeMatch) extractedColors.push(themeMatch[1]);
+        // Find hex colors in style tags and inline styles
+        const hexMatches = html.match(/#[0-9a-fA-F]{6}\b/g);
+        if (hexMatches) {
+          // Count occurrences and take the most common non-white/black/gray colors
+          const counts: Record<string, number> = {};
+          for (const c of hexMatches) {
+            const lower = c.toLowerCase();
+            // Skip white, black, very light grays, and common defaults
+            if (["#ffffff", "#000000", "#f5f5f5", "#f3f4f6", "#e5e7eb", "#d1d5db", "#9ca3af", "#6b7280", "#374151", "#111827", "#1f2937"].includes(lower)) continue;
+            counts[lower] = (counts[lower] || 0) + 1;
+          }
+          const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+          extractedColors.push(...sorted.slice(0, 5).map(([c]) => c));
+        }
+      }
+    } catch {
+      // Non-critical — AI will guess from content
+    }
+
     if (scrapedContent.trim().length < 50) {
       return NextResponse.json(
         { error: "Could not extract enough content from that website. Try a different page." },
@@ -194,7 +229,7 @@ export async function POST(req: NextRequest) {
 
     let aiData;
     try {
-      const prompt = buildPrompt(scrapedContent);
+      const prompt = buildPrompt(scrapedContent, extractedColors);
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
