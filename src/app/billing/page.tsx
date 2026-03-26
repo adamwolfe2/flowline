@@ -213,7 +213,7 @@ export default function BillingPage() {
                 )}
               </div>
 
-              <div className="mb-6">
+              <div className="mb-5">
                 <span className="text-3xl font-bold text-[#333333]">
                   ${price}
                 </span>
@@ -225,15 +225,8 @@ export default function BillingPage() {
                 )}
               </div>
 
-              <ul className="space-y-2 mb-6">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-[#737373]">
-                    <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
+              {/* CTA button at top, before features */}
+              <div className="mb-6">
               {isCurrent ? (
                 currentPlan !== "free" ? (
                   <button
@@ -271,6 +264,17 @@ export default function BillingPage() {
                   )}
                 </button>
               )}
+              </div>
+
+              {/* Features list below button */}
+              <ul className="space-y-2">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-[#737373]">
+                    <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
             </div>
           );
         })}

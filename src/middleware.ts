@@ -26,6 +26,12 @@ export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
 
   if (!isPlatformDomain(hostname)) {
+    // Let API routes pass through on custom domains — tracking, submissions, sessions
+    const path = req.nextUrl.pathname;
+    if (path.startsWith('/api/')) {
+      return NextResponse.next();
+    }
+
     const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? '';
     if (hostname.endsWith(`.${platformDomain}`)) {
       const slug = hostname.replace(`.${platformDomain}`, '');
