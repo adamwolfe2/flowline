@@ -26,6 +26,7 @@ interface ReasoningStep {
 
 interface BuilderState {
   phase: "prompt" | "planning" | "questions" | "generating" | "preview";
+  mode: "describe" | "url";
   businessDescription: string;
   thinking: string;
   questions: PlanQuestion[];
@@ -40,6 +41,7 @@ interface BuilderState {
 
 type BuilderAction =
   | { type: "SET_DESCRIPTION"; value: string }
+  | { type: "SET_MODE"; mode: "describe" | "url" }
   | { type: "START_PLANNING" }
   | { type: "SET_REASONING"; steps: ReasoningStep[] }
   | { type: "PLAN_READY"; thinking: string; questions: PlanQuestion[] }
@@ -75,6 +77,8 @@ function reducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {
     case "SET_DESCRIPTION":
       return { ...state, businessDescription: action.value };
+    case "SET_MODE":
+      return { ...state, mode: action.mode };
     case "START_PLANNING":
       return { ...state, phase: "planning", error: null, reasoningSteps: [] };
     case "SET_REASONING":
@@ -123,8 +127,17 @@ function reducer(state: BuilderState, action: BuilderAction): BuilderState {
   }
 }
 
+const URL_BUILD_STEPS = [
+  "Scraping website content...",
+  "Extracting brand identity...",
+  "Analyzing your business...",
+  "Generating quiz questions...",
+  "Building your funnel...",
+];
+
 const initialState: BuilderState = {
   phase: "prompt",
+  mode: "describe",
   businessDescription: "",
   thinking: "",
   questions: [],
@@ -420,19 +433,26 @@ function FunnelPreview({ data, color, logoUrl }: { data: Record<string, unknown>
 function BuildContent() {
   const searchParams = useSearchParams();
   const initialPrompt = searchParams.get("prompt") || "";
+  const initialUrl = searchParams.get("url") || "";
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
-    businessDescription: initialPrompt,
+    businessDescription: initialPrompt || initialUrl,
+    mode: initialUrl ? "url" : "describe",
   });
 
   const [textInput, setTextInput] = useState("");
+  const [urlInput, setUrlInput] = useState(initialUrl);
   const [autoStarted, setAutoStarted] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
 
-  // Auto-start if prompt came from homepage
+  // Auto-start if prompt or URL came from homepage
   useEffect(() => {
-    if (initialPrompt && initialPrompt.length > 10 && !autoStarted) {
+    if (autoStarted) return;
+    if (initialUrl && initialUrl.length > 5) {
+      setAutoStarted(true);
+      startUrlGeneration(initialUrl);
+    } else if (initialPrompt && initialPrompt.length > 10) {
       setAutoStarted(true);
       startPlanning(initialPrompt);
     }
@@ -486,6 +506,90 @@ function BuildContent() {
     } catch {
       toast.error("Failed to analyze your business. Please try again.");
       dispatch({ type: "SET_ERROR", error: "Planning failed" });
+    }
+  }
+
+  async function startUrlGeneration(inputUrl?: string) {
+    let url = inputUrl || urlInput;
+    if (!url || url.trim().length < 4) return;
+
+    if (!/^https?:\/\//i.test(url.trim())) {
+      url = `https://${url.trim()}`;
+    }
+
+    dispatch({ type: "SET_DESCRIPTION", value: url });
+    dispatch({ type: "SET_MODE", mode: "url" });
+    dispatch({ type: "START_PLANNING" });
+
+    // URL generation reasoning steps
+    const urlSteps: ReasoningStep[] = [
+      { label: "Scraping website content", status: "active" },
+      { label: "Extracting brand identity", status: "pending" },
+      { label: "Analyzing your business", status: "pending" },
+      { label: "Generating quiz questions", status: "pending" },
+      { label: "Building your funnel", status: "pending" },
+    ];
+    dispatch({ type: "SET_REASONING", steps: [...urlSteps] });
+
+    try {
+      const fetchPromise = fetch("/api/ai/url-to-funnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      // Animate through steps while API call runs
+      for (let i = 0; i < urlSteps.length - 1; i++) {
+        await new Promise((r) => setTimeout(r, 1200));
+        urlSteps[i].status = "done";
+        urlSteps[i + 1].status = "active";
+        dispatch({ type: "SET_REASONING", steps: [...urlSteps] });
+      }
+
+      const res = await fetchPromise;
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "URL generation failed");
+      }
+
+      const data = await res.json();
+
+      // Mark all done
+      urlSteps[urlSteps.length - 1].status = "done";
+      dispatch({ type: "SET_REASONING", steps: [...urlSteps] });
+      await new Promise((r) => setTimeout(r, 300));
+
+      const color = data.config?.brand?.primaryColor || "#2D6A4F";
+      const generatedData = {
+        brandName: data.brandName || data.config?.brand?.name || "",
+        headline: data.config?.quiz?.headline || "",
+        subheadline: data.config?.quiz?.subheadline || "",
+        questions: data.config?.quiz?.questions || [],
+        thresholds: data.config?.quiz?.thresholds || { high: 7, mid: 4 },
+        metaDescription: data.config?.meta?.description || "",
+        badgeText: data.config?.quiz?.badgeText || "FREE ASSESSMENT",
+        ctaButtonText: data.config?.quiz?.ctaButtonText || "Take the Quiz",
+      };
+
+      dispatch({ type: "GENERATION_DONE", data: generatedData, color });
+
+      // Store logo URL as an answer so the preview shows it
+      if (data.logoUrl) {
+        dispatch({ type: "ANSWER_QUESTION", questionId: "logo_url", answer: data.logoUrl });
+      }
+
+      // Save to localStorage
+      localStorage.setItem(
+        "myvsl_pending_funnel",
+        JSON.stringify({
+          config: data.config,
+          slug: data.slug,
+        })
+      );
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "URL generation failed";
+      toast.error(msg);
+      dispatch({ type: "SET_ERROR", error: msg });
     }
   }
 
@@ -658,23 +762,82 @@ function BuildContent() {
                 </div>
                 <span className="text-sm font-semibold text-[#111827]">AI Builder</span>
               </div>
-              <p className="text-sm text-[#6B7280] mb-4">
-                Describe your business and who you serve. The more detail you give, the better your funnel will be.
-              </p>
-              <textarea
-                value={state.businessDescription}
-                onChange={(e) => dispatch({ type: "SET_DESCRIPTION", value: e.target.value })}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startPlanning(); } }}
-                placeholder="I run a coaching business helping SaaS founders scale from $50k to $500k MRR through outbound sales systems..."
-                rows={5}
-                className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] resize-none outline-none border border-[#E5E7EB] rounded-xl p-4 focus:border-[#2D6A4F] transition-colors"
-                style={{ fontSize: "15px" }}
-                aria-label="Describe your business"
-              />
-              <button onClick={() => startPlanning()} disabled={state.businessDescription.length < 10}
-                className="w-full mt-4 py-3 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
-                <Sparkles className="w-4 h-4" /> Start Building
-              </button>
+
+              {/* Mode tabs */}
+              <div className="flex border border-[#E5E7EB] rounded-lg p-0.5 mb-4">
+                <button
+                  onClick={() => dispatch({ type: "SET_MODE", mode: "describe" })}
+                  className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors ${
+                    state.mode === "describe"
+                      ? "bg-[#2D6A4F] text-white"
+                      : "text-[#6B7280] hover:text-[#111827]"
+                  }`}
+                >
+                  Describe
+                </button>
+                <button
+                  onClick={() => dispatch({ type: "SET_MODE", mode: "url" })}
+                  className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors ${
+                    state.mode === "url"
+                      ? "bg-[#2D6A4F] text-white"
+                      : "text-[#6B7280] hover:text-[#111827]"
+                  }`}
+                >
+                  Website URL
+                </button>
+              </div>
+
+              {state.mode === "describe" ? (
+                <>
+                  <p className="text-sm text-[#6B7280] mb-4">
+                    Describe your business and who you serve. The more detail you give, the better your funnel will be.
+                  </p>
+                  <textarea
+                    value={state.businessDescription}
+                    onChange={(e) => dispatch({ type: "SET_DESCRIPTION", value: e.target.value })}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startPlanning(); } }}
+                    placeholder="I run a coaching business helping SaaS founders scale from $50k to $500k MRR through outbound sales systems..."
+                    rows={5}
+                    className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] resize-none outline-none border border-[#E5E7EB] rounded-xl p-4 focus:border-[#2D6A4F] transition-colors"
+                    style={{ fontSize: "15px" }}
+                    aria-label="Describe your business"
+                  />
+                  <button onClick={() => startPlanning()} disabled={state.businessDescription.length < 10}
+                    className="w-full mt-4 py-3 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
+                    <Sparkles className="w-4 h-4" /> Start Building
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-[#6B7280] mb-4">
+                    Paste your website URL and we will scrape it to auto-generate a complete funnel with your branding, quiz questions, and lead scoring.
+                  </p>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                      </svg>
+                    </div>
+                    <input
+                      type="url"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); startUrlGeneration(); } }}
+                      placeholder="https://yourwebsite.com"
+                      className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl pl-9 pr-4 py-3.5 focus:border-[#2D6A4F] transition-colors"
+                      style={{ fontSize: "15px" }}
+                      aria-label="Paste your website URL"
+                    />
+                  </div>
+                  <button onClick={() => startUrlGeneration()} disabled={!urlInput || urlInput.trim().length < 4}
+                    className="w-full mt-4 py-3 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                    </svg>
+                    Generate from Website
+                  </button>
+                </>
+              )}
               <p className="text-xs text-[#9CA3AF] text-center mt-3">
                 Free to build. No account required.
               </p>
@@ -686,7 +849,7 @@ function BuildContent() {
             <div className="p-6 flex-1">
               {/* User's description */}
               <div className="bg-[#F9FAFB] rounded-xl px-4 py-3 border border-[#E5E7EB] mb-5">
-                <p className="text-sm text-[#111827]">{state.businessDescription}</p>
+                <p className="text-sm text-[#111827] break-all">{state.businessDescription}</p>
               </div>
 
               {/* AI header */}
@@ -694,7 +857,9 @@ function BuildContent() {
                 <div className="w-6 h-6 rounded-md bg-[#2D6A4F] flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
-                <span className="text-sm font-semibold text-[#111827]">Planning</span>
+                <span className="text-sm font-semibold text-[#111827]">
+                  {state.mode === "url" ? "Generating from website" : "Planning"}
+                </span>
               </div>
 
               {/* Reasoning steps */}

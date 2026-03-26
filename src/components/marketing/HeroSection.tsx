@@ -2,8 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { Loader2, Globe } from "lucide-react";
+import { toast } from "sonner";
 
 const QUICK_TEMPLATES = [
   { label: "Coaching Qualifier", prompt: "I sell business coaching to 6-figure entrepreneurs" },
@@ -24,11 +27,18 @@ const COLOR_PRESETS = [
 
 export function HeroSection() {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
   const [prompt, setPrompt] = useState("");
   const [showTemplates, setShowTemplates] = useState(false);
   const [showStyles, setShowStyles] = useState(false);
+  const [urlLoading, setUrlLoading] = useState(false);
+  const [urlStatus, setUrlStatus] = useState("");
   const templateRef = useRef<HTMLDivElement>(null);
   const styleRef = useRef<HTMLDivElement>(null);
+
+  const isUrl =
+    /^https?:\/\//i.test(prompt.trim()) ||
+    /\.[a-z]{2,}(\/|$)/i.test(prompt.trim());
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -40,7 +50,55 @@ export function HeroSection() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  async function handleUrlGenerate() {
+    let url = prompt.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+    }
+
+    setUrlLoading(true);
+    setUrlStatus("Analyzing website...");
+
+    try {
+      const res = await fetch("/api/ai/url-to-funnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to generate from URL");
+      }
+
+      setUrlStatus("Building your funnel...");
+      const data = await res.json();
+
+      localStorage.setItem(
+        "myvsl_pending_funnel",
+        JSON.stringify({
+          config: data.config,
+          slug: data.slug,
+        })
+      );
+
+      if (isSignedIn) {
+        router.push("/dashboard");
+      } else {
+        router.push("/sign-up");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to generate from URL");
+      setUrlLoading(false);
+      setUrlStatus("");
+    }
+  }
+
   function handleSubmit() {
+    if (isUrl) {
+      handleUrlGenerate();
+      return;
+    }
     if (prompt.length > 5) {
       router.push(`/build?prompt=${encodeURIComponent(prompt)}`);
     } else {
@@ -109,12 +167,28 @@ export function HeroSection() {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-              placeholder="I sell business coaching to 6-figure entrepreneurs..."
+              placeholder="Describe your business or paste your website URL..."
               rows={3}
               className="w-full px-6 py-5 text-base text-[#111827] placeholder-[#9CA3AF] bg-transparent resize-none outline-none border-none focus:ring-0 focus:outline-none"
               style={{ fontSize: "16px" }}
-              aria-label="Describe your business to generate a funnel"
+              aria-label="Describe your business or paste a website URL"
+              disabled={urlLoading}
             />
+            {/* URL detection indicator */}
+            {isUrl && !urlLoading && (
+              <div className="flex items-center gap-1.5 px-6 pb-1">
+                <Globe className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                <span className="text-xs text-[#2D6A4F] font-medium">
+                  Website detected — we will scrape it and auto-generate your funnel
+                </span>
+              </div>
+            )}
+            {urlLoading && (
+              <div className="flex items-center gap-2 px-6 pb-2">
+                <Loader2 className="w-3.5 h-3.5 text-[#2D6A4F] animate-spin" />
+                <span className="text-xs text-[#2D6A4F] font-medium">{urlStatus}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between px-5 pb-4">
               {/* Integration logos */}
               <div className="flex items-center">
@@ -216,13 +290,28 @@ export function HeroSection() {
                 {/* Build button */}
                 <button
                   onClick={handleSubmit}
-                  className="flex items-center gap-2 text-sm font-semibold pl-5 pr-4 py-2.5 rounded-xl transition-all hover:brightness-95 shadow-sm"
+                  disabled={urlLoading}
+                  className="flex items-center gap-2 text-sm font-semibold pl-5 pr-4 py-2.5 rounded-xl transition-all hover:brightness-95 shadow-sm disabled:opacity-60"
                   style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
                 >
-                  Build it
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                  </svg>
+                  {urlLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Generating...
+                    </>
+                  ) : isUrl ? (
+                    <>
+                      <Globe className="w-3.5 h-3.5" />
+                      Generate from website
+                    </>
+                  ) : (
+                    <>
+                      Build it
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
