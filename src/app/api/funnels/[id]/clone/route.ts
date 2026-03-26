@@ -85,13 +85,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     }
 
-    // Generate unique slug
+    // Generate unique slug with retry
     const baseSlug = generateSlug(config.brand?.name ?? "my-funnel");
     let slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
 
-    const isAvailable = await checkSlugAvailable(slug);
+    let isAvailable = await checkSlugAvailable(slug);
     if (!isAvailable) {
       slug = `${baseSlug}-${Math.random().toString(36).slice(2, 8)}`;
+      isAvailable = await checkSlugAvailable(slug);
+      if (!isAvailable) {
+        return NextResponse.json({ error: "Could not generate unique slug. Try again." }, { status: 409 });
+      }
     }
 
     const newFunnel = await createFunnel({

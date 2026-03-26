@@ -30,25 +30,34 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
 
   async function handlePublish() {
     setPublishing(true);
-    const res = await fetch(`/api/funnels/${funnel.id}/publish`, { method: "POST" });
-    const updated = await res.json();
-    onUpdate(updated);
-    setPublishing(false);
-    if (res.ok) {
-      firePublishConfetti(_config.brand?.primaryColor);
-      toast.success("Funnel published!");
-    } else {
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}/publish`, { method: "POST" });
+      if (res.ok) {
+        const updated = await res.json();
+        onUpdate(updated);
+        firePublishConfetti(_config.brand?.primaryColor);
+        toast.success("Funnel published!");
+      } else {
+        toast.error("Failed to publish funnel");
+      }
+    } catch {
       toast.error("Failed to publish funnel");
+    } finally {
+      setPublishing(false);
     }
   }
 
   async function handleUnpublish() {
-    const res = await fetch(`/api/funnels/${funnel.id}/unpublish`, { method: "POST" });
-    const updated = await res.json();
-    onUpdate(updated);
-    if (res.ok) {
-      toast.success("Funnel unpublished");
-    } else {
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}/unpublish`, { method: "POST" });
+      if (res.ok) {
+        const updated = await res.json();
+        onUpdate(updated);
+        toast.success("Funnel unpublished");
+      } else {
+        toast.error("Failed to unpublish funnel");
+      }
+    } catch {
       toast.error("Failed to unpublish funnel");
     }
   }
@@ -115,7 +124,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
               <p className="text-xs text-[#6B7280] mb-2">Embed on your website</p>
               <div className="relative">
                 <pre className="text-[10px] text-[#737373] font-mono bg-white border border-[#E5E7EB] rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-all">
-{`<iframe src="https://${funnelUrl}" width="100%" height="800" frameborder="0" style="border:none;"></iframe>`}
+{`<iframe src="https://${funnelUrl}?embed=true" width="100%" height="800" frameborder="0" style="border:none;"></iframe>`}
                 </pre>
                 <Button
                   variant="outline"
@@ -123,7 +132,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                   className="absolute top-2 right-2 text-[10px] h-6 px-2"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `<iframe src="https://${funnelUrl}" width="100%" height="800" frameborder="0" style="border:none;"></iframe>`
+                      `<iframe src="https://${funnelUrl}?embed=true" width="100%" height="800" frameborder="0" style="border:none;"></iframe>`
                     );
                     toast.success("Embed code copied");
                   }}

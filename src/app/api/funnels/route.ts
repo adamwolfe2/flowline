@@ -60,14 +60,22 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { config: bodyConfig, slug: rawSlug, templateId } = body;
 
-    // If templateId is provided, use the template config as the base
+    // If templateId is provided, use the template config as the base (deep merge)
     let config = bodyConfig;
     if (templateId && typeof templateId === "string") {
       const template = getTemplateById(templateId);
       if (!template) {
         return NextResponse.json({ error: "Template not found" }, { status: 400 });
       }
-      config = { ...template.config, ...(bodyConfig || {}) };
+      // Deep merge to preserve nested template fields when bodyConfig has partial overrides
+      config = {
+        ...template.config,
+        ...(bodyConfig || {}),
+        brand: { ...template.config.brand, ...(bodyConfig?.brand || {}) },
+        quiz: { ...template.config.quiz, ...(bodyConfig?.quiz || {}) },
+        webhook: { ...template.config.webhook, ...(bodyConfig?.webhook || {}) },
+        meta: { ...template.config.meta, ...(bodyConfig?.meta || {}) },
+      };
     }
 
     // Validate config has required sections

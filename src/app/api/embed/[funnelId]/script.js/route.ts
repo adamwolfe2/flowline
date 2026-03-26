@@ -59,7 +59,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ fun
   window.addEventListener("message", function(event) {
     if (!event.data || event.data.type !== "myvsl:resize") return;
     var height = parseInt(event.data.height, 10);
-    if (height > 0) {
+    if (height > 0 && height < 10000) {
       iframe.style.height = height + "px";
     }
   });
