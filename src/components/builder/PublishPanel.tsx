@@ -34,7 +34,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
     onUpdate(updated);
     setPublishing(false);
     if (res.ok) {
-      firePublishConfetti();
+      firePublishConfetti(_config.brand?.primaryColor);
       toast.success("Funnel published!");
     } else {
       toast.error("Failed to publish funnel");
