@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   ChevronDown,
   Mail,
+  Globe,
+  Code,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -28,6 +30,7 @@ const tabs = [
   { id: "routing", label: "Calendar Routing", icon: Calendar },
   { id: "emails", label: "Email Sequences", icon: Mail },
   { id: "integrations", label: "Integrations", icon: Link2 },
+  { id: "publish", label: "Publish", icon: Globe },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -99,6 +102,15 @@ const leftContent: Record<TabId, TabContent> = {
       { icon: Sparkles, text: "Embed on any website with a single link" },
     ],
     cta: "Explore integrations",
+  },
+  publish: {
+    headline: "Publish with your own domain",
+    bullets: [
+      { icon: Globe, text: "Connect any custom domain in seconds — no DNS expertise needed" },
+      { icon: Code, text: "Embed on your site with a single script tag" },
+      { icon: CheckCircle2, text: "SSL, CDN, and global edge delivery included free" },
+    ],
+    cta: "Try it free",
   },
 };
 
@@ -599,6 +611,107 @@ function IntegrationsMockup() {
   );
 }
 
+/* --- Publish / Custom Domain Mockup --- */
+
+function PublishMockup() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    setStep(0);
+    const timers = [
+      setTimeout(() => setStep(1), 500),
+      setTimeout(() => setStep(2), 1200),
+      setTimeout(() => setStep(3), 2000),
+      setTimeout(() => setStep(4), 2800),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="w-full max-w-[380px] space-y-4">
+      {/* Domain input */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white rounded-xl border border-[#E5E7EB] p-4"
+      >
+        <p className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider mb-2">Custom Domain</p>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-3 py-2">
+            <span className="text-sm font-mono text-[#111827]">
+              {step >= 1 ? "form.yourbrand.com" : <span className="text-[#9CA3AF]">app.yourdomain.com</span>}
+            </span>
+          </div>
+          <div className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${step >= 2 ? "bg-[#2D6A4F] text-white" : "bg-[#F3F4F6] text-[#9CA3AF]"}`}>
+            {step >= 2 ? "Connected" : "Save"}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* DNS setup */}
+      {step >= 2 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-xl border border-[#E5E7EB] p-4"
+        >
+          <p className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider mb-3">DNS Record</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded">CNAME</span>
+              <span className="text-xs font-mono text-[#111827]">form.yourbrand.com</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded">Value</span>
+              <span className="text-xs font-mono text-[#111827]">cname.vercel-dns.com</span>
+            </div>
+          </div>
+          {step >= 3 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5 mt-3 text-xs text-[#2D6A4F] font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              DNS verified
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Embed code */}
+      {step >= 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-xl border border-[#E5E7EB] p-4"
+        >
+          <p className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider mb-2">Embed Widget</p>
+          <div className="bg-[#111827] rounded-lg p-3 font-mono text-[10px] text-[#86EFAC] overflow-x-auto">
+            &lt;script src=&quot;getmyvsl.com/embed/...&quot;&gt;&lt;/script&gt;
+          </div>
+          <p className="text-[10px] text-[#9CA3AF] mt-2">Paste on any website to embed your quiz</p>
+        </motion.div>
+      )}
+
+      {/* Live status */}
+      {step >= 4 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[#2D6A4F]/5 border border-[#2D6A4F]/20 rounded-xl p-4 text-center"
+        >
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2D6A4F]" />
+            </span>
+            <span className="text-sm font-semibold text-[#2D6A4F]">Live at form.yourbrand.com</span>
+          </div>
+          <p className="text-[10px] text-[#6B7280]">SSL secured, globally distributed</p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Mockup selector                                                    */
 /* ------------------------------------------------------------------ */
@@ -670,6 +783,8 @@ function RightMockup({ tab }: { tab: TabId }) {
       return <EmailsMockup />;
     case "integrations":
       return <IntegrationsMockup />;
+    case "publish":
+      return <PublishMockup />;
   }
 }
 
