@@ -131,6 +131,17 @@
   }
 }
 
+/* Page content fade-in for smoother navigation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+main,
+[data-slot="page-content"] {
+  animation: fadeIn 0.15s ease-out;
+}
+
 /* Instrument Serif headings — wider tracking for readability at large sizes */
 h1 {
   letter-spacing: 0.02em;

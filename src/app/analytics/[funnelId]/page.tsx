@@ -368,7 +368,7 @@ export default function AnalyticsDashboard() {
         <div className="text-center space-y-3">
           <BarChart3 className="w-10 h-10 text-gray-300 mx-auto" />
           <p className="text-gray-500">{error ?? "No data available"}</p>
-          <Link href="/dashboard" className="text-indigo-600 text-sm hover:underline">
+          <Link href="/dashboard" className="text-[#2D6A4F] text-sm hover:underline">
             Back to dashboard
           </Link>
         </div>
@@ -466,7 +466,7 @@ export default function AnalyticsDashboard() {
             <button
               onClick={shareToken ? () => setShareModalOpen(true) : handleGenerateShareToken}
               disabled={sharing}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 min-h-[44px]"
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 min-h-[44px]"
             >
               {shareToken ? (
                 <>
@@ -482,7 +482,7 @@ export default function AnalyticsDashboard() {
             </button>
             {funnel.published && (
               <a href={`/f/${funnel.slug}`} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
-                <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]">
+                <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]">
                   <ExternalLink className="w-3 h-3" />
                   View live
                 </button>

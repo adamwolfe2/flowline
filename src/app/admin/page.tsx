@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity, Globe, CheckCircle, XCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 interface AdminStats {
@@ -74,8 +75,27 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="text-sm text-[#737373]">Loading admin stats...</div>
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white border border-[#EBEBEB] rounded-lg p-4">
+              <Skeleton className="h-3 w-20 mb-2" />
+              <Skeleton className="h-8 w-12" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="bg-white border border-[#EBEBEB] rounded-lg p-4">
+              <Skeleton className="h-3 w-16 mb-2" />
+              <Skeleton className="h-6 w-14" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -308,7 +328,7 @@ export default function AdminPage() {
                             if (data.verified) {
                               toast.success(`${d.domain} verified`);
                             } else {
-                              toast.error(data.error || "Verification pending");
+                              toast.error("Domain verification pending. Check your DNS settings.");
                             }
                           } catch {
                             toast.error("Verification request failed");

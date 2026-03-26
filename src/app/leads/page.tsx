@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, Download, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -273,8 +274,23 @@ export default function LeadsPage() {
       {/* Table */}
       <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden overflow-x-auto">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-5 h-5 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin" />
+          <div className="divide-y divide-[#E5E7EB]">
+            <div className="bg-[#F9FAFB] px-4 py-3 flex gap-4">
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-24 hidden sm:block" />
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3 w-20 hidden sm:block" />
+            </div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-4 py-3">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-4 w-24 hidden sm:block" />
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-5 w-14 rounded-full" />
+                <Skeleton className="h-4 w-20 hidden sm:block" />
+              </div>
+            ))}
           </div>
         ) : displayedLeads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">

@@ -71,8 +71,19 @@ function DashboardContent() {
 
   useEffect(() => {
     if (searchParams.get("upgraded") === "true") {
-      toast.success("Welcome to Pro! Your account has been upgraded.");
-      firePublishConfetti();
+      fetch("/api/user")
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          const planName = data?.plan
+            ? data.plan.charAt(0).toUpperCase() + data.plan.slice(1)
+            : "Pro";
+          toast.success(`Welcome to ${planName}! Your account has been upgraded.`);
+          firePublishConfetti("#2D6A4F");
+        })
+        .catch(() => {
+          toast.success("Your account has been upgraded!");
+          firePublishConfetti("#2D6A4F");
+        });
       window.history.replaceState({}, "", "/dashboard");
     }
   }, [searchParams]);

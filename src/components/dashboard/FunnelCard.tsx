@@ -110,7 +110,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
 
   return (
     <>
-      <Card className="p-5 hover:shadow-md transition-shadow border-gray-100 group">
+      <Card className="p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border-gray-100 group">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             {funnel.config.brand.logoUrl ? (

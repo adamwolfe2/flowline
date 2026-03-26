@@ -10,7 +10,7 @@ const PLANS = {
     name: "Free",
     monthlyPrice: 0,
     annualPrice: 0,
-    features: ["1 funnel", "Basic analytics", "MyVSL branding", "Community support"],
+    features: ["1 funnel", "100 submissions / month", "Basic analytics", "MyVSL branding", "Community support"],
   },
   pro: {
     name: "Pro",
@@ -18,11 +18,12 @@ const PLANS = {
     annualPrice: 39,
     features: [
       "Unlimited funnels",
-      "Custom domains",
+      "Unlimited submissions",
       "Advanced analytics & scoring",
+      "Custom domains",
       "Remove MyVSL branding",
+      "Calendar integrations",
       "Priority support",
-      "Webhook integrations",
     ],
   },
   agency: {
@@ -31,11 +32,12 @@ const PLANS = {
     annualPrice: 119,
     features: [
       "Everything in Pro",
+      "Unlimited workspaces",
       "White-label branding",
+      "Client sub-accounts",
       "Team collaboration",
       "API access",
       "Dedicated account manager",
-      "Custom integrations",
     ],
   },
 } as const;
@@ -93,7 +95,7 @@ export default function BillingPage() {
       }
 
       if (!res.ok) {
-        toast.error(data.error || "Failed to start checkout");
+        toast.error("Failed to start checkout. Please try again.");
         setLoading(null);
         return;
       }
@@ -120,7 +122,7 @@ export default function BillingPage() {
       }
 
       if (!res.ok) {
-        toast.error(data.error || "Failed to open billing portal");
+        toast.error("Failed to open billing portal. Please try again.");
         setPortalLoading(false);
         return;
       }

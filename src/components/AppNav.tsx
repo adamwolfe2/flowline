@@ -36,7 +36,7 @@ export function AppNav() {
     <nav className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-[#111827]">
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-[#111827]" style={{ fontFamily: "var(--font-plus-jakarta)" }}>
             <Image src="/logo.png" alt="MyVSL" width={24} height={24} />
             <span className="hidden sm:inline">MyVSL</span>
           </Link>

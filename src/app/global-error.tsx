@@ -16,19 +16,84 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center max-w-md px-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-sm text-gray-500 mb-6">
-              An unexpected error occurred. Our team has been notified.
+      <body style={{ fontFamily: "Inter, system-ui, -apple-system, sans-serif", margin: 0 }}>
+        <div style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+          padding: "24px",
+        }}>
+          <div style={{ textAlign: "center", maxWidth: "400px" }}>
+            <div style={{
+              width: "56px",
+              height: "56px",
+              backgroundColor: "rgba(45, 106, 79, 0.1)",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px",
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <h2 style={{
+              fontSize: "20px",
+              fontWeight: 600,
+              color: "#111827",
+              marginBottom: "8px",
+            }}>
+              Something went wrong
+            </h2>
+            <p style={{
+              fontSize: "14px",
+              color: "#6B7280",
+              marginBottom: "24px",
+              lineHeight: 1.5,
+            }}>
+              An unexpected error occurred. Our team has been notified and is looking into it.
             </p>
-            <button
-              onClick={reset}
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-[#2D6A4F] text-white text-sm font-medium hover:bg-[#245840] transition-colors"
-            >
-              Try again
-            </button>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+              <button
+                onClick={reset}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "10px 20px",
+                  borderRadius: "12px",
+                  backgroundColor: "#2D6A4F",
+                  color: "#ffffff",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Try again
+              </button>
+              <a
+                href="/dashboard"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "10px 20px",
+                  borderRadius: "12px",
+                  border: "1px solid #E5E7EB",
+                  color: "#333333",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Go to Dashboard
+              </a>
+            </div>
           </div>
         </div>
       </body>

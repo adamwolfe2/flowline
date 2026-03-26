@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, LayoutTemplate } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, LayoutTemplate, Layers } from "lucide-react";
 
 export function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <Image src="/logo.png" alt="MyVSL" width={32} height={32} className="mb-6" />
+      <div className="w-14 h-14 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-5">
+        <Layers className="w-7 h-7 text-[#2D6A4F]" />
+      </div>
       <h2 className="text-xl font-semibold text-gray-900 mb-2">Build Your First Funnel</h2>
       <p className="text-sm text-gray-500 max-w-sm mb-6">
         Describe your business and AI will create a quiz funnel in 60 seconds. No code required.
