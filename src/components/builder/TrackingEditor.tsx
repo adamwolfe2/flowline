@@ -128,6 +128,31 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
         </p>
       </div>
 
+      {/* Webhook Format */}
+      {config.webhook?.url && (
+        <div>
+          <Label className="text-xs text-gray-500 mb-1.5">Webhook Format</Label>
+          <select
+            value={config.webhook?.format ?? "default"}
+            onChange={e => {
+              const newConfig = JSON.parse(JSON.stringify(config));
+              if (!newConfig.webhook) newConfig.webhook = {};
+              newConfig.webhook.format = e.target.value;
+              onSave(newConfig);
+            }}
+            className="w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:ring-offset-1"
+          >
+            <option value="default">Default</option>
+            <option value="ghl">GoHighLevel</option>
+          </select>
+          {config.webhook?.format === "ghl" && (
+            <p className="text-[10px] text-[#2D6A4F] bg-green-50 border border-green-100 rounded-md px-2 py-1.5 mt-2">
+              Payload formatted for GoHighLevel contact creation. Includes tags, custom fields, and quiz data.
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Webhook Delivery Log */}
       {config.webhook?.url && funnelId && (
         <>

@@ -22,7 +22,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { BarChart3, ExternalLink, MoreVertical, Pencil, Users, Eye, Target, Trash2, Copy } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BarChart3, ExternalLink, MoreVertical, Pencil, Users, Eye, Target, Trash2, Copy, Share2, Loader2 } from "lucide-react";
 
 interface FunnelCardProps {
   funnel: Funnel;
@@ -34,6 +35,9 @@ interface FunnelCardProps {
 export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardProps) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
+  const [sharing, setSharing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
 
@@ -59,6 +63,30 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
       toast.error("Failed to duplicate funnel");
     } finally {
       setDuplicating(false);
+    }
+  }
+
+  async function handleShare() {
+    if (!shareEmail.trim()) return;
+    setSharing(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}/clone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetEmail: shareEmail.trim() }),
+      });
+      if (res.ok) {
+        toast.success("Funnel shared! They can find it in their dashboard.");
+        setShareOpen(false);
+        setShareEmail("");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to share funnel");
+      }
+    } catch {
+      toast.error("Failed to share funnel");
+    } finally {
+      setSharing(false);
     }
   }
 
@@ -133,6 +161,10 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
                   <Copy className="w-3.5 h-3.5 mr-2" />
                   {duplicating ? "Duplicating..." : "Duplicate"}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShareOpen(true)}>
+                  <Share2 className="w-3.5 h-3.5 mr-2" />
+                  Share to Client
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => setConfirmOpen(true)}
@@ -206,6 +238,45 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share to Client</DialogTitle>
+            <DialogDescription>
+              Clone this funnel to another MyVSL user&apos;s account. They must have an existing account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <Input
+              type="email"
+              placeholder="client@example.com"
+              value={shareEmail}
+              onChange={e => setShareEmail(e.target.value)}
+              className="text-sm"
+              onKeyDown={e => { if (e.key === "Enter") handleShare(); }}
+            />
+            <p className="text-[10px] text-gray-400 mt-1.5">
+              The funnel will appear as a new draft in their dashboard.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareOpen(false)} disabled={sharing}>
+              Cancel
+            </Button>
+            <Button onClick={handleShare} disabled={sharing || !shareEmail.trim()}>
+              {sharing ? (
+                <span className="flex items-center gap-1.5">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Sharing...
+                </span>
+              ) : (
+                "Clone to Their Account"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

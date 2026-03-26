@@ -49,6 +49,7 @@ export interface FunnelConfig {
   };
   webhook: {
     url: string;
+    format?: "default" | "ghl";
   };
   meta: {
     title: string;

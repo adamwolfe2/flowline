@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Globe, Copy, ExternalLink } from "lucide-react";
+import { CheckCircle, Globe, Copy, ExternalLink, Code } from "lucide-react";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 
@@ -19,6 +19,7 @@ interface PublishPanelProps {
 export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanelProps) {
   const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [widgetCopied, setWidgetCopied] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [customDomain, setCustomDomain] = useState(funnel.customDomain || "");
   const [savingDomain, setSavingDomain] = useState(false);
@@ -133,6 +134,38 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
               </div>
               <p className="text-[10px] text-[#9CA3AF] mt-2">
                 Paste this code into your website&apos;s HTML to embed the funnel.
+              </p>
+            </div>
+            {/* Quiz Widget Embed */}
+            <div className="mt-4 p-3 bg-[#F9FAFB] rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Code className="w-3.5 h-3.5 text-[#6B7280]" />
+                <p className="text-xs text-[#6B7280] font-medium">Quiz Widget Embed</p>
+              </div>
+              <div className="relative">
+                <pre className="text-[10px] text-[#737373] font-mono bg-white border border-[#E5E7EB] rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-all">
+{`<div id="myvsl-quiz-${funnel.id}"></div>
+<script src="https://${domain}/api/embed/${funnel.id}/script.js" async></script>`}
+                </pre>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute top-2 right-2 text-[10px] h-6 px-2"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `<div id="myvsl-quiz-${funnel.id}"></div>\n<script src="https://${domain}/api/embed/${funnel.id}/script.js" async></script>`
+                    );
+                    setWidgetCopied(true);
+                    setTimeout(() => setWidgetCopied(false), 2000);
+                    toast.success("Widget code copied");
+                  }}
+                >
+                  {widgetCopied ? <CheckCircle className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                  {widgetCopied ? "Copied" : "Copy"}
+                </Button>
+              </div>
+              <p className="text-[10px] text-[#9CA3AF] mt-2">
+                Paste this on any website to embed your quiz as an auto-resizing widget.
               </p>
             </div>
           </div>

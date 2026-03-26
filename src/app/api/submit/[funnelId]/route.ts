@@ -7,7 +7,7 @@ import { sendLeadNotification } from "@/lib/resend";
 import { fireWebhook } from "@/lib/webhook";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
-import { leads, users, emailSequences, sequenceEnrollments } from "@/db/schema";
+import { leads, users, emailSequences, sequenceEnrollments, funnelSessions } from "@/db/schema";
 import { eq, and, sql, gte } from "drizzle-orm";
 import type { FunnelConfig } from "@/types";
 import { isSuperAdmin } from "@/lib/admin";
@@ -137,13 +137,69 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
 
     // Fire webhook if configured (retries with exponential backoff, non-blocking)
     if (config.webhook?.url) {
-      fireWebhook(config.webhook.url, {
-        email, answers, score,
+      // Build enhanced webhook payload
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
+      const funnelUrl = `${appUrl}/f/${funnel.slug}`;
+
+      // Format quiz answers for human readability
+      const quizAnswersFormatted = config.quiz.questions.map((q, i) => {
+        const chosenId = answers[q.key];
+        const chosen = q.options.find(o => o.id === chosenId);
+        return `Q${i + 1}: ${chosen?.label ?? "No answer"} (${chosen?.points ?? 0}pts)`;
+      }).join(", ");
+
+      const totalQuestions = config.quiz.questions.length;
+      const questionsAnswered = Object.keys(answers).length;
+
+      // Fetch session data for device type and duration (non-blocking lookup)
+      let deviceType: string | null = null;
+      let sessionDurationMs: number | null = null;
+      let utmSource: string | null = null;
+      let utmMedium: string | null = null;
+      let utmCampaign: string | null = null;
+
+      if (sessionId) {
+        try {
+          const [session] = await db.select({
+            deviceType: funnelSessions.deviceType,
+            totalDurationMs: funnelSessions.totalDurationMs,
+            utmSource: funnelSessions.utmSource,
+            utmMedium: funnelSessions.utmMedium,
+            utmCampaign: funnelSessions.utmCampaign,
+          }).from(funnelSessions).where(eq(funnelSessions.id, sessionId));
+          if (session) {
+            deviceType = session.deviceType;
+            sessionDurationMs = session.totalDurationMs;
+            utmSource = session.utmSource;
+            utmMedium = session.utmMedium;
+            utmCampaign = session.utmCampaign;
+          }
+        } catch {
+          // Non-critical — proceed without session data
+        }
+      }
+
+      const webhookPayload: Record<string, unknown> = {
+        email,
+        answers,
+        score,
         calendar_tier: calendarTier,
         timestamp: new Date().toISOString(),
         source: config.brand.name,
         funnel_slug: funnel.slug,
-      }, funnelId).catch(() => {}); // Final catch for the retry chain — truly best-effort
+        funnel_url: funnelUrl,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        device_type: deviceType,
+        session_duration_ms: sessionDurationMs,
+        quiz_answers_formatted: quizAnswersFormatted,
+        total_questions: totalQuestions,
+        questions_answered: questionsAnswered,
+      };
+
+      const webhookFormat = config.webhook?.format ?? "default";
+      fireWebhook(config.webhook.url, webhookPayload, funnelId, 3, webhookFormat).catch(() => {});
     }
 
     return NextResponse.json({

@@ -32,7 +32,7 @@ export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          config: template.config,
+          templateId: template.id,
           slug: `${template.id}-${Math.random().toString(36).slice(2, 6)}`,
         }),
       });

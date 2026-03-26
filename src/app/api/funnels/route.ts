@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
+import { getTemplateById } from "@/lib/templates";
 import { generateSlug } from "@/lib/utils";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { db } from "@/db";
@@ -57,7 +58,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { config, slug: rawSlug } = body;
+    const { config: bodyConfig, slug: rawSlug, templateId } = body;
+
+    // If templateId is provided, use the template config as the base
+    let config = bodyConfig;
+    if (templateId && typeof templateId === "string") {
+      const template = getTemplateById(templateId);
+      if (!template) {
+        return NextResponse.json({ error: "Template not found" }, { status: 400 });
+      }
+      config = { ...template.config, ...(bodyConfig || {}) };
+    }
 
     // Validate config has required sections
     if (!config?.brand || typeof config.brand !== "object") {

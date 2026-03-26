@@ -13,11 +13,53 @@ function computeSignature(body: string, secret: string): string {
   return crypto.createHmac("sha256", secret).update(body, "utf8").digest("hex");
 }
 
-export async function fireWebhook(url: string, payload: Record<string, unknown>, funnelId?: string, retries = 3): Promise<boolean> {
+/**
+ * Transform a default webhook payload into GoHighLevel contact format.
+ * Maps quiz data into GHL-compatible customField structure with tags for segmentation.
+ */
+export function formatForGHL(payload: Record<string, unknown>): Record<string, unknown> {
+  const email = String(payload.email ?? "");
+  const score = payload.score !== undefined ? String(payload.score) : "";
+  const tier = payload.calendar_tier ? String(payload.calendar_tier) : "";
+  const answersFormatted = payload.quiz_answers_formatted ? String(payload.quiz_answers_formatted) : "";
+  const source = payload.source ? String(payload.source) : "";
+  const slug = payload.funnel_slug ? String(payload.funnel_slug) : "";
+  const funnelUrl = payload.funnel_url ? String(payload.funnel_url) : "";
+
+  const tags: string[] = ["myvsl-lead"];
+  if (tier) tags.push(`score-${tier}`);
+  if (slug) tags.push(`funnel-${slug}`);
+
+  return {
+    email,
+    firstName: "",
+    lastName: "",
+    phone: "",
+    tags,
+    customField: {
+      quiz_score: score,
+      quiz_tier: tier,
+      quiz_answers: answersFormatted,
+      funnel_name: source,
+      funnel_url: funnelUrl,
+    },
+    source: "MyVSL Quiz Funnel",
+  };
+}
+
+export async function fireWebhook(
+  url: string,
+  payload: Record<string, unknown>,
+  funnelId?: string,
+  retries = 3,
+  format: "default" | "ghl" = "default"
+): Promise<boolean> {
   let lastStatusCode: number | null = null;
   let lastError: string | null = null;
   let success = false;
-  const body = JSON.stringify(payload);
+
+  const finalPayload = format === "ghl" ? formatForGHL(payload) : payload;
+  const body = JSON.stringify(finalPayload);
   const signingSecret = process.env.WEBHOOK_SIGNING_SECRET;
 
   for (let attempt = 0; attempt < retries; attempt++) {

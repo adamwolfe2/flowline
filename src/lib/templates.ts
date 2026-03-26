@@ -30,11 +30,13 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
         headline: "See if you qualify for our coaching program",
         subheadline: "Answer 3 quick questions to find out if we're a fit.",
         ctaButtonText: "Start Your Application",
+        badgeText: "Free Application",
         emailHeadline: "Almost there!",
         emailSubtext: "Enter your email to see your results and book a strategy call.",
         emailButtonText: "See My Results",
         successHeadline: "Great news - you qualify!",
         successSubtext: "We sent a confirmation to {email}. Book your free strategy call below.",
+        trustBadges: ["No commitment required", "Results in 60 seconds", "100% confidential"],
         questions: [
           {
             key: "q1",
@@ -79,7 +81,7 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     name: "SaaS Demo Booker",
     category: "SaaS",
     icon: "Laptop",
-    description: "Qualify SaaS prospects by company size, use case, and timeline.",
+    description: "Qualify SaaS prospects by team size, current tools, and pain points.",
     config: {
       brand: {
         name: "My SaaS Product",
@@ -94,11 +96,13 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
         headline: "Find out which plan is right for your team",
         subheadline: "Takes 60 seconds. Get a personalized recommendation.",
         ctaButtonText: "Get My Recommendation",
+        badgeText: "Free Assessment",
         emailHeadline: "Your recommendation is ready",
         emailSubtext: "Enter your work email to see your personalized plan and book a demo.",
         emailButtonText: "See My Plan",
         successHeadline: "We've found your perfect plan!",
         successSubtext: "We sent the details to {email}. Book a demo to get started.",
+        trustBadges: ["No credit card needed", "Personalized results", "Talk to a human"],
         questions: [
           {
             key: "q1",
@@ -112,22 +116,22 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
           },
           {
             key: "q2",
-            text: "What's your biggest challenge right now?",
+            text: "What tools are you currently using?",
+            options: [
+              { id: "a", label: "Spreadsheets only", points: 0 },
+              { id: "b", label: "Basic free tools", points: 1 },
+              { id: "c", label: "A competitor product", points: 2 },
+              { id: "d", label: "Multiple paid tools", points: 3 },
+            ],
+          },
+          {
+            key: "q3",
+            text: "What's your biggest pain point?",
             options: [
               { id: "a", label: "Manual processes", points: 1 },
               { id: "b", label: "Scaling operations", points: 2 },
               { id: "c", label: "Data & reporting", points: 2 },
               { id: "d", label: "Team collaboration", points: 3 },
-            ],
-          },
-          {
-            key: "q3",
-            text: "When are you looking to implement a solution?",
-            options: [
-              { id: "a", label: "Just researching", points: 0 },
-              { id: "b", label: "Next quarter", points: 1 },
-              { id: "c", label: "This month", points: 2 },
-              { id: "d", label: "ASAP", points: 3 },
             ],
           },
         ],
@@ -140,10 +144,10 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
   },
   {
     id: "agency",
-    name: "Agency Lead Qualifier",
+    name: "Agency Lead Scorer",
     category: "Agency",
     icon: "Briefcase",
-    description: "Qualify marketing agency leads by budget, channels, and timeline.",
+    description: "Qualify marketing agency leads by company size, budget, channels, and challenges.",
     config: {
       brand: {
         name: "My Agency",
@@ -156,17 +160,29 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
       },
       quiz: {
         headline: "Let's see if we can help grow your business",
-        subheadline: "Answer 3 questions to get a custom growth plan.",
+        subheadline: "Answer 4 questions to get a custom growth plan.",
         ctaButtonText: "Get My Growth Plan",
+        badgeText: "Free Strategy Session",
         emailHeadline: "Your growth plan is ready",
         emailSubtext: "Enter your email to unlock your custom strategy.",
         emailButtonText: "Unlock My Strategy",
         successHeadline: "Your custom plan is ready!",
         successSubtext: "We sent the details to {email}. Book a call to discuss your strategy.",
+        trustBadges: ["Free consultation included", "No long-term contracts", "Proven strategies"],
         questions: [
           {
             key: "q1",
-            text: "What's your monthly marketing budget?",
+            text: "How large is your company?",
+            options: [
+              { id: "a", label: "Solo / freelancer", points: 0 },
+              { id: "b", label: "2-10 employees", points: 1 },
+              { id: "c", label: "11-50 employees", points: 2 },
+              { id: "d", label: "50+ employees", points: 3 },
+            ],
+          },
+          {
+            key: "q2",
+            text: "What's your monthly marketing spend?",
             options: [
               { id: "a", label: "Under $2k", points: 0 },
               { id: "b", label: "$2k - $10k", points: 1 },
@@ -175,23 +191,23 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
             ],
           },
           {
-            key: "q2",
+            key: "q3",
+            text: "What's your biggest marketing challenge?",
+            options: [
+              { id: "a", label: "Getting started", points: 0 },
+              { id: "b", label: "Generating quality leads", points: 1 },
+              { id: "c", label: "Scaling what works", points: 2 },
+              { id: "d", label: "Improving ROI across channels", points: 3 },
+            ],
+          },
+          {
+            key: "q4",
             text: "Which channels are you using today?",
             options: [
               { id: "a", label: "None / Organic only", points: 0 },
               { id: "b", label: "Social media ads", points: 1 },
               { id: "c", label: "Google + Social", points: 2 },
               { id: "d", label: "Full omnichannel", points: 3 },
-            ],
-          },
-          {
-            key: "q3",
-            text: "When do you need results?",
-            options: [
-              { id: "a", label: "No rush", points: 0 },
-              { id: "b", label: "Next 90 days", points: 1 },
-              { id: "c", label: "Next 30 days", points: 2 },
-              { id: "d", label: "Yesterday", points: 3 },
             ],
           },
         ],
@@ -204,10 +220,10 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
   },
   {
     id: "real-estate",
-    name: "Real Estate Qualifier",
+    name: "Real Estate Buyer",
     category: "Real Estate",
     icon: "Home",
-    description: "Qualify home buyers by budget, timeline, and preferences.",
+    description: "Qualify home buyers by budget, timeline, and location preferences.",
     config: {
       brand: {
         name: "My Real Estate Team",
@@ -222,11 +238,13 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
         headline: "Find your dream home faster",
         subheadline: "Answer 3 questions and we'll match you with the right properties.",
         ctaButtonText: "Find My Match",
+        badgeText: "Free Home Search",
         emailHeadline: "We found your matches!",
         emailSubtext: "Enter your email to see personalized listings and book a viewing.",
         emailButtonText: "See My Matches",
         successHeadline: "Great matches found!",
         successSubtext: "We sent property matches to {email}. Book a viewing below.",
+        trustBadges: ["Licensed agents", "No obligation", "Local market experts"],
         questions: [
           {
             key: "q1",
@@ -250,12 +268,12 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
           },
           {
             key: "q3",
-            text: "Are you pre-approved for a mortgage?",
+            text: "What type of area do you prefer?",
             options: [
-              { id: "a", label: "Not yet", points: 0 },
-              { id: "b", label: "Working on it", points: 1 },
-              { id: "c", label: "Yes, pre-approved", points: 3 },
-              { id: "d", label: "Cash buyer", points: 3 },
+              { id: "a", label: "Rural / countryside", points: 1 },
+              { id: "b", label: "Suburban neighborhood", points: 2 },
+              { id: "c", label: "Urban / city center", points: 2 },
+              { id: "d", label: "Waterfront / luxury", points: 3 },
             ],
           },
         ],
@@ -268,10 +286,10 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
   },
   {
     id: "fitness",
-    name: "Fitness Program Qualifier",
+    name: "Fitness Assessment",
     category: "Health & Fitness",
     icon: "Dumbbell",
-    description: "Qualify fitness coaching leads by goals, experience, and commitment.",
+    description: "Qualify fitness coaching leads by goals, experience, and commitment level.",
     config: {
       brand: {
         name: "My Fitness Program",
@@ -286,11 +304,13 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
         headline: "Get your custom fitness plan",
         subheadline: "Answer 3 questions and we'll build your personalized program.",
         ctaButtonText: "Build My Plan",
+        badgeText: "Free Assessment",
         emailHeadline: "Your plan is ready!",
         emailSubtext: "Enter your email to get your custom fitness program.",
         emailButtonText: "Get My Program",
         successHeadline: "Your program is ready!",
         successSubtext: "We sent your custom plan to {email}. Book your free consultation below.",
+        trustBadges: ["Certified trainers", "Personalized plan", "No gym required"],
         questions: [
           {
             key: "q1",
@@ -331,3 +351,8 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
     },
   },
 ];
+
+/** Look up a template by ID */
+export function getTemplateById(templateId: string): FunnelTemplate | undefined {
+  return FUNNEL_TEMPLATES.find(t => t.id === templateId);
+}

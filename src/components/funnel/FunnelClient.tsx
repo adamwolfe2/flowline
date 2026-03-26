@@ -20,11 +20,24 @@ interface FunnelClientProps {
   funnelId: string;
   sessionId: string;
   hideBranding?: boolean;
+  embedMode?: boolean;
 }
 
-export function FunnelClient({ config, funnelId, sessionId, hideBranding }: FunnelClientProps) {
+export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedMode: embedModeProp }: FunnelClientProps) {
   // Local config state that can be updated via postMessage from the builder
   const [activeConfig, setActiveConfig] = useState(config);
+
+  // Detect embed mode from prop or URL parameter
+  const [isEmbedMode, setIsEmbedMode] = useState(embedModeProp ?? false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("embed") === "true") {
+        setIsEmbedMode(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -51,6 +64,23 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
   const [calendarUrl, setCalendarUrl] = useState("");
   const [leadScore, setLeadScore] = useState<number | undefined>();
   const [leadTier, setLeadTier] = useState<string | undefined>();
+
+  // Send resize message to parent when in embed mode
+  useEffect(() => {
+    if (!isEmbedMode) return;
+    const sendResize = () => {
+      try {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ type: "myvsl:resize", height }, "*");
+      } catch {
+        // Silently ignore cross-origin errors
+      }
+    };
+    sendResize();
+    const observer = new ResizeObserver(sendResize);
+    observer.observe(document.body);
+    return () => observer.disconnect();
+  }, [isEmbedMode, step]);
 
   const {
     trackPageView, trackAnswer, trackCTAClick, trackFieldFocus,
@@ -172,7 +202,10 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center bg-gray-50"
+      className={isEmbedMode
+        ? "flex flex-col items-center justify-center bg-white"
+        : "min-h-screen flex flex-col items-center justify-center bg-gray-50"
+      }
       style={{ fontFamily: activeConfig.brand.fontBody }}
     >
       <TrackingPixels
@@ -279,8 +312,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding }: Funn
           )}
         </AnimatePresence>
 
-        {/* Powered by badge — hidden for Pro+ plans */}
-        {!hideBranding && (
+        {/* Powered by badge — hidden for Pro+ plans or embed mode */}
+        {!hideBranding && !isEmbedMode && (
           <EditableOverlay section="brand" field="branding">
             <div className="mt-8 text-center">
               <a
