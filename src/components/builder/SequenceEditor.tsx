@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Mail, Loader2, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Mail, Loader2, ChevronDown, ChevronUp, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { EmailPreview } from "@/components/builder/EmailPreview";
 
 interface Step {
   id?: string;
@@ -37,6 +38,20 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
   const [loading, setLoading] = useState(true);
   const [expandedSeq, setExpandedSeq] = useState<string | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
+  const [previewSteps, setPreviewSteps] = useState<Set<string>>(new Set());
+
+  function togglePreview(seqId: string, stepIndex: number) {
+    const key = `${seqId}-${stepIndex}`;
+    setPreviewSteps((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     fetch(`/api/funnels/${funnel.id}/sequences`)
@@ -250,17 +265,30 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
 
                   <Separator />
 
-                  {seq.steps.map((step, si) => (
+                  {seq.steps.map((step, si) => {
+                    const previewKey = `${seq.id}-${si}`;
+                    const isPreviewOpen = previewSteps.has(previewKey);
+                    return (
                     <div key={step.id || `step-${si}`} className="p-2 bg-gray-50 rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-medium text-gray-500">
                           Step {si + 1} {si === 0 ? "" : `(after ${step.delayHours}h)`}
                         </span>
-                        {seq.steps.length > 1 && (
-                          <button onClick={() => removeStep(seq.id, si)} className="p-0.5 text-gray-300 hover:text-red-400" aria-label="Remove step">
-                            <Trash2 className="w-3 h-3" />
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => togglePreview(seq.id, si)}
+                            className="p-0.5 text-gray-300 hover:text-[#2D6A4F] transition-colors"
+                            aria-label={isPreviewOpen ? "Hide preview" : "Show preview"}
+                            title={isPreviewOpen ? "Hide preview" : "Preview email"}
+                          >
+                            {isPreviewOpen ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                           </button>
-                        )}
+                          {seq.steps.length > 1 && (
+                            <button onClick={() => removeStep(seq.id, si)} className="p-0.5 text-gray-300 hover:text-red-400" aria-label="Remove step">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       {si > 0 && (
                         <div>
@@ -292,8 +320,19 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
                           rows={4}
                         />
                       </div>
+                      {isPreviewOpen && (
+                        <div className="mt-2">
+                          <EmailPreview
+                            subject={step.subject}
+                            body={step.body}
+                            brandName={(funnel.config as { brand?: { name?: string } })?.brand?.name || ""}
+                            brandColor={(funnel.config as { brand?: { primaryColor?: string } })?.brand?.primaryColor}
+                          />
+                        </div>
+                      )}
                     </div>
-                  ))}
+                    );
+                  })}
 
                   <Button
                     variant="ghost"

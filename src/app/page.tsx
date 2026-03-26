@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { LogoStrip } from "@/components/marketing/LogoStrip";
+import { StatsBar } from "@/components/marketing/StatsBar";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
 const ProductDemo = dynamic(
@@ -35,6 +36,7 @@ export default function HomePage() {
       <MarketingNav />
       <HeroSection />
       <LogoStrip />
+      <StatsBar />
       <ProductDemo />
       <IntegrationsSection />
       <WhySection />

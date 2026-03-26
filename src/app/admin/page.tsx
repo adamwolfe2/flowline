@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity, Globe, CheckCircle, XCircle } from "lucide-react";
+import { Users, Layers, Mail, CalendarDays, MousePointerClick, Activity, Globe, CheckCircle, XCircle, HeartPulse, Database, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
@@ -54,6 +54,36 @@ export default function AdminPage() {
     totalVercelDomains: number;
   } | null>(null);
   const [domainAction, setDomainAction] = useState<string | null>(null);
+  const [diagnostics, setDiagnostics] = useState<{
+    database: string;
+    totalUsers: number;
+    totalFunnels: number;
+    totalSessions: number;
+    totalEvents: number;
+    totalLeads: number;
+    eventTypes: Record<string, number>;
+    sessionsWithoutEvents: number;
+    sessionsWithDeviceType: number;
+    trackingHealthPercent: number;
+    recentSessions: Array<{
+      id: string;
+      funnelSlug: string;
+      startedAt: string;
+      deviceType: string | null;
+      completed: boolean;
+      events: number;
+    }>;
+  } | null>(null);
+  const [diagLoading, setDiagLoading] = useState(false);
+
+  function loadDiagnostics() {
+    setDiagLoading(true);
+    fetch("/api/admin/diagnostics")
+      .then(r => r.ok ? r.json() : null)
+      .then(setDiagnostics)
+      .catch(() => {})
+      .finally(() => setDiagLoading(false));
+  }
 
   useEffect(() => {
     fetch("/api/admin/stats")
@@ -237,6 +267,129 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* System Health */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[#333333]">System Health</h2>
+          <button
+            onClick={loadDiagnostics}
+            disabled={diagLoading}
+            className="text-[10px] px-3 py-1 bg-[#2D6A4F] text-white rounded hover:bg-[#245840] transition-colors disabled:opacity-50"
+          >
+            {diagLoading ? "Loading..." : "Run Diagnostics"}
+          </button>
+        </div>
+        {diagLoading && !diagnostics && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+          </div>
+        )}
+        {diagnostics && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Database className="w-3 h-3 text-[#737373]" />
+                  <span className="text-[10px] text-[#737373]">Database</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${diagnostics.database === "connected" ? "bg-green-500" : "bg-red-500"}`} />
+                  <span className="text-xs font-medium text-[#333333] capitalize">{diagnostics.database}</span>
+                </div>
+              </div>
+              <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <HeartPulse className="w-3 h-3 text-[#737373]" />
+                  <span className="text-[10px] text-[#737373]">Tracking Health</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${diagnostics.trackingHealthPercent >= 50 ? "bg-green-500" : diagnostics.trackingHealthPercent >= 20 ? "bg-yellow-500" : "bg-red-500"}`} />
+                  <span className="text-xs font-medium text-[#333333]">{diagnostics.trackingHealthPercent}%</span>
+                </div>
+                <p className="text-[9px] text-[#999999] mt-0.5">sessions with events</p>
+              </div>
+              <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+                <span className="text-[10px] text-[#737373]">Sessions w/o Events</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className={`w-2 h-2 rounded-full ${diagnostics.sessionsWithoutEvents === 0 ? "bg-green-500" : diagnostics.sessionsWithoutEvents < 50 ? "bg-yellow-500" : "bg-red-500"}`} />
+                  <span className="text-xs font-medium text-[#333333]">{diagnostics.sessionsWithoutEvents.toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+                <span className="text-[10px] text-[#737373]">Sessions w/ Device Type</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className={`w-2 h-2 rounded-full ${diagnostics.sessionsWithDeviceType > 0 ? "bg-green-500" : "bg-yellow-500"}`} />
+                  <span className="text-xs font-medium text-[#333333]">{diagnostics.sessionsWithDeviceType.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Event types breakdown */}
+            {Object.keys(diagnostics.eventTypes).length > 0 && (
+              <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg p-4">
+                <p className="text-xs font-medium text-[#333333] mb-2">Event Types</p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(diagnostics.eventTypes)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([type, count]) => (
+                      <span key={type} className="inline-flex items-center gap-1 text-[10px] px-2 py-1 bg-white border border-[#EBEBEB] rounded">
+                        <span className="text-[#737373]">{type}</span>
+                        <span className="font-semibold text-[#333333]">{count}</span>
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent sessions */}
+            <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-x-auto">
+              <table className="w-full text-sm min-w-[500px]">
+                <thead>
+                  <tr className="border-b border-[#EBEBEB] text-left text-[#737373]">
+                    <th className="px-4 py-2 font-medium text-xs">Funnel</th>
+                    <th className="px-4 py-2 font-medium text-xs">Started</th>
+                    <th className="px-4 py-2 font-medium text-xs text-center">Events</th>
+                    <th className="px-4 py-2 font-medium text-xs text-center">Device</th>
+                    <th className="px-4 py-2 font-medium text-xs text-center">Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {diagnostics.recentSessions.map((s) => (
+                    <tr key={s.id} className="border-b border-[#EBEBEB] last:border-0">
+                      <td className="px-4 py-2 text-xs font-mono text-[#2D6A4F]">{s.funnelSlug}</td>
+                      <td className="px-4 py-2 text-xs text-[#737373]">
+                        {new Date(s.startedAt).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-center">
+                        <span className={`inline-flex items-center gap-1 ${s.events > 0 ? "text-[#333333]" : "text-red-400"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${s.events > 0 ? "bg-green-500" : "bg-red-400"}`} />
+                          {s.events}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-xs text-center text-[#737373]">
+                        {s.deviceType || "--"}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-center">
+                        {s.completed ? (
+                          <CheckCircle className="w-3 h-3 text-green-500 inline" />
+                        ) : (
+                          <XCircle className="w-3 h-3 text-[#999999] inline" />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {diagnostics.recentSessions.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-6 text-center text-[#999999] text-xs">No sessions yet</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Domain Management */}
