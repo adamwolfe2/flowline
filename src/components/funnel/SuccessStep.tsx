@@ -119,9 +119,9 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
   return (
     <div className="w-full px-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 28 }}
         className="text-center mb-8"
       >
         <motion.div

@@ -51,7 +51,7 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ type: "spring", stiffness: 260, damping: 28, delay: 0.1 }}
         className="mb-4"
       >
         <EditableOverlay section="content" field="badge">
@@ -80,7 +80,7 @@ export function WelcomeStep({ config, onStart }: WelcomeStepProps) {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+        transition={{ type: "spring", stiffness: 260, damping: 28, delay: 0.2 }}
         className="w-full mt-6"
       >
         <EditableOverlay section="content" field="cta">

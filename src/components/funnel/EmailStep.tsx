@@ -39,9 +39,9 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack 
   return (
     <div className="flex flex-col items-center text-center px-4">
       <motion.div
-        initial={{ opacity: 0, y: -12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ type: "spring", stiffness: 280, damping: 28 }}
         className="mb-6"
       >
         {brand.logoUrl ? (
@@ -81,9 +81,9 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack 
       </motion.div>
 
       <motion.form
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
+        transition={{ type: "spring", stiffness: 280, damping: 28, delay: 0.08 }}
         onSubmit={handleSubmit}
         className="w-full max-w-sm"
         noValidate

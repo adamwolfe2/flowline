@@ -30,7 +30,7 @@ export function ProgressBar({ config, step, totalQuestions }: ProgressBarProps) 
           className="h-1.5 rounded-full"
           style={{ backgroundColor: config.brand.primaryColor }}
           animate={{ width: `${(questionProgress / totalQuestions) * 100}%` }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ type: "spring", stiffness: 200, damping: 30 }}
         />
       </div>
     </div>

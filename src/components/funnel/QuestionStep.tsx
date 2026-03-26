@@ -29,9 +29,9 @@ export function QuestionStep({
   return (
     <div className="w-full px-4">
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
         className="mb-6"
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
@@ -51,10 +51,11 @@ export function QuestionStep({
           return (
             <motion.button
               key={opt.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.07, duration: 0.22 }}
-              whileTap={{ scale: 0.98 }}
+              transition={{ delay: 0.1 + i * 0.06, type: "spring", stiffness: 300, damping: 25 }}
+              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.01 }}
               onClick={() => onSelect(question.key, opt.id)}
               className="w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-150 flex items-center justify-between group"
               style={{
