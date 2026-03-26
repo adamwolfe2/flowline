@@ -1,13 +1,33 @@
+import dynamic from "next/dynamic";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { LogoStrip } from "@/components/marketing/LogoStrip";
-import { ProductDemo } from "@/components/marketing/ProductDemo";
-import { IntegrationsSection } from "@/components/marketing/IntegrationsSection";
-import { WhySection } from "@/components/marketing/WhySection";
-import { TemplatesSection } from "@/components/marketing/TemplatesSection";
-import { TestimonialsSection } from "@/components/marketing/TestimonialsSection";
-import { BottomCTA } from "@/components/marketing/BottomCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+
+const ProductDemo = dynamic(
+  () => import("@/components/marketing/ProductDemo").then((m) => m.ProductDemo),
+  { ssr: true }
+);
+const IntegrationsSection = dynamic(
+  () => import("@/components/marketing/IntegrationsSection").then((m) => m.IntegrationsSection),
+  { ssr: true }
+);
+const WhySection = dynamic(
+  () => import("@/components/marketing/WhySection").then((m) => m.WhySection),
+  { ssr: true }
+);
+const TemplatesSection = dynamic(
+  () => import("@/components/marketing/TemplatesSection").then((m) => m.TemplatesSection),
+  { ssr: true }
+);
+const TestimonialsSection = dynamic(
+  () => import("@/components/marketing/TestimonialsSection").then((m) => m.TestimonialsSection),
+  { ssr: true }
+);
+const BottomCTA = dynamic(
+  () => import("@/components/marketing/BottomCTA").then((m) => m.BottomCTA),
+  { ssr: true }
+);
 
 export default function HomePage() {
   return (

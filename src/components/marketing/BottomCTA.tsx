@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
@@ -95,13 +96,13 @@ export function BottomCTA() {
             <div className="flex items-center justify-between px-5 pb-4">
               <div className="flex -space-x-1.5" title="Integrates with Calendly, Slack, HubSpot">
                 <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                  <img src="/integrations/calendly.svg" alt="Calendly" className="w-3.5 h-3.5 object-contain" />
+                  <Image src="/integrations/calendly.svg" alt="Calendly" width={14} height={14} className="w-3.5 h-3.5 object-contain" />
                 </div>
                 <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                  <img src="/integrations/slack.svg" alt="Slack" className="w-3.5 h-3.5 object-contain" />
+                  <Image src="/integrations/slack.svg" alt="Slack" width={14} height={14} className="w-3.5 h-3.5 object-contain" />
                 </div>
                 <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                  <img src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" className="w-3.5 h-3.5 object-contain" />
+                  <Image src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" width={14} height={14} className="w-3.5 h-3.5 object-contain" />
                 </div>
               </div>
               <button

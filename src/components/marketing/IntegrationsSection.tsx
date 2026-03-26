@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const integrations = [
@@ -54,7 +55,7 @@ export function IntegrationsSection() {
               className="flex flex-col items-center justify-center p-4 rounded-xl border border-[#E5E7EB] bg-white hover:shadow-md hover:border-[#D1D5DB] transition-all"
             >
               {int.icon ? (
-                <img src={int.icon} alt={int.name} className="w-8 h-8 object-contain" />
+                <Image src={int.icon} alt={int.name} width={32} height={32} className="w-8 h-8 object-contain" />
               ) : (
                 <div className="w-8 h-8 rounded-lg bg-[#F3F4F6] flex items-center justify-center text-xs font-bold text-[#6B7280]">
                   {"{ }"}
