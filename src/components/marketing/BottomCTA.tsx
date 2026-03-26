@@ -52,7 +52,7 @@ export function BottomCTA() {
 
   return (
     <section className="bg-[#F9FAFB] py-8 px-4">
-      <div className="bg-white/60 backdrop-blur-xl border border-[#E5E7EB] rounded-2xl sm:rounded-[40px] max-w-6xl mx-auto py-12 sm:py-20 md:py-28 px-4 sm:px-6">
+      <div className="bg-white/60 backdrop-blur-xl border border-[#E5E7EB] rounded-2xl sm:rounded-[40px] max-w-6xl mx-auto py-10 sm:py-20 md:py-28 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}

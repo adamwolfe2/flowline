@@ -168,13 +168,13 @@ export default function BillingPage() {
           role="switch"
           aria-checked={annual}
           aria-label="Toggle annual billing"
-          className={`relative w-12 h-6 rounded-full transition-colors ${
+          className={`relative w-12 h-7 rounded-full transition-colors ${
             annual ? "bg-[#2D6A4F]" : "bg-gray-300"
           }`}
         >
           <div
-            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-              annual ? "translate-x-6" : "translate-x-0.5"
+            className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+              annual ? "translate-x-[22px]" : "translate-x-0.5"
             }`}
           />
         </button>

@@ -57,7 +57,7 @@ export function QuestionStep({
               whileTap={{ scale: 0.97 }}
               whileHover={{ scale: 1.01 }}
               onClick={() => onSelect(question.key, opt.id)}
-              className="w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-150 flex items-center justify-between group"
+              className="w-full text-left px-4 sm:px-5 py-4 rounded-xl border-2 transition-all duration-150 flex items-center justify-between group"
               style={{
                 borderColor: isSelected || hoveredId === opt.id ? brand.primaryColor : "#E5E7EB",
                 backgroundColor: isSelected || hoveredId === opt.id ? brand.primaryColorLight : "#FFFFFF",
@@ -124,7 +124,7 @@ export function QuestionStep({
         <button
           type="button"
           onClick={onBack}
-          className="mt-6 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          className="mt-6 text-sm text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] px-2 py-2"
         >
           &larr; Back
         </button>

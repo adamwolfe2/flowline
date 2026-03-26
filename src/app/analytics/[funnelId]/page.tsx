@@ -445,44 +445,44 @@ export default function AnalyticsDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ---- Header ---- */}
-      <div className="bg-white border-b border-gray-100 px-6 lg:px-10 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="p-2 hover:bg-gray-50 rounded-lg transition-colors">
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-10 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link href="/dashboard" className="p-2 hover:bg-gray-50 rounded-lg transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center">
               <ArrowLeft className="w-4 h-4 text-gray-500" />
             </Link>
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
               style={{ backgroundColor: funnel.config.brand.primaryColor }}
             >
               {funnel.config.brand.name.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">{funnel.config.brand.name}</h1>
-              <p className="text-xs text-gray-400">{funnel.slug}</p>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{funnel.config.brand.name}</h1>
+              <p className="text-xs text-gray-400 truncate">{funnel.slug}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={shareToken ? () => setShareModalOpen(true) : handleGenerateShareToken}
               disabled={sharing}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 min-h-[44px]"
             >
               {shareToken ? (
                 <>
                   <Link2 className="w-3 h-3 text-[#2D6A4F]" />
-                  <span className="text-[#2D6A4F]">Shared</span>
+                  <span className="text-[#2D6A4F] hidden sm:inline">Shared</span>
                 </>
               ) : (
                 <>
                   <Share2 className="w-3 h-3" />
-                  Share
+                  <span className="hidden sm:inline">Share</span>
                 </>
               )}
             </button>
             {funnel.published && (
-              <a href={`/f/${funnel.slug}`} target="_blank" rel="noopener noreferrer">
-                <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
+              <a href={`/f/${funnel.slug}`} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
+                <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]">
                   <ExternalLink className="w-3 h-3" />
                   View live
                 </button>
@@ -492,14 +492,14 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8 space-y-6 sm:space-y-8">
         {/* ---- Time Range Selector ---- */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {(['7d', '30d', '90d', 'all'] as const).map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`text-sm px-4 py-2 rounded-lg transition-colors ${
+              className={`text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap min-h-[44px] ${
                 timeRange === range
                   ? 'bg-[#2D6A4F] text-white'
                   : 'bg-[#FBFBFB] text-[#737373] hover:bg-[#F0F0F0] border border-[#EBEBEB]'
@@ -511,7 +511,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* ---- Stats Bar ---- */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
           <StatCard label="Sessions" value={stats.totalSessions.toLocaleString()} icon={Eye} />
           <StatCard label="Completion" value={stats.completionRate} icon={Target} suffix="%" />
           <StatCard label="Conversion" value={stats.conversionRate} icon={BarChart3} suffix="%" />
@@ -531,7 +531,7 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Waterfall Chart ---- */}
         <ErrorBoundary>
-          <div className="bg-white rounded-xl border border-gray-100 p-6 overflow-x-auto">
+          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
             <WaterfallChart steps={dropoff} />
           </div>
@@ -670,10 +670,10 @@ export default function AnalyticsDashboard() {
             : null;
 
           return (
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">A/B Test Performance</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+              <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
+                <table className="w-full text-xs min-w-[600px]">
                   <thead>
                     <tr className="text-gray-400 border-b border-gray-100">
                       <th className="text-left py-2 font-medium">Variant</th>
@@ -723,31 +723,33 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
             <LeadsChart data={timeSeries} timeRange={timeRange} />
           </div>
         </ErrorBoundary>
 
         {/* ---- Leads Table ---- */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <h3 className="text-sm font-semibold text-gray-900">Recent Leads</h3>
             {recentLeads.length > 0 && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => downloadCSV(recentLeads, funnel.slug)}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
                   <Download className="w-3 h-3" />
-                  Export Page
+                  <span className="hidden sm:inline">Export Page</span>
+                  <span className="sm:hidden">Page</span>
                 </button>
                 <a
                   href={`/api/analytics/${funnelId}/export?timeRange=${timeRange}`}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
                   <Download className="w-3 h-3" />
-                  Export All ({totalLeadCount})
+                  <span className="hidden sm:inline">Export All ({totalLeadCount})</span>
+                  <span className="sm:hidden">All</span>
                 </a>
               </div>
             )}
@@ -757,15 +759,15 @@ export default function AnalyticsDashboard() {
             <p className="text-sm text-gray-400 text-center py-12">No leads captured yet</p>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+              <div className="overflow-x-auto -mx-6 px-6">
+                <table className="w-full text-xs min-w-[500px]">
                   <thead>
                     <tr className="text-gray-400 border-b border-gray-100">
                       <th className="text-left py-2 font-medium">Email</th>
                       <th className="text-center py-2 font-medium">Score</th>
                       <th className="text-center py-2 font-medium">Tier</th>
-                      <th className="text-center py-2 font-medium">Device</th>
-                      <th className="text-left py-2 font-medium">Source</th>
+                      <th className="text-center py-2 font-medium hidden sm:table-cell">Device</th>
+                      <th className="text-left py-2 font-medium hidden sm:table-cell">Source</th>
                       <th className="text-right py-2 font-medium">Date</th>
                     </tr>
                   </thead>
@@ -781,8 +783,8 @@ export default function AnalyticsDashboard() {
                             {lead.calendarTier}
                           </span>
                         </td>
-                        <td className="py-2.5 text-center text-gray-500 capitalize">{lead.deviceType ?? "--"}</td>
-                        <td className="py-2.5 text-gray-500">{lead.utmSource ?? "--"}</td>
+                        <td className="py-2.5 text-center text-gray-500 capitalize hidden sm:table-cell">{lead.deviceType ?? "--"}</td>
+                        <td className="py-2.5 text-gray-500 hidden sm:table-cell">{lead.utmSource ?? "--"}</td>
                         <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
                       </tr>
                     ))}
@@ -791,7 +793,7 @@ export default function AnalyticsDashboard() {
               </div>
 
               {/* Pagination Controls */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-4 pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-400">
                   Showing {leadsPage * leadsPerPage + 1}–{Math.min((leadsPage + 1) * leadsPerPage, totalLeadCount)} of {totalLeadCount}
                 </p>
@@ -799,18 +801,18 @@ export default function AnalyticsDashboard() {
                   <button
                     onClick={() => setLeadsPage((p) => Math.max(0, p - 1))}
                     disabled={leadsPage === 0}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     <ChevronLeft className="w-3 h-3" />
                     Prev
                   </button>
-                  <span className="text-xs text-gray-500">
-                    Page {leadsPage + 1} of {totalLeadPages}
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {leadsPage + 1}/{totalLeadPages}
                   </span>
                   <button
                     onClick={() => setLeadsPage((p) => Math.min(totalLeadPages - 1, p + 1))}
                     disabled={leadsPage >= totalLeadPages - 1}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     Next
                     <ChevronRight className="w-3 h-3" />
@@ -836,7 +838,7 @@ export default function AnalyticsDashboard() {
               <h2 className="text-sm font-semibold text-gray-900">Share Analytics</h2>
               <button
                 onClick={() => setShareModalOpen(false)}
-                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <X className="w-4 h-4 text-gray-400" />
               </button>

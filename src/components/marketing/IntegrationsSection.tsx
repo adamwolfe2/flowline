@@ -48,7 +48,7 @@ export function IntegrationsSection() {
         </div>
 
         {/* Logo grid */}
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 mb-10">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-3 mb-10">
           {integrations.map((int) => (
             <div
               key={int.name}

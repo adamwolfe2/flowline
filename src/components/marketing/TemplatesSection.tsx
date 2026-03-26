@@ -119,7 +119,7 @@ export function TemplatesSection() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-sm px-4 py-2 rounded-full transition-colors border ${
+              className={`text-sm px-4 py-2.5 rounded-full transition-colors border min-h-[44px] ${
                 activeCategory === cat
                   ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
                   : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"

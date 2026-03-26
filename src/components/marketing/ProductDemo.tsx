@@ -164,7 +164,7 @@ function BuilderMockup() {
   ];
 
   return (
-    <div className="w-full max-w-[360px] sm:max-w-[420px] grid grid-cols-1 sm:grid-cols-2 gap-3 h-full">
+    <div className="w-full max-w-[320px] sm:max-w-[420px] grid grid-cols-1 sm:grid-cols-2 gap-3 h-full">
       {/* Chat panel */}
       <div className="bg-white rounded-lg border border-[#E5E7EB] p-3 flex flex-col gap-2 overflow-hidden">
         <div className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider mb-1">
@@ -694,20 +694,21 @@ export function ProductDemo() {
         </div>
 
         {/* Fillout-style frosted glass tab bar */}
-        <div className="flex items-center justify-center mb-10">
-          <div className="inline-flex items-center gap-0.5 bg-[#F3F4F6]/80 backdrop-blur-sm rounded-xl p-1.5 border border-[#E5E7EB]/60 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center justify-start sm:justify-center mb-10 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto scrollbar-hide">
+          <div className="inline-flex items-center gap-0.5 bg-[#F3F4F6]/80 backdrop-blur-sm rounded-xl p-1.5 border border-[#E5E7EB]/60">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-white text-[#111827] shadow-sm"
                     : "text-[#6B7280] hover:text-[#111827]"
                 }`}
               >
                 <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? "text-[#2D6A4F]" : ""}`} />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
               </button>
             ))}
           </div>
@@ -720,7 +721,7 @@ export function ProductDemo() {
             <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
-            <div className="flex-1 mx-8">
+            <div className="flex-1 mx-4 sm:mx-8">
               <div className="bg-white border border-[#E5E7EB] rounded px-3 py-1 text-[10px] text-[#9CA3AF] text-center max-w-[220px] mx-auto">
                 app.getmyvsl.com
               </div>
@@ -735,14 +736,14 @@ export function ProductDemo() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="grid md:grid-cols-2 min-h-[460px]"
+              className="grid grid-cols-1 md:grid-cols-2 min-h-[360px] md:min-h-[460px]"
             >
               {/* LEFT: Copy */}
-              <div className="p-8 md:p-10 flex flex-col justify-center">
+              <div className="p-5 sm:p-8 md:p-10 flex flex-col justify-center">
                 <LeftContent tab={activeTab} />
               </div>
               {/* RIGHT: Interactive mockup */}
-              <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center border-t md:border-t-0 md:border-l border-[#E5E7EB]">
+              <div className="bg-[#F9FAFB] p-4 sm:p-6 md:p-8 flex items-center justify-center border-t md:border-t-0 md:border-l border-[#E5E7EB]">
                 <RightMockup tab={activeTab} />
               </div>
             </motion.div>

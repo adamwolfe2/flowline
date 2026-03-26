@@ -41,7 +41,7 @@ export function MarketingFooter() {
   return (
     <footer className="bg-white border-t border-[#E5E7EB] py-10 md:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-8 md:gap-10 mb-10 md:mb-12">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] md:gap-10 mb-10 md:mb-12">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2.5 mb-4">

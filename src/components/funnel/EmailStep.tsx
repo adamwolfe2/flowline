@@ -166,7 +166,7 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack 
           <button
             type="button"
             onClick={onBack}
-            className="mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            className="mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] px-2 py-2"
           >
             &larr; Back
           </button>

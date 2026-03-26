@@ -182,7 +182,7 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
         {useCalEmbed && effectiveCalLink && !calEmbedFailed ? (
           <div
             id={`cal-embed-${effectiveNamespace}`}
-            style={{ width: "100%", height: "700px", overflow: "auto" }}
+            style={{ width: "100%", height: "min(700px, 80vh)", overflow: "auto" }}
           />
         ) : safeCalendarUrl ? (
           <iframe
@@ -191,7 +191,7 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
             height="700"
             frameBorder="0"
             className="block"
-            style={{ minHeight: "600px" }}
+            style={{ minHeight: "500px", maxHeight: "80vh" }}
             title="Book your call"
           />
         ) : calEmbedFailed && safeCalendarUrl ? (

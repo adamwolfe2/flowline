@@ -29,7 +29,7 @@ function WaterfallChart() {
   ];
 
   return (
-    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-end justify-center gap-3 min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-4 sm:p-6 md:p-8 flex items-end justify-center gap-2 sm:gap-3 min-h-[200px]">
       {bars.map((bar, i) => (
         <div key={bar.label} className="flex flex-col items-center gap-2">
           <motion.span
@@ -62,7 +62,7 @@ function WaterfallChart() {
 
 function ScoringDiagram() {
   return (
-    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="flex flex-col items-center gap-3 w-full max-w-[280px]">
         {/* AI Action */}
         <motion.div
@@ -161,7 +161,7 @@ function CalendarTable() {
   ];
 
   return (
-    <div className="bg-[#F9FAFB] p-6 md:p-8 flex items-center justify-center min-h-[200px]">
+    <div className="bg-[#F9FAFB] p-4 sm:p-6 md:p-8 flex items-center justify-center min-h-[200px]">
       <div className="w-full max-w-[280px] bg-white rounded-xl border border-[#E5E7EB] overflow-hidden">
         <div className="px-4 py-2.5 border-b border-[#E5E7EB] bg-[#F9FAFB]">
           <span className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider">

@@ -184,9 +184,9 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-4 sm:space-y-6">
         {/* Stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
           {statCards.map(({ label, value, icon: Icon }) => (
             <div key={label} className="bg-white rounded-xl border border-[#E5E7EB] p-4">
               <div className="flex items-center gap-1.5 mb-1">
@@ -215,7 +215,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
               <div className="space-y-2">
                 {data.dropoff.map((step) => (
                   <div key={step.stepLabel} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 w-24 shrink-0 truncate">{step.stepLabel}</span>
+                    <span className="text-xs text-gray-500 w-16 sm:w-24 shrink-0 truncate">{step.stepLabel}</span>
                     <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
                       <div
                         className="h-full rounded-full flex items-center justify-end px-2 transition-all"
@@ -288,8 +288,8 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
           <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Leads</h3>
             {data.recentLeads.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+              <div className="overflow-x-auto -mx-6 px-6">
+                <table className="w-full text-xs min-w-[400px]">
                   <thead>
                     <tr className="text-gray-400 border-b border-gray-100">
                       <th className="text-left py-2 font-medium">Email</th>

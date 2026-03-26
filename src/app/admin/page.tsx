@@ -101,9 +101,9 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-lg font-semibold text-[#333333]">Platform Overview</h1>
-        <span className="text-[10px] text-[#9CA3AF]">Super Admin</span>
+        <span className="text-[10px] text-[#9CA3AF] shrink-0">Super Admin</span>
       </div>
 
       {/* Plan breakdown */}
@@ -123,7 +123,7 @@ export default function AdminPage() {
       </div>
 
       {/* Primary stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {primaryCards.map((card) => (
           <div
             key={card.label}
@@ -154,7 +154,7 @@ export default function AdminPage() {
       {/* Recent Users */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[#333333]">Recent Users</h2>
-        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-hidden">
+        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#EBEBEB] text-left text-[#737373]">
@@ -166,7 +166,7 @@ export default function AdminPage() {
             <tbody>
               {stats.recentUsers.map((user) => (
                 <tr key={user.id} className="border-b border-[#EBEBEB] last:border-0">
-                  <td className="px-4 py-2 text-[#333333]">{user.email}</td>
+                  <td className="px-4 py-2 text-[#333333] truncate max-w-[200px]">{user.email}</td>
                   <td className="px-4 py-2">
                     <span className="inline-block text-xs px-2 py-0.5 rounded bg-[#EBEBEB] text-[#555555] capitalize">
                       {user.plan}
@@ -190,7 +190,7 @@ export default function AdminPage() {
       {/* Top Funnels */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-[#333333]">Top Funnels by Leads (last 30 days)</h2>
-        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-hidden">
+        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#EBEBEB] text-left text-[#737373]">
@@ -221,7 +221,7 @@ export default function AdminPage() {
 
       {/* Domain Management */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <h2 className="text-sm font-semibold text-[#333333]">Custom Domains</h2>
           {domains && (
             <span className="text-[10px] text-[#999999]">
@@ -229,8 +229,8 @@ export default function AdminPage() {
             </span>
           )}
         </div>
-        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-lg overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="border-b border-[#EBEBEB] text-left text-[#737373]">
                 <th className="px-4 py-2 font-medium text-xs">Domain</th>

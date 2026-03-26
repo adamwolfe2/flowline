@@ -197,16 +197,16 @@ export default function BuilderPage() {
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Top bar */}
-      <div className="h-12 border-b border-gray-100 flex items-center justify-between px-4 flex-shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="h-12 border-b border-gray-100 flex items-center justify-between px-2 sm:px-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link href="/dashboard">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+            <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs px-2 sm:px-3">
               <ArrowLeft className="w-3.5 h-3.5" />
-              Back
+              <span className="hidden sm:inline">Back</span>
             </Button>
           </Link>
-          <div className="h-5 w-px bg-gray-200" />
-          <span className="text-sm font-medium text-gray-700 truncate max-w-[200px]">
+          <div className="h-5 w-px bg-gray-200 hidden sm:block" />
+          <span className="text-sm font-medium text-gray-700 truncate max-w-[120px] sm:max-w-[200px] hidden sm:block">
             {config.brand.name}
           </span>
           {saving && (
@@ -273,40 +273,40 @@ export default function BuilderPage() {
       {/* Main area — tabs on top, content + preview below */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         {/* Tab bar */}
-        <div className="border-b border-gray-100 flex items-center justify-center gap-2 px-4 flex-shrink-0">
+        <div className="border-b border-gray-100 flex items-center gap-2 px-2 sm:px-4 flex-shrink-0 overflow-x-auto scrollbar-hide">
           <div className="overflow-x-auto scrollbar-hide">
             <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
-              <TabsTrigger value="content" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="content" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <FileText className="w-3 h-3" />
-                Content
+                <span className="hidden sm:inline">Content</span>
               </TabsTrigger>
-              <TabsTrigger value="blocks" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="blocks" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <LayoutGrid className="w-3 h-3" />
-                Blocks
+                <span className="hidden sm:inline">Blocks</span>
               </TabsTrigger>
-              <TabsTrigger value="brand" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="brand" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <Palette className="w-3 h-3" />
-                Brand
+                <span className="hidden sm:inline">Brand</span>
               </TabsTrigger>
-              <TabsTrigger value="calendars" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="calendars" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <Calendar className="w-3 h-3" />
-                Calendars
+                <span className="hidden sm:inline">Calendars</span>
               </TabsTrigger>
-              <TabsTrigger value="emails" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="emails" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <Mail className="w-3 h-3" />
-                Emails
+                <span className="hidden sm:inline">Emails</span>
               </TabsTrigger>
-              <TabsTrigger value="ab-test" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="ab-test" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <FlaskConical className="w-3 h-3" />
-                A/B
+                <span className="hidden sm:inline">A/B</span>
               </TabsTrigger>
-              <TabsTrigger value="tracking" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="tracking" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <BarChart3 className="w-3 h-3" />
-                Tracking
+                <span className="hidden sm:inline">Tracking</span>
               </TabsTrigger>
-              <TabsTrigger value="publish" className="text-xs px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
+              <TabsTrigger value="publish" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
                 <Send className="w-3 h-3" />
-                Publish
+                <span className="hidden sm:inline">Publish</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -360,7 +360,7 @@ export default function BuilderPage() {
         {/* Content + Preview side by side */}
         <div className="flex-1 flex overflow-hidden">
           {/* Editor panel */}
-          <div className={`${sidebarOpen ? 'w-full md:w-[420px]' : 'hidden md:block md:w-[420px]'} border-r border-gray-100 overflow-y-auto p-4 flex-shrink-0`}>
+          <div className={`${sidebarOpen ? 'w-full md:w-[420px]' : 'hidden md:block md:w-[420px]'} border-r border-gray-100 overflow-y-auto p-3 sm:p-4 flex-shrink-0`}>
             <TabsContent value="content" className="mt-0">
               <ContentEditor config={config} onSave={saveConfig} />
             </TabsContent>
@@ -393,7 +393,7 @@ export default function BuilderPage() {
           </div>
 
           {/* Preview pane */}
-          <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-6" : "p-3"}`}>
+          <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
             <ErrorBoundary>
               <div
                 className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"

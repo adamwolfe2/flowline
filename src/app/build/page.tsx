@@ -736,13 +736,15 @@ function BuildContent() {
           <span className="font-semibold text-[#111827] text-sm">MyVSL</span>
         </Link>
         <PhaseIndicator phase={state.phase} />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {state.phase === "preview" && (
-            <Link href="/sign-up" className="bg-[#2D6A4F] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#245840] transition-colors flex items-center gap-1.5">
-              Save & Publish <ArrowRight className="w-3.5 h-3.5" />
+            <Link href="/sign-up" className="bg-[#2D6A4F] text-white text-xs sm:text-sm font-medium px-3 sm:px-4 py-2 rounded-lg hover:bg-[#245840] transition-colors flex items-center gap-1.5 min-h-[44px]">
+              <span className="hidden sm:inline">Save & Publish</span>
+              <span className="sm:hidden">Save</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           )}
-          <Link href="/sign-in" className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors">
+          <Link href="/sign-in" className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors hidden sm:block">
             Sign in
           </Link>
         </div>
@@ -755,7 +757,7 @@ function BuildContent() {
 
           {/* Phase: Prompt */}
           {state.phase === "prompt" && (
-            <div className="p-6 flex-1 flex flex-col">
+            <div className="p-4 sm:p-6 flex-1 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-[#2D6A4F]" />

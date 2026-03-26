@@ -70,7 +70,7 @@ export function MarketingNav() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

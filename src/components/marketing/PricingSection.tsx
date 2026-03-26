@@ -93,13 +93,13 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
           </span>
           <button
             onClick={() => setAnnual(!annual)}
-            className={`relative h-6 w-11 rounded-full transition-colors ${
+            className={`relative h-7 w-12 rounded-full transition-colors ${
               annual ? "bg-[#2D6A4F]" : "bg-[#D1D5DB]"
             }`}
             aria-label="Toggle annual billing"
           >
             <span
-              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+              className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${
                 annual ? "translate-x-5" : "translate-x-0"
               }`}
             />
@@ -126,7 +126,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-2xl border p-8 flex flex-col ${
+                className={`relative rounded-2xl border p-5 sm:p-8 flex flex-col ${
                   plan.popular
                     ? "border-[#2D6A4F] shadow-[0_0_0_1px_#2D6A4F] bg-white"
                     : "border-[#E5E7EB] bg-white"
