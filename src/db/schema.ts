@@ -38,6 +38,8 @@ export const funnels = pgTable('funnels', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   shareToken: text('share_token').unique(),
   shareTokenExpiresAt: timestamp('share_token_expires_at'),
+  shareClientEmail: text('share_client_email'),
+  shareDailyDigest: boolean('share_daily_digest').default(false),
 }, (t) => [
   index('funnels_user_id_idx').on(t.userId),
 ]);

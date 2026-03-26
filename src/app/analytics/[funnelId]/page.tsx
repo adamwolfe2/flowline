@@ -22,6 +22,10 @@ import {
   Link2,
   Link2Off,
   Check,
+  X,
+  Mail,
+  Send,
+  Copy,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -176,24 +180,82 @@ export default function AnalyticsDashboard() {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
   const [shareToken, setShareToken] = useState<string | null>(null);
+  const [shareClientEmail, setShareClientEmail] = useState<string>("");
+  const [shareDailyDigest, setShareDailyDigest] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [sendingInvite, setSendingInvite] = useState(false);
 
-  const handleShare = async () => {
+  const handleGenerateShareToken = async () => {
     setSharing(true);
     try {
       const res = await fetch(`/api/funnels/${funnelId}/share`, { method: "POST" });
       if (!res.ok) throw new Error();
-      const { shareToken: token } = await res.json();
-      setShareToken(token);
-      const url = `${window.location.origin}/analytics/shared/${token}`;
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const result = await res.json();
+      setShareToken(result.shareToken);
+      setShareClientEmail(result.shareClientEmail ?? "");
+      setShareDailyDigest(result.shareDailyDigest ?? false);
+      setShareModalOpen(true);
     } catch {
-      // silently fail
+      toast.error("Failed to generate share link");
     } finally {
       setSharing(false);
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!shareToken) return;
+    const url = `${window.location.origin}/analytics/shared/${shareToken}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Link copied to clipboard");
+  };
+
+  const handleUpdateShareSettings = async () => {
+    try {
+      const res = await fetch(`/api/funnels/${funnelId}/share`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientEmail: shareClientEmail || undefined,
+          dailyDigest: shareDailyDigest,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const result = await res.json();
+      setShareToken(result.shareToken);
+      toast.success("Share settings updated");
+    } catch {
+      toast.error("Failed to update settings");
+    }
+  };
+
+  const handleSendInvite = async () => {
+    if (!shareClientEmail) {
+      toast.error("Enter a client email first");
+      return;
+    }
+    setSendingInvite(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnelId}/share`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientEmail: shareClientEmail,
+          dailyDigest: shareDailyDigest,
+          sendInvite: true,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const result = await res.json();
+      setShareToken(result.shareToken);
+      toast.success(`Invite sent to ${shareClientEmail}`);
+    } catch {
+      toast.error("Failed to send invite");
+    } finally {
+      setSendingInvite(false);
     }
   };
 
@@ -201,8 +263,12 @@ export default function AnalyticsDashboard() {
     try {
       await fetch(`/api/funnels/${funnelId}/share`, { method: "DELETE" });
       setShareToken(null);
+      setShareClientEmail("");
+      setShareDailyDigest(false);
+      setShareModalOpen(false);
+      toast.success("Share link revoked");
     } catch {
-      // silently fail
+      toast.error("Failed to revoke link");
     }
   };
 
@@ -350,33 +416,23 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {shareToken ? (
-              <button
-                onClick={handleRevokeShare}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <Link2Off className="w-3 h-3" />
-                Revoke link
-              </button>
-            ) : (
-              <button
-                onClick={handleShare}
-                disabled={sharing}
-                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3 h-3 text-green-600" />
-                    <span className="text-green-600">Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-3 h-3" />
-                    Share
-                  </>
-                )}
-              </button>
-            )}
+            <button
+              onClick={shareToken ? () => setShareModalOpen(true) : handleGenerateShareToken}
+              disabled={sharing}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              {shareToken ? (
+                <>
+                  <Link2 className="w-3 h-3 text-[#2D6A4F]" />
+                  <span className="text-[#2D6A4F]">Shared</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3 h-3" />
+                  Share
+                </>
+              )}
+            </button>
             {funnel.published && (
               <a href={`/f/${funnel.slug}`} target="_blank" rel="noopener noreferrer">
                 <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
@@ -720,6 +776,133 @@ export default function AnalyticsDashboard() {
       </div>
 
       <LeadDetailModal leadId={selectedLeadId} onClose={() => setSelectedLeadId(null)} />
+
+      {/* Share Modal */}
+      {shareModalOpen && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShareModalOpen(false)}>
+          <div
+            className="bg-white rounded-xl border border-[#E5E7EB] shadow-lg w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB]">
+              <h2 className="text-sm font-semibold text-gray-900">Share Analytics</h2>
+              <button
+                onClick={() => setShareModalOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Shareable link */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                  Shareable Link
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={shareToken ? `${window.location.origin}/analytics/shared/${shareToken}` : ""}
+                    className="flex-1 text-xs bg-gray-50 border border-[#E5E7EB] rounded-lg px-3 py-2 text-gray-600 truncate"
+                  />
+                  <button
+                    onClick={handleCopyShareLink}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors shrink-0"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3 h-3 text-[#2D6A4F]" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Client email */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+                  Client Email (optional)
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Mail className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      value={shareClientEmail}
+                      onChange={(e) => setShareClientEmail(e.target.value)}
+                      placeholder="client@example.com"
+                      className="w-full text-xs border border-[#E5E7EB] rounded-lg pl-9 pr-3 py-2 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] focus:border-[#2D6A4F]"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">Used for daily digest and invite emails</p>
+              </div>
+
+              {/* Daily digest toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-700">Send daily report</p>
+                  <p className="text-[10px] text-gray-400">Email daily stats to the client</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const next = !shareDailyDigest;
+                    setShareDailyDigest(next);
+                  }}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                    shareDailyDigest ? "bg-[#2D6A4F]" : "bg-gray-200"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
+                      shareDailyDigest ? "translate-x-4.5" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Save + Send invite */}
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  onClick={handleUpdateShareSettings}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <Check className="w-3 h-3" />
+                  Save Settings
+                </button>
+                <button
+                  onClick={handleSendInvite}
+                  disabled={!shareClientEmail || sendingInvite}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-[#2D6A4F] text-white hover:bg-[#245840] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-3 h-3" />
+                  {sendingInvite ? "Sending..." : "Send Invite"}
+                </button>
+              </div>
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-6 py-3 border-t border-[#E5E7EB] flex justify-end">
+              <button
+                onClick={handleRevokeShare}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Link2Off className="w-3 h-3" />
+                Revoke link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

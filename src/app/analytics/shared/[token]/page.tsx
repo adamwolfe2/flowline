@@ -1,10 +1,22 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { BarChart3, Users, Target, TrendingUp, Clock } from "lucide-react";
+import {
+  BarChart3,
+  Users,
+  Target,
+  TrendingUp,
+  Clock,
+  Smartphone,
+  Monitor,
+  Tablet,
+} from "lucide-react";
+import Image from "next/image";
 
 interface SharedAnalytics {
   funnelName: string;
+  brandLogoUrl: string | null;
+  brandColor: string;
   stats: {
     totalSessions: number;
     totalLeads: number;
@@ -15,6 +27,30 @@ interface SharedAnalytics {
   dropoff: Array<{ stepLabel: string; visitors: number; retentionFromTop: number }>;
   tiers: Array<{ tier: string; count: number }>;
   timeSeries: Array<{ date: string; count: number }>;
+  devices: Array<{ deviceType: string | null; count: number }>;
+  recentLeads: Array<{
+    id: string;
+    email: string;
+    score: number;
+    calendarTier: string;
+    createdAt: string;
+  }>;
+}
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function tierBadgeColor(tier: string): string {
+  if (tier === "high") return "bg-[#2D6A4F]/10 text-[#2D6A4F]";
+  if (tier === "mid") return "bg-[#D97706]/10 text-[#D97706]";
+  return "bg-gray-100 text-gray-600";
+}
+
+function deviceIcon(type: string | null) {
+  if (type === "mobile") return Smartphone;
+  if (type === "tablet") return Tablet;
+  return Monitor;
 }
 
 export default function SharedAnalyticsPage({ params }: { params: Promise<{ token: string }> }) {
@@ -47,39 +83,72 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <BarChart3 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">This analytics link is invalid or has been revoked.</p>
+          <p className="text-sm text-gray-500">This analytics link is invalid or has expired.</p>
         </div>
       </div>
     );
   }
 
+  const accentColor = data.brandColor || "#2D6A4F";
+
   const statCards = [
-    { label: "Total Sessions", value: data.stats.totalSessions, icon: TrendingUp },
-    { label: "Total Leads", value: data.stats.totalLeads, icon: Users },
+    { label: "Sessions", value: data.stats.totalSessions.toLocaleString(), icon: TrendingUp },
+    { label: "Leads", value: data.stats.totalLeads.toLocaleString(), icon: Users },
     { label: "Completion Rate", value: `${data.stats.completionRate}%`, icon: Target },
     { label: "Conversion Rate", value: `${data.stats.conversionRate}%`, icon: BarChart3 },
-    { label: "Avg. Time", value: data.stats.avgCompletionTimeSec > 0 ? `${data.stats.avgCompletionTimeSec}s` : "--", icon: Clock },
+    {
+      label: "Avg. Time",
+      value: data.stats.avgCompletionTimeSec > 0
+        ? data.stats.avgCompletionTimeSec >= 60
+          ? `${Math.floor(data.stats.avgCompletionTimeSec / 60)}m ${data.stats.avgCompletionTimeSec % 60}s`
+          : `${data.stats.avgCompletionTimeSec}s`
+        : "--",
+      icon: Clock,
+    },
   ];
 
-  const tierColors: Record<string, string> = {
-    high: "bg-[#2D6A4F]/10 text-[#2D6A4F]",
-    mid: "bg-[#D97706]/10 text-[#D97706]",
-    low: "bg-gray-100 text-gray-600",
-  };
+  // Device breakdown
+  const totalDevices = data.devices.reduce((s, d) => s + d.count, 0) || 1;
+  const deviceMap: Record<string, number> = {};
+  data.devices.forEach((d) => {
+    deviceMap[d.deviceType ?? "unknown"] = d.count;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Shared Analytics</p>
-          <h1 className="text-2xl font-bold text-gray-900">{data.funnelName}</h1>
+      {/* Header */}
+      <div className="bg-white border-b border-[#E5E7EB]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
+          <div className="flex items-center gap-3">
+            {data.brandLogoUrl ? (
+              <Image
+                src={data.brandLogoUrl}
+                alt={data.funnelName}
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-lg object-contain"
+              />
+            ) : (
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                style={{ backgroundColor: accentColor }}
+              >
+                {data.funnelName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">{data.funnelName} Analytics</h1>
+              <p className="text-xs text-gray-400">Last 30 days</p>
+            </div>
+          </div>
         </div>
+      </div>
 
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {statCards.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="bg-white rounded-xl border border-gray-100 p-4">
+            <div key={label} className="bg-white rounded-xl border border-[#E5E7EB] p-4">
               <div className="flex items-center gap-1.5 mb-1">
                 <Icon className="w-3.5 h-3.5 text-gray-400" />
                 <span className="text-[10px] text-gray-400 uppercase tracking-wider">{label}</span>
@@ -90,45 +159,108 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
         </div>
 
         {/* Dropoff waterfall */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Dropoff</h3>
-          <div className="space-y-2">
-            {data.dropoff.map((step) => (
-              <div key={step.stepLabel} className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 w-24 shrink-0">{step.stepLabel}</span>
-                <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                  <div
-                    className="h-full bg-[#2D6A4F] rounded-full flex items-center justify-end px-2"
-                    style={{ width: `${step.retentionFromTop}%` }}
-                  >
-                    <span className="text-[10px] text-white font-medium">{step.visitors}</span>
+        {data.dropoff.length > 0 && (
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
+            <div className="space-y-2">
+              {data.dropoff.map((step) => (
+                <div key={step.stepLabel} className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 w-24 shrink-0 truncate">{step.stepLabel}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                    <div
+                      className="h-full rounded-full flex items-center justify-end px-2 transition-all"
+                      style={{ width: `${Math.max(step.retentionFromTop, 2)}%`, backgroundColor: accentColor }}
+                    >
+                      {step.retentionFromTop >= 10 && (
+                        <span className="text-[10px] text-white font-medium">{step.visitors}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <span className="text-xs text-gray-400 w-10 text-right">{step.retentionFromTop}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tier distribution */}
-        {data.tiers.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Quality</h3>
-            <div className="flex gap-3">
-              {data.tiers.map(({ tier, count }) => (
-                <div key={tier} className="flex-1 text-center p-3 rounded-lg bg-gray-50">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${tierColors[tier] || tierColors.low}`}>
-                    {tier.toUpperCase()}
-                  </span>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">{count}</p>
+                  <span className="text-xs text-gray-400 w-10 text-right">{step.retentionFromTop}%</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Footer */}
-        <div className="text-center mt-8">
+        {/* Device breakdown + Tier distribution row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Device Breakdown */}
+          {data.devices.length > 0 && (
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Device Breakdown</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {(["desktop", "mobile", "tablet"] as const).map((type) => {
+                  const count = deviceMap[type] ?? 0;
+                  const pct = Math.round((count / totalDevices) * 100);
+                  const DeviceIcon = deviceIcon(type);
+                  return (
+                    <div key={type} className="text-center p-3 bg-gray-50 rounded-lg">
+                      <DeviceIcon className="w-5 h-5 text-gray-400 mx-auto mb-1" />
+                      <p className="text-lg font-bold text-gray-900">{pct}%</p>
+                      <p className="text-[10px] text-gray-400 capitalize">{type}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Tier distribution */}
+          {data.tiers.length > 0 && (
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Quality</h3>
+              <div className="flex gap-3">
+                {data.tiers.map(({ tier, count }) => (
+                  <div key={tier} className="flex-1 text-center p-3 rounded-lg bg-gray-50">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${tierBadgeColor(tier)}`}>
+                      {tier.toUpperCase()}
+                    </span>
+                    <p className="text-2xl font-bold text-gray-900 mt-2">{count}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Leads Table */}
+        {data.recentLeads.length > 0 && (
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Leads</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-gray-400 border-b border-gray-100">
+                    <th className="text-left py-2 font-medium">Email</th>
+                    <th className="text-center py-2 font-medium">Score</th>
+                    <th className="text-center py-2 font-medium">Tier</th>
+                    <th className="text-right py-2 font-medium">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.recentLeads.map((lead) => (
+                    <tr key={lead.id} className="border-b border-gray-50">
+                      <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
+                      <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
+                      <td className="py-2.5 text-center">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}>
+                          {lead.calendarTier}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#E5E7EB] bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-center">
           <a
             href="https://getmyvsl.com"
             target="_blank"
