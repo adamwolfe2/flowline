@@ -207,6 +207,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
                       value={seq.triggerType || "lead_created"}
                       onChange={e => updateLocal(seq.id, { triggerType: e.target.value })}
                       className="w-full border border-gray-200 rounded-md px-2 py-1 text-xs bg-white mt-1 h-7"
+                      aria-label="Trigger type"
                     >
                       <option value="lead_created">Lead Created</option>
                       <option value="abandoned">Quiz Abandoned</option>
@@ -237,6 +238,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
                         value={seq.triggerTier || ""}
                         onChange={e => updateLocal(seq.id, { triggerTier: e.target.value || null })}
                         className="w-full border border-gray-200 rounded-md px-2 py-1 text-xs bg-white mt-1 h-7"
+                        aria-label="Trigger tier"
                       >
                         <option value="">All tiers</option>
                         <option value="high">High only</option>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, BarChart3, Calendar, MessageSquare, ArrowRight, CheckCircle2, Users, Zap } from "lucide-react";
+import { Sparkles, BarChart3, Calendar, MessageSquare, ArrowRight, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 
 const features = [

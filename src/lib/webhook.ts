@@ -1,7 +1,7 @@
 import { logger } from "@/lib/logger";
 import { db } from "@/db";
 import { webhookDeliveries } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import crypto from "crypto";
 
 /**

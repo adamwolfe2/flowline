@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { getFunnelsByUser, getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
+import { getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
 import { generateSlug } from "@/lib/utils";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";

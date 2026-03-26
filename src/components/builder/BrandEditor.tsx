@@ -180,6 +180,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
               onSave(newConfig);
             }}
             className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+            aria-label="Heading font"
           >
             {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
           </select>
@@ -195,6 +196,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
               onSave(newConfig);
             }}
             className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-white"
+            aria-label="Body font"
           >
             {FONT_OPTIONS.map(f => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
           </select>

@@ -189,7 +189,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
                     <ArrowDown className="w-3 h-3 text-gray-400" />
                   </button>
                 </div>
-                <button onClick={() => setExpandedQ(expandedQ === qi ? null : qi)}>
+                <button onClick={() => setExpandedQ(expandedQ === qi ? null : qi)} aria-label={expandedQ === qi ? "Collapse question" : "Expand question"}>
                   {expandedQ === qi ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                 </button>
               </div>

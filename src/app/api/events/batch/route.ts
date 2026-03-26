@@ -13,6 +13,8 @@ const VALID_EVENT_TYPES = [
 
 type EventType = (typeof VALID_EVENT_TYPES)[number];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
@@ -33,8 +35,8 @@ export async function POST(req: NextRequest) {
 
     for (const e of batch) {
       if (
-        !e.sessionId || typeof e.sessionId !== "string" ||
-        !e.funnelId || typeof e.funnelId !== "string" ||
+        !e.sessionId || typeof e.sessionId !== "string" || !UUID_RE.test(e.sessionId) ||
+        !e.funnelId || typeof e.funnelId !== "string" || !UUID_RE.test(e.funnelId) ||
         !e.eventType || !VALID_EVENT_TYPES.includes(e.eventType as EventType)
       ) {
         continue;
