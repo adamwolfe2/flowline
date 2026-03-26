@@ -83,7 +83,7 @@ export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
         <button
           onClick={() => {
             setOpen(false);
-            router.push("/onboarding");
+            router.push("/build");
           }}
           className="text-left p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-[#2D6A4F] hover:bg-green-50/30 transition-all group"
         >

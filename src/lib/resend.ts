@@ -43,7 +43,7 @@ export async function sendWelcomeEmail(email: string) {
       from: FROM,
       to: email,
       subject: "Welcome to MyVSL! Let's build your first funnel",
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">Welcome to MyVSL</h2><p style="color:#6B7280">You're 60 seconds away from your first VSL funnel.</p><div style="margin:24px 0"><p><strong>1.</strong> Describe your business</p><p><strong>2.</strong> Upload your logo + pick a color</p><p><strong>3.</strong> Add your calendar link + publish</p></div><a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com"}/onboarding" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">Build My First Funnel</a><p style="color:#9CA3AF;font-size:12px;margin-top:24px">No credit card required. Free plan forever.</p></div>`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">Welcome to MyVSL</h2><p style="color:#6B7280">You're 60 seconds away from your first VSL funnel.</p><div style="margin:24px 0"><p><strong>1.</strong> Describe your business</p><p><strong>2.</strong> Upload your logo + pick a color</p><p><strong>3.</strong> Add your calendar link + publish</p></div><a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com"}/build" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">Build My First Funnel</a><p style="color:#9CA3AF;font-size:12px;margin-top:24px">No credit card required. Free plan forever.</p></div>`,
     });
   } catch (err) {
     logger.error("[resend] welcome email failed", { error: err instanceof Error ? err.message : String(err) });

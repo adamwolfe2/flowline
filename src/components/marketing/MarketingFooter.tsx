@@ -13,11 +13,11 @@ const columns = [
   {
     title: "Use Cases",
     links: [
-      { label: "Coaches", href: "/onboarding" },
-      { label: "Agencies", href: "/onboarding" },
-      { label: "SaaS", href: "/onboarding" },
-      { label: "Consultants", href: "/onboarding" },
-      { label: "Real Estate", href: "/onboarding" },
+      { label: "Coaches", href: "/build" },
+      { label: "Agencies", href: "/build" },
+      { label: "SaaS", href: "/build" },
+      { label: "Consultants", href: "/build" },
+      { label: "Real Estate", href: "/build" },
     ],
   },
   {

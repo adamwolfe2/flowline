@@ -129,7 +129,7 @@ function LeftContent({ tab }: { tab: TabId }) {
         ))}
       </div>
       <Link
-        href="/onboarding"
+        href="/build"
         className="inline-flex items-center gap-2 bg-[#2D6A4F] text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-[#245840] transition-colors"
       >
         {data.cta} <ArrowRight className="w-3.5 h-3.5" />
