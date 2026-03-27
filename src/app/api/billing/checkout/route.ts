@@ -56,11 +56,10 @@ export async function POST(req: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      payment_method_types: ["card"],
       line_items: [{ price: resolvedPriceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${appUrl}/dashboard?upgraded=true`,
-      cancel_url: `${appUrl}/pricing`,
+      cancel_url: `${appUrl}/billing`,
       metadata: { clerkUserId: userId },
       subscription_data: { metadata: { clerkUserId: userId } },
       allow_promotion_codes: true,
