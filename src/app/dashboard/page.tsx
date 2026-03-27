@@ -7,7 +7,7 @@ import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { TemplateGallery } from "@/components/dashboard/TemplateGallery";
+import { TemplateGallery, TemplateGalleryRef } from "@/components/dashboard/TemplateGallery";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 
@@ -19,6 +19,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [funnels, setFunnels] = useState<FunnelWithStats[]>([]);
+  const templateGalleryRef = useRef<TemplateGalleryRef>(null);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -178,7 +179,7 @@ function DashboardContent() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
-        <TemplateGallery onCreated={loadFunnels} />
+        <TemplateGallery ref={templateGalleryRef} onCreated={loadFunnels} />
         {!loading && funnels.length > 0 && (
           <>
             <select
@@ -213,7 +214,7 @@ function DashboardContent() {
           ))}
         </div>
       ) : funnels.length === 0 ? (
-        <EmptyState />
+        <EmptyState onOpenTemplates={() => templateGalleryRef.current?.open()} />
       ) : (
         <ErrorBoundary>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

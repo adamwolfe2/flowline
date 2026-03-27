@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LayoutTemplate, Layers } from "lucide-react";
 
-export function EmptyState() {
+export function EmptyState({ onOpenTemplates }: { onOpenTemplates?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="w-14 h-14 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-5">
@@ -19,10 +19,17 @@ export function EmptyState() {
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>
-        <Link href="/dashboard" className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors flex items-center gap-1.5">
-          <LayoutTemplate className="w-3.5 h-3.5" />
-          Or start from a template
-        </Link>
+        {onOpenTemplates ? (
+          <button onClick={onOpenTemplates} className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors flex items-center gap-1.5">
+            <LayoutTemplate className="w-3.5 h-3.5" />
+            Or start from a template
+          </button>
+        ) : (
+          <Link href="/build" className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors flex items-center gap-1.5">
+            <LayoutTemplate className="w-3.5 h-3.5" />
+            Or start from a template
+          </Link>
+        )}
       </div>
     </div>
   );

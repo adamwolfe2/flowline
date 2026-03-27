@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, forwardRef } from "react";
 import { useRouter } from "next/navigation";
 import { FUNNEL_TEMPLATES, FunnelTemplate } from "@/lib/templates";
 import { Button } from "@/components/ui/button";
@@ -20,10 +20,16 @@ interface TemplateGalleryProps {
   onCreated?: () => void;
 }
 
-export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
+export interface TemplateGalleryRef {
+  open: () => void;
+}
+
+export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryProps>(function TemplateGallery({ onCreated }, ref) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({ open: () => setOpen(true) }), []);
 
   async function createFromTemplate(template: FunnelTemplate) {
     setCreating(template.id);
@@ -132,4 +138,4 @@ export function TemplateGallery({ onCreated }: TemplateGalleryProps) {
       </div>
     </div>
   );
-}
+});
