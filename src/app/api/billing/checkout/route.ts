@@ -68,7 +68,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    logger.error("Checkout error", { error: error instanceof Error ? error.message : String(error) });
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const msg = error instanceof Error ? error.message : String(error);
+    const type = error instanceof Error ? error.constructor.name : typeof error;
+    logger.error("Checkout error", { error: msg, type });
+    // Return the error type to help debug in production
+    return NextResponse.json({ error: "Checkout failed", detail: msg }, { status: 500 });
   }
 }
