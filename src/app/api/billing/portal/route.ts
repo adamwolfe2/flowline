@@ -17,8 +17,11 @@ export async function POST() {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const [user] = await db.select().from(users).where(eq(users.id, userId));
-    if (!user?.stripeCustomerId) {
-      return NextResponse.json({ error: "No billing account" }, { status: 400 });
+    if (!user) {
+      return NextResponse.json({ error: "Account not found. Please refresh and try again." }, { status: 400 });
+    }
+    if (!user.stripeCustomerId) {
+      return NextResponse.json({ error: "No active subscription. Please upgrade first." }, { status: 400 });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";

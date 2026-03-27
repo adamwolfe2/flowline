@@ -151,7 +151,7 @@ export async function GET(req: Request) {
             await resend.emails.send({
               from: `${fromName} <noreply@getmyvsl.com>`,
               to: recipientEmail,
-              subject: escapeHtml(step.subject),
+              subject: step.subject,
               html: `
                 <!DOCTYPE html>
                 <html>

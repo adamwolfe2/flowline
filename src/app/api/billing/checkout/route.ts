@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
@@ -38,15 +38,36 @@ export async function POST(req: Request) {
       );
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    // Fetch user from DB, auto-create if missing (same upsert pattern as POST /api/funnels)
+    let [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) {
-      return NextResponse.json({ error: "Account not ready. Please refresh and try again." }, { status: 400 });
+      const clerkUser = await currentUser();
+      const email = clerkUser?.emailAddresses?.[0]?.emailAddress || "unknown@getmyvsl.com";
+      const inserted = await db.insert(users).values({ id: userId, email }).onConflictDoNothing().returning();
+      if (inserted.length > 0) {
+        user = inserted[0];
+      } else {
+        // Race condition: another request created the user between our select and insert
+        const [retried] = await db.select().from(users).where(eq(users.id, userId));
+        if (!retried) {
+          return NextResponse.json({ error: "Account setup failed. Please refresh and try again." }, { status: 500 });
+        }
+        user = retried;
+      }
+    } else if (user.email === "unknown@getmyvsl.com") {
+      // Fix placeholder email if it was set before Clerk webhook ran
+      const clerkUser = await currentUser();
+      const email = clerkUser?.emailAddresses?.[0]?.emailAddress;
+      if (email) {
+        await db.update(users).set({ email }).where(eq(users.id, userId));
+        user = { ...user, email };
+      }
     }
-    let customerId = user?.stripeCustomerId;
+    let customerId = user.stripeCustomerId;
 
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user?.email,
+        email: user.email,
         metadata: { clerkUserId: userId },
       });
       customerId = customer.id;
@@ -70,7 +91,6 @@ export async function POST(req: Request) {
     const msg = error instanceof Error ? error.message : String(error);
     const type = error instanceof Error ? error.constructor.name : typeof error;
     logger.error("Checkout error", { error: msg, type });
-    // Return the error type to help debug in production
-    return NextResponse.json({ error: "Checkout failed", detail: msg }, { status: 500 });
+    return NextResponse.json({ error: "Checkout failed. Please try again or contact support." }, { status: 500 });
   }
 }

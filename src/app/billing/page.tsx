@@ -17,7 +17,7 @@ const PLANS = {
     monthlyPrice: 49,
     annualPrice: 39,
     features: [
-      "Unlimited funnels",
+      "Up to 25 funnels",
       "Unlimited submissions",
       "Advanced analytics & scoring",
       "Custom domains",
