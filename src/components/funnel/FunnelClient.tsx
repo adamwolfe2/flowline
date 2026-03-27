@@ -14,6 +14,7 @@ import { useTracking } from "./useTracking";
 import { TrackingPixels, fireConversionEvent, fireQuizStartEvent } from "./TrackingPixels";
 import { toast } from "sonner";
 import { EditableOverlay } from "./EditableOverlay";
+import { Pencil, ExternalLink } from "lucide-react";
 
 interface FunnelClientProps {
   config: FunnelConfig;
@@ -21,14 +22,27 @@ interface FunnelClientProps {
   sessionId: string;
   hideBranding?: boolean;
   embedMode?: boolean;
+  slug?: string;
+  published?: boolean;
 }
 
-export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedMode: embedModeProp }: FunnelClientProps) {
+export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedMode: embedModeProp, slug, published }: FunnelClientProps) {
   // Local config state that can be updated via postMessage from the builder
   const [activeConfig, setActiveConfig] = useState(config);
 
   // Detect embed mode from prop or URL parameter
   const [isEmbedMode, setIsEmbedMode] = useState(embedModeProp ?? false);
+
+  // Detect preview mode (URL contains /f/preview/) and not in an iframe
+  const [showPreviewBanner, setShowPreviewBanner] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isPreview = window.location.pathname.includes("/f/preview/");
+      const isInIframe = window.self !== window.top;
+      setShowPreviewBanner(isPreview && !isInIframe);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -208,6 +222,33 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
       }
       style={{ fontFamily: activeConfig.brand.fontBody }}
     >
+      {showPreviewBanner && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between">
+          <span className="text-xs font-medium text-amber-800">
+            Preview Mode — This is how your funnel looks to visitors
+          </span>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/builder/${funnelId}`}
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#2D6A4F] hover:text-[#245840] bg-white border border-[#E5E7EB] rounded-md px-2.5 py-1 transition-colors"
+            >
+              <Pencil className="w-3 h-3" />
+              Edit
+            </a>
+            {published && slug && (
+              <a
+                href={`/f/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#2D6A4F] hover:text-[#245840] bg-white border border-[#E5E7EB] rounded-md px-2.5 py-1 transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+                View Live
+              </a>
+            )}
+          </div>
+        </div>
+      )}
       <TrackingPixels
         fbPixelId={activeConfig.tracking?.fbPixelId}
         tiktokPixelId={activeConfig.tracking?.tiktokPixelId}

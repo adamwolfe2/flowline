@@ -30,5 +30,5 @@ export default async function PreviewPage({ params }: Props) {
 
   // Use "preview" sessionId — tracking calls will fire but silently fail
   // since "preview" is not a valid UUID, preventing polluted analytics
-  return <FunnelClient config={config} funnelId={funnel.id} sessionId="preview" />;
+  return <FunnelClient config={config} funnelId={funnel.id} sessionId="preview" slug={funnel.slug} published={funnel.published} />;
 }

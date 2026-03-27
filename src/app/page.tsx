@@ -3,6 +3,7 @@ import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { LogoStrip } from "@/components/marketing/LogoStrip";
 import { StatsBar } from "@/components/marketing/StatsBar";
+import { ThreeSteps } from "@/components/marketing/ThreeSteps";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
 const ProductDemo = dynamic(
@@ -37,6 +38,7 @@ export default function HomePage() {
       <HeroSection />
       <LogoStrip />
       <StatsBar />
+      <ThreeSteps />
       <ProductDemo />
       <IntegrationsSection />
       <WhySection />

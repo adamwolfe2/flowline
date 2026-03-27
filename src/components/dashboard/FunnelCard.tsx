@@ -35,6 +35,7 @@ interface FunnelCardProps {
 export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardProps) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmSlug, setConfirmSlug] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
   const [sharing, setSharing] = useState(false);
@@ -224,20 +225,38 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
         </div>
       </Card>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <Dialog open={confirmOpen} onOpenChange={(open) => { setConfirmOpen(open); if (!open) setConfirmSlug(""); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Funnel</DialogTitle>
             <DialogDescription>
-              Are you sure? This will permanently delete this funnel and all its leads.
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
+          <div className="py-2 space-y-3">
+            <p className="text-sm font-semibold text-gray-900">{funnel.config.brand.name}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">
+              This will permanently delete this funnel and all its data (sessions, leads, analytics).
+            </p>
+            <div>
+              <label className="text-xs text-gray-500 block mb-1.5">
+                Type <span className="font-mono font-semibold text-gray-700">{funnel.slug}</span> to confirm
+              </label>
+              <Input
+                value={confirmSlug}
+                onChange={e => setConfirmSlug(e.target.value)}
+                placeholder={funnel.slug}
+                className="text-sm font-mono"
+                autoComplete="off"
+              />
+            </div>
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={deleting}>
+            <Button variant="outline" onClick={() => { setConfirmOpen(false); setConfirmSlug(""); }} disabled={deleting}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-              {deleting ? "Deleting..." : "Delete"}
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting || confirmSlug !== funnel.slug}>
+              {deleting ? "Deleting..." : "Delete Forever"}
             </Button>
           </DialogFooter>
         </DialogContent>

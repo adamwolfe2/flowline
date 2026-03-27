@@ -13,15 +13,17 @@ import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { UpgradeGate } from "@/components/builder/UpgradeGate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function BuilderPage() {
   const params = useParams();
+  const router = useRouter();
   const funnelId = params.funnelId as string;
+  const [duplicating, setDuplicating] = useState(false);
   const [funnel, setFunnel] = useState<Funnel | null>(null);
   const [config, setConfig] = useState<FunnelConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -150,6 +152,29 @@ export default function BuilderPage() {
     }
   }, [funnelId, editingVariantId]);
 
+  async function handleDuplicate() {
+    setDuplicating(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnelId}/clone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success("Funnel duplicated");
+        router.push(`/builder/${data.id}`);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to duplicate funnel");
+      }
+    } catch {
+      toast.error("Failed to duplicate funnel");
+    } finally {
+      setDuplicating(false);
+    }
+  }
+
   // Send config to the preview iframe via postMessage (no reload needed)
   const postConfigToPreview = useCallback((configToPost: FunnelConfig) => {
     const iframe = document.querySelector('iframe[title="Funnel preview"]') as HTMLIFrameElement;
@@ -222,26 +247,51 @@ export default function BuilderPage() {
           <span className="text-sm font-medium text-gray-700 truncate max-w-[120px] sm:max-w-[200px] hidden sm:block">
             {config.brand.name}
           </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 text-xs px-2 text-gray-500 hover:text-gray-700"
+            onClick={handleDuplicate}
+            disabled={duplicating}
+            title="Duplicate funnel"
+          >
+            {duplicating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Copy className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{duplicating ? "Duplicating..." : "Duplicate"}</span>
+          </Button>
+          <div className="h-5 w-px bg-gray-200 hidden sm:block" />
           {saving && (
-            <span className="text-xs text-gray-400 animate-pulse flex items-center gap-1">
-              <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            <span className="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
               Saving
             </span>
           )}
           {!saving && saveStatus === "saved" && (
-            <span className="text-xs text-green-600 flex items-center gap-1">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+            <span className="text-xs text-green-700 bg-green-50 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-[scale-pop_0.3s_ease-out]">
+              <Check className="w-3.5 h-3.5" />
               Saved
             </span>
           )}
           {!saving && saveStatus === "failed" && (
-            <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
-              Save failed
+            <span className="text-xs text-red-600 bg-red-50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+              <X className="w-3.5 h-3.5" />
+              Failed
+              <button
+                onClick={() => {
+                  if (pendingConfigRef.current) {
+                    flushSave(pendingConfigRef.current);
+                  } else if (config) {
+                    flushSave(config);
+                  }
+                }}
+                className="ml-0.5 underline hover:no-underline flex items-center gap-0.5"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Retry
+              </button>
             </span>
           )}
           {!saving && saveStatus === "idle" && hasUnsavedChanges && (
-            <span className="text-xs text-amber-500 flex items-center gap-1">
+            <span className="text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex items-center gap-1">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
               Unsaved
             </span>

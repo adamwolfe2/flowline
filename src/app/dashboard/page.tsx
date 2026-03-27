@@ -20,8 +20,18 @@ function DashboardContent() {
   const router = useRouter();
   const [funnels, setFunnels] = useState<FunnelWithStats[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<string>("newest");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("myvsl_dashboard_sort") || "newest";
+    }
+    return "newest";
+  });
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("myvsl_dashboard_status") || "all";
+    }
+    return "all";
+  });
   const claimAttempted = useRef(false);
 
   // Claim pending funnel from localStorage (saved before sign-up)
@@ -120,6 +130,15 @@ function DashboardContent() {
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [loadFunnels]);
+
+  // Persist sort and filter preferences
+  useEffect(() => {
+    localStorage.setItem("myvsl_dashboard_sort", sortBy);
+  }, [sortBy]);
+
+  useEffect(() => {
+    localStorage.setItem("myvsl_dashboard_status", statusFilter);
+  }, [statusFilter]);
 
   const filteredFunnels = useMemo(() => {
     let result = [...funnels];

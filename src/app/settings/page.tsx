@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Check,
   Zap,
+  Bell,
 } from "lucide-react";
 import { TeamSettings } from "@/components/settings/TeamSettings";
 
@@ -18,6 +19,20 @@ export default function SettingsPage() {
   const { openUserProfile } = useClerk();
   const [funnelCount, setFunnelCount] = useState(0);
   const [plan, setPlan] = useState<string>("free");
+  const [leadAlerts, setLeadAlerts] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("myvsl_notif_lead_alerts");
+      return stored !== null ? stored === "true" : true;
+    }
+    return true;
+  });
+  const [weeklyDigest, setWeeklyDigest] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("myvsl_notif_weekly_digest");
+      return stored !== null ? stored === "true" : true;
+    }
+    return true;
+  });
 
   useEffect(() => {
     fetch("/api/funnels")
@@ -155,6 +170,74 @@ export default function SettingsPage() {
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
         )}
+      </section>
+
+      {/* Notifications */}
+      <section className="bg-white rounded-xl border border-[#EBEBEB] p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Bell className="w-4 h-4 text-[#737373]" />
+          <h2 className="text-sm font-semibold text-[#333333] uppercase tracking-wider">
+            Notifications
+          </h2>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#333333]">New lead email alerts</p>
+              <p className="text-xs text-[#737373] mt-0.5">Get notified when a new lead completes your funnel</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !leadAlerts;
+                setLeadAlerts(next);
+                localStorage.setItem("myvsl_notif_lead_alerts", String(next));
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                leadAlerts ? "bg-[#2D6A4F]" : "bg-gray-200"
+              }`}
+              role="switch"
+              aria-checked={leadAlerts}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  leadAlerts ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="border-t border-[#EBEBEB]" />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[#333333]">Weekly performance digest</p>
+              <p className="text-xs text-[#737373] mt-0.5">Receive a weekly summary of funnel performance</p>
+            </div>
+            <button
+              onClick={() => {
+                const next = !weeklyDigest;
+                setWeeklyDigest(next);
+                localStorage.setItem("myvsl_notif_weekly_digest", String(next));
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                weeklyDigest ? "bg-[#2D6A4F]" : "bg-gray-200"
+              }`}
+              role="switch"
+              aria-checked={weeklyDigest}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  weeklyDigest ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        <p className="text-[10px] text-[#A3A3A3] mt-4">
+          Preferences saved locally. Server-side delivery coming soon.
+        </p>
       </section>
 
       {/* Team */}

@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const funnel = await getCachedFunnel(slug);
   if (!funnel) return { title: "Not Found" };
   const config = funnel.config as FunnelConfig;
-  const metaTitle = config.meta?.title || config.brand.name;
-  const metaDesc = config.meta?.description || "";
+  const metaTitle = config.meta?.title || config.quiz?.headline || config.brand.name;
+  const metaDesc = config.meta?.description || config.quiz?.subheadline || "";
   return {
     title: metaTitle,
     description: metaDesc,

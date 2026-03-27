@@ -74,16 +74,41 @@ export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
                 <div>
                   <p className="text-sm font-semibold text-[#333333]">{lead.email as string}</p>
                   <p className="text-[11px] text-[#A3A3A3]">
-                    {new Date(lead.createdAt as string).toLocaleString()}
+                    {new Date(lead.createdAt as string).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
               </div>
+
+              {/* Score bar */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-[#A3A3A3]">Lead Score</span>
+                  <span className="text-xs font-semibold text-[#333333]">{lead.score as number} pts</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      (lead.calendarTier as string) === "high"
+                        ? "bg-emerald-500"
+                        : (lead.calendarTier as string) === "mid"
+                          ? "bg-amber-500"
+                          : "bg-gray-400"
+                    }`}
+                    style={{ width: `${Math.min(100, Math.max(5, ((lead.score as number) / 20) * 100))}%` }}
+                  />
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge className={tierColor[(lead.calendarTier as string) as keyof typeof tierColor] || tierColor.low}>
                   {(lead.calendarTier as string || 'low').toUpperCase()} TIER
-                </Badge>
-                <Badge variant="secondary" className="text-[10px]">
-                  <Target className="w-3 h-3 mr-1" /> Score: {lead.score as number}
                 </Badge>
                 {lead.deviceType ? (() => {
                   const DeviceIcon = deviceIconMap[(lead.deviceType as string) as keyof typeof deviceIconMap] || Monitor;
@@ -98,6 +123,16 @@ export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
                     <Globe className="w-3 h-3 mr-1" /> {lead.utmSource as string}
                   </Badge>
                 ) : null}
+                {(lead.utmMedium as string) ? (
+                  <Badge variant="secondary" className="text-[10px]">
+                    utm_medium: {lead.utmMedium as string}
+                  </Badge>
+                ) : null}
+                {(lead.utmCampaign as string) ? (
+                  <Badge variant="secondary" className="text-[10px]">
+                    utm_campaign: {lead.utmCampaign as string}
+                  </Badge>
+                ) : null}
               </div>
             </div>
 
@@ -105,12 +140,16 @@ export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
             <div>
               <h3 className="text-xs font-semibold text-[#A3A3A3] uppercase tracking-wider mb-3">Answers</h3>
               <div className="space-y-2">
-                {Object.entries((lead.answers as Record<string, string>) || {}).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between bg-white border border-[#EBEBEB] rounded-lg px-3 py-2">
-                    <span className="text-xs text-[#737373]">{key}</span>
-                    <span className="text-xs font-medium text-[#333333]">{value}</span>
-                  </div>
-                ))}
+                {Object.entries((lead.answers as Record<string, string>) || {}).map(([key, value]) => {
+                  // Format the key from snake_case to readable text
+                  const readableKey = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+                  return (
+                    <div key={key} className="bg-white border border-[#EBEBEB] rounded-lg px-3 py-2.5">
+                      <p className="text-[11px] text-[#A3A3A3] mb-0.5">{readableKey}</p>
+                      <p className="text-xs font-medium text-[#333333]">{value}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
