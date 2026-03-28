@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { leads, funnels } from "@/db/schema";
-import { eq, desc, sql, and, ilike } from "drizzle-orm";
+import { eq, desc, sql, and, ilike, gt } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -38,6 +38,13 @@ export async function GET(req: NextRequest) {
     }
     if (tier && ["high", "mid", "low"].includes(tier)) {
       conditions.push(sql`${leads.calendarTier} = ${tier}`);
+    }
+    const since = req.nextUrl.searchParams.get("since");
+    if (since) {
+      const sinceDate = new Date(since);
+      if (!isNaN(sinceDate.getTime())) {
+        conditions.push(gt(leads.createdAt, sinceDate));
+      }
     }
     if (search) {
       // Sanitize search input: escape SQL LIKE special characters and limit length

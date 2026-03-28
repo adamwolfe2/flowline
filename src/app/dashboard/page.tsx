@@ -8,8 +8,10 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TemplateGallery, TemplateGalleryRef } from "@/components/dashboard/TemplateGallery";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
+import { useLeadNotifications } from "@/hooks/useLeadNotifications";
 
 interface FunnelWithStats extends Funnel {
   stats: FunnelStats;
@@ -34,6 +36,9 @@ function DashboardContent() {
     return "all";
   });
   const claimAttempted = useRef(false);
+
+  // Poll for new leads and show toast notifications
+  useLeadNotifications(!loading && funnels.length > 0);
 
   // Claim pending funnel from localStorage (saved before sign-up)
   useEffect(() => {
@@ -177,6 +182,16 @@ function DashboardContent() {
         <h1 className="text-2xl font-bold text-gray-900">Your Funnels</h1>
         <p className="text-sm text-gray-500 mt-1">Create, manage, and monitor your booking funnels.</p>
       </div>
+
+      {!loading && (
+        <OnboardingChecklist
+          hasFunnel={funnels.length > 0}
+          hasPublished={funnels.some(f => f.published)}
+          hasLead={funnels.some(f => (f.stats?.leadsThisMonth ?? 0) > 0)}
+          hasCustomBrand={funnels.some(f => f.config?.brand?.logoUrl?.trim())}
+          hasCalendar={funnels.some(f => f.config?.quiz?.calendars?.high?.trim() || f.config?.quiz?.calendars?.mid?.trim() || f.config?.quiz?.calendars?.low?.trim())}
+        />
+      )}
 
       <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
         <TemplateGallery ref={templateGalleryRef} onCreated={loadFunnels} />

@@ -18,6 +18,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { FunnelHealthWidget } from "@/components/builder/FunnelHealthWidget";
+import { calculateFunnelHealth } from "@/lib/funnel-health";
 
 export default function BuilderPage() {
   const params = useParams();
@@ -421,9 +423,13 @@ export default function BuilderPage() {
         </div>
 
         {/* Content + Preview side by side */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Editor panel */}
-          <div className={`${sidebarOpen ? 'w-full md:w-[420px]' : 'hidden md:block md:w-[420px]'} border-r border-gray-100 overflow-y-auto p-3 sm:p-4 flex-shrink-0`}>
+        <div className="flex-1 flex overflow-hidden relative">
+          {/* Editor panel — full sidebar on desktop, bottom sheet on mobile */}
+          <div className={`${sidebarOpen ? 'absolute inset-x-0 bottom-0 z-20 max-h-[60vh] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] rounded-t-2xl md:relative md:inset-auto md:max-h-none md:shadow-none md:rounded-none md:w-[420px]' : 'hidden md:block md:w-[420px]'} border-r border-gray-100 overflow-y-auto p-3 sm:p-4 flex-shrink-0`}>
+            {/* Mobile drag handle */}
+            <div className="md:hidden flex justify-center pb-2">
+              <div className="w-10 h-1 rounded-full bg-gray-300" />
+            </div>
             <TabsContent value="content" className="mt-0">
               <ContentEditor config={config} onSave={saveConfig} />
             </TabsContent>
@@ -459,9 +465,12 @@ export default function BuilderPage() {
             <TabsContent value="publish" className="mt-0">
               <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />
             </TabsContent>
+            <FunnelHealthWidget
+              health={calculateFunnelHealth(config, funnel.published, funnel.customDomain)}
+            />
           </div>
 
-          {/* Preview pane */}
+          {/* Preview pane — always visible, editor overlays on mobile */}
           <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
             <ErrorBoundary>
               <div

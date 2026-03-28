@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, Download, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Search, Download, ChevronLeft, ChevronRight, Users, Trash2, CheckSquare, Square, MinusSquare } from "lucide-react";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -37,6 +37,8 @@ export default function LeadsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dateRange, setDateRange] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -118,6 +120,86 @@ export default function LeadsPage() {
     }
     return sorted;
   }, [leads, dateRange, sortBy]);
+
+  function toggleSelectAll() {
+    if (selectedIds.size === displayedLeads.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(displayedLeads.map(l => l.id)));
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function exportSelectedCSV() {
+    const selectedLeads = displayedLeads.filter(l => selectedIds.has(l.id));
+    if (selectedLeads.length === 0) {
+      toast.error("No leads selected");
+      return;
+    }
+    const answerKeys = new Set<string>();
+    for (const lead of selectedLeads) {
+      if (lead.answers && typeof lead.answers === "object") {
+        for (const key of Object.keys(lead.answers)) {
+          answerKeys.add(key);
+        }
+      }
+    }
+    const sortedKeys = Array.from(answerKeys).sort();
+    const header = ["Email", "Funnel", "Score", "Tier", "Date", ...sortedKeys].join(",") + "\n";
+    const rows = selectedLeads
+      .map((l) => {
+        const fName = (funnelNameMap[l.funnelId] || "").replace(/,/g, " ");
+        const date = new Date(l.createdAt).toLocaleDateString();
+        const answerCols = sortedKeys.map((k) => {
+          const val = l.answers?.[k] ?? "";
+          return String(val).replace(/,/g, " ");
+        });
+        return [l.email, fName, l.score, l.calendarTier, date, ...answerCols].join(",");
+      })
+      .join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-selected-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${selectedLeads.length} leads`);
+  }
+
+  async function bulkDelete() {
+    if (selectedIds.size === 0) return;
+    const confirmed = window.confirm(`Delete ${selectedIds.size} lead${selectedIds.size > 1 ? "s" : ""}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    setBulkDeleting(true);
+    try {
+      const res = await fetch("/api/leads/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      });
+      if (res.ok) {
+        toast.success(`Deleted ${selectedIds.size} lead${selectedIds.size > 1 ? "s" : ""}`);
+        setSelectedIds(new Set());
+        fetchLeads();
+      } else {
+        toast.error("Failed to delete leads");
+      }
+    } catch {
+      toast.error("Failed to delete leads");
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
 
   async function exportCSV() {
     try {
@@ -202,14 +284,36 @@ export default function LeadsPage() {
             {total} total lead{total !== 1 ? "s" : ""} across all funnels
           </p>
         </div>
-        <button
-          onClick={exportCSV}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#6B7280] bg-white border border-[#E5E7EB] rounded-lg hover:bg-gray-50 transition-colors min-h-[44px] shrink-0"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Export CSV</span>
-          <span className="sm:hidden">Export</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {selectedIds.size > 0 && (
+            <>
+              <span className="text-xs text-[#6B7280]">{selectedIds.size} selected</span>
+              <button
+                onClick={exportSelectedCSV}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#6B7280] bg-white border border-[#E5E7EB] rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Export Selected</span>
+              </button>
+              <button
+                onClick={bulkDelete}
+                disabled={bulkDeleting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors min-h-[44px] disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{bulkDeleting ? "Deleting..." : "Delete"}</span>
+              </button>
+            </>
+          )}
+          <button
+            onClick={exportCSV}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#6B7280] bg-white border border-[#E5E7EB] rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Export All</span>
+            <span className="sm:hidden">Export</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters row */}
@@ -322,6 +426,17 @@ export default function LeadsPage() {
             <table className="w-full">
               <thead className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
                 <tr>
+                  <th className="px-3 py-3 w-10">
+                    <button onClick={toggleSelectAll} className="p-0.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" aria-label="Select all">
+                      {selectedIds.size === displayedLeads.length && displayedLeads.length > 0 ? (
+                        <CheckSquare className="w-4 h-4 text-[#2D6A4F]" />
+                      ) : selectedIds.size > 0 ? (
+                        <MinusSquare className="w-4 h-4 text-[#2D6A4F]" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                    </button>
+                  </th>
                   <th className="text-left text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider px-4 py-3">
                     Email
                   </th>
@@ -343,22 +458,34 @@ export default function LeadsPage() {
                 {displayedLeads.map((lead) => (
                   <tr
                     key={lead.id}
-                    onClick={() => setSelectedLeadId(lead.id)}
                     className="border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#F9FAFB] cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-3 text-sm text-[#111827] truncate max-w-[200px]">
+                    <td className="px-3 py-3 w-10" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => toggleSelect(lead.id)}
+                        className="p-0.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
+                        aria-label={`Select ${lead.email}`}
+                      >
+                        {selectedIds.has(lead.id) ? (
+                          <CheckSquare className="w-4 h-4 text-[#2D6A4F]" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-[#111827] truncate max-w-[200px]" onClick={() => setSelectedLeadId(lead.id)}>
                       {lead.email}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#6B7280] hidden sm:table-cell truncate max-w-[150px]">
+                    <td className="px-4 py-3 text-sm text-[#6B7280] hidden sm:table-cell truncate max-w-[150px]" onClick={() => setSelectedLeadId(lead.id)}>
                       {funnelNameMap[lead.funnelId] || "Untitled"}
                     </td>
-                    <td className="px-4 py-3 text-sm font-medium text-[#111827]">
+                    <td className="px-4 py-3 text-sm font-medium text-[#111827]" onClick={() => setSelectedLeadId(lead.id)}>
                       {lead.score}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3" onClick={() => setSelectedLeadId(lead.id)}>
                       {tierBadge(lead.calendarTier)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#6B7280] hidden sm:table-cell">
+                    <td className="px-4 py-3 text-sm text-[#6B7280] hidden sm:table-cell" onClick={() => setSelectedLeadId(lead.id)}>
                       {new Date(lead.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
