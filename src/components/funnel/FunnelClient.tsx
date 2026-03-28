@@ -157,7 +157,11 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         });
 
         if (!res.ok) {
-          toast.error("Something went wrong. Please try again.");
+          if (res.status === 429) {
+            toast.error("Too many submissions. Please wait a moment and try again.");
+          } else {
+            toast.error("Something went wrong. Please try again.");
+          }
           return;
         }
 

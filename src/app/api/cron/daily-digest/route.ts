@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/db";
-import { funnels, funnelSessions, leads } from "@/db/schema";
+import { funnels, funnelSessions, leads, users } from "@/db/schema";
 import { eq, and, gte, lt, sql, isNotNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { sendDailyDigestEmail } from "@/lib/resend";
@@ -101,6 +101,17 @@ export async function GET(req: Request) {
 
     for (const funnel of activeFunnels) {
       if (!funnel.shareClientEmail || !funnel.shareToken) {
+        skipped++;
+        continue;
+      }
+
+      // Check funnel owner's notification preferences
+      const [owner] = await db
+        .select({ notificationPreferences: users.notificationPreferences })
+        .from(users)
+        .where(eq(users.id, funnel.userId));
+      const ownerPrefs = owner?.notificationPreferences as { leadAlerts?: boolean } | null;
+      if (ownerPrefs?.leadAlerts === false) {
         skipped++;
         continue;
       }

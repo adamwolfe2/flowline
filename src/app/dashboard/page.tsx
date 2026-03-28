@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo, useRef, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Funnel, FunnelStats } from "@/types";
 import { FunnelCard } from "@/components/dashboard/FunnelCard";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -96,11 +97,17 @@ function DashboardContent() {
           const planName = data?.plan
             ? data.plan.charAt(0).toUpperCase() + data.plan.slice(1)
             : "Pro";
-          toast.success(`Welcome to ${planName}! Your account has been upgraded.`);
+          toast.success(`Welcome to ${planName}!`, {
+            description: "Your account has been upgraded. All features are now unlocked.",
+            duration: 6000,
+          });
           firePublishConfetti("#2D6A4F");
         })
         .catch(() => {
-          toast.success("Your account has been upgraded!");
+          toast.success("Your account has been upgraded!", {
+            description: "All features are now unlocked.",
+            duration: 6000,
+          });
           firePublishConfetti("#2D6A4F");
         });
       window.history.replaceState({}, "", "/dashboard");
@@ -108,7 +115,8 @@ function DashboardContent() {
   }, [searchParams]);
 
   const loadFunnels = useCallback(() => {
-    fetch("/api/funnels")
+    const params = new URLSearchParams({ sort: sortBy, status: statusFilter });
+    fetch(`/api/funnels?${params.toString()}`)
       .then(r => {
         if (!r.ok) throw new Error("Failed to load");
         return r.json();
@@ -121,7 +129,7 @@ function DashboardContent() {
         setLoading(false);
         toast.error("Failed to load funnels. Please refresh.");
       });
-  }, []);
+  }, [sortBy, statusFilter]);
 
   useEffect(() => {
     loadFunnels();
@@ -146,31 +154,7 @@ function DashboardContent() {
     localStorage.setItem("myvsl_dashboard_status", statusFilter);
   }, [statusFilter]);
 
-  const filteredFunnels = useMemo(() => {
-    let result = [...funnels];
-
-    // Status filter
-    if (statusFilter === "published") result = result.filter(f => f.published);
-    if (statusFilter === "draft") result = result.filter(f => !f.published);
-
-    // Sort
-    switch (sortBy) {
-      case "newest":
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case "leads":
-        result.sort((a, b) => (b.stats?.leadsThisMonth ?? 0) - (a.stats?.leadsThisMonth ?? 0));
-        break;
-      case "views":
-        result.sort((a, b) => (b.stats?.totalSessions ?? 0) - (a.stats?.totalSessions ?? 0));
-        break;
-      case "az":
-        result.sort((a, b) => a.config.brand.name.localeCompare(b.config.brand.name));
-        break;
-    }
-
-    return result;
-  }, [funnels, sortBy, statusFilter]);
+  // Sort/filter is handled server-side; funnels is already sorted and filtered
 
   function handleDelete(id: string) {
     setFunnels(prev => prev.filter(f => f.id !== id));
@@ -178,10 +162,15 @@ function DashboardContent() {
 
   return (
     <div>
-      <div className="mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-8"
+      >
         <h1 className="text-2xl font-bold text-gray-900">Your Funnels</h1>
         <p className="text-sm text-gray-500 mt-1">Create, manage, and monitor your booking funnels.</p>
-      </div>
+      </motion.div>
 
       {!loading && (
         <OnboardingChecklist
@@ -233,14 +222,20 @@ function DashboardContent() {
       ) : (
         <ErrorBoundary>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredFunnels.map(funnel => (
-              <FunnelCard
+            {funnels.map((funnel, index) => (
+              <motion.div
                 key={funnel.id}
-                funnel={funnel}
-                stats={funnel.stats}
-                onDelete={handleDelete}
-                onDuplicate={loadFunnels}
-              />
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04 }}
+              >
+                <FunnelCard
+                  funnel={funnel}
+                  stats={funnel.stats}
+                  onDelete={handleDelete}
+                  onDuplicate={loadFunnels}
+                />
+              </motion.div>
             ))}
           </div>
         </ErrorBoundary>

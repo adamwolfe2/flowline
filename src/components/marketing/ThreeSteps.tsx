@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import { MessageSquare, Sparkles, Globe } from "lucide-react";
 
 const steps = [
@@ -23,9 +25,14 @@ const steps = [
   },
 ];
 
+const DELAYS = [0, 0.15, 0.3];
+
 export function ThreeSteps() {
+  const ref = useRef<HTMLElement>(null);
+  const isInView = useInView(ref, { once: true });
+
   return (
-    <section className="py-20 px-6 bg-white">
+    <section ref={ref} className="py-20 px-6 bg-white">
       <div className="max-w-4xl mx-auto text-center">
         <h2
           className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
@@ -38,11 +45,14 @@ export function ThreeSteps() {
         </p>
 
         <div className="grid grid-cols-3 gap-3 sm:gap-8">
-          {steps.map((step) => {
+          {steps.map((step, i) => {
             const Icon = step.icon;
             return (
-              <div
+              <motion.div
                 key={step.number}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 24 }}
+                transition={{ duration: 0.5, delay: DELAYS[i] }}
                 className="relative flex flex-col items-center text-center px-1 sm:px-4"
               >
                 {/* Numbered circle */}
@@ -62,7 +72,7 @@ export function ThreeSteps() {
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
                   {step.description}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>

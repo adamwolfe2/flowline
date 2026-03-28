@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { CreditCard, Check, Zap, Loader2, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 
 const PLANS = {
@@ -192,15 +193,19 @@ export default function BillingPage() {
 
       {/* Plan cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {(Object.keys(PLANS) as PlanKey[]).map((key) => {
+        {(Object.keys(PLANS) as PlanKey[]).map((key, index) => {
           const plan = PLANS[key];
           const isCurrent = key === currentPlan;
           const price = annual ? plan.annualPrice : plan.monthlyPrice;
 
           return (
-            <div
+            <motion.div
               key={key}
-              className={`bg-white rounded-xl border p-6 transition-all ${
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: index * 0.08 }}
+              whileHover={{ y: -3, transition: { duration: 0.15 } }}
+              className={`bg-white rounded-xl border p-6 transition-colors ${
                 isCurrent
                   ? "border-[#2D6A4F] ring-1 ring-[#2D6A4F]"
                   : "border-[#EBEBEB] hover:border-gray-300"
@@ -277,7 +282,7 @@ export default function BillingPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           );
         })}
       </div>

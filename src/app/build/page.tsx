@@ -490,6 +490,11 @@ function BuildContent() {
       }
 
       const res = await fetchPromise;
+      if (res.status === 429) {
+        toast.error("You've hit the rate limit for AI generation. Please wait a minute and try again.");
+        dispatch({ type: "SET_ERROR", error: "Rate limited" });
+        return;
+      }
       if (!res.ok) throw new Error("Planning failed");
       const data = await res.json();
 

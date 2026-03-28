@@ -34,9 +34,16 @@ export async function GET(req: NextRequest) {
 
     for (const userId of userIds) {
       try {
-        // Get user email
-        const [user] = await db.select({ email: users.email }).from(users).where(eq(users.id, userId));
+        // Get user email and notification preferences
+        const [user] = await db
+          .select({ email: users.email, notificationPreferences: users.notificationPreferences })
+          .from(users)
+          .where(eq(users.id, userId));
         if (!user?.email) continue;
+
+        // Skip users who opted out of weekly digest
+        const userPrefs = user.notificationPreferences as { weeklyDigest?: boolean } | null;
+        if (userPrefs?.weeklyDigest === false) continue;
 
         // Get all funnel IDs for this user
         const userFunnels = await db

@@ -6,6 +6,7 @@
 // - sequence_enrollments.lead_id nullable change
 // - event_type enum: 'email_captured' value
 import { pgTable, uuid, text, boolean, integer, jsonb, timestamp, pgEnum, index } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const planEnum = pgEnum('plan', ['free', 'pro', 'agency']);
 export const tierEnum = pgEnum('calendar_tier', ['high', 'mid', 'low']);
@@ -24,6 +25,10 @@ export const users = pgTable('users', {
   stripeCustomerId: text('stripe_customer_id'),
   plan: planEnum('plan').default('free').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  notificationPreferences: jsonb('notification_preferences')
+    .$type<{ leadAlerts: boolean; weeklyDigest: boolean }>()
+    .default(sql`'{"leadAlerts": true, "weeklyDigest": true}'::jsonb`)
+    .notNull(),
 });
 
 export const funnels = pgTable('funnels', {

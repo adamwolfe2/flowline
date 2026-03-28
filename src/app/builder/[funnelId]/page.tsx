@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Funnel, FunnelConfig } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentEditor } from "@/components/builder/ContentEditor";
@@ -20,6 +21,7 @@ import { toast } from "sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { FunnelHealthWidget } from "@/components/builder/FunnelHealthWidget";
 import { calculateFunnelHealth } from "@/lib/funnel-health";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export default function BuilderPage() {
   const params = useParams();
@@ -33,8 +35,8 @@ export default function BuilderPage() {
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("content");
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingConfigRef = useRef<FunnelConfig | null>(null);
 
@@ -148,6 +150,7 @@ export default function BuilderPage() {
       setHasUnsavedChanges(false);
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 3000);
+      toast.success("Saved", { duration: 1500, id: "auto-save" });
     } else {
       setSaveStatus("failed");
       toast.error("Failed to save changes");
@@ -234,6 +237,17 @@ export default function BuilderPage() {
     );
   }
 
+  const builderTabs = [
+    { value: "content", label: "Content", icon: FileText },
+    { value: "blocks", label: "Blocks", icon: LayoutGrid },
+    { value: "brand", label: "Brand", icon: Palette },
+    { value: "calendars", label: "Calendars", icon: Calendar },
+    { value: "emails", label: "Emails", icon: Mail },
+    { value: "ab-test", label: "A/B", icon: FlaskConical },
+    { value: "tracking", label: "Tracking", icon: BarChart3 },
+    { value: "publish", label: "Publish", icon: Send },
+  ];
+
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Top bar */}
@@ -261,56 +275,76 @@ export default function BuilderPage() {
             <span className="hidden sm:inline">{duplicating ? "Duplicating..." : "Duplicate"}</span>
           </Button>
           <div className="h-5 w-px bg-gray-200 hidden sm:block" />
-          {saving && (
-            <span className="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Saving
-            </span>
-          )}
-          {!saving && saveStatus === "saved" && (
-            <span className="text-xs text-green-700 bg-green-50 px-2.5 py-1 rounded-full flex items-center gap-1.5 animate-[scale-pop_0.3s_ease-out]">
-              <Check className="w-3.5 h-3.5" />
-              Saved
-            </span>
-          )}
-          {!saving && saveStatus === "failed" && (
-            <span className="text-xs text-red-600 bg-red-50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-              <X className="w-3.5 h-3.5" />
-              Failed
-              <button
-                onClick={() => {
-                  if (pendingConfigRef.current) {
-                    flushSave(pendingConfigRef.current);
-                  } else if (config) {
-                    flushSave(config);
-                  }
-                }}
-                className="ml-0.5 underline hover:no-underline flex items-center gap-0.5"
+          <AnimatePresence mode="wait">
+            {saving && (
+              <motion.span
+                key="saving"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.15 }}
+                className="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full flex items-center gap-1.5"
               >
-                <RotateCcw className="w-3 h-3" />
-                Retry
-              </button>
-            </span>
-          )}
-          {!saving && saveStatus === "idle" && hasUnsavedChanges && (
-            <span className="text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
-              Unsaved
-            </span>
-          )}
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Saving
+              </motion.span>
+            )}
+            {!saving && saveStatus === "saved" && (
+              <motion.span
+                key="saved"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.15 }}
+                className="text-xs text-green-700 bg-green-50 px-2.5 py-1 rounded-full flex items-center gap-1.5"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Saved
+              </motion.span>
+            )}
+            {!saving && saveStatus === "failed" && (
+              <motion.span
+                key="failed"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.15 }}
+                className="text-xs text-red-600 bg-red-50 px-2.5 py-1 rounded-full flex items-center gap-1.5"
+              >
+                <X className="w-3.5 h-3.5" />
+                Failed
+                <button
+                  onClick={() => {
+                    if (pendingConfigRef.current) {
+                      flushSave(pendingConfigRef.current);
+                    } else if (config) {
+                      flushSave(config);
+                    }
+                  }}
+                  className="ml-0.5 underline hover:no-underline flex items-center gap-0.5"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Retry
+                </button>
+              </motion.span>
+            )}
+            {!saving && saveStatus === "idle" && hasUnsavedChanges && (
+              <motion.span
+                key="unsaved"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.15 }}
+                className="text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex items-center gap-1"
+              >
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
+                Unsaved
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            className="md:hidden flex items-center gap-1 px-2 py-1.5 rounded-md text-xs text-gray-500 hover:bg-gray-100 transition-colors"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? (
-              <><Eye className="w-3.5 h-3.5" /> Preview</>
-            ) : (
-              <><Pencil className="w-3.5 h-3.5" /> Edit</>
-            )}
-          </button>
-          <div className="flex bg-gray-100 rounded-lg p-0.5">
+          <div className="hidden sm:flex bg-gray-100 rounded-lg p-0.5">
             <button
               onClick={() => setPreviewMode("desktop")}
               className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-white shadow-sm" : "text-gray-400"}`}
@@ -326,7 +360,7 @@ export default function BuilderPage() {
               <Smartphone className="w-3.5 h-3.5" />
             </button>
           </div>
-          <a href={`/f/preview/${funnelId}`} target="_blank" rel="noopener noreferrer">
+          <a href={`/f/preview/${funnelId}`} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
             <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <Eye className="w-3.5 h-3.5" />
               Preview
@@ -337,42 +371,20 @@ export default function BuilderPage() {
 
       {/* Main area — tabs on top, content + preview below */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-        {/* Tab bar */}
-        <div className="border-b border-gray-100 flex items-center gap-2 px-2 sm:px-4 flex-shrink-0 overflow-x-auto scrollbar-hide">
+        {/* Tab bar — hidden on mobile, shown via bottom bar */}
+        <div className="hidden sm:flex border-b border-gray-100 items-center gap-2 px-2 sm:px-4 flex-shrink-0 overflow-x-auto scrollbar-hide">
           <div className="overflow-x-auto scrollbar-hide">
             <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
-              <TabsTrigger value="content" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <FileText className="w-3 h-3" />
-                <span className="hidden sm:inline">Content</span>
-              </TabsTrigger>
-              <TabsTrigger value="blocks" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <LayoutGrid className="w-3 h-3" />
-                <span className="hidden sm:inline">Blocks</span>
-              </TabsTrigger>
-              <TabsTrigger value="brand" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <Palette className="w-3 h-3" />
-                <span className="hidden sm:inline">Brand</span>
-              </TabsTrigger>
-              <TabsTrigger value="calendars" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <Calendar className="w-3 h-3" />
-                <span className="hidden sm:inline">Calendars</span>
-              </TabsTrigger>
-              <TabsTrigger value="emails" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <Mail className="w-3 h-3" />
-                <span className="hidden sm:inline">Emails</span>
-              </TabsTrigger>
-              <TabsTrigger value="ab-test" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <FlaskConical className="w-3 h-3" />
-                <span className="hidden sm:inline">A/B</span>
-              </TabsTrigger>
-              <TabsTrigger value="tracking" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <BarChart3 className="w-3 h-3" />
-                <span className="hidden sm:inline">Tracking</span>
-              </TabsTrigger>
-              <TabsTrigger value="publish" className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100">
-                <Send className="w-3 h-3" />
-                <span className="hidden sm:inline">Publish</span>
-              </TabsTrigger>
+              {builderTabs.map(tab => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="text-xs px-2 sm:px-3 py-2 gap-1 rounded-md data-[state=active]:bg-gray-100"
+                >
+                  <tab.icon className="w-3 h-3" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
           {/* Variant selector */}
@@ -424,54 +436,60 @@ export default function BuilderPage() {
 
         {/* Content + Preview side by side */}
         <div className="flex-1 flex overflow-hidden relative">
-          {/* Editor panel — full sidebar on desktop, bottom sheet on mobile */}
-          <div className={`${sidebarOpen ? 'absolute inset-x-0 bottom-0 z-20 max-h-[60vh] bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] rounded-t-2xl md:relative md:inset-auto md:max-h-none md:shadow-none md:rounded-none md:w-[420px]' : 'hidden md:block md:w-[420px]'} border-r border-gray-100 overflow-y-auto p-3 sm:p-4 flex-shrink-0`}>
-            {/* Mobile drag handle */}
-            <div className="md:hidden flex justify-center pb-2">
-              <div className="w-10 h-1 rounded-full bg-gray-300" />
-            </div>
-            <TabsContent value="content" className="mt-0">
-              <ContentEditor config={config} onSave={saveConfig} />
-            </TabsContent>
-            <TabsContent value="blocks" className="mt-0">
-              <ContentBlocksEditor config={config} onSave={saveConfig} />
-            </TabsContent>
-            <TabsContent value="brand" className="mt-0">
-              <BrandEditor config={config} onSave={saveConfig} />
-            </TabsContent>
-            <TabsContent value="calendars" className="mt-0">
-              <CalendarEditor config={config} onSave={saveConfig} />
-            </TabsContent>
-            <TabsContent value="emails" className="mt-0">
-              <UpgradeGate feature="Email Sequences" plan={userPlan}>
-                <SequenceEditor funnel={funnel} />
-              </UpgradeGate>
-            </TabsContent>
-            <TabsContent value="ab-test" className="mt-0">
-              <UpgradeGate feature="A/B Testing" plan={userPlan}>
-                <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
-                  setVariants(v);
-                  if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
-                    switchToVariant(null);
-                  }
-                }} />
-              </UpgradeGate>
-            </TabsContent>
-            <TabsContent value="tracking" className="mt-0">
-              <UpgradeGate feature="Tracking & Webhooks" plan={userPlan}>
-                <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
-              </UpgradeGate>
-            </TabsContent>
-            <TabsContent value="publish" className="mt-0">
-              <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />
-            </TabsContent>
+          {/* Editor panel — full width on mobile, fixed sidebar on desktop */}
+          <div className="w-full sm:w-[420px] sm:flex-shrink-0 sm:border-r sm:border-gray-100 overflow-y-auto p-3 sm:p-4 pb-20 sm:pb-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15 }}
+              >
+                <TabsContent value="content" className="mt-0">
+                  <ContentEditor config={config} onSave={saveConfig} />
+                </TabsContent>
+                <TabsContent value="blocks" className="mt-0">
+                  <ContentBlocksEditor config={config} onSave={saveConfig} />
+                </TabsContent>
+                <TabsContent value="brand" className="mt-0">
+                  <BrandEditor config={config} onSave={saveConfig} />
+                </TabsContent>
+                <TabsContent value="calendars" className="mt-0">
+                  <CalendarEditor config={config} onSave={saveConfig} />
+                </TabsContent>
+                <TabsContent value="emails" className="mt-0">
+                  <UpgradeGate feature="Email Sequences" plan={userPlan}>
+                    <SequenceEditor funnel={funnel} />
+                  </UpgradeGate>
+                </TabsContent>
+                <TabsContent value="ab-test" className="mt-0">
+                  <UpgradeGate feature="A/B Testing" plan={userPlan}>
+                    <ABTestEditor funnel={funnel} onVariantsChange={(v) => {
+                      setVariants(v);
+                      if (editingVariantId && !v.find(variant => variant.id === editingVariantId)) {
+                        switchToVariant(null);
+                      }
+                    }} />
+                  </UpgradeGate>
+                </TabsContent>
+                <TabsContent value="tracking" className="mt-0">
+                  <UpgradeGate feature="Tracking & Webhooks" plan={userPlan}>
+                    <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
+                  </UpgradeGate>
+                </TabsContent>
+                <TabsContent value="publish" className="mt-0">
+                  <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />
+                </TabsContent>
+              </motion.div>
+            </AnimatePresence>
             <FunnelHealthWidget
               health={calculateFunnelHealth(config, funnel.published, funnel.customDomain)}
             />
           </div>
 
-          {/* Preview pane — always visible, editor overlays on mobile */}
-          <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
+          {/* Preview pane — hidden on mobile (use floating button instead) */}
+          <div className={`hidden sm:flex flex-1 bg-gray-50 items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
             <ErrorBoundary>
               <div
                 className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
@@ -498,6 +516,85 @@ export default function BuilderPage() {
           </div>
         </div>
       </Tabs>
+
+      {/* Mobile bottom tab bar */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 safe-area-pb">
+        {/* Floating preview button — above tab bar */}
+        <Sheet open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>
+          <button
+            onClick={() => setMobilePreviewOpen(true)}
+            className="absolute -top-12 right-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#2D6A4F] text-white text-xs font-medium shadow-lg"
+            aria-label="Open preview"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Preview
+          </button>
+          <SheetContent side="bottom" showCloseButton className="h-[90vh] p-0 flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+              <span className="text-sm font-medium text-gray-700">Preview</span>
+              <div className="flex bg-gray-100 rounded-lg p-0.5">
+                <button
+                  onClick={() => setPreviewMode("desktop")}
+                  className={`p-1.5 rounded-md transition-colors ${previewMode === "desktop" ? "bg-white shadow-sm" : "text-gray-400"}`}
+                  aria-label="Desktop preview"
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setPreviewMode("mobile")}
+                  className={`p-1.5 rounded-md transition-colors ${previewMode === "mobile" ? "bg-white shadow-sm" : "text-gray-400"}`}
+                  aria-label="Mobile preview"
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+            <div className={`flex-1 bg-gray-50 flex items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-4" : "p-2"}`}>
+              <ErrorBoundary>
+                <div
+                  className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden w-full h-full"
+                  style={{
+                    maxWidth: previewMode === "mobile" ? "375px" : "100%",
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
+                    <div className="text-center">
+                      <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
+                      <p className="text-xs text-[#9CA3AF]">Loading preview</p>
+                    </div>
+                  </div>
+                  <iframe
+                    key={`mobile-preview-${previewKey}`}
+                    src={`/f/preview/${funnelId}`}
+                    className="w-full h-full border-0 relative z-10"
+                    title="Funnel preview mobile"
+                  />
+                </div>
+              </ErrorBoundary>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Tab bar */}
+        <div className="flex overflow-x-auto scrollbar-hide">
+          {builderTabs.map(tab => {
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`flex-1 min-w-[56px] flex flex-col items-center justify-center gap-1 py-2 px-1 text-[10px] font-medium transition-colors ${
+                  isActive ? "text-[#2D6A4F]" : "text-[#9CA3AF]"
+                }`}
+                aria-label={tab.label}
+              >
+                <tab.icon className={`w-4 h-4 ${isActive ? "text-[#2D6A4F]" : "text-[#9CA3AF]"}`} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

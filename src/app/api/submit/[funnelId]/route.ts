@@ -123,16 +123,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     }
 
     // Send email notification to funnel owner (non-blocking)
-    const [owner] = await db.select({ email: users.email }).from(users).where(eq(users.id, funnel.userId));
+    const [owner] = await db
+      .select({ email: users.email, notificationPreferences: users.notificationPreferences })
+      .from(users)
+      .where(eq(users.id, funnel.userId));
     if (owner?.email) {
-      sendLeadNotification({
-        toEmail: owner.email,
-        funnelName: config.brand.name,
-        leadEmail: email,
-        score,
-        calendarTier,
-        funnelId,
-      }).catch(() => {});
+      // Check user notification preferences
+      const userPrefs = owner.notificationPreferences as { leadAlerts?: boolean } | null;
+      if (userPrefs?.leadAlerts !== false) {
+        sendLeadNotification({
+          toEmail: owner.email,
+          funnelName: config.brand.name,
+          leadEmail: email,
+          score,
+          calendarTier,
+          funnelId,
+        }).catch(() => {});
+      }
     }
 
     // Fire webhook if configured (retries with exponential backoff, non-blocking)

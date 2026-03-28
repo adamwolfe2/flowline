@@ -12,12 +12,44 @@ import { eq } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
 import { canCreateFunnel } from "@/lib/plan-limits";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const funnelsWithStats = await getFunnelsWithStats(userId);
+    const { searchParams } = new URL(req.url);
+    const sort = searchParams.get("sort") ?? "newest";
+    const status = searchParams.get("status") ?? "all";
+
+    let funnelsWithStats = await getFunnelsWithStats(userId);
+
+    // Apply status filter
+    if (status === "published") {
+      funnelsWithStats = funnelsWithStats.filter(f => f.published);
+    } else if (status === "draft") {
+      funnelsWithStats = funnelsWithStats.filter(f => !f.published);
+    }
+
+    // Apply sort
+    switch (sort) {
+      case "newest":
+        funnelsWithStats.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case "leads":
+        funnelsWithStats.sort((a, b) => (b.stats?.leadsThisMonth ?? 0) - (a.stats?.leadsThisMonth ?? 0));
+        break;
+      case "views":
+        funnelsWithStats.sort((a, b) => (b.stats?.totalSessions ?? 0) - (a.stats?.totalSessions ?? 0));
+        break;
+      case "az":
+        funnelsWithStats.sort((a, b) => {
+          const nameA = (a.config as { brand?: { name?: string } })?.brand?.name ?? "";
+          const nameB = (b.config as { brand?: { name?: string } })?.brand?.name ?? "";
+          return nameA.localeCompare(nameB);
+        });
+        break;
+    }
+
     return NextResponse.json(funnelsWithStats, {
       headers: { "Cache-Control": "private, max-age=10, stale-while-revalidate=30" }
     });

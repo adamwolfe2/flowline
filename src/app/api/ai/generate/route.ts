@@ -125,7 +125,8 @@ export async function POST(req: NextRequest) {
         });
         // Fall through to mock with fallback flag
       }
-    } catch {
+    } catch (error) {
+      logger.error("AI generate OpenAI request failed", { error: error instanceof Error ? error.message : String(error) });
       // Fall through to mock
     }
   }

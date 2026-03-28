@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Globe, Copy, ExternalLink, Code } from "lucide-react";
+import { CheckCircle, Globe, Copy, ExternalLink, Code, BarChart2, Link2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 
@@ -25,8 +25,15 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [savingDomain, setSavingDomain] = useState(false);
   const [checkingDns, setCheckingDns] = useState(false);
   const [dnsStatus, setDnsStatus] = useState<"unknown" | "configured" | "pending" | "error">("unknown");
+  const [shareToken, setShareToken] = useState<string | null>(funnel.shareToken ?? null);
+  const [shareExpiresAt, setShareExpiresAt] = useState<Date | string | null>(funnel.shareTokenExpiresAt ?? null);
+  const [generatingShare, setGeneratingShare] = useState(false);
+  const [revokingShare, setRevokingShare] = useState(false);
+  const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const domain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
   const funnelUrl = `${domain}/f/${funnel.slug}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${domain}`;
+  const shareUrl = shareToken ? `${appUrl}/analytics/shared/${shareToken}` : null;
 
   async function handlePublish() {
     setPublishing(true);
@@ -66,6 +73,57 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
     navigator.clipboard.writeText(`https://${funnelUrl}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleGenerateShareLink() {
+    setGeneratingShare(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}/share`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setShareToken(data.shareToken);
+        setShareExpiresAt(data.shareTokenExpiresAt);
+        toast.success("Share link generated");
+      } else {
+        toast.error("Failed to generate share link");
+      }
+    } catch {
+      toast.error("Failed to generate share link");
+    } finally {
+      setGeneratingShare(false);
+    }
+  }
+
+  async function handleRevokeShareLink() {
+    setRevokingShare(true);
+    try {
+      const res = await fetch(`/api/funnels/${funnel.id}/share`, { method: "DELETE" });
+      if (res.ok) {
+        setShareToken(null);
+        setShareExpiresAt(null);
+        toast.success("Share link revoked");
+      } else {
+        toast.error("Failed to revoke share link");
+      }
+    } catch {
+      toast.error("Failed to revoke share link");
+    } finally {
+      setRevokingShare(false);
+    }
+  }
+
+  function copyShareLink() {
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl);
+    setShareLinkCopied(true);
+    setTimeout(() => setShareLinkCopied(false), 2000);
+    toast.success("Share link copied");
+  }
+
+  function getDaysUntilExpiry(expiresAt: Date | string | null): number | null {
+    if (!expiresAt) return null;
+    const ms = new Date(expiresAt).getTime() - Date.now();
+    return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
 
   return (
@@ -212,6 +270,66 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Analytics Sharing */}
+      <div className="p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <BarChart2 className="w-3.5 h-3.5 text-gray-500" />
+          <p className="text-[11px] text-gray-500 font-medium">Share Analytics</p>
+        </div>
+        <p className="text-[10px] text-gray-400 mb-3">
+          Generate a read-only link so clients can view this funnel&apos;s analytics.
+        </p>
+
+        {shareToken && shareUrl ? (
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={shareUrl}
+                readOnly
+                className="text-[11px] font-mono flex-1 bg-white"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyShareLink}
+                className="shrink-0 gap-1 text-xs"
+              >
+                {shareLinkCopied ? <CheckCircle className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
+                {shareLinkCopied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-gray-400">
+                {getDaysUntilExpiry(shareExpiresAt) !== null
+                  ? `Expires in ~${getDaysUntilExpiry(shareExpiresAt)} days`
+                  : "Expires in ~30 days"}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRevokeShareLink}
+                disabled={revokingShare}
+                className="text-[10px] h-6 text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
+              >
+                <Trash2 className="w-3 h-3" />
+                {revokingShare ? "Revoking..." : "Revoke Access"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleGenerateShareLink}
+            disabled={generatingShare}
+            className="text-xs gap-1.5"
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            {generatingShare ? "Generating..." : "Generate Share Link"}
+          </Button>
         )}
       </div>
 

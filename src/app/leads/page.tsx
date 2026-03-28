@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Search, Download, ChevronLeft, ChevronRight, Users, Trash2, CheckSquare, Square, MinusSquare } from "lucide-react";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -201,77 +202,15 @@ export default function LeadsPage() {
     }
   }
 
-  async function exportCSV() {
-    try {
-      // Fetch ALL leads (not just current page) with current filters
-      const params = new URLSearchParams();
-      if (funnelFilter) params.set("funnelId", funnelFilter);
-      if (tierFilter) params.set("tier", tierFilter);
-      if (debouncedSearch) params.set("search", debouncedSearch);
-      params.set("page", "0");
-      params.set("limit", "10000"); // Fetch all
-
-      const res = await fetch(`/api/leads?${params}`);
-      if (!res.ok) {
-        toast.error("Failed to export leads");
-        return;
-      }
-      const data = await res.json();
-      const allLeads: LeadRow[] = data.leads || [];
-
-      if (allLeads.length === 0) {
-        toast.error("No leads to export");
-        return;
-      }
-
-      // Apply date range filter client-side
-      let filteredLeads = allLeads;
-      if (dateRange !== "all") {
-        const now = new Date();
-        const days = dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90;
-        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-        filteredLeads = allLeads.filter((l) => new Date(l.createdAt) >= cutoff);
-      }
-
-      if (filteredLeads.length === 0) {
-        toast.error("No leads match current filters");
-        return;
-      }
-
-      // Collect answer keys
-      const answerKeys = new Set<string>();
-      for (const lead of filteredLeads) {
-        if (lead.answers && typeof lead.answers === "object") {
-          for (const key of Object.keys(lead.answers)) {
-            answerKeys.add(key);
-          }
-        }
-      }
-      const sortedKeys = Array.from(answerKeys).sort();
-
-      const header = ["Email", "Funnel", "Score", "Tier", "Date", ...sortedKeys].join(",") + "\n";
-      const rows = filteredLeads
-        .map((l) => {
-          const fName = (funnelNameMap[l.funnelId] || "").replace(/,/g, " ");
-          const date = new Date(l.createdAt).toLocaleDateString();
-          const answerCols = sortedKeys.map((k) => {
-            const val = l.answers?.[k] ?? "";
-            return String(val).replace(/,/g, " ");
-          });
-          return [l.email, fName, l.score, l.calendarTier, date, ...answerCols].join(",");
-        })
-        .join("\n");
-      const blob = new Blob([header + rows], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `leads-export-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success(`Exported ${filteredLeads.length} leads`);
-    } catch {
-      toast.error("Export failed");
-    }
+  function exportCSV() {
+    const params = new URLSearchParams();
+    if (funnelFilter) params.set("funnelId", funnelFilter);
+    const qs = params.toString();
+    const href = `/api/leads/export${qs ? `?${qs}` : ""}`;
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = `leads-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
   }
 
   return (
@@ -455,9 +394,12 @@ export default function LeadsPage() {
                 </tr>
               </thead>
               <tbody>
-                {displayedLeads.map((lead) => (
-                  <tr
+                {displayedLeads.map((lead, index) => (
+                  <motion.tr
                     key={lead.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2, delay: index * 0.02 }}
                     className="border-b border-[#E5E7EB] last:border-b-0 hover:bg-[#F9FAFB] cursor-pointer transition-colors"
                   >
                     <td className="px-3 py-3 w-10" onClick={(e) => e.stopPropagation()}>
@@ -488,7 +430,7 @@ export default function LeadsPage() {
                     <td className="px-4 py-3 text-sm text-[#6B7280] hidden sm:table-cell" onClick={() => setSelectedLeadId(lead.id)}>
                       {new Date(lead.createdAt).toLocaleDateString()}
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>

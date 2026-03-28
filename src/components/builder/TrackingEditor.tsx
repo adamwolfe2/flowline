@@ -5,8 +5,9 @@ import { FunnelConfig } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Copy, Check } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface WebhookDeliveryRow {
   id: string;
@@ -26,6 +27,7 @@ interface TrackingEditorProps {
 export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps) {
   const [deliveries, setDeliveries] = useState<WebhookDeliveryRow[]>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+  const [embedCopied, setEmbedCopied] = useState(false);
 
   useEffect(() => {
     if (!funnelId || !config.webhook?.url) return;
@@ -193,6 +195,43 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
             )}
           </div>
           <Separator />
+        </>
+      )}
+
+      {/* Embed Code */}
+      {funnelId && (
+        <>
+          <Separator />
+          <div>
+            <p className="text-xs font-medium text-gray-700 mb-1">Embed on Your Website</p>
+            <p className="text-[10px] text-gray-400 mb-2">
+              Paste this snippet into any webpage to embed your funnel directly.
+            </p>
+            <div className="relative">
+              <pre className="text-[11px] font-mono bg-gray-50 border border-[#E5E7EB] rounded-lg px-3 py-3 overflow-x-auto text-gray-700 whitespace-pre-wrap break-all">
+{`<div id="myvsl-funnel"></div>\n<script src="${process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com"}/api/embed/${funnelId}/script.js" async></script>`}
+              </pre>
+              <button
+                type="button"
+                onClick={() => {
+                  const code = `<div id="myvsl-funnel"></div>\n<script src="${process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com"}/api/embed/${funnelId}/script.js" async></script>`;
+                  navigator.clipboard.writeText(code).then(() => {
+                    setEmbedCopied(true);
+                    toast.success("Embed code copied!");
+                    setTimeout(() => setEmbedCopied(false), 2000);
+                  });
+                }}
+                className="absolute top-2 right-2 p-1.5 rounded-md bg-white border border-[#E5E7EB] text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-colors"
+                aria-label="Copy embed code"
+              >
+                {embedCopied ? (
+                  <Check className="w-3.5 h-3.5 text-green-500" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+              </button>
+            </div>
+          </div>
         </>
       )}
 

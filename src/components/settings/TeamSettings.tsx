@@ -37,6 +37,7 @@ export function TeamSettings() {
   const [loading, setLoading] = useState(true);
   const [teamName, setTeamName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"admin" | "member">("member");
   const [creating, setCreating] = useState(false);
   const [inviting, setInviting] = useState(false);
 
@@ -102,12 +103,13 @@ export function TeamSettings() {
       const res = await fetch(`/api/teams/${teams[0].id}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: inviteEmail, role: "member" }),
+        body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
       });
       if (res.ok) {
         const invite = await res.json();
         setInvites(prev => [...prev, invite]);
         setInviteEmail("");
+        setInviteRole("member");
         toast.success("Invite sent");
       } else {
         const data = await res.json();
@@ -192,6 +194,7 @@ export function TeamSettings() {
                     <Mail className="w-3 h-3 text-amber-500" />
                     <span className="text-sm text-amber-700">{inv.email}</span>
                     <Badge className="text-[10px] bg-amber-100 text-amber-600">Pending</Badge>
+                    {roleBadge(inv.role)}
                   </div>
                 </div>
               ))}
@@ -206,6 +209,14 @@ export function TeamSettings() {
                 type="email"
                 className="text-sm flex-1"
               />
+              <select
+                value={inviteRole}
+                onChange={e => setInviteRole(e.target.value as "admin" | "member")}
+                className="text-sm rounded-md border border-input bg-background px-2 py-1.5 text-[#333333] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
+              >
+                <option value="member">Member</option>
+                <option value="admin">Admin</option>
+              </select>
               <Button onClick={sendInvite} disabled={inviting || !inviteEmail.trim()} variant="outline" size="sm" className="gap-1.5">
                 {inviting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
                 Invite

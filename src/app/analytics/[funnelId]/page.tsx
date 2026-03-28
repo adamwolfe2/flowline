@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -512,30 +513,45 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Stats Bar ---- */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-          <StatCard label="Sessions" value={stats.totalSessions.toLocaleString()} icon={Eye} />
-          <StatCard label="Completion" value={stats.completionRate} icon={Target} suffix="%" />
-          <StatCard label="Conversion" value={stats.conversionRate} icon={BarChart3} suffix="%" />
-          <StatCard
-            label="Avg. Time"
-            value={
-              stats.avgCompletionTimeSec > 0
+          {([
+            { label: "Sessions", value: stats.totalSessions.toLocaleString(), icon: Eye },
+            { label: "Completion", value: stats.completionRate, icon: Target, suffix: "%" },
+            { label: "Conversion", value: stats.conversionRate, icon: BarChart3, suffix: "%" },
+            {
+              label: "Avg. Time",
+              value: stats.avgCompletionTimeSec > 0
                 ? stats.avgCompletionTimeSec >= 60
                   ? `${Math.floor(stats.avgCompletionTimeSec / 60)}m ${stats.avgCompletionTimeSec % 60}s`
                   : `${stats.avgCompletionTimeSec}s`
-                : "--"
-            }
-            icon={Clock}
-          />
-          <StatCard label="Leads" value={stats.totalLeads.toLocaleString()} icon={Users} />
+                : "--",
+              icon: Clock,
+            },
+            { label: "Leads", value: stats.totalLeads.toLocaleString(), icon: Users },
+          ] as const).map((card, index) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: index * 0.07 }}
+            >
+              <StatCard label={card.label} value={card.value} icon={card.icon} suffix={"suffix" in card ? card.suffix : undefined} />
+            </motion.div>
+          ))}
         </div>
 
         {/* ---- Waterfall Chart ---- */}
-        <ErrorBoundary>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 overflow-x-auto">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
-            <WaterfallChart steps={dropoff} />
-          </div>
-        </ErrorBoundary>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <ErrorBoundary>
+            <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 overflow-x-auto">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
+              <WaterfallChart steps={dropoff} />
+            </div>
+          </ErrorBoundary>
+        </motion.div>
 
         {/* ---- Answer Distribution ---- */}
         {answerKeys.length > 0 && (

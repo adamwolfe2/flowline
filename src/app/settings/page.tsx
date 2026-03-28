@@ -13,26 +13,29 @@ import {
   Bell,
 } from "lucide-react";
 import { TeamSettings } from "@/components/settings/TeamSettings";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
   const { openUserProfile } = useClerk();
   const [funnelCount, setFunnelCount] = useState(0);
   const [plan, setPlan] = useState<string>("free");
-  const [leadAlerts, setLeadAlerts] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("myvsl_notif_lead_alerts");
-      return stored !== null ? stored === "true" : true;
-    }
-    return true;
-  });
-  const [weeklyDigest, setWeeklyDigest] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("myvsl_notif_weekly_digest");
-      return stored !== null ? stored === "true" : true;
-    }
-    return true;
-  });
+  const [leadAlerts, setLeadAlerts] = useState<boolean>(true);
+  const [weeklyDigest, setWeeklyDigest] = useState<boolean>(true);
+  const [saving, setSaving] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetch("/api/funnels")
@@ -50,9 +53,30 @@ export default function SettingsPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.plan) setPlan(data.plan);
+        if (data.notificationPreferences) {
+          setLeadAlerts(data.notificationPreferences.leadAlerts ?? true);
+          setWeeklyDigest(data.notificationPreferences.weeklyDigest ?? true);
+        }
       })
       .catch(() => {});
   }, []);
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/user", { method: "DELETE" });
+      if (res.ok) {
+        window.location.href = "/";
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to delete account. Please contact support.");
+      }
+    } catch {
+      toast.error("Failed to delete account. Please contact support.");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   if (!isLoaded) {
     return (
@@ -188,12 +212,25 @@ export default function SettingsPage() {
               <p className="text-xs text-[#737373] mt-0.5">Get notified when a new lead completes your funnel</p>
             </div>
             <button
-              onClick={() => {
+              disabled={saving}
+              onClick={async () => {
+                if (saving) return;
                 const next = !leadAlerts;
                 setLeadAlerts(next);
-                localStorage.setItem("myvsl_notif_lead_alerts", String(next));
+                setSaving(true);
+                try {
+                  await fetch("/api/user/preferences", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ leadAlerts: next }),
+                  });
+                } catch {
+                  setLeadAlerts(!next);
+                } finally {
+                  setSaving(false);
+                }
               }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
                 leadAlerts ? "bg-[#2D6A4F]" : "bg-gray-200"
               }`}
               role="switch"
@@ -215,12 +252,25 @@ export default function SettingsPage() {
               <p className="text-xs text-[#737373] mt-0.5">Receive a weekly summary of funnel performance</p>
             </div>
             <button
-              onClick={() => {
+              disabled={saving}
+              onClick={async () => {
+                if (saving) return;
                 const next = !weeklyDigest;
                 setWeeklyDigest(next);
-                localStorage.setItem("myvsl_notif_weekly_digest", String(next));
+                setSaving(true);
+                try {
+                  await fetch("/api/user/preferences", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ weeklyDigest: next }),
+                  });
+                } catch {
+                  setWeeklyDigest(!next);
+                } finally {
+                  setSaving(false);
+                }
               }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${
                 weeklyDigest ? "bg-[#2D6A4F]" : "bg-gray-200"
               }`}
               role="switch"
@@ -235,9 +285,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <p className="text-[10px] text-[#A3A3A3] mt-4">
-          Preferences saved locally. Server-side delivery coming soon.
-        </p>
       </section>
 
       {/* Team */}
@@ -258,20 +305,58 @@ export default function SettingsPage() {
         </p>
 
         <button
-          disabled
-          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-400 cursor-not-allowed opacity-60"
-          title="Contact support to delete your account"
+          onClick={() => setDeleteOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-colors"
         >
           Delete Account
         </button>
-        <p className="text-xs text-[#A3A3A3] mt-2">
-          Contact{" "}
-          <a href="mailto:support@getmyvsl.com" className="text-[#2D6A4F] hover:underline">
-            support@getmyvsl.com
-          </a>{" "}
-          to delete your account.
-        </p>
       </section>
+
+      <Dialog open={deleteOpen} onOpenChange={(open) => { setDeleteOpen(open); if (!open) setDeleteConfirm(""); }}>
+        <DialogContent showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>
+              This will permanently delete your account, all funnels, leads, and analytics. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+            <p className="text-sm text-red-700 font-medium">Warning: All your data will be permanently erased.</p>
+            <p className="text-xs text-red-600 mt-1">This includes all funnels, leads, sessions, analytics, and account settings.</p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#333333]">
+              Type <span className="font-bold font-mono">DELETE</span> to confirm
+            </label>
+            <Input
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder="DELETE"
+              className="font-mono"
+              autoComplete="off"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { setDeleteOpen(false); setDeleteConfirm(""); }}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteAccount}
+              disabled={deleteConfirm !== "DELETE" || deleting}
+              className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleting ? "Deleting..." : "Delete Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
