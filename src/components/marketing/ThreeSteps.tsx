@@ -37,29 +37,29 @@ export function ThreeSteps() {
           Go from idea to live funnel in under 5 minutes
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div className="grid grid-cols-3 gap-3 sm:gap-8">
           {steps.map((step) => {
             const Icon = step.icon;
             return (
               <div
                 key={step.number}
-                className="relative flex flex-col items-center text-center px-4"
+                className="relative flex flex-col items-center text-center px-1 sm:px-4"
               >
                 {/* Numbered circle */}
-                <div className="w-10 h-10 rounded-full bg-[#2D6A4F] text-white text-sm font-bold flex items-center justify-center mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#2D6A4F] text-white text-xs sm:text-sm font-bold flex items-center justify-center mb-3 sm:mb-4">
                   {step.number}
                 </div>
 
                 {/* Icon */}
-                <div className="w-14 h-14 rounded-2xl bg-[#2D6A4F]/5 border border-[#E5E7EB] flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-[#2D6A4F]" />
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#2D6A4F]/5 border border-[#E5E7EB] flex items-center justify-center mb-3 sm:mb-4">
+                  <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-[#2D6A4F]" />
                 </div>
 
                 {/* Text */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
                   {step.title}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
                   {step.description}
                 </p>
               </div>

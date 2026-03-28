@@ -22,20 +22,20 @@ export function LogoStrip() {
     <section className="bg-white border-b border-[#E5E7EB] py-10 md:py-16 overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Value props */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 md:gap-20 text-center mb-8 sm:mb-10">
+        <div className="flex flex-row items-center justify-center gap-6 sm:gap-10 md:gap-20 text-center mb-8 sm:mb-10">
           <div>
-            <p className="text-sm font-semibold text-[#111827]">No Code Required</p>
-            <p className="text-xs text-[#6B7280]">AI builds it for you</p>
+            <p className="text-xs sm:text-sm font-semibold text-[#111827]">No Code Required</p>
+            <p className="text-[10px] sm:text-xs text-[#6B7280]">AI builds it for you</p>
           </div>
-          <div className="hidden sm:block w-px h-8 bg-[#E5E7EB]" />
+          <div className="w-px h-8 bg-[#E5E7EB]" />
           <div>
-            <p className="text-sm font-semibold text-[#111827]">Smart Routing</p>
-            <p className="text-xs text-[#6B7280]">Score-based calendar booking</p>
+            <p className="text-xs sm:text-sm font-semibold text-[#111827]">Smart Routing</p>
+            <p className="text-[10px] sm:text-xs text-[#6B7280]">Score-based calendar booking</p>
           </div>
-          <div className="hidden sm:block w-px h-8 bg-[#E5E7EB]" />
+          <div className="w-px h-8 bg-[#E5E7EB]" />
           <div>
-            <p className="text-sm font-semibold text-[#111827]">Under 5 Minutes</p>
-            <p className="text-xs text-[#6B7280]">To build and publish</p>
+            <p className="text-xs sm:text-sm font-semibold text-[#111827]">Under 5 Minutes</p>
+            <p className="text-[10px] sm:text-xs text-[#6B7280]">To build and publish</p>
           </div>
         </div>
 

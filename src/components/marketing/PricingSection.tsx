@@ -178,14 +178,14 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 max-w-5xl mx-auto">
+        <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 max-w-5xl mx-auto overflow-x-auto snap-x snap-mandatory -mx-4 px-4 md:mx-auto md:px-0 md:overflow-visible scrollbar-hide">
           {plans.map((plan) => {
             const price = annual ? plan.annualPrice : plan.monthlyPrice;
 
             return (
               <div
                 key={plan.name}
-                className={`relative rounded-2xl border p-5 sm:p-8 flex flex-col ${
+                className={`relative rounded-2xl border p-5 sm:p-8 flex flex-col min-w-[260px] md:min-w-0 snap-center shrink-0 md:shrink ${
                   plan.popular
                     ? "border-[#2D6A4F] shadow-[0_0_0_1px_#2D6A4F] bg-white"
                     : "border-[#E5E7EB] bg-white"

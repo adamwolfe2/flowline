@@ -123,18 +123,18 @@ function LeftContent({ tab }: { tab: TabId }) {
   return (
     <>
       <h2
-        className="text-2xl md:text-3xl font-bold text-[#111827] mb-6"
+        className="text-sm sm:text-2xl md:text-3xl font-bold text-[#111827] mb-3 sm:mb-6"
         style={{ fontFamily: "var(--font-plus-jakarta)" }}
       >
         {data.headline}
       </h2>
-      <div className="space-y-4 mb-8">
+      <div className="space-y-2 sm:space-y-4 mb-4 sm:mb-8">
         {data.bullets.map((bullet, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-[#2D6A4F]/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-              <bullet.icon className="w-3.5 h-3.5 text-[#2D6A4F]" />
+          <div key={i} className="flex items-start gap-2 sm:gap-3">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#2D6A4F]/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+              <bullet.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#2D6A4F]" />
             </div>
-            <p className="text-sm text-[#6B7280] leading-relaxed">
+            <p className="text-[11px] sm:text-sm text-[#6B7280] leading-relaxed">
               {bullet.text}
             </p>
           </div>
@@ -142,9 +142,9 @@ function LeftContent({ tab }: { tab: TabId }) {
       </div>
       <Link
         href="/build"
-        className="inline-flex items-center gap-2 bg-[#2D6A4F] text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-[#245840] transition-colors"
+        className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#2D6A4F] text-white text-[11px] sm:text-sm font-medium px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg hover:bg-[#245840] transition-colors"
       >
-        {data.cta} <ArrowRight className="w-3.5 h-3.5" />
+        {data.cta} <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
       </Link>
     </>
   );
@@ -851,14 +851,14 @@ export function ProductDemo() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 min-h-[360px] md:min-h-[460px]"
+              className="grid grid-cols-2 min-h-[300px] sm:min-h-[360px] md:min-h-[460px]"
             >
               {/* LEFT: Copy */}
-              <div className="p-5 sm:p-8 md:p-10 flex flex-col justify-center">
+              <div className="p-3 sm:p-8 md:p-10 flex flex-col justify-center">
                 <LeftContent tab={activeTab} />
               </div>
               {/* RIGHT: Interactive mockup */}
-              <div className="bg-[#F9FAFB] p-4 sm:p-6 md:p-8 flex items-center justify-center border-t md:border-t-0 md:border-l border-[#E5E7EB]">
+              <div className="bg-[#F9FAFB] p-3 sm:p-6 md:p-8 flex items-center justify-center border-l border-[#E5E7EB]">
                 <RightMockup tab={activeTab} />
               </div>
             </motion.div>

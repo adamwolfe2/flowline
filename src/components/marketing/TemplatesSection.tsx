@@ -131,7 +131,7 @@ export function TemplatesSection() {
         </div>
 
         {/* Template grid — filtered by category */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {templates
             .filter((t) => t.category === activeCategory)
             .map((t, i) => (
@@ -146,12 +146,12 @@ export function TemplatesSection() {
                   className="group block bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#D1D5DB] transition-all duration-200"
                 >
                   <TemplateMockup color={t.color} questions={t.questions} />
-                  <div className="p-5 border-t border-[#E5E7EB]">
-                    <h3 className="text-sm font-semibold text-[#111827] mb-1">
+                  <div className="p-3 sm:p-5 border-t border-[#E5E7EB]">
+                    <h3 className="text-xs sm:text-sm font-semibold text-[#111827] mb-1">
                       {t.title}
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#9CA3AF]">
+                      <span className="text-[10px] sm:text-xs text-[#9CA3AF]">
                         {t.questions} questions
                       </span>
                       <span className="flex items-center gap-1 text-xs font-medium text-[#2D6A4F] opacity-0 group-hover:opacity-100 transition-opacity duration-200">

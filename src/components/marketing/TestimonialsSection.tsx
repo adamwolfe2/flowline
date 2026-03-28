@@ -71,7 +71,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Testimonial cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+        <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide">
           {testimonials.map((t, i) => (
             <motion.div
               key={t.name}
@@ -79,7 +79,7 @@ export function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#E5E7EB] rounded-2xl p-6 hover:shadow-md transition-shadow duration-200"
+              className="bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
             >
               {/* Stars */}
               <div className="flex items-center gap-0.5 mb-4">

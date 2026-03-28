@@ -230,7 +230,7 @@ export function WhySection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide">
           {cards.map((card, i) => (
             <motion.div
               key={card.title}
@@ -238,14 +238,14 @@ export function WhySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200"
+              className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
             >
               {card.illustration}
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-[#111827] mb-2">
+              <div className="p-5 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-[#111827] mb-2">
                   {card.title}
                 </h3>
-                <p className="text-sm text-[#6B7280]">{card.description}</p>
+                <p className="text-xs sm:text-sm text-[#6B7280]">{card.description}</p>
               </div>
             </motion.div>
           ))}

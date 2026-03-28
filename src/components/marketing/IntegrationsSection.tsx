@@ -48,7 +48,7 @@ export function IntegrationsSection() {
         </div>
 
         {/* Logo grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-3 mb-10">
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-2 sm:gap-3 mb-10">
           {integrations.map((int) => (
             <div
               key={int.name}
@@ -67,11 +67,11 @@ export function IntegrationsSection() {
         </div>
 
         {/* Featured integration cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {featured.map((f) => (
-            <div key={f.title} className="p-6 rounded-2xl border border-[#E5E7EB] hover:shadow-md transition-shadow">
-              <h3 className="text-base font-semibold text-[#111827] mb-2">{f.title}</h3>
-              <p className="text-sm text-[#6B7280] mb-4">{f.description}</p>
+            <div key={f.title} className="p-4 sm:p-6 rounded-2xl border border-[#E5E7EB] hover:shadow-md transition-shadow">
+              <h3 className="text-sm sm:text-base font-semibold text-[#111827] mb-1 sm:mb-2">{f.title}</h3>
+              <p className="text-xs sm:text-sm text-[#6B7280] mb-3 sm:mb-4">{f.description}</p>
               <div className="flex flex-wrap gap-2">
                 {f.badges.map((b) => (
                   <span key={b} className="text-[10px] font-medium text-[#374151] bg-[#F3F4F6] px-2.5 py-1 rounded-full">
