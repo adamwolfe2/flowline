@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { isSuperAdmin } from "@/lib/admin";
 
 export const metadata: Metadata = {
   title: "Admin | MyVSL",
@@ -8,7 +11,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { userId } = await auth();
+  if (!userId || !(await isSuperAdmin(userId))) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAF8]">
       <div className="bg-white border-b border-[#EBEBEB] px-6 h-12 flex items-center gap-3">

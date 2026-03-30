@@ -143,7 +143,12 @@ export function ABTestEditor({ funnel, onVariantsChange, variantStats }: ABTestE
     }
   }
 
-  const totalWeight = variants.reduce((sum, v) => sum + v.trafficWeight, 0) || 100;
+  const variantTotalWeight = variants.reduce((sum, v) => sum + v.trafficWeight, 0);
+  const totalWeightIncludingControl = variantTotalWeight + 100;
+
+  function trafficPercent(weight: number): number {
+    return Math.round((weight / totalWeightIncludingControl) * 100);
+  }
 
   const hasLowConversions = variants.some(v => {
     const stats = variantStats?.[v.id];
@@ -232,7 +237,7 @@ export function ABTestEditor({ funnel, onVariantsChange, variantStats }: ABTestE
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-green-800">Control (Original)</span>
                 <Badge variant="secondary" className="text-[10px]">
-                  {variants.length > 0 ? `${Math.round((1 - totalWeight / (totalWeight + 100)) * 100)}%` : "100%"}
+                  {variants.length > 0 ? `${trafficPercent(100)}%` : "100%"}
                 </Badge>
               </div>
             </div>
@@ -286,7 +291,7 @@ export function ABTestEditor({ funnel, onVariantsChange, variantStats }: ABTestE
                           max={100}
                         />
                         <span className="text-[10px] text-gray-400">
-                          ~{Math.round((variant.trafficWeight / (totalWeight + 100)) * 100)}% of traffic
+                          ~{trafficPercent(variant.trafficWeight)}% of traffic
                         </span>
                       </div>
                     </div>

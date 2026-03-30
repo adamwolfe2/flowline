@@ -267,10 +267,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           {step === 0 && (
             <motion.div
               key="welcome"
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
               <WelcomeStep config={activeConfig} onStart={handleStart} />
             </motion.div>
@@ -279,10 +278,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           {hasContentBlocks && step === 1 && (
             <motion.div
               key="content-blocks"
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
               <ContentBlockDisplay
                 blocks={activeConfig.quiz.contentBlocks!}
@@ -295,10 +293,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           {hasVideo && step === (1 + contentBlocksOffset) && (
             <motion.div
               key="video"
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
               <VideoStep config={activeConfig} onContinue={() => setStep(1 + contentBlocksOffset + 1)} />
             </motion.div>
@@ -307,10 +304,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           {step >= questionStartStep && step < emailStep && currentQuestion && (
             <motion.div
               key={`question-${step}`}
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
               <EditableOverlay section="content" field="questions">
                 <QuestionStep
@@ -329,10 +325,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           {step === emailStep && (
             <motion.div
               key="email"
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
               <EmailStep config={activeConfig} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onEmailBlur={handleEmailBlur} onBack={handleBack} />
             </motion.div>
@@ -341,10 +336,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           {step === successStep && (
             <motion.div
               key="success"
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
               <SuccessStep
                 config={activeConfig}

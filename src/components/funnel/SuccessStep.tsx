@@ -208,8 +208,9 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
             </a>
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-sm text-gray-500">Calendar booking coming soon. We'll be in touch!</p>
+          <div className="text-center py-8 text-[#6B7280] text-sm">
+            <p className="font-medium text-[#111827] mb-2">Your results are ready!</p>
+            <p>Our team will be in touch soon to schedule your call.</p>
           </div>
         )}
       </motion.div>

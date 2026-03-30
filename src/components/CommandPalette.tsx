@@ -152,15 +152,20 @@ export function CommandPalette({ isAdmin = false, open, onOpenChange }: CommandP
             </Command.Group>
 
             {/* Funnels group */}
-            {funnels.length > 0 && (
-              <Command.Group
-                heading="Funnels"
-                className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-[#9CA3AF] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 mt-1"
-              >
-                {funnels.map(funnel => (
-                  <Command.Group key={funnel.id} className="[&_[cmdk-group-heading]]:hidden">
+            {funnels.length > 0 && (() => {
+              const filteredFunnels = funnels.filter(f =>
+                !search || f.name.toLowerCase().includes(search.toLowerCase())
+              );
+              if (filteredFunnels.length === 0) return null;
+              return (
+                <Command.Group
+                  heading="Your Funnels"
+                  className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-[#9CA3AF] [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 mt-1"
+                >
+                  {filteredFunnels.flatMap(funnel => [
                     <Command.Item
-                      value={`${funnel.name} edit`}
+                      key={`${funnel.id}-edit`}
+                      value={`${funnel.name} edit builder`}
                       keywords={[funnel.name, "edit", "builder"]}
                       onSelect={() => navigate(`/builder/${funnel.id}`)}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-[#374151] data-[selected=true]:bg-[#F3F4F6] data-[selected=true]:text-[#111827] transition-colors"
@@ -168,9 +173,10 @@ export function CommandPalette({ isAdmin = false, open, onOpenChange }: CommandP
                       <Pencil className="w-4 h-4 text-[#6B7280] flex-shrink-0" />
                       <span className="flex-1 truncate">{funnel.name}</span>
                       <span className="text-xs text-[#9CA3AF]">Edit</span>
-                    </Command.Item>
+                    </Command.Item>,
                     <Command.Item
-                      value={`${funnel.name} analytics`}
+                      key={`${funnel.id}-analytics`}
+                      value={`${funnel.name} analytics stats`}
                       keywords={[funnel.name, "analytics", "stats"]}
                       onSelect={() => navigate(`/analytics/${funnel.id}`)}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-[#374151] data-[selected=true]:bg-[#F3F4F6] data-[selected=true]:text-[#111827] transition-colors"
@@ -178,9 +184,10 @@ export function CommandPalette({ isAdmin = false, open, onOpenChange }: CommandP
                       <BarChart3 className="w-4 h-4 text-[#6B7280] flex-shrink-0" />
                       <span className="flex-1 truncate">{funnel.name}</span>
                       <span className="text-xs text-[#9CA3AF]">Analytics</span>
-                    </Command.Item>
+                    </Command.Item>,
                     <Command.Item
-                      value={`${funnel.name} preview`}
+                      key={`${funnel.id}-preview`}
+                      value={`${funnel.name} preview view`}
                       keywords={[funnel.name, "preview", "view"]}
                       onSelect={() => { onOpenChange(false); setSearch(""); window.open(`/f/preview/${funnel.id}`, "_blank"); }}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-[#374151] data-[selected=true]:bg-[#F3F4F6] data-[selected=true]:text-[#111827] transition-colors"
@@ -188,11 +195,11 @@ export function CommandPalette({ isAdmin = false, open, onOpenChange }: CommandP
                       <ExternalLink className="w-4 h-4 text-[#6B7280] flex-shrink-0" />
                       <span className="flex-1 truncate">{funnel.name}</span>
                       <span className="text-xs text-[#9CA3AF]">Preview</span>
-                    </Command.Item>
-                  </Command.Group>
-                ))}
-              </Command.Group>
-            )}
+                    </Command.Item>,
+                  ])}
+                </Command.Group>
+              );
+            })()}
           </Command.List>
 
           {/* Footer hint */}

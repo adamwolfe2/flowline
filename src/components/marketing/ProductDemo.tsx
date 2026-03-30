@@ -844,13 +844,13 @@ export function ProductDemo() {
           </div>
 
           {/* Content area */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.div
               key={activeTab}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.15 }}
               className="grid grid-cols-2 min-h-[300px] sm:min-h-[360px] md:min-h-[460px]"
             >
               {/* LEFT: Copy */}

@@ -85,6 +85,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
   }
 
   async function saveSequence(seq: Sequence) {
+    const previousSequences = [...sequences];
     setSaving(seq.id);
     try {
       const res = await fetch(`/api/funnels/${funnel.id}/sequences/${seq.id}`, {
@@ -103,9 +104,11 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
         setSequences(prev => prev.map(s => s.id === seq.id ? updated : s));
         toast.success("Sequence saved");
       } else {
+        setSequences(previousSequences);
         toast.error("Failed to save");
       }
     } catch {
+      setSequences(previousSequences);
       toast.error("Failed to save");
     }
     setSaving(null);
@@ -174,7 +177,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
         <p className="text-xs text-blue-700 font-medium mb-1">Email Sequences</p>
         <p className="text-[11px] text-blue-600 leading-relaxed">
           Automatically send follow-up emails to leads after they complete your funnel,
-          or recover abandoned quiz visitors. Use placeholders: {"{email}"}, {"{score}"}, {"{tier}"}, {"{funnel_name}"}.
+          or recover abandoned quiz visitors. Use placeholders: {"{email}"}, {"{score}"}, {"{tier}"}, {"{funnel_name}"}, {"{calendar_url}"} (the booking link for this lead&apos;s tier).
         </p>
       </div>
 

@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { events, funnelSessions, leads, funnelVariants, variantAssignments } from "@/db/schema";
 import { eq, and, gte, sql, avg } from "drizzle-orm";
+import type { FunnelConfig } from "@/types";
 
 function getDateCutoff(timeRange: string): Date | null {
   const now = new Date();
@@ -12,15 +13,43 @@ function getDateCutoff(timeRange: string): Date | null {
   }
 }
 
-function getStepLabel(index: number, totalQuestions: number, hasVideo: boolean): string {
+function getStepLabel(
+  index: number,
+  totalQuestions: number,
+  hasVideo: boolean,
+  questionTexts?: string[]
+): string {
   if (index === 0) return "Welcome";
   const videoOffset = hasVideo ? 1 : 0;
   if (hasVideo && index === 1) return "Video";
   const qStart = 1 + videoOffset;
-  if (index >= qStart && index < qStart + totalQuestions) return `Question ${index - qStart + 1}`;
+  if (index >= qStart && index < qStart + totalQuestions) {
+    const qIndex = index - qStart;
+    const text = questionTexts?.[qIndex];
+    if (text) {
+      const truncated = text.length > 30 ? `${text.slice(0, 27)}...` : text;
+      return `Q${qIndex + 1}: ${truncated}`;
+    }
+    return `Question ${qIndex + 1}`;
+  }
   if (index === qStart + totalQuestions) return "Email";
   if (index === qStart + totalQuestions + 1) return "Booked";
   return `Step ${index}`;
+}
+
+function extractConfigMeta(config: FunnelConfig | null | undefined): {
+  totalQuestions: number;
+  hasVideo: boolean;
+  questionTexts: string[];
+} {
+  if (!config) return { totalQuestions: 3, hasVideo: false, questionTexts: [] };
+  const questions = config.quiz?.questions ?? [];
+  const hasVideo = config.quiz?.video?.enabled === true;
+  return {
+    totalQuestions: questions.length,
+    hasVideo,
+    questionTexts: questions.map((q) => q.text),
+  };
 }
 
 export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
@@ -56,7 +85,8 @@ export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
   };
 }
 
-export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', totalQuestions = 3, hasVideo = false) {
+export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', config?: FunnelConfig | null) {
+  const { totalQuestions, hasVideo, questionTexts } = extractConfigMeta(config);
   const cutoff = getDateCutoff(timeRange);
   const whereClause = cutoff
     ? and(eq(events.funnelId, funnelId), eq(events.eventType, "page_viewed"), gte(events.createdAt, cutoff))
@@ -78,7 +108,7 @@ export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', t
     const prevVisitors = prev ? Number(prev.uniqueSessions) : visitors;
     return {
       stepIndex: row.stepIndex,
-      stepLabel: getStepLabel(row.stepIndex, totalQuestions, hasVideo),
+      stepLabel: getStepLabel(row.stepIndex, totalQuestions, hasVideo, questionTexts),
       visitors,
       dropoffFromPrev: prevVisitors > 0 ? Math.round((1 - visitors / prevVisitors) * 100) : 0,
       retentionFromTop: topOfFunnel > 0 ? Math.round((visitors / topOfFunnel) * 100) : 0,
@@ -111,7 +141,8 @@ export async function getAnswerDistribution(funnelId: string, timeRange = 'all')
   return grouped;
 }
 
-export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', totalQuestions = 3, hasVideo = false) {
+export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', config?: FunnelConfig | null) {
+  const { totalQuestions, hasVideo, questionTexts } = extractConfigMeta(config);
   const cutoff = getDateCutoff(timeRange);
   const whereClause = cutoff
     ? and(eq(funnelSessions.funnelId, funnelId), sql`${funnelSessions.abandonedAtStep} is not null`, gte(funnelSessions.startedAt, cutoff))
@@ -127,7 +158,7 @@ export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', tot
 
   return result.map((r) => ({
     stepIndex: r.stepIndex ?? 0,
-    stepLabel: getStepLabel(r.stepIndex ?? 0, totalQuestions, hasVideo),
+    stepLabel: getStepLabel(r.stepIndex ?? 0, totalQuestions, hasVideo, questionTexts),
     abandonCount: Number(r.count),
   }));
 }
@@ -286,14 +317,14 @@ export async function getVariantPerformance(funnelId: string, timeRange = 'all')
   return results;
 }
 
-export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRange = 'all') {
+export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRange = 'all', config?: FunnelConfig | null) {
   const leadsLimit = 25;
   const leadsOffset = leadsPage * leadsLimit;
   const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount, variantPerformance] = await Promise.all([
     getFunnelOverview(funnelId, timeRange),
-    getDropoffWaterfall(funnelId, timeRange),
+    getDropoffWaterfall(funnelId, timeRange, config),
     getAnswerDistribution(funnelId, timeRange),
-    getAbandonHeatmap(funnelId, timeRange),
+    getAbandonHeatmap(funnelId, timeRange, config),
     getDeviceBreakdown(funnelId, timeRange),
     getUTMBreakdown(funnelId, timeRange),
     getTierDistribution(funnelId, timeRange),

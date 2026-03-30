@@ -2,9 +2,17 @@ import { db } from '@/db';
 import { funnelSessions } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
+export function parseDeviceType(userAgent: string): "mobile" | "desktop" | "tablet" {
+  const ua = userAgent.toLowerCase();
+  if (/tablet|ipad|playbook|silk/.test(ua)) return "tablet";
+  if (/mobile|android|iphone|ipod|blackberry|windows phone|opera mini|iemobile/.test(ua)) return "mobile";
+  return "desktop";
+}
+
 export async function insertSession(
   funnelId: string,
-  utm?: { utmSource?: string; utmMedium?: string; utmCampaign?: string }
+  utm?: { utmSource?: string; utmMedium?: string; utmCampaign?: string },
+  deviceType?: "mobile" | "desktop" | "tablet"
 ) {
   const result = await db.insert(funnelSessions)
     .values({
@@ -12,6 +20,7 @@ export async function insertSession(
       utmSource: utm?.utmSource ?? null,
       utmMedium: utm?.utmMedium ?? null,
       utmCampaign: utm?.utmCampaign ?? null,
+      deviceType: deviceType ?? null,
     }).returning();
   return result[0];
 }

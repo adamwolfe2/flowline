@@ -318,11 +318,7 @@ function LivePreview({ answers, description }: { answers: Record<string, string>
           {hasContent ? (
             <motion.h3 key={businessType + audience} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="text-lg font-bold text-[#111827] leading-tight mb-2">
-              {offering
-                ? `Discover If You Qualify for ${offering.split(" ").slice(0, 4).join(" ")}`
-                : audience
-                  ? `Built for ${audience}`
-                  : `Your ${businessType} Funnel`}
+              {businessType ? `Is Your ${businessType} Ready to Scale?` : "Find Out If You Qualify"}
             </motion.h3>
           ) : (
             <div className="h-6 bg-[#E5E7EB] rounded w-3/4 mx-auto mb-2 animate-pulse" />
@@ -445,6 +441,17 @@ function BuildContent() {
   const [urlInput, setUrlInput] = useState(initialUrl);
   const [autoStarted, setAutoStarted] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [describeError, setDescribeError] = useState("");
+
+  // BUG-003: Reset textInput when question changes so prior input doesn't bleed through
+  useEffect(() => {
+    const currentQ = state.questions[state.currentQuestionIndex];
+    if (currentQ?.type === "text" || currentQ?.type === "url") {
+      setTextInput(state.answers[currentQ.id] || "");
+    } else {
+      setTextInput("");
+    }
+  }, [state.currentQuestionIndex, state.questions, state.answers]);
 
   // Auto-start if prompt or URL came from homepage
   useEffect(() => {
@@ -460,7 +467,11 @@ function BuildContent() {
 
   async function startPlanning(desc?: string) {
     const text = desc || state.businessDescription;
-    if (text.length < 10) return;
+    if (text.length < 10) {
+      setDescribeError("Please describe your business in at least 10 characters.");
+      return;
+    }
+    setDescribeError("");
 
     dispatch({ type: "SET_DESCRIPTION", value: text });
     dispatch({ type: "START_PLANNING" });
@@ -801,7 +812,7 @@ function BuildContent() {
                   </p>
                   <textarea
                     value={state.businessDescription}
-                    onChange={(e) => dispatch({ type: "SET_DESCRIPTION", value: e.target.value })}
+                    onChange={(e) => { dispatch({ type: "SET_DESCRIPTION", value: e.target.value }); if (describeError) setDescribeError(""); }}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startPlanning(); } }}
                     placeholder="I run a coaching business helping SaaS founders scale from $50k to $500k MRR through outbound sales systems..."
                     rows={5}
@@ -809,6 +820,7 @@ function BuildContent() {
                     style={{ fontSize: "15px" }}
                     aria-label="Describe your business"
                   />
+                  {describeError && <p className="text-xs text-red-500 mt-1">{describeError}</p>}
                   <button onClick={() => startPlanning()} disabled={state.businessDescription.length < 10}
                     className="w-full mt-4 py-3 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4" /> Start Building
@@ -982,15 +994,18 @@ function BuildContent() {
                       )}
 
                       {currentQ.type === "url" && (
-                        <input
-                          type="url"
-                          value={textInput}
-                          onChange={(e) => setTextInput(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleNext(); } }}
-                          placeholder="https://cal.com/you/discovery-call"
-                          className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#2D6A4F] transition-colors"
-                          autoFocus
-                        />
+                        <>
+                          <input
+                            type="url"
+                            value={textInput}
+                            onChange={(e) => setTextInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleNext(); } }}
+                            placeholder="https://cal.com/you/discovery-call"
+                            className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#2D6A4F] transition-colors"
+                            autoFocus
+                          />
+                          <p className="text-xs text-[#9CA3AF] mt-1">Enter your booking link to auto-route qualified leads, or skip to continue.</p>
+                        </>
                       )}
 
                       {currentQ.type === "color" && (

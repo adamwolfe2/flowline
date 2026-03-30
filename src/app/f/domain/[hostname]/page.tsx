@@ -1,9 +1,10 @@
 import { getFunnelByCustomDomain } from "@/db/queries/funnels";
-import { insertSession } from "@/db/queries/sessions";
+import { insertSession, parseDeviceType } from "@/db/queries/sessions";
 import { FunnelClient } from "@/components/funnel/FunnelClient";
 import { FunnelConfig } from "@/types";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -58,9 +59,13 @@ export default async function DomainFunnelPage({ params, searchParams }: Props) 
   const utmMedium = typeof sp.utm_medium === "string" ? sp.utm_medium : undefined;
   const utmCampaign = typeof sp.utm_campaign === "string" ? sp.utm_campaign : undefined;
 
+  const headersList = await headers();
+  const userAgent = headersList.get("user-agent") ?? "";
+  const deviceType = parseDeviceType(userAgent);
+
   let sessionId: string;
   try {
-    const session = await insertSession(funnel.id, { utmSource, utmMedium, utmCampaign });
+    const session = await insertSession(funnel.id, { utmSource, utmMedium, utmCampaign }, deviceType);
     sessionId = session.id;
   } catch (error) {
     logger.error("Failed to create session", { error: error instanceof Error ? error.message : String(error) });

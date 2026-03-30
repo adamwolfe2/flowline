@@ -16,7 +16,7 @@ const aiOutputSchema = z.object({
       label: z.string(),
       points: z.number(),
     })).min(2),
-  })).min(1),
+  })).min(3),
   thresholds: z.object({
     high: z.number(),
     mid: z.number(),
@@ -34,6 +34,8 @@ function buildSystemPrompt(context?: { businessType?: string; targetAudience?: s
 
   return `${base}${contextBlock}
 
+Generate exactly 3 qualifying questions covering: (1) budget/revenue, (2) timeline/urgency, (3) problem-awareness.
+
 Return ONLY valid JSON matching this exact schema:
 {
   "headline": "string, compelling, outcome-focused, max 12 words",
@@ -42,7 +44,27 @@ Return ONLY valid JSON matching this exact schema:
   "questions": [
     {
       "key": "q1",
-      "text": "string, qualification question",
+      "text": "string, budget or revenue qualification question",
+      "options": [
+        { "id": "a", "label": "string", "points": 0 },
+        { "id": "b", "label": "string", "points": 1 },
+        { "id": "c", "label": "string", "points": 2 },
+        { "id": "d", "label": "string", "points": 3 }
+      ]
+    },
+    {
+      "key": "q2",
+      "text": "string, timeline or urgency qualification question",
+      "options": [
+        { "id": "a", "label": "string", "points": 0 },
+        { "id": "b", "label": "string", "points": 1 },
+        { "id": "c", "label": "string", "points": 2 },
+        { "id": "d", "label": "string", "points": 3 }
+      ]
+    },
+    {
+      "key": "q3",
+      "text": "string, problem-awareness or sophistication question",
       "options": [
         { "id": "a", "label": "string", "points": 0 },
         { "id": "b", "label": "string", "points": 1 },
@@ -56,7 +78,7 @@ Return ONLY valid JSON matching this exact schema:
   "metaDescription": "string"
 }
 
-Questions must qualify: budget/revenue, timeline/urgency, and problem-awareness/sophistication. Points 0-3 per option. Do not include calendar URLs, colors, or logo. Do not use em dashes in any generated text. Return JSON only, no markdown, no backticks.`;
+You MUST include exactly 3 questions. Points 0-3 per option. Do not include calendar URLs, colors, or logo. Do not use em dashes in any generated text. Return JSON only, no markdown, no backticks.`;
 }
 
 export async function POST(req: NextRequest) {
@@ -102,7 +124,7 @@ export async function POST(req: NextRequest) {
             { role: "user", content: userMessage },
           ],
           temperature: 0.7,
-          max_tokens: 1000,
+          max_tokens: 2000,
         }),
       });
       const data = await response.json();

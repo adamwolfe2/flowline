@@ -22,7 +22,6 @@ export function WaterfallChart({ steps }: WaterfallChartProps) {
     );
   }
 
-  const maxVisitors = Math.max(...steps.map((s) => s.visitors), 1);
   const chartHeight = 240;
 
   return (
@@ -30,7 +29,7 @@ export function WaterfallChart({ steps }: WaterfallChartProps) {
       <div className="relative" style={{ height: chartHeight + 60 }}>
         <svg width="100%" height={chartHeight} viewBox={`0 0 ${steps.length * 100} ${chartHeight}`} preserveAspectRatio="none">
           {steps.map((step, i) => {
-            const barHeight = (step.visitors / maxVisitors) * (chartHeight - 20);
+            const barHeight = (step.retentionFromTop / 100) * (chartHeight - 20);
             const x = i * 100 + 15;
             const y = chartHeight - barHeight;
 

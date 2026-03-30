@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getFullAnalytics } from "@/db/queries/analytics";
 import { getFunnelById } from "@/db/queries/funnels";
 import { logger } from "@/lib/logger";
+import type { FunnelConfig } from "@/types";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
   try {
@@ -18,7 +19,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     const VALID_TIME_RANGES = ["7d", "30d", "90d", "all"];
     const rawTimeRange = req.nextUrl.searchParams.get("timeRange") ?? "all";
     const timeRange = VALID_TIME_RANGES.includes(rawTimeRange) ? rawTimeRange : "all";
-    const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange);
+    const funnelConfig = funnel.config as FunnelConfig;
+    const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange, funnelConfig);
     return NextResponse.json({ funnel, ...analytics }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });

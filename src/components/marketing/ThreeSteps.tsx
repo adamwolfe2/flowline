@@ -56,7 +56,7 @@ export function ThreeSteps() {
                 className="relative flex flex-col items-center text-center px-1 sm:px-4"
               >
                 {/* Numbered circle */}
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#2D6A4F] text-white text-xs sm:text-sm font-bold flex items-center justify-center mb-3 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-bold flex items-center justify-center mb-3 sm:mb-4 text-[#6B7280]">
                   {step.number}
                 </div>
 

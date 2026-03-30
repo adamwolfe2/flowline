@@ -86,7 +86,7 @@ export function HeroSection() {
         />
       </div>
       <div className="absolute inset-0" style={{
-        background: "linear-gradient(180deg, transparent 0%, transparent 40%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0.7) 80%, #FFFFFF 100%)",
+        background: "linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.1) 40%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0.7) 80%, #FFFFFF 100%)",
       }} />
 
       {/* Content */}
@@ -96,7 +96,7 @@ export function HeroSection() {
             style={{ fontFamily: "var(--font-plus-jakarta)", textShadow: "0 2px 24px rgba(0,0,0,0.15)" }}>
             Your VSL funnel.
             <br />
-            <span className="text-white/70">Built in 60 seconds.</span>
+            <span className="text-white/90">Built in 60 seconds.</span>
           </h1>
         </motion.div>
 

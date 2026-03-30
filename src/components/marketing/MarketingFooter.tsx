@@ -23,9 +23,7 @@ const columns = [
   {
     title: "Resources",
     links: [
-      { label: "Help Center", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Status", href: "#" },
+      { label: "Contact Support", href: "mailto:support@getmyvsl.com" },
     ],
   },
   {

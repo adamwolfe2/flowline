@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { leads, funnels } from "@/db/schema";
-import { eq, desc, sql, and, ilike, gt } from "drizzle-orm";
+import { eq, desc, sql, and, ilike, gt, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     const userFunnels = await db
       .select({
         id: funnels.id,
-        name: sql<string>`(${funnels.config}->>'brand')::jsonb->>'name'`,
+        name: sql<string>`${funnels.config}->'brand'->>'name'`,
       })
       .from(funnels)
       .where(eq(funnels.userId, userId));
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Build WHERE conditions
-    const conditions = [sql`${leads.funnelId} = ANY(${funnelIds})`];
+    const conditions = [inArray(leads.funnelId, funnelIds)];
 
     if (funnelId) {
       conditions.push(eq(leads.funnelId, funnelId));

@@ -5,6 +5,7 @@ import { eq, and, gte, desc } from "drizzle-orm";
 import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries, getDeviceBreakdown } from "@/db/queries/analytics";
 import { logger } from "@/lib/logger";
 import { sharedAnalyticsLimiter, checkRateLimit } from "@/lib/rate-limit";
+import type { FunnelConfig } from "@/types";
 
 const VALID_TIME_RANGES = ["7d", "30d", "90d"];
 
@@ -53,9 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       return NextResponse.json({ error: "Share link has expired" }, { status: 410 });
     }
 
-    const config = funnel.config as {
-      brand?: { name?: string; logoUrl?: string; primaryColor?: string };
-    };
+    const config = funnel.config as FunnelConfig;
 
     function getDateCutoff(range: string): Date | null {
       const now = new Date();
@@ -74,7 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
 
     const [stats, dropoff, tiers, timeSeries, devices, recentLeads] = await Promise.all([
       getFunnelOverview(funnel.id, timeRange),
-      getDropoffWaterfall(funnel.id, timeRange),
+      getDropoffWaterfall(funnel.id, timeRange, config),
       getTierDistribution(funnel.id, timeRange),
       getLeadsTimeSeries(funnel.id, timeRange),
       getDeviceBreakdown(funnel.id, timeRange),
@@ -92,9 +91,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
     ]);
 
     return NextResponse.json({
-      funnelName: config.brand?.name || "Funnel",
-      brandLogoUrl: config.brand?.logoUrl || null,
-      brandColor: config.brand?.primaryColor || "#2D6A4F",
+      funnelName: config.brand?.name ?? "Funnel",
+      brandLogoUrl: config.brand?.logoUrl ?? null,
+      brandColor: config.brand?.primaryColor ?? "#2D6A4F",
       stats,
       dropoff,
       tiers,

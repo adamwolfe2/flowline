@@ -34,27 +34,7 @@ interface FunnelCardProps {
 }
 
 function AnimatedNumber({ value }: { value: number }) {
-  const [displayed, setDisplayed] = useState(0);
-
-  useEffect(() => {
-    if (value === 0) return;
-    const duration = 600;
-    const steps = 20;
-    const increment = value / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setDisplayed(value);
-        clearInterval(timer);
-      } else {
-        setDisplayed(Math.round(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [value]);
-
-  return <>{displayed}</>;
+  return <>{value}</>;
 }
 
 export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardProps) {

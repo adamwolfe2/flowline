@@ -16,7 +16,7 @@ export function MarketingNav() {
   }, []);
 
   return (
-    <nav className="sticky top-4 z-50 mx-auto max-w-[1039px] px-4">
+    <nav className="sticky top-4 z-50 mx-auto max-w-[1039px] px-4 overflow-visible">
       <div
         className={`flex items-center justify-between rounded-2xl px-4 py-2.5 transition-all duration-200 ${
           scrolled
@@ -70,7 +70,7 @@ export function MarketingNav() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="md:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

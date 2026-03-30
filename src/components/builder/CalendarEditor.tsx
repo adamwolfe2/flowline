@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface CalendarEditorProps {
@@ -125,7 +126,12 @@ export function CalendarEditor({ config, onSave }: CalendarEditorProps) {
               setTestingWebhook(false);
             }}
           >
-            {testingWebhook ? "Sending..." : "Send test payload"}
+            {testingWebhook ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+              Sending...
+            </>
+          ) : "Send test payload"}
           </Button>
         </div>
         <div className="mt-3 p-3 bg-[#FBFBFB] rounded-lg border border-[#EBEBEB]">

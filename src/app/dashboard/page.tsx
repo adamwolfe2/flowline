@@ -225,9 +225,9 @@ function DashboardContent() {
             {funnels.map((funnel, index) => (
               <motion.div
                 key={funnel.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.04 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2, delay: index * 0.02 }}
               >
                 <FunnelCard
                   funnel={funnel}

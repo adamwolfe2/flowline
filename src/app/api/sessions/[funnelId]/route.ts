@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { insertSession, completeSession, convertSession } from "@/db/queries/sessions";
+import { insertSession, completeSession, convertSession, parseDeviceType } from "@/db/queries/sessions";
 import { sessionLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
@@ -25,7 +25,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
 
     if (event === "start") {
       try {
-        const session = await insertSession(funnelId);
+        const userAgent = req.headers.get("user-agent") ?? "";
+        const deviceType = parseDeviceType(userAgent);
+        const session = await insertSession(funnelId, undefined, deviceType);
         return NextResponse.json({ sessionId: session.id });
       } catch {
         // FK constraint failure = funnel doesn't exist

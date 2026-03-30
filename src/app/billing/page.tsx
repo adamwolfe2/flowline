@@ -201,9 +201,7 @@ export default function BillingPage() {
           return (
             <motion.div
               key={key}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: index * 0.08 }}
+              initial={false}
               whileHover={{ y: -3, transition: { duration: 0.15 } }}
               className={`bg-white rounded-xl border p-6 transition-colors ${
                 isCurrent
