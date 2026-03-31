@@ -195,31 +195,102 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 2: Fetch logo via Brandfetch CDN
+    // Step 2: Fetch logo via multiple strategies
     let logoUrl = "";
-    try {
-      const logoRes = await fetch(`https://cdn.brandfetch.io/${domain}/w/256/h/256`, {
-        signal: AbortSignal.timeout(8000),
-      });
-      if (logoRes.ok) {
-        const contentType = logoRes.headers.get("content-type") || "image/png";
-        const logoBlob = await logoRes.blob();
-        if (logoBlob.size > 0 && logoBlob.size < 5 * 1024 * 1024) {
-          const ext = contentType.includes("svg") ? "svg" : contentType.includes("png") ? "png" : "png";
+    const logoStrategies = [
+      // Strategy 1: Brandfetch CDN
+      async () => {
+        const res = await fetch(`https://cdn.brandfetch.io/${domain}/w/256/h/256`, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) return null;
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.startsWith("image/")) return null;
+        const blob = await res.blob();
+        return blob.size > 500 ? { blob, contentType: ct } : null;
+      },
+      // Strategy 2: Clearbit Logo API
+      async () => {
+        const res = await fetch(`https://logo.clearbit.com/${domain}`, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) return null;
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.startsWith("image/")) return null;
+        const blob = await res.blob();
+        return blob.size > 500 ? { blob, contentType: ct } : null;
+      },
+      // Strategy 3: Scrape og:image or logo from HTML
+      async () => {
+        const htmlRes = await fetch(url, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; MyVSLBot/1.0)" },
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!htmlRes.ok) return null;
+        const html = await htmlRes.text();
+
+        // Try og:image first
+        const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+          || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+        // Try apple-touch-icon
+        const touchMatch = html.match(/<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i);
+        // Try icon links
+        const iconMatch = html.match(/<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i);
+        // Try img tags with "logo" in src, class, id, or alt
+        const logoImgMatch = html.match(/<img[^>]*(?:class|id|alt|src)=["'][^"']*logo[^"']*["'][^>]*src=["']([^"']+)["']/i)
+          || html.match(/<img[^>]*src=["']([^"']*logo[^"']+)["']/i);
+
+        const candidateUrl = ogMatch?.[1] || touchMatch?.[1] || logoImgMatch?.[1] || iconMatch?.[1];
+        if (!candidateUrl) return null;
+
+        // Resolve relative URLs
+        const absUrl = candidateUrl.startsWith("http")
+          ? candidateUrl
+          : candidateUrl.startsWith("//")
+            ? `https:${candidateUrl}`
+            : new URL(candidateUrl, url).href;
+
+        const imgRes = await fetch(absUrl, { signal: AbortSignal.timeout(5000) });
+        if (!imgRes.ok) return null;
+        const ct = imgRes.headers.get("content-type") || "";
+        if (!ct.startsWith("image/") && !ct.includes("svg")) return null;
+        const blob = await imgRes.blob();
+        return blob.size > 200 ? { blob, contentType: ct } : null;
+      },
+      // Strategy 4: Google Favicon (always works but low-res)
+      async () => {
+        const res = await fetch(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        return blob.size > 200 ? { blob, contentType: "image/png" } : null;
+      },
+    ];
+
+    for (const strategy of logoStrategies) {
+      try {
+        const result = await strategy();
+        if (result) {
+          const ext = result.contentType.includes("svg") ? "svg"
+            : result.contentType.includes("png") ? "png"
+            : result.contentType.includes("webp") ? "webp"
+            : "png";
           const { url: blobUrl } = await put(
             `logos/url-gen-${domain}-${Date.now()}.${ext}`,
-            logoBlob,
-            { access: "public", contentType }
+            result.blob,
+            { access: "public", contentType: result.contentType }
           );
           logoUrl = blobUrl;
+          break;
         }
+      } catch {
+        // Try next strategy
       }
-    } catch (error) {
-      // Logo fetch is non-critical, continue without it
-      logger.warn("URL-to-funnel: Logo fetch failed", {
-        domain,
-        error: error instanceof Error ? error.message : String(error),
-      });
+    }
+
+    if (!logoUrl) {
+      logger.warn("URL-to-funnel: All logo strategies failed", { domain });
     }
 
     // Step 3: Call GPT-4o
