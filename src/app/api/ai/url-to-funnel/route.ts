@@ -229,18 +229,17 @@ export async function POST(req: NextRequest) {
         if (!htmlRes.ok) return null;
         const html = await htmlRes.text();
 
-        // Try og:image first
-        const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
-          || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
-        // Try apple-touch-icon
-        const touchMatch = html.match(/<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i);
-        // Try icon links
-        const iconMatch = html.match(/<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/i);
-        // Try img tags with "logo" in src, class, id, or alt
+        // Priority order: actual logos first, social images last
+        // 1. apple-touch-icon (high-res, usually the logo)
+        const touchMatch = html.match(/<link[^>]*rel=["']apple-touch-icon[^"']*["'][^>]*href=["']([^"']+)["']/i);
+        // 2. img tags with "logo" in src, class, id, or alt
         const logoImgMatch = html.match(/<img[^>]*(?:class|id|alt|src)=["'][^"']*logo[^"']*["'][^>]*src=["']([^"']+)["']/i)
           || html.match(/<img[^>]*src=["']([^"']*logo[^"']+)["']/i);
+        // 3. SVG or large icon links
+        const iconMatch = html.match(/<link[^>]*rel=["'](?:icon|shortcut icon)["'][^>]*href=["']([^"']+\.(?:svg|png))["']/i);
 
-        const candidateUrl = ogMatch?.[1] || touchMatch?.[1] || logoImgMatch?.[1] || iconMatch?.[1];
+        // Skip og:image — it's almost always a social card, not a logo
+        const candidateUrl = touchMatch?.[1] || logoImgMatch?.[1] || iconMatch?.[1];
         if (!candidateUrl) return null;
 
         // Resolve relative URLs
