@@ -12,6 +12,7 @@ interface QuestionStepProps {
   selectedOptionId?: string;
   onSelect: (key: string, id: string) => void;
   onBack?: () => void;
+  compact?: boolean;
 }
 
 export function QuestionStep({
@@ -22,6 +23,7 @@ export function QuestionStep({
   selectedOptionId,
   onSelect,
   onBack,
+  compact = false,
 }: QuestionStepProps) {
   const { brand } = config;
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -32,20 +34,22 @@ export function QuestionStep({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 28 }}
-        className="mb-6"
+        className={compact ? "mb-3" : "mb-6"}
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
-          Question {questionNumber} of {totalQuestions}
-        </p>
+        {!compact && (
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+            Question {questionNumber} of {totalQuestions}
+          </p>
+        )}
         <h2
-          className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug"
+          className={`font-semibold text-gray-900 leading-snug ${compact ? "text-lg" : "text-xl sm:text-2xl"}`}
           style={{ fontFamily: brand.fontHeading }}
         >
           {question.text}
         </h2>
       </motion.div>
 
-      <div className="flex flex-col gap-3">
+      <div className={`flex flex-col ${compact ? "gap-2" : "gap-3"}`}>
         {question.options.map((opt, i) => {
           const isSelected = selectedOptionId === opt.id;
           return (
@@ -57,11 +61,11 @@ export function QuestionStep({
               whileTap={{ scale: 0.97 }}
               whileHover={{ scale: 1.01 }}
               onClick={() => onSelect(question.key, opt.id)}
-              className="w-full text-left px-4 sm:px-5 py-4 rounded-xl border-2 transition-all duration-150 flex items-center justify-between group"
+              className={`w-full text-left border-2 transition-all duration-150 flex items-center justify-between group ${compact ? "px-3 py-2.5 rounded-lg" : "px-4 sm:px-5 py-4 rounded-xl"}`}
               style={{
                 borderColor: isSelected || hoveredId === opt.id ? brand.primaryColor : "#E5E7EB",
                 backgroundColor: isSelected || hoveredId === opt.id ? brand.primaryColorLight : "#FFFFFF",
-                minHeight: "56px",
+                minHeight: compact ? "44px" : "56px",
                 cursor: "pointer",
               }}
               onMouseEnter={() => setHoveredId(opt.id)}
@@ -69,7 +73,7 @@ export function QuestionStep({
             >
               <div className="flex items-center gap-3">
                 <div
-                  className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150"
+                  className={`rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 ${compact ? "w-5 h-5" : "w-6 h-6"}`}
                   style={{
                     borderColor: isSelected ? brand.primaryColor : "#D1D5DB",
                     backgroundColor: isSelected ? brand.primaryColor : "transparent",
@@ -90,7 +94,7 @@ export function QuestionStep({
                   )}
                 </div>
                 <span
-                  className="text-sm sm:text-base font-medium"
+                  className={`font-medium ${compact ? "text-sm" : "text-sm sm:text-base"}`}
                   style={{ color: isSelected ? brand.primaryColorDark : "#374151" }}
                 >
                   {opt.label}
@@ -118,13 +122,13 @@ export function QuestionStep({
         })}
       </div>
 
-      <p className="text-xs text-gray-400 sm:hidden mt-4 text-center">Tap an answer to continue</p>
+      {!compact && <p className="text-xs text-gray-400 sm:hidden mt-4 text-center">Tap an answer to continue</p>}
 
       {onBack && (
         <button
           type="button"
           onClick={onBack}
-          className="mt-6 text-sm text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] px-2 py-2"
+          className={`text-sm text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] px-2 py-2 ${compact ? "mt-3" : "mt-6"}`}
         >
           &larr; Back
         </button>

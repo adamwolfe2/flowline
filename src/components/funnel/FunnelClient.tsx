@@ -273,8 +273,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         cursivePixelId={activeConfig.tracking?.cursivePixelId}
         customScripts={activeConfig.tracking?.customScripts}
       />
-      <div className={`w-full max-w-lg mx-auto ${isPopupMode ? "py-6 px-4" : "py-12 px-4"}`}>
-        <ProgressBar config={activeConfig} step={progressStep} totalQuestions={totalQuestions} />
+      <div className={`w-full max-w-lg mx-auto ${isPopupMode ? "py-3 px-3" : "py-12 px-4"}`}>
+        {!isPopupMode && <ProgressBar config={activeConfig} step={progressStep} totalQuestions={totalQuestions} />}
 
         <AnimatePresence mode="wait">
           {step === 0 && (
@@ -284,7 +284,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
               animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
               exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
-              <WelcomeStep config={activeConfig} onStart={handleStart} />
+              <WelcomeStep config={activeConfig} onStart={handleStart} compact={isPopupMode} />
             </motion.div>
           )}
 
@@ -330,6 +330,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
                   selectedOptionId={answers[currentQuestion.key]}
                   onSelect={handleSelect}
                   onBack={step >= questionStartStep ? handleBack : undefined}
+                  compact={isPopupMode}
                 />
               </EditableOverlay>
             </motion.div>
@@ -342,7 +343,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
               animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 350, damping: 35 } }}
               exit={{ opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" } }}
             >
-              <EmailStep config={activeConfig} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onEmailBlur={handleEmailBlur} onBack={handleBack} />
+              <EmailStep config={activeConfig} onSubmit={handleEmailSubmit} onFieldFocus={handleEmailFocus} onEmailBlur={handleEmailBlur} onBack={handleBack} compact={isPopupMode} />
             </motion.div>
           )}
 

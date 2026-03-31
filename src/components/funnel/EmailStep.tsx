@@ -11,9 +11,10 @@ interface EmailStepProps {
   onFieldFocus?: () => void;
   onEmailBlur?: (email: string) => void;
   onBack?: () => void;
+  compact?: boolean;
 }
 
-export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack }: EmailStepProps) {
+export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack, compact = false }: EmailStepProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,20 +43,20 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 280, damping: 28 }}
-        className="mb-6"
+        className={compact ? "mb-3" : "mb-6"}
       >
         {brand.logoUrl ? (
-          <div className="inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-3 mb-6">
+          <div className={`inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 ${compact ? "px-4 py-2 mb-3" : "px-6 py-3 mb-6"}`}>
             <Image
               src={brand.logoUrl}
               alt={brand.name}
-              width={100}
-              height={36}
+              width={compact ? 80 : 100}
+              height={compact ? 28 : 36}
               style={{ objectFit: "contain" }}
             />
           </div>
         ) : (
-          <div className="inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-3 mb-6">
+          <div className={`inline-flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100 ${compact ? "px-4 py-2 mb-3" : "px-6 py-3 mb-6"}`}>
             <span
               className="text-lg font-bold"
               style={{ color: brand.primaryColor, fontFamily: brand.fontHeading }}
@@ -64,13 +65,15 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack 
             </span>
           </div>
         )}
-        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: brand.primaryColorLight }}>
-          <svg className="w-6 h-6" style={{ color: brand.primaryColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
+        {!compact && (
+          <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: brand.primaryColorLight }}>
+            <svg className="w-6 h-6" style={{ color: brand.primaryColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
         <h2
-          className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
+          className={`font-bold text-gray-900 mb-2 ${compact ? "text-xl" : "text-2xl sm:text-3xl"}`}
           style={{ fontFamily: brand.fontHeading }}
         >
           {config.quiz.emailHeadline ?? "One last step"}
@@ -137,11 +140,11 @@ export function EmailStep({ config, onSubmit, onFieldFocus, onEmailBlur, onBack 
           disabled={loading}
           whileHover={{ scale: loading ? 1 : 1.02 }}
           whileTap={{ scale: loading ? 1 : 0.98 }}
-          className="w-full py-4 rounded-xl text-white font-semibold text-base shadow-lg transition-all"
+          className={`w-full rounded-xl text-white font-semibold shadow-lg transition-all ${compact ? "py-3 text-sm" : "py-4 text-base"}`}
           style={{
             backgroundColor: loading ? "#93C5FD" : brand.primaryColor,
             cursor: loading ? "not-allowed" : "pointer",
-            minHeight: "48px",
+            minHeight: compact ? undefined : "48px",
           }}
         >
           {loading ? (

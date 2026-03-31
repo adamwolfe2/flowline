@@ -82,7 +82,7 @@ export function PopupPreview({
           <iframe
             src={`/f/preview/${funnelId}?embed=true&popup=true`}
             className="w-full border-0"
-            style={{ height: 420, minHeight: 380 }}
+            style={{ height: 520 }}
             title="Popup preview"
           />
         </div>
@@ -118,7 +118,7 @@ export function PopupPreview({
               <iframe
                 src={`/f/preview/${funnelId}?embed=true&popup=true`}
                 className="w-full border-0"
-                style={{ height: 480, minHeight: 400 }}
+                style={{ height: 540 }}
                 title="Popup preview"
               />
             </div>

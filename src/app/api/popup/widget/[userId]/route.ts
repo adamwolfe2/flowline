@@ -329,7 +329,8 @@ function buildWidgetScript(
     // Create iframe
     var iframe = document.createElement("iframe");
     iframe.src = appUrl + "/f/" + campaign.funnelSlug + "?embed=true&popup=true";
-    iframe.style.cssText = "width:100%;height:100%;border:none;min-height:500px;";
+    var iframeMinHeight = campaign.displayMode === "slide_in" ? "400px" : "500px";
+    iframe.style.cssText = "width:100%;height:100%;border:none;min-height:" + iframeMinHeight + ";";
     iframe.setAttribute("allow", "clipboard-write");
     iframe.title = "MyVSL Quiz";
 
