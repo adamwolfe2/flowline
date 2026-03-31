@@ -59,7 +59,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
   }, []);
 
   useEffect(() => {
+    const trustedOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     function handleMessage(event: MessageEvent) {
+      if (event.origin !== trustedOrigin) return;
       if (event.data?.type === 'myvsl:config-update' && event.data.config) {
         setActiveConfig(event.data.config);
       }

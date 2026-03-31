@@ -11,7 +11,7 @@ export async function GET(
 ) {
   const jsHeaders = {
     "Content-Type": "application/javascript",
-    "Cache-Control": "public, max-age=300, s-maxage=300",
+    "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=120",
     "Access-Control-Allow-Origin": "*",
   };
 
@@ -73,22 +73,20 @@ export async function GET(
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
 
-    const serializedCampaigns = JSON.stringify(
-      campaigns.map((c) => ({
-        id: c.id,
-        name: c.name,
-        displayMode: c.displayMode,
-        position: c.position,
-        triggers: c.triggers,
-        targeting: c.targeting,
-        suppression: c.suppression,
-        styleOverrides: c.styleOverrides,
-        priority: c.priority,
-        funnelSlug: c.funnelSlug,
-      }))
-    );
+    const campaignData = campaigns.map((c) => ({
+      id: c.id,
+      name: c.name,
+      displayMode: c.displayMode,
+      position: c.position,
+      triggers: c.triggers,
+      targeting: c.targeting,
+      suppression: c.suppression,
+      styleOverrides: c.styleOverrides,
+      priority: c.priority,
+      funnelSlug: c.funnelSlug,
+    }));
 
-    const script = buildWidgetScript(serializedCampaigns, appUrl);
+    const script = buildWidgetScript(campaignData, appUrl);
 
     return new NextResponse(script, {
       status: 200,
@@ -105,16 +103,25 @@ export async function GET(
   }
 }
 
+function safeJsonForScript(value: unknown): string {
+  return JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 function buildWidgetScript(
-  serializedCampaigns: string,
+  campaigns: Array<Record<string, unknown>>,
   appUrl: string
 ): string {
   return `(function() {
   "use strict";
 
   // ── A. Configuration ──
-  var campaigns = ${serializedCampaigns};
-  var appUrl = ${JSON.stringify(appUrl)};
+  var campaigns = ${safeJsonForScript(campaigns)};
+  var appUrl = ${safeJsonForScript(appUrl)};
   var impressionUrl = appUrl + "/api/popup/impression";
 
   // ── B. Visitor ID ──
@@ -132,9 +139,7 @@ function buildWidgetScript(
 
   var popupShown = false;
   var activeTriggerType = null;
-
-  // ── J. Set returning visitor flag ──
-  try { localStorage.setItem("_myvsl_returning", "1"); } catch (e) {}
+  var idleCleanupFns = [];
 
   // ── D. Targeting evaluation helpers ──
   function matchesWildcard(url, pattern) {
@@ -231,6 +236,7 @@ function buildWidgetScript(
   // ── H. Handle messages from iframe ──
   function handlePopupMessage(event) {
     if (!event.data) return;
+    if (event.origin !== appUrl) return;
     if (event.data.type === "myvsl:resize") {
       var iframe = document.querySelector("#myvsl-popup-container iframe");
       if (iframe) {
@@ -283,6 +289,10 @@ function buildWidgetScript(
   function showPopup(campaign) {
     if (popupShown) return;
     popupShown = true;
+
+    // Clean up idle listeners
+    idleCleanupFns.forEach(function(fn) { fn(); });
+    idleCleanupFns = [];
 
     trackImpression(campaign.id, "shown", activeTriggerType);
 
@@ -375,6 +385,9 @@ function buildWidgetScript(
     break;
   }
 
+  // ── J. Set returning visitor flag (AFTER targeting evaluation) ──
+  try { localStorage.setItem("_myvsl_returning", "1"); } catch (e) {}
+
   if (!matchedCampaign) return;
 
   // Track that a campaign was triggered (targeting matched)
@@ -444,6 +457,7 @@ function buildWidgetScript(
     }
     ["mousemove", "keydown", "scroll", "touchstart"].forEach(function(evt) {
       document.addEventListener(evt, resetIdle, { passive: true });
+      idleCleanupFns.push(function() { document.removeEventListener(evt, resetIdle); });
     });
     resetIdle();
   }

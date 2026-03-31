@@ -5,12 +5,39 @@ import { popupCampaigns, funnels } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { z } from "zod";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const VALID_DISPLAY_MODES = ["modal", "slide_in", "full_screen"] as const;
 const VALID_POSITIONS = ["center", "bottom_left", "bottom_right"] as const;
 const VALID_STATUSES = ["draft", "active", "paused"] as const;
+
+const triggersSchema = z.object({
+  exitIntent: z.boolean(),
+  timeDelay: z.number().int().min(0).max(3600).nullable(),
+  scrollDepth: z.number().int().min(0).max(100).nullable(),
+  idleTime: z.number().int().min(0).max(3600).nullable(),
+});
+
+const targetingSchema = z.object({
+  pageUrls: z.array(z.string().max(2048)).max(50),
+  utmSources: z.array(z.string().max(200)).max(20),
+  deviceTypes: z.array(z.enum(["mobile", "desktop"])),
+  newVisitorsOnly: z.boolean(),
+});
+
+const suppressionSchema = z.object({
+  dismissCookieDays: z.number().int().min(1).max(365),
+  convertedCookieDays: z.number().int().min(1).max(3650),
+});
+
+const styleSchema = z.object({
+  overlayOpacity: z.number().min(0).max(1),
+  borderRadius: z.number().int().min(0).max(64),
+  animation: z.enum(["fade", "slide_up", "scale"]),
+  maxWidth: z.number().int().min(280).max(800),
+});
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -39,7 +66,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         priority: popupCampaigns.priority,
         createdAt: popupCampaigns.createdAt,
         updatedAt: popupCampaigns.updatedAt,
-        funnelName: funnels.slug,
         funnelSlug: funnels.slug,
         funnelPublished: funnels.published,
       })
@@ -76,7 +102,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const body = await req.json();
+    let body: Record<string, unknown>;
+    try { body = await req.json(); } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
     const updates: Record<string, unknown> = {};
 
     if (body.name !== undefined) {
@@ -90,7 +119,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     if (body.status !== undefined) {
-      if (!VALID_STATUSES.includes(body.status)) {
+      if (!(VALID_STATUSES as readonly string[]).includes(body.status as string)) {
         return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
       }
       if (existing.status === "paused" && body.status === "draft") {
@@ -100,45 +129,41 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     if (body.displayMode !== undefined) {
-      if (!VALID_DISPLAY_MODES.includes(body.displayMode)) {
+      if (!(VALID_DISPLAY_MODES as readonly string[]).includes(body.displayMode as string)) {
         return NextResponse.json({ error: `Invalid displayMode. Must be one of: ${VALID_DISPLAY_MODES.join(", ")}` }, { status: 400 });
       }
       updates.displayMode = body.displayMode;
     }
 
     if (body.position !== undefined) {
-      if (!VALID_POSITIONS.includes(body.position)) {
+      if (!(VALID_POSITIONS as readonly string[]).includes(body.position as string)) {
         return NextResponse.json({ error: `Invalid position. Must be one of: ${VALID_POSITIONS.join(", ")}` }, { status: 400 });
       }
       updates.position = body.position;
     }
 
     if (body.triggers !== undefined) {
-      if (typeof body.triggers !== "object" || body.triggers === null) {
-        return NextResponse.json({ error: "triggers must be an object" }, { status: 400 });
-      }
-      updates.triggers = body.triggers;
+      const parsed = triggersSchema.safeParse(body.triggers);
+      if (!parsed.success) return NextResponse.json({ error: "Invalid triggers: " + parsed.error.issues[0]?.message }, { status: 400 });
+      updates.triggers = parsed.data;
     }
 
     if (body.targeting !== undefined) {
-      if (typeof body.targeting !== "object" || body.targeting === null) {
-        return NextResponse.json({ error: "targeting must be an object" }, { status: 400 });
-      }
-      updates.targeting = body.targeting;
+      const parsed = targetingSchema.safeParse(body.targeting);
+      if (!parsed.success) return NextResponse.json({ error: "Invalid targeting: " + parsed.error.issues[0]?.message }, { status: 400 });
+      updates.targeting = parsed.data;
     }
 
     if (body.suppression !== undefined) {
-      if (typeof body.suppression !== "object" || body.suppression === null) {
-        return NextResponse.json({ error: "suppression must be an object" }, { status: 400 });
-      }
-      updates.suppression = body.suppression;
+      const parsed = suppressionSchema.safeParse(body.suppression);
+      if (!parsed.success) return NextResponse.json({ error: "Invalid suppression: " + parsed.error.issues[0]?.message }, { status: 400 });
+      updates.suppression = parsed.data;
     }
 
     if (body.styleOverrides !== undefined) {
-      if (typeof body.styleOverrides !== "object" || body.styleOverrides === null) {
-        return NextResponse.json({ error: "styleOverrides must be an object" }, { status: 400 });
-      }
-      updates.styleOverrides = body.styleOverrides;
+      const parsed = styleSchema.safeParse(body.styleOverrides);
+      if (!parsed.success) return NextResponse.json({ error: "Invalid styleOverrides: " + parsed.error.issues[0]?.message }, { status: 400 });
+      updates.styleOverrides = parsed.data;
     }
 
     if (body.priority !== undefined) {
@@ -185,7 +210,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await db.delete(popupCampaigns).where(eq(popupCampaigns.id, id));
+    await db.delete(popupCampaigns).where(and(eq(popupCampaigns.id, id), eq(popupCampaigns.userId, userId)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

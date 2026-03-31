@@ -8,6 +8,8 @@ import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { getPlanLimits, hasFeature } from "@/lib/plan-limits";
 import { isSuperAdmin } from "@/lib/admin";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -32,7 +34,6 @@ export async function GET(req: NextRequest) {
         priority: popupCampaigns.priority,
         createdAt: popupCampaigns.createdAt,
         updatedAt: popupCampaigns.updatedAt,
-        funnelName: funnels.slug,
         funnelSlug: funnels.slug,
         funnelPublished: funnels.published,
       })
@@ -87,8 +88,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { funnelId, name } = body;
 
-    if (!funnelId || typeof funnelId !== "string") {
-      return NextResponse.json({ error: "funnelId is required" }, { status: 400 });
+    if (!funnelId || typeof funnelId !== "string" || !UUID_RE.test(funnelId)) {
+      return NextResponse.json({ error: "funnelId must be a valid UUID" }, { status: 400 });
     }
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json({ error: "name is required" }, { status: 400 });

@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 import { popupImpressionLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 const VALID_ACTIONS = ["triggered", "shown", "dismissed", "engaged", "converted"] as const;
+const VALID_TRIGGER_TYPES = ["exit_intent", "time_delay", "scroll_depth", "idle", "immediate"] as const;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const corsHeaders = {
@@ -71,8 +72,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate visitorId is a string
-    if (typeof visitorId !== "string" || visitorId.length === 0) {
+    // Validate visitorId
+    if (typeof visitorId !== "string" || visitorId.length === 0 || visitorId.length > 100) {
       return NextResponse.json(
         { success: false, error: "Invalid visitorId" },
         { status: 400, headers: corsHeaders }
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
       campaignId,
       visitorId,
       action: action as (typeof VALID_ACTIONS)[number],
-      triggerType: typeof triggerType === "string" ? triggerType : null,
+      triggerType: typeof triggerType === "string" && (VALID_TRIGGER_TYPES as readonly string[]).includes(triggerType) ? triggerType : null,
       pageUrl: typeof pageUrl === "string" ? pageUrl.slice(0, 2048) : null,
       referrer: typeof referrer === "string" ? referrer.slice(0, 2048) : null,
     });
