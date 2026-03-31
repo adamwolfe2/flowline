@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Funnel, FunnelConfig } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Globe, Copy, ExternalLink, Code, BarChart2, Link2, Trash2 } from "lucide-react";
+import { CheckCircle, Globe, Copy, ExternalLink, Code, BarChart2, Link2, Trash2, Users, X, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
+import { useWorkspace, workspaceFetch } from "@/hooks/useWorkspace";
 
 interface PublishPanelProps {
   funnel: Funnel;
@@ -34,6 +35,73 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const funnelUrl = `${domain}/f/${funnel.slug}`;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${domain}`;
   const shareUrl = shareToken ? `${appUrl}/analytics/shared/${shareToken}` : null;
+
+  // Client assignment
+  const { activeTeamId, isTeamContext } = useWorkspace();
+  const [clients, setClients] = useState<Array<{ id: string; name: string; email: string }>>([]);
+  const [clientDropdownOpen, setClientDropdownOpen] = useState(false);
+  const [savingClient, setSavingClient] = useState(false);
+
+  useEffect(() => {
+    if (!activeTeamId) return;
+    fetch(`/api/teams/${activeTeamId}/clients`)
+      .then(r => r.ok ? r.json() : { clients: [] })
+      .then(data => {
+        const list = Array.isArray(data) ? data : (Array.isArray(data?.clients) ? data.clients : []);
+        setClients(list);
+      })
+      .catch(() => setClients([]));
+  }, [activeTeamId]);
+
+  const assignedClient = funnel.clientId
+    ? clients.find(c => c.id === funnel.clientId) ?? null
+    : null;
+
+  async function handleAssignClient(clientId: string) {
+    setSavingClient(true);
+    setClientDropdownOpen(false);
+    try {
+      const res = await workspaceFetch(`/api/funnels/${funnel.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        onUpdate(updated);
+        toast.success("Client assigned");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to assign client");
+      }
+    } catch {
+      toast.error("Failed to assign client");
+    } finally {
+      setSavingClient(false);
+    }
+  }
+
+  async function handleRemoveClient() {
+    setSavingClient(true);
+    try {
+      const res = await workspaceFetch(`/api/funnels/${funnel.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: null }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        onUpdate(updated);
+        toast.success("Client removed");
+      } else {
+        toast.error("Failed to remove client");
+      }
+    } catch {
+      toast.error("Failed to remove client");
+    } finally {
+      setSavingClient(false);
+    }
+  }
 
   async function handlePublish() {
     setPublishing(true);
@@ -128,6 +196,84 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
 
   return (
     <div className="space-y-5">
+      {/* Client Assignment — team workspace only */}
+      {isTeamContext && (
+        <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <Users className="w-3.5 h-3.5 text-gray-500" />
+            <p className="text-[11px] text-gray-500 font-medium">Client</p>
+          </div>
+
+          {assignedClient ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-900">{assignedClient.name}</span>
+                <span className="text-[10px] text-gray-400">{assignedClient.email}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[10px] h-6 px-2 text-gray-500 hover:text-gray-700"
+                  disabled={savingClient}
+                  onClick={() => setClientDropdownOpen(!clientDropdownOpen)}
+                >
+                  Change
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[10px] h-6 w-6 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                  disabled={savingClient}
+                  onClick={handleRemoveClient}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-400 mb-2">No client assigned</p>
+          )}
+
+          {(!assignedClient || clientDropdownOpen) && clients.length > 0 && (
+            <div className="relative mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-between text-xs h-8"
+                onClick={() => setClientDropdownOpen(!clientDropdownOpen)}
+                disabled={savingClient}
+              >
+                <span className="text-gray-500">
+                  {savingClient ? "Saving..." : "Select a client"}
+                </span>
+                <ChevronDown className="w-3 h-3 text-gray-400" />
+              </Button>
+              {clientDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-[#E5E7EB] rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {clients.map((client) => (
+                    <button
+                      key={client.id}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      onClick={() => handleAssignClient(client.id)}
+                    >
+                      <span className="text-xs font-medium text-gray-900 block">{client.name}</span>
+                      <span className="text-[10px] text-gray-400">{client.email}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!assignedClient && clients.length === 0 && isTeamContext && (
+            <p className="text-[10px] text-gray-400">
+              No clients yet. Add clients in Settings to assign them here.
+            </p>
+          )}
+        </div>
+      )}
+
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Globe className="w-4 h-4 text-gray-400" />

@@ -1,15 +1,29 @@
 import { db } from '@/db';
-import { funnels, funnelSessions, leads } from '@/db/schema';
+import { funnels, funnelSessions, leads, clients } from '@/db/schema';
 import { eq, and, sql, inArray, isNull, or } from 'drizzle-orm';
 import type { NewFunnel } from '@/db/schema';
 
 export async function getFunnelsByUser(userId: string, teamId?: string | null) {
   if (teamId) {
-    return db.select().from(funnels).where(eq(funnels.teamId, teamId));
+    const rows = await db
+      .select({
+        funnel: funnels,
+        clientName: clients.name,
+      })
+      .from(funnels)
+      .leftJoin(clients, eq(funnels.clientId, clients.id))
+      .where(eq(funnels.teamId, teamId));
+    return rows.map(r => ({ ...r.funnel, clientName: r.clientName }));
   }
-  return db.select().from(funnels).where(
-    and(eq(funnels.userId, userId), isNull(funnels.teamId))
-  );
+  const rows = await db
+    .select({
+      funnel: funnels,
+      clientName: clients.name,
+    })
+    .from(funnels)
+    .leftJoin(clients, eq(funnels.clientId, clients.id))
+    .where(and(eq(funnels.userId, userId), isNull(funnels.teamId)));
+  return rows.map(r => ({ ...r.funnel, clientName: r.clientName }));
 }
 
 export async function getFunnelById(id: string, userId?: string, teamIds?: string[]) {

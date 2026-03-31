@@ -17,6 +17,11 @@ interface SharedAnalytics {
   funnelName: string;
   brandLogoUrl: string | null;
   brandColor: string;
+  teamBranding?: {
+    logoUrl: string | null;
+    appName: string | null;
+    primaryColor: string | null;
+  };
   stats: {
     totalSessions: number;
     totalLeads: number;
@@ -122,8 +127,12 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
     );
   }
 
-  const accentColor = sanitizeColor(data.brandColor || "#2D6A4F");
+  const teamColor = data.teamBranding?.primaryColor ? sanitizeColor(data.teamBranding.primaryColor) : null;
+  const accentColor = teamColor || sanitizeColor(data.brandColor || "#2D6A4F");
   const funnelName = data.funnelName || "Funnel";
+  const headerLogoUrl = data.teamBranding?.logoUrl || data.brandLogoUrl;
+  const poweredByName = data.teamBranding?.appName || "MyVSL";
+  const poweredByUrl = data.teamBranding?.appName ? null : "https://getmyvsl.com";
 
   const statCards = [
     { label: "Sessions", value: data.stats.totalSessions.toLocaleString(), icon: TrendingUp },
@@ -156,15 +165,14 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
       <div className="bg-white border-b border-[#E5E7EB]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5">
           <div className="flex items-center gap-3">
-            {data.brandLogoUrl ? (
+            {headerLogoUrl ? (
               <Image
-                src={data.brandLogoUrl}
+                src={headerLogoUrl}
                 alt={funnelName}
                 width={40}
                 height={40}
                 className="w-10 h-10 rounded-lg object-contain"
                 onError={(e) => {
-                  // Hide broken image and show fallback
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
               />
@@ -324,14 +332,20 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
       {/* Footer */}
       <div className="border-t border-[#E5E7EB] bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-center">
-          <a
-            href="https://getmyvsl.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
-          >
-            Powered by MyVSL
-          </a>
+          {poweredByUrl ? (
+            <a
+              href={poweredByUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
+            >
+              Powered by {poweredByName}
+            </a>
+          ) : (
+            <span className="text-xs text-gray-400">
+              Powered by {poweredByName}
+            </span>
+          )}
         </div>
       </div>
     </div>

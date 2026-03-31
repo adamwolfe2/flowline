@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { BarChart3, ExternalLink, MoreVertical, Pencil, Users, Eye, Target, Trash2, Copy, Share2, Loader2 } from "lucide-react";
 
 interface FunnelCardProps {
-  funnel: Funnel;
+  funnel: Funnel & { clientName?: string | null };
   stats: FunnelStats;
   onDelete?: (id: string) => void;
   onDuplicate?: () => void;
@@ -142,7 +142,14 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
                 <h3 className="font-semibold text-gray-900 text-sm leading-tight">
                   {funnel.config.brand.name}
                 </h3>
-                <p className="text-xs text-gray-400 mt-0.5">{funnel.slug}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-xs text-gray-400">{funnel.slug}</p>
+                  {funnel.clientName && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                      {funnel.clientName}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">

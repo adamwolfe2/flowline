@@ -46,9 +46,11 @@ export const funnels = pgTable('funnels', {
   shareClientEmail: text('share_client_email'),
   shareDailyDigest: boolean('share_daily_digest').default(false),
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
+  clientId: uuid('client_id').references(() => clients.id, { onDelete: 'set null' }),
 }, (t) => [
   index('funnels_user_id_idx').on(t.userId),
   index('funnels_team_id_idx').on(t.teamId),
+  index('funnels_client_id_idx').on(t.clientId),
 ]);
 
 export const leads = pgTable('leads', {
@@ -225,6 +227,24 @@ export const webhookDeliveries = pgTable('webhook_deliveries', {
 }, (t) => [
   index('webhook_deliveries_funnel_id_idx').on(t.funnelId),
 ]);
+
+// ── Clients ──
+
+export const clients = pgTable('clients', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  company: text('company'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('clients_team_id_idx').on(t.teamId),
+  index('clients_email_idx').on(t.email),
+]);
+
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
 
 export type User = typeof users.$inferSelect;
 export type Funnel = typeof funnels.$inferSelect;

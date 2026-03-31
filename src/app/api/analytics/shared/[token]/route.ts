@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { funnels, leads } from "@/db/schema";
+import { funnels, leads, teams } from "@/db/schema";
 import { eq, and, gte, desc } from "drizzle-orm";
 import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries, getDeviceBreakdown } from "@/db/queries/analytics";
 import { logger } from "@/lib/logger";
 import { sharedAnalyticsLimiter, checkRateLimit } from "@/lib/rate-limit";
-import type { FunnelConfig } from "@/types";
+import type { FunnelConfig, TeamBranding } from "@/types";
 
 const VALID_TIME_RANGES = ["7d", "30d", "90d"];
 
@@ -56,6 +56,29 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
 
     const config = funnel.config as FunnelConfig;
 
+    // Fetch team branding if the funnel belongs to a team
+    let teamBranding: {
+      logoUrl: string | null;
+      appName: string | null;
+      primaryColor: string | null;
+    } = { logoUrl: null, appName: null, primaryColor: null };
+
+    if (funnel.teamId) {
+      const [team] = await db
+        .select({ branding: teams.branding })
+        .from(teams)
+        .where(eq(teams.id, funnel.teamId));
+
+      if (team?.branding) {
+        const branding = team.branding as TeamBranding;
+        teamBranding = {
+          logoUrl: branding.logoUrl ?? null,
+          appName: branding.appName ?? null,
+          primaryColor: branding.primaryColor ?? null,
+        };
+      }
+    }
+
     function getDateCutoff(range: string): Date | null {
       const now = new Date();
       switch (range) {
@@ -94,6 +117,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       funnelName: config.brand?.name ?? "Funnel",
       brandLogoUrl: config.brand?.logoUrl ?? null,
       brandColor: config.brand?.primaryColor ?? "#2D6A4F",
+      teamBranding,
       stats,
       dropoff,
       tiers,

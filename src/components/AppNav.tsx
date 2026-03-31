@@ -14,6 +14,7 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/leads", label: "Leads" },
+  { href: "/clients", label: "Clients" },
   { href: "/settings", label: "Settings" },
   { href: "/billing", label: "Billing" },
 ];
