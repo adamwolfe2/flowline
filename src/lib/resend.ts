@@ -1,9 +1,42 @@
 import { Resend } from "resend";
 import { logger } from "@/lib/logger";
+import { db } from "@/db";
+import { funnels, teams } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM = "MyVSL <noreply@getmyvsl.com>";
+const DEFAULT_BRAND = "MyVSL";
+const FROM = `${DEFAULT_BRAND} <noreply@getmyvsl.com>`;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
+
+/**
+ * Look up team branding for a funnel.
+ * Returns the team's appName if configured, otherwise "MyVSL".
+ */
+export async function getTeamBrandName(funnelId: string): Promise<string> {
+  try {
+    const [funnel] = await db
+      .select({ teamId: funnels.teamId })
+      .from(funnels)
+      .where(eq(funnels.id, funnelId));
+
+    if (!funnel?.teamId) return DEFAULT_BRAND;
+
+    const [team] = await db
+      .select({ branding: teams.branding })
+      .from(teams)
+      .where(eq(teams.id, funnel.teamId));
+
+    const branding = team?.branding as { appName?: string } | null;
+    return branding?.appName || DEFAULT_BRAND;
+  } catch (err) {
+    logger.error("[resend] getTeamBrandName failed", {
+      funnelId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return DEFAULT_BRAND;
+  }
+}
 
 /** Escape HTML special characters to prevent XSS in email templates */
 function escapeHtml(str: string): string {
@@ -22,14 +55,17 @@ export async function sendLeadNotification(params: {
   score: number;
   calendarTier: string;
   funnelId: string;
+  brandName?: string;
 }) {
   if (!resend) return;
+  const brand = params.brandName ?? DEFAULT_BRAND;
+  const fromLine = brand !== DEFAULT_BRAND ? `${brand} <noreply@getmyvsl.com>` : FROM;
   try {
     await resend.emails.send({
-      from: FROM,
+      from: fromLine,
       to: params.toEmail,
       subject: `New lead on ${params.funnelName} (${params.calendarTier} tier)`,
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${escapeHtml(params.calendarTier)} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${escapeHtml(params.calendarTier)}</p></div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a></div>`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${escapeHtml(params.calendarTier)} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${escapeHtml(params.calendarTier)}</p></div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a><p style="color:#9CA3AF;font-size:11px;margin-top:24px;">Powered by ${escapeHtml(brand)}</p></div>`,
     });
   } catch (err) {
     logger.error("[resend] lead notification failed", { error: err instanceof Error ? err.message : String(err) });
@@ -54,11 +90,14 @@ export async function sendClientInviteEmail(params: {
   toEmail: string;
   brandName: string;
   shareUrl: string;
+  poweredByName?: string;
 }) {
   if (!resend) return;
+  const footerBrand = params.poweredByName ?? DEFAULT_BRAND;
+  const fromLine = footerBrand !== DEFAULT_BRAND ? `${footerBrand} <noreply@getmyvsl.com>` : FROM;
   try {
     await resend.emails.send({
-      from: FROM,
+      from: fromLine,
       to: params.toEmail,
       subject: `View your funnel analytics — ${params.brandName}`,
       html: `
@@ -79,7 +118,7 @@ export async function sendClientInviteEmail(params: {
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
-                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">MyVSL</a>
+                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">${escapeHtml(footerBrand)}</a>
                   </p>
                 </td></tr>
               </table>
@@ -103,9 +142,12 @@ export async function sendWeeklyDigestEmail(params: {
   lastWeekLeads: number;
   lastWeekConversion: number;
   topFunnels: Array<{ name: string; leads: number }>;
+  brandName?: string;
 }) {
   if (!resend) return;
   try {
+    const brand = params.brandName ?? DEFAULT_BRAND;
+    const fromLine = brand !== DEFAULT_BRAND ? `${brand} <noreply@getmyvsl.com>` : FROM;
     const sessionsDelta = params.thisWeekSessions - params.lastWeekSessions;
     const leadsDelta = params.thisWeekLeads - params.lastWeekLeads;
     const convDelta = params.thisWeekConversion - params.lastWeekConversion;
@@ -124,9 +166,9 @@ export async function sendWeeklyDigestEmail(params: {
     ).join("");
 
     await resend.emails.send({
-      from: FROM,
+      from: fromLine,
       to: params.toEmail,
-      subject: `Your MyVSL Weekly Report — ${params.thisWeekLeads} new leads`,
+      subject: `Your ${brand} Weekly Report — ${params.thisWeekLeads} new leads`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -136,7 +178,7 @@ export async function sendWeeklyDigestEmail(params: {
             <tr><td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
                 <tr><td style="padding:24px 32px;border-bottom:1px solid #f3f4f6;">
-                  <span style="font-size:16px;font-weight:600;color:#111827;">MyVSL Weekly Report</span>
+                  <span style="font-size:16px;font-weight:600;color:#111827;">${escapeHtml(brand)} Weekly Report</span>
                 </td></tr>
                 <tr><td style="padding:32px;color:#374151;font-size:15px;line-height:1.6;">
                   <p style="margin:0 0 20px 0;">Here's how your funnels performed this week:</p>
@@ -178,7 +220,7 @@ export async function sendWeeklyDigestEmail(params: {
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
-                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">MyVSL</a>
+                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">${escapeHtml(brand)}</a>
                   </p>
                 </td></tr>
               </table>
@@ -203,9 +245,12 @@ export async function sendDailyDigestEmail(params: {
   prevDaySessions: number;
   prevDayLeads: number;
   prevDayConversionRate: number;
+  poweredByName?: string;
 }) {
   if (!resend) return;
   try {
+    const footerBrand = params.poweredByName ?? DEFAULT_BRAND;
+    const fromLine = footerBrand !== DEFAULT_BRAND ? `${footerBrand} <noreply@getmyvsl.com>` : FROM;
     const sessionsDelta = params.yesterdaySessions - params.prevDaySessions;
     const leadsDelta = params.yesterdayLeads - params.prevDayLeads;
     const convDelta = params.yesterdayConversionRate - params.prevDayConversionRate;
@@ -217,7 +262,7 @@ export async function sendDailyDigestEmail(params: {
     }
 
     await resend.emails.send({
-      from: FROM,
+      from: fromLine,
       to: params.toEmail,
       subject: `${params.brandName} — Daily Funnel Report`,
       html: `
@@ -258,7 +303,7 @@ export async function sendDailyDigestEmail(params: {
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
-                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">MyVSL</a>
+                    Powered by <a href="${escapeHtml(APP_URL)}" style="color:#9ca3af;">${escapeHtml(footerBrand)}</a>
                   </p>
                 </td></tr>
               </table>

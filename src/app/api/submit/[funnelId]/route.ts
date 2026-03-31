@@ -3,7 +3,7 @@ import { getFunnelById } from "@/db/queries/funnels";
 import { insertLead } from "@/db/queries/leads";
 import { calculateScore, getCalendarTier, getCalendarUrl } from "@/lib/scoring";
 import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
-import { sendLeadNotification } from "@/lib/resend";
+import { sendLeadNotification, getTeamBrandName } from "@/lib/resend";
 import { fireWebhook } from "@/lib/webhook";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
@@ -131,6 +131,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       // Check user notification preferences
       const userPrefs = owner.notificationPreferences as { leadAlerts?: boolean } | null;
       if (userPrefs?.leadAlerts !== false) {
+        const brandName = await getTeamBrandName(funnelId);
         sendLeadNotification({
           toEmail: owner.email,
           funnelName: config.brand.name,
@@ -138,6 +139,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
           score,
           calendarTier,
           funnelId,
+          brandName,
         }).catch(() => {});
       }
     }

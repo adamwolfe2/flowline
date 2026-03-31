@@ -7,6 +7,7 @@ import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useWorkspace, workspaceFetch } from "@/hooks/useWorkspace";
 
 interface LeadRow {
   id: string;
@@ -40,6 +41,7 @@ export default function LeadsPage() {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const { isTeamContext, activeTeam } = useWorkspace();
 
   // Debounce search
   useEffect(() => {
@@ -60,7 +62,7 @@ export default function LeadsPage() {
       if (tierFilter) params.set("tier", tierFilter);
       if (debouncedSearch) params.set("search", debouncedSearch);
 
-      const res = await fetch(`/api/leads?${params}`);
+      const res = await workspaceFetch(`/api/leads?${params}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setLeads(data.leads);
@@ -183,7 +185,7 @@ export default function LeadsPage() {
 
     setBulkDeleting(true);
     try {
-      const res = await fetch("/api/leads/bulk-delete", {
+      const res = await workspaceFetch("/api/leads/bulk-delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: Array.from(selectedIds) }),
@@ -218,7 +220,9 @@ export default function LeadsPage() {
       {/* Header */}
       <div className="flex items-start sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-[#111827]">Leads</h1>
+          <h1 className="text-xl font-semibold text-[#111827]">
+            {isTeamContext && activeTeam ? `${activeTeam.name} Leads` : "Leads"}
+          </h1>
           <p className="text-sm text-[#6B7280] mt-0.5">
             {total} total lead{total !== 1 ? "s" : ""} across all funnels
           </p>

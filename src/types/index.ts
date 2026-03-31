@@ -106,6 +106,14 @@ export interface FunnelStats {
 
 export type Plan = 'free' | 'pro' | 'agency';
 
+export interface TeamBranding {
+  logoUrl?: string;
+  logoWidth?: number;
+  primaryColor?: string;
+  appName?: string;
+  faviconUrl?: string;
+}
+
 // Popup campaign types
 export interface PopupTriggerConfig {
   exitIntent: boolean;

@@ -45,8 +45,10 @@ export const funnels = pgTable('funnels', {
   shareTokenExpiresAt: timestamp('share_token_expires_at'),
   shareClientEmail: text('share_client_email'),
   shareDailyDigest: boolean('share_daily_digest').default(false),
+  teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
 }, (t) => [
   index('funnels_user_id_idx').on(t.userId),
+  index('funnels_team_id_idx').on(t.teamId),
 ]);
 
 export const leads = pgTable('leads', {
@@ -185,6 +187,9 @@ export const teams = pgTable('teams', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   ownerId: text('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  branding: jsonb('branding')
+    .$type<{ logoUrl?: string; logoWidth?: number; primaryColor?: string; appName?: string; faviconUrl?: string }>()
+    .default(sql`'{}'::jsonb`),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -274,6 +279,7 @@ export const popupCampaigns = pgTable('popup_campaigns', {
     .default(sql`'{"overlayOpacity": 0.5, "borderRadius": 16, "animation": "slide_up", "maxWidth": 480}'::jsonb`)
     .notNull(),
   priority: integer('priority').default(0).notNull(),
+  teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (t) => [

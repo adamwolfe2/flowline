@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Instrument_Sans, Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { WorkspaceWrapper } from "@/components/WorkspaceWrapper";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], display: "swap" });
@@ -51,7 +52,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <link rel="dns-prefetch" href="https://api.clerk.com" />
         </head>
         <body className={`${inter.className} ${instrumentSans.variable} ${instrumentSerif.variable} ${plusJakarta.variable} antialiased bg-white text-gray-900`}>
-          {children}
+          <WorkspaceWrapper>
+            {children}
+          </WorkspaceWrapper>
           <Toaster />
         </body>
       </html>

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { users, funnels, funnelSessions, leads } from "@/db/schema";
-import { eq, and, gte, sql, inArray } from "drizzle-orm";
+import { users, funnels, funnelSessions, leads, teams } from "@/db/schema";
+import { eq, and, gte, sql, inArray, isNotNull } from "drizzle-orm";
 import { sendWeeklyDigestEmail } from "@/lib/resend";
 import { logger } from "@/lib/logger";
-import type { FunnelConfig } from "@/types";
+import type { FunnelConfig, TeamBranding } from "@/types";
 
 export async function GET(req: NextRequest) {
   try {
@@ -117,6 +117,25 @@ export async function GET(req: NextRequest) {
           };
         });
 
+        // Look up team brand name from user's team-owned funnels
+        let brandName: string | undefined;
+        const teamFunnels = await db
+          .select({ teamId: funnels.teamId })
+          .from(funnels)
+          .where(and(eq(funnels.userId, userId), isNotNull(funnels.teamId)))
+          .limit(1);
+
+        if (teamFunnels.length > 0 && teamFunnels[0].teamId) {
+          const [team] = await db
+            .select({ branding: teams.branding })
+            .from(teams)
+            .where(eq(teams.id, teamFunnels[0].teamId));
+          const branding = team?.branding as TeamBranding | null;
+          if (branding?.appName) {
+            brandName = branding.appName;
+          }
+        }
+
         await sendWeeklyDigestEmail({
           toEmail: user.email,
           thisWeekSessions: thisWeekSessionCount,
@@ -126,6 +145,7 @@ export async function GET(req: NextRequest) {
           lastWeekLeads: lastWeekLeadCount,
           lastWeekConversion,
           topFunnels: topFunnelData,
+          brandName,
         });
 
         sentCount++;

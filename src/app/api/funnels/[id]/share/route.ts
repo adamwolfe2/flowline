@@ -6,7 +6,7 @@ import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
-import { sendClientInviteEmail } from "@/lib/resend";
+import { sendClientInviteEmail, getTeamBrandName } from "@/lib/resend";
 
 const shareBodySchema = z.object({
   clientEmail: z.string().email().optional(),
@@ -69,10 +69,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const brandName = config.brand?.name || "Funnel";
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
         const shareUrl = `${appUrl}/analytics/shared/${token}`;
+        const poweredByName = await getTeamBrandName(id);
         await sendClientInviteEmail({
           toEmail: clientEmail,
           brandName,
           shareUrl,
+          poweredByName,
         });
         inviteSent = true;
       } catch (err) {

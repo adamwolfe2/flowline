@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { popupCampaigns, funnels, users } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, or, inArray, isNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { getPlanLimits, hasFeature } from "@/lib/plan-limits";
 import { isSuperAdmin } from "@/lib/admin";
+import { getUserTeamIds, requireFunnelAccess } from "@/lib/team-access";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -17,6 +18,15 @@ export async function GET(req: NextRequest) {
 
     const rl = await checkRateLimit(apiLimiter, userId);
     if (rl.limited) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
+    const workspaceTeamId = req.headers.get("x-workspace-team-id");
+    const teamIds = await getUserTeamIds(userId);
+    const isValidTeam = workspaceTeamId && teamIds.includes(workspaceTeamId);
+
+    // Build ownership condition: personal campaigns OR campaigns on team funnels
+    const ownershipCondition = isValidTeam
+      ? eq(funnels.teamId, workspaceTeamId)
+      : and(eq(popupCampaigns.userId, userId), isNull(funnels.teamId));
 
     const campaigns = await db
       .select({
@@ -39,7 +49,7 @@ export async function GET(req: NextRequest) {
       })
       .from(popupCampaigns)
       .innerJoin(funnels, eq(popupCampaigns.funnelId, funnels.id))
-      .where(eq(popupCampaigns.userId, userId))
+      .where(ownershipCondition)
       .orderBy(desc(popupCampaigns.createdAt));
 
     return NextResponse.json(campaigns, {
@@ -98,14 +108,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "name too long (max 100 chars)" }, { status: 400 });
     }
 
-    const [funnel] = await db
-      .select({ id: funnels.id, published: funnels.published })
-      .from(funnels)
-      .where(and(eq(funnels.id, funnelId), eq(funnels.userId, userId)));
-
-    if (!funnel) {
-      return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
+    let funnel;
+    try {
+      funnel = await requireFunnelAccess(userId, funnelId, "edit");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Funnel not found" }, { status: e.status || 404 });
     }
+
     if (!funnel.published) {
       return NextResponse.json({ error: "Funnel must be published before creating a popup campaign" }, { status: 400 });
     }

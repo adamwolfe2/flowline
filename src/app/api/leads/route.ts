@@ -3,7 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { leads, funnels } from "@/db/schema";
-import { eq, desc, sql, and, ilike, gt, inArray } from "drizzle-orm";
+import { eq, desc, sql, and, ilike, gt, inArray, isNull } from "drizzle-orm";
+import { getUserTeamIds } from "@/lib/team-access";
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,14 +17,27 @@ export async function GET(req: NextRequest) {
     const search = req.nextUrl.searchParams.get("search");
     const limit = Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "25") || 25, 10000);
 
-    // Get user's funnel IDs and names
+    const workspaceTeamId = req.headers.get("x-workspace-team-id");
+    let resolvedTeamId: string | undefined;
+    if (workspaceTeamId) {
+      const teamIds = await getUserTeamIds(userId);
+      if (teamIds.includes(workspaceTeamId)) {
+        resolvedTeamId = workspaceTeamId;
+      }
+    }
+
+    // Get funnel IDs and names scoped to workspace
     const userFunnels = await db
       .select({
         id: funnels.id,
         name: sql<string>`${funnels.config}->'brand'->>'name'`,
       })
       .from(funnels)
-      .where(eq(funnels.userId, userId));
+      .where(
+        resolvedTeamId
+          ? eq(funnels.teamId, resolvedTeamId)
+          : and(eq(funnels.userId, userId), isNull(funnels.teamId))
+      );
 
     const funnelIds = userFunnels.map((f) => f.id);
     if (funnelIds.length === 0) {

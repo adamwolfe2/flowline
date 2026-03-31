@@ -13,6 +13,7 @@ import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist"
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 import { useLeadNotifications } from "@/hooks/useLeadNotifications";
+import { useWorkspace, workspaceFetch } from "@/hooks/useWorkspace";
 
 interface FunnelWithStats extends Funnel {
   stats: FunnelStats;
@@ -37,6 +38,7 @@ function DashboardContent() {
     return "all";
   });
   const claimAttempted = useRef(false);
+  const { isTeamContext, activeTeam } = useWorkspace();
 
   // Poll for new leads and show toast notifications
   useLeadNotifications(!loading && funnels.length > 0);
@@ -56,7 +58,7 @@ function DashboardContent() {
         return;
       }
 
-      fetch("/api/funnels", {
+      workspaceFetch("/api/funnels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: savedConfig, slug: savedSlug }),
@@ -116,7 +118,7 @@ function DashboardContent() {
 
   const loadFunnels = useCallback(() => {
     const params = new URLSearchParams({ sort: sortBy, status: statusFilter });
-    fetch(`/api/funnels?${params.toString()}`)
+    workspaceFetch(`/api/funnels?${params.toString()}`)
       .then(r => {
         if (!r.ok) throw new Error("Failed to load");
         return r.json();
@@ -168,8 +170,14 @@ function DashboardContent() {
         transition={{ duration: 0.3 }}
         className="mb-8"
       >
-        <h1 className="text-2xl font-bold text-gray-900">Your Funnels</h1>
-        <p className="text-sm text-gray-500 mt-1">Create, manage, and monitor your booking funnels.</p>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {isTeamContext && activeTeam ? activeTeam.name : "Your Funnels"}
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          {isTeamContext && activeTeam
+            ? `Manage funnels for ${activeTeam.name}.`
+            : "Create, manage, and monitor your booking funnels."}
+        </p>
       </motion.div>
 
       {!loading && (

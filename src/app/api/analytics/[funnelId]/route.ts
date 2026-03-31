@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getFullAnalytics } from "@/db/queries/analytics";
-import { getFunnelById } from "@/db/queries/funnels";
 import { logger } from "@/lib/logger";
+import { requireFunnelAccess } from "@/lib/team-access";
 import type { FunnelConfig } from "@/types";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
@@ -12,8 +12,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
 
     const { funnelId } = await params;
 
-    const funnel = await getFunnelById(funnelId, userId);
-    if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    let funnel;
+    try {
+      funnel = await requireFunnelAccess(userId, funnelId, "view");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
 
     const leadsPage = Math.max(0, parseInt(req.nextUrl.searchParams.get("leadsPage") ?? "0", 10) || 0);
     const VALID_TIME_RANGES = ["7d", "30d", "90d", "all"];

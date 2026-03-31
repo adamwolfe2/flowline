@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { popupCampaigns, funnels } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, inArray } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
+import { getUserTeamIds } from "@/lib/team-access";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -50,6 +51,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const rl = await checkRateLimit(apiLimiter, userId);
     if (rl.limited) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
+    const teamIds = await getUserTeamIds(userId);
+
     const [row] = await db
       .select({
         id: popupCampaigns.id,
@@ -71,7 +74,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       })
       .from(popupCampaigns)
       .innerJoin(funnels, eq(popupCampaigns.funnelId, funnels.id))
-      .where(and(eq(popupCampaigns.id, id), eq(popupCampaigns.userId, userId)));
+      .where(and(
+        eq(popupCampaigns.id, id),
+        or(
+          eq(popupCampaigns.userId, userId),
+          teamIds.length > 0 ? inArray(funnels.teamId, teamIds) : undefined
+        )
+      ));
 
     if (!row) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -95,10 +104,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const rl = await checkRateLimit(apiLimiter, userId);
     if (rl.limited) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
+    const teamIds = await getUserTeamIds(userId);
+
     const [existing] = await db
       .select({ id: popupCampaigns.id, status: popupCampaigns.status })
       .from(popupCampaigns)
-      .where(and(eq(popupCampaigns.id, id), eq(popupCampaigns.userId, userId)));
+      .innerJoin(funnels, eq(popupCampaigns.funnelId, funnels.id))
+      .where(and(
+        eq(popupCampaigns.id, id),
+        or(
+          eq(popupCampaigns.userId, userId),
+          teamIds.length > 0 ? inArray(funnels.teamId, teamIds) : undefined
+        )
+      ));
 
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -203,14 +221,23 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     const rl = await checkRateLimit(apiLimiter, userId);
     if (rl.limited) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
+    const teamIds = await getUserTeamIds(userId);
+
     const [existing] = await db
       .select({ id: popupCampaigns.id })
       .from(popupCampaigns)
-      .where(and(eq(popupCampaigns.id, id), eq(popupCampaigns.userId, userId)));
+      .innerJoin(funnels, eq(popupCampaigns.funnelId, funnels.id))
+      .where(and(
+        eq(popupCampaigns.id, id),
+        or(
+          eq(popupCampaigns.userId, userId),
+          teamIds.length > 0 ? inArray(funnels.teamId, teamIds) : undefined
+        )
+      ));
 
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await db.delete(popupCampaigns).where(and(eq(popupCampaigns.id, id), eq(popupCampaigns.userId, userId)));
+    await db.delete(popupCampaigns).where(eq(popupCampaigns.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

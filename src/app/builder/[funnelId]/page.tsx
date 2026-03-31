@@ -24,6 +24,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { FunnelHealthWidget } from "@/components/builder/FunnelHealthWidget";
 import { calculateFunnelHealth } from "@/lib/funnel-health";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { workspaceFetch } from "@/hooks/useWorkspace";
 
 export default function BuilderPage() {
   const params = useParams();
@@ -92,14 +93,14 @@ export default function BuilderPage() {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/funnels/${funnelId}`)
+    workspaceFetch(`/api/funnels/${funnelId}`)
       .then(r => r.json())
       .then(data => {
         setFunnel(data);
         setConfig(data.config);
       });
     // Also fetch variants
-    fetch(`/api/funnels/${funnelId}/variants`)
+    workspaceFetch(`/api/funnels/${funnelId}/variants`)
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setVariants(data); })
       .catch(() => {});
@@ -143,7 +144,7 @@ export default function BuilderPage() {
     let res;
     if (editingVariantId) {
       // Save variant config
-      res = await fetch(`/api/funnels/${funnelId}/variants/${editingVariantId}`, {
+      res = await workspaceFetch(`/api/funnels/${funnelId}/variants/${editingVariantId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: configToSave }),
@@ -154,7 +155,7 @@ export default function BuilderPage() {
       }
     } else {
       // Save control config
-      res = await fetch(`/api/funnels/${funnelId}`, {
+      res = await workspaceFetch(`/api/funnels/${funnelId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: configToSave }),
@@ -175,7 +176,7 @@ export default function BuilderPage() {
   async function handleDuplicate() {
     setDuplicating(true);
     try {
-      const res = await fetch(`/api/funnels/${funnelId}/clone`, {
+      const res = await workspaceFetch(`/api/funnels/${funnelId}/clone`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -233,7 +234,7 @@ export default function BuilderPage() {
       }
       if (pendingConfigRef.current) {
         // Fire-and-forget save on unmount
-        fetch(`/api/funnels/${funnelId}`, {
+        workspaceFetch(`/api/funnels/${funnelId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ config: pendingConfigRef.current }),

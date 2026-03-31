@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { publishFunnel } from "@/db/queries/funnels";
 import { logger } from "@/lib/logger";
+import { requireFunnelAccess } from "@/lib/team-access";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
+
+    try {
+      await requireFunnelAccess(userId, id, "edit");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
+
     const funnel = await publishFunnel(id, userId);
     if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(funnel);

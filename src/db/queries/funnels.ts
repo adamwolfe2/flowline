@@ -1,13 +1,26 @@
 import { db } from '@/db';
 import { funnels, funnelSessions, leads } from '@/db/schema';
-import { eq, and, sql, inArray } from 'drizzle-orm';
+import { eq, and, sql, inArray, isNull, or } from 'drizzle-orm';
 import type { NewFunnel } from '@/db/schema';
 
-export async function getFunnelsByUser(userId: string) {
-  return db.select().from(funnels).where(eq(funnels.userId, userId));
+export async function getFunnelsByUser(userId: string, teamId?: string | null) {
+  if (teamId) {
+    return db.select().from(funnels).where(eq(funnels.teamId, teamId));
+  }
+  return db.select().from(funnels).where(
+    and(eq(funnels.userId, userId), isNull(funnels.teamId))
+  );
 }
 
-export async function getFunnelById(id: string, userId?: string) {
+export async function getFunnelById(id: string, userId?: string, teamIds?: string[]) {
+  if (userId && teamIds && teamIds.length > 0) {
+    const result = await db.select().from(funnels)
+      .where(and(
+        eq(funnels.id, id),
+        or(eq(funnels.userId, userId), inArray(funnels.teamId, teamIds))
+      ));
+    return result[0] ?? null;
+  }
   if (userId) {
     const result = await db.select().from(funnels)
       .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
@@ -80,14 +93,19 @@ export async function checkSlugAvailable(slug: string): Promise<boolean> {
   return result.length === 0;
 }
 
-export async function getFunnelCount(userId: string): Promise<number> {
+export async function getFunnelCount(userId: string, teamId?: string | null): Promise<number> {
+  if (teamId) {
+    const result = await db.select({ count: sql<number>`count(*)::int` })
+      .from(funnels).where(eq(funnels.teamId, teamId));
+    return Number(result[0]?.count ?? 0);
+  }
   const result = await db.select({ count: sql<number>`count(*)::int` })
-    .from(funnels).where(eq(funnels.userId, userId));
+    .from(funnels).where(and(eq(funnels.userId, userId), isNull(funnels.teamId)));
   return Number(result[0]?.count ?? 0);
 }
 
-export async function getFunnelsWithStats(userId: string) {
-  const userFunnels = await getFunnelsByUser(userId);
+export async function getFunnelsWithStats(userId: string, teamId?: string | null) {
+  const userFunnels = await getFunnelsByUser(userId, teamId);
   if (userFunnels.length === 0) return [];
 
   const funnelIds = userFunnels.map(f => f.id);

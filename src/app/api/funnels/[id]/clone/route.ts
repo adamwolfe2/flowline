@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { funnels, users } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createFunnel, checkSlugAvailable, getFunnelCount } from "@/db/queries/funnels";
 import { generateSlug } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 import { isSuperAdmin } from "@/lib/admin";
+import { requireFunnelAccess, getUserTeamIds } from "@/lib/team-access";
 import type { FunnelConfig } from "@/types";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -18,19 +19,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const { id } = await params;
 
-    // Validate funnelId format
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      return NextResponse.json({ error: "Invalid funnel ID" }, { status: 400 });
-    }
-
-    // Verify ownership of the source funnel
-    const [sourceFunnel] = await db
-      .select()
-      .from(funnels)
-      .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
-
-    if (!sourceFunnel) {
-      return NextResponse.json({ error: "Funnel not found" }, { status: 404 });
+    let sourceFunnel;
+    try {
+      sourceFunnel = await requireFunnelAccess(userId, id, "view");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Funnel not found" }, { status: e.status || 404 });
     }
 
     const body = await req.json();
@@ -98,10 +92,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     }
 
+    // Resolve workspace team context for the cloned funnel
+    let cloneTeamId: string | null = null;
+    if (!targetEmail) {
+      const workspaceTeamId = req.headers.get("x-workspace-team-id");
+      if (workspaceTeamId) {
+        const teamIds = await getUserTeamIds(userId);
+        if (teamIds.includes(workspaceTeamId)) {
+          cloneTeamId = workspaceTeamId;
+        }
+      }
+    }
+
     const newFunnel = await createFunnel({
       userId: targetUserId,
       slug,
       config: sourceFunnel.config,
+      teamId: cloneTeamId,
     });
 
     return NextResponse.json({

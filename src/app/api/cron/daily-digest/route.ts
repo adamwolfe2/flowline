@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/db";
-import { funnels, funnelSessions, leads, users } from "@/db/schema";
+import { funnels, funnelSessions, leads, users, teams } from "@/db/schema";
 import { eq, and, gte, lt, sql, isNotNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { sendDailyDigestEmail } from "@/lib/resend";
+import type { TeamBranding } from "@/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -127,6 +128,19 @@ export async function GET(req: Request) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
         const shareUrl = `${appUrl}/analytics/shared/${funnel.shareToken}`;
 
+        // Look up team brand name for white-label footer
+        let poweredByName: string | undefined;
+        if (funnel.teamId) {
+          const [team] = await db
+            .select({ branding: teams.branding })
+            .from(teams)
+            .where(eq(teams.id, funnel.teamId));
+          const branding = team?.branding as TeamBranding | null;
+          if (branding?.appName) {
+            poweredByName = branding.appName;
+          }
+        }
+
         await sendDailyDigestEmail({
           toEmail: funnel.shareClientEmail,
           brandName,
@@ -137,6 +151,7 @@ export async function GET(req: Request) {
           prevDaySessions: prevDayStats.sessions,
           prevDayLeads: prevDayStats.leads,
           prevDayConversionRate: prevDayStats.conversionRate,
+          poweredByName,
         });
 
         sent++;

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getFunnelById, updateFunnelConfig, deleteFunnel } from "@/db/queries/funnels";
+import { updateFunnelConfig, deleteFunnel } from "@/db/queries/funnels";
 import { getSessionStats } from "@/db/queries/sessions";
 import { getLeadsByFunnel, getLeadsThisWeek, getLeadsThisMonth, getTierBreakdown } from "@/db/queries/leads";
 import { logger } from "@/lib/logger";
+import { requireFunnelAccess } from "@/lib/team-access";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,8 +12,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
 
-    const funnel = await getFunnelById(id, userId);
-    if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    let funnel;
+    try {
+      funnel = await requireFunnelAccess(userId, id, "view");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
 
     const stats = await getSessionStats(id);
     const leads = await getLeadsByFunnel(id);
@@ -56,6 +62,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
+
+    try {
+      await requireFunnelAccess(userId, id, "edit");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
+
     const body = await req.json();
 
     if (!validateConfig(body.config)) {
@@ -76,6 +90,14 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
+
+    try {
+      await requireFunnelAccess(userId, id, "delete");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
+
     await deleteFunnel(id, userId);
     return NextResponse.json({ success: true });
   } catch (error) {

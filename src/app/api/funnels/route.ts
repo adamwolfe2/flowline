@@ -11,6 +11,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
 import { canCreateFunnel } from "@/lib/plan-limits";
+import { getUserTeamIds, getTeamPlan } from "@/lib/team-access";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,7 +22,16 @@ export async function GET(req: NextRequest) {
     const sort = searchParams.get("sort") ?? "newest";
     const status = searchParams.get("status") ?? "all";
 
-    let funnelsWithStats = await getFunnelsWithStats(userId);
+    const workspaceTeamId = req.headers.get("x-workspace-team-id");
+    let resolvedTeamId: string | undefined;
+    if (workspaceTeamId) {
+      const teamIds = await getUserTeamIds(userId);
+      if (teamIds.includes(workspaceTeamId)) {
+        resolvedTeamId = workspaceTeamId;
+      }
+    }
+
+    let funnelsWithStats = await getFunnelsWithStats(userId, resolvedTeamId);
 
     // Apply status filter
     if (status === "published") {
@@ -79,12 +89,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Resolve workspace team context
+    const workspaceTeamId = req.headers.get("x-workspace-team-id");
+    let resolvedTeamId: string | undefined;
+    if (workspaceTeamId) {
+      const teamIds = await getUserTeamIds(userId);
+      if (teamIds.includes(workspaceTeamId)) {
+        resolvedTeamId = workspaceTeamId;
+      }
+    }
+
     // Plan enforcement — super admin bypasses all limits
     const isAdmin = await isSuperAdmin(userId);
     if (!isAdmin) {
-      const count = await getFunnelCount(userId);
-      const userRow = existingUser[0];
-      const plan = userRow?.plan ?? "free";
+      let plan: string;
+      let count: number;
+
+      if (resolvedTeamId) {
+        plan = await getTeamPlan(resolvedTeamId);
+        count = await getFunnelCount(userId, resolvedTeamId);
+      } else {
+        count = await getFunnelCount(userId);
+        const userRow = existingUser[0];
+        plan = userRow?.plan ?? "free";
+      }
+
       if (!canCreateFunnel(plan, count)) {
         const limitMsg = plan === "free"
           ? "Free plan allows 1 funnel. Upgrade to Pro for unlimited."
@@ -185,7 +214,7 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const funnel = await createFunnel({ userId, slug, config: finalConfig });
+    const funnel = await createFunnel({ userId, slug, config: finalConfig, teamId: resolvedTeamId ?? null });
     return NextResponse.json(funnel, { status: 201 });
   } catch (error) {
     logger.error("POST /api/funnels error", { error: error instanceof Error ? error.message : String(error) });
