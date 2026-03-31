@@ -12,9 +12,10 @@ import { ABTestEditor, Variant } from "@/components/builder/ABTestEditor";
 import { SequenceEditor } from "@/components/builder/SequenceEditor";
 import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
+import { PopupCampaignEditor } from "@/components/builder/PopupCampaignEditor";
 import { UpgradeGate } from "@/components/builder/UpgradeGate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2, Zap } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -245,6 +246,7 @@ export default function BuilderPage() {
     { value: "emails", label: "Emails", icon: Mail },
     { value: "ab-test", label: "A/B", icon: FlaskConical },
     { value: "tracking", label: "Tracking", icon: BarChart3 },
+    { value: "popup", label: "Popup", icon: Zap },
     { value: "publish", label: "Publish", icon: Send },
   ];
 
@@ -476,6 +478,11 @@ export default function BuilderPage() {
                 <TabsContent value="tracking" className="mt-0">
                   <UpgradeGate feature="Tracking & Webhooks" plan={userPlan}>
                     <TrackingEditor config={config} onSave={saveConfig} funnelId={funnel.id} />
+                  </UpgradeGate>
+                </TabsContent>
+                <TabsContent value="popup" className="mt-0">
+                  <UpgradeGate feature="Popup Campaigns" plan={userPlan}>
+                    <PopupCampaignEditor funnel={funnel} />
                   </UpgradeGate>
                 </TabsContent>
                 <TabsContent value="publish" className="mt-0">

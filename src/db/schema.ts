@@ -239,3 +239,64 @@ export type Team = typeof teams.$inferSelect;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type TeamInvite = typeof teamInvites.$inferSelect;
 export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
+
+// ── Popup campaigns ──
+
+export const popupDisplayModeEnum = pgEnum('popup_display_mode', ['modal', 'slide_in', 'full_screen']);
+export const popupPositionEnum = pgEnum('popup_position', ['center', 'bottom_left', 'bottom_right']);
+export const popupStatusEnum = pgEnum('popup_status', ['draft', 'active', 'paused']);
+export const popupImpressionActionEnum = pgEnum('popup_impression_action', [
+  'triggered', 'shown', 'dismissed', 'engaged', 'converted',
+]);
+
+export const popupCampaigns = pgTable('popup_campaigns', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  funnelId: uuid('funnel_id').notNull().references(() => funnels.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  status: popupStatusEnum('status').default('draft').notNull(),
+  displayMode: popupDisplayModeEnum('display_mode').default('modal').notNull(),
+  position: popupPositionEnum('position').default('center').notNull(),
+  triggers: jsonb('triggers')
+    .$type<{ exitIntent: boolean; timeDelay: number | null; scrollDepth: number | null; idleTime: number | null }>()
+    .default(sql`'{"exitIntent": true, "timeDelay": null, "scrollDepth": null, "idleTime": null}'::jsonb`)
+    .notNull(),
+  targeting: jsonb('targeting')
+    .$type<{ pageUrls: string[]; utmSources: string[]; deviceTypes: string[]; newVisitorsOnly: boolean }>()
+    .default(sql`'{"pageUrls": [], "utmSources": [], "deviceTypes": [], "newVisitorsOnly": false}'::jsonb`)
+    .notNull(),
+  suppression: jsonb('suppression')
+    .$type<{ dismissCookieDays: number; convertedCookieDays: number }>()
+    .default(sql`'{"dismissCookieDays": 30, "convertedCookieDays": 365}'::jsonb`)
+    .notNull(),
+  styleOverrides: jsonb('style_overrides')
+    .$type<{ overlayOpacity: number; borderRadius: number; animation: string; maxWidth: number }>()
+    .default(sql`'{"overlayOpacity": 0.5, "borderRadius": 16, "animation": "slide_up", "maxWidth": 480}'::jsonb`)
+    .notNull(),
+  priority: integer('priority').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (t) => [
+  index('popup_campaigns_user_id_idx').on(t.userId),
+  index('popup_campaigns_funnel_id_idx').on(t.funnelId),
+  index('popup_campaigns_status_idx').on(t.status),
+]);
+
+export const popupImpressions = pgTable('popup_impressions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  campaignId: uuid('campaign_id').notNull().references(() => popupCampaigns.id, { onDelete: 'cascade' }),
+  visitorId: text('visitor_id').notNull(),
+  action: popupImpressionActionEnum('action').notNull(),
+  triggerType: text('trigger_type'),
+  pageUrl: text('page_url'),
+  referrer: text('referrer'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('popup_impressions_campaign_id_idx').on(t.campaignId),
+  index('popup_impressions_campaign_id_created_at_idx').on(t.campaignId, t.createdAt),
+]);
+
+export type PopupCampaign = typeof popupCampaigns.$inferSelect;
+export type NewPopupCampaign = typeof popupCampaigns.$inferInsert;
+export type PopupImpression = typeof popupImpressions.$inferSelect;
+export type NewPopupImpression = typeof popupImpressions.$inferInsert;

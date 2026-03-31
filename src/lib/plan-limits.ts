@@ -8,6 +8,9 @@ export const PLAN_LIMITS = {
     abTesting: false,
     webhooks: false,
     teamMembers: 0,
+    popups: false,
+    popupCampaigns: 0,
+    popupImpressions: 0,
   },
   pro: {
     maxFunnels: 25,
@@ -18,6 +21,9 @@ export const PLAN_LIMITS = {
     abTesting: true,
     webhooks: true,
     teamMembers: 3,
+    popups: true,
+    popupCampaigns: 3,
+    popupImpressions: 10000,
   },
   agency: {
     maxFunnels: -1,
@@ -28,6 +34,9 @@ export const PLAN_LIMITS = {
     abTesting: true,
     webhooks: true,
     teamMembers: 10,
+    popups: true,
+    popupCampaigns: -1,
+    popupImpressions: 100000,
   },
 } as const;
 

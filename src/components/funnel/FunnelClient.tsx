@@ -33,6 +33,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
   // Detect embed mode from prop or URL parameter
   const [isEmbedMode, setIsEmbedMode] = useState(embedModeProp ?? false);
 
+  const [isPopupMode, setIsPopupMode] = useState(false);
+
   // Detect preview mode (URL contains /f/preview/) and not in an iframe
   const [showPreviewBanner, setShowPreviewBanner] = useState(false);
 
@@ -49,6 +51,9 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
       const params = new URLSearchParams(window.location.search);
       if (params.get("embed") === "true") {
         setIsEmbedMode(true);
+      }
+      if (params.get("popup") === "true") {
+        setIsPopupMode(true);
       }
     }
   }, []);
@@ -81,7 +86,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
 
   // Send resize message to parent when in embed mode
   useEffect(() => {
-    if (!isEmbedMode) return;
+    if (!isEmbedMode && !isPopupMode) return;
     const sendResize = () => {
       try {
         const height = document.body.scrollHeight;
@@ -94,7 +99,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
     const observer = new ResizeObserver(sendResize);
     observer.observe(document.body);
     return () => observer.disconnect();
-  }, [isEmbedMode, step]);
+  }, [isEmbedMode, isPopupMode, step]);
 
   const {
     trackPageView, trackAnswer, trackCTAClick, trackFieldFocus,
@@ -176,6 +181,10 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         }
         fireConversionEvent(activeConfig.tracking);
 
+        try {
+          window.parent.postMessage({ type: "myvsl:lead-created", slug, funnelId, leadId: data.leadId }, "*");
+        } catch {}
+
         // Check for tier-specific or global redirect URL
         const tierRedirect = data.calendarTier && activeConfig.quiz.results?.[data.calendarTier as keyof typeof activeConfig.quiz.results]?.redirectUrl;
         const globalRedirect = activeConfig.quiz.successRedirectUrl;
@@ -191,7 +200,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         toast.error("Something went wrong. Please try again.");
       }
     },
-    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated, activeConfig.tracking]
+    [answers, funnelId, sessionId, successStep, trackFormSubmit, trackLeadCreated, activeConfig.tracking, slug]
   );
 
   // Track funnel completed when reaching success step
@@ -220,9 +229,11 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
 
   return (
     <div
-      className={isEmbedMode
-        ? "flex flex-col items-center justify-center bg-white"
-        : "min-h-screen flex flex-col items-center justify-center bg-gray-50"
+      className={isPopupMode
+        ? "flex flex-col items-center justify-start bg-white overflow-y-auto"
+        : isEmbedMode
+          ? "flex flex-col items-center justify-center bg-white"
+          : "min-h-screen flex flex-col items-center justify-center bg-gray-50"
       }
       style={{ fontFamily: activeConfig.brand.fontBody }}
     >
@@ -260,7 +271,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         cursivePixelId={activeConfig.tracking?.cursivePixelId}
         customScripts={activeConfig.tracking?.customScripts}
       />
-      <div className="w-full max-w-lg mx-auto py-12 px-4">
+      <div className={`w-full max-w-lg mx-auto ${isPopupMode ? "py-6 px-4" : "py-12 px-4"}`}>
         <ProgressBar config={activeConfig} step={progressStep} totalQuestions={totalQuestions} />
 
         <AnimatePresence mode="wait">
@@ -352,7 +363,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         </AnimatePresence>
 
         {/* Powered by badge — hidden for Pro+ plans or embed mode */}
-        {!hideBranding && !isEmbedMode && (
+        {!hideBranding && !isEmbedMode && !isPopupMode && (
           <EditableOverlay section="brand" field="branding">
             <div className="mt-8 text-center">
               <a

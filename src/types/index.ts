@@ -105,3 +105,35 @@ export interface FunnelStats {
 }
 
 export type Plan = 'free' | 'pro' | 'agency';
+
+// Popup campaign types
+export interface PopupTriggerConfig {
+  exitIntent: boolean;
+  timeDelay: number | null; // seconds, null = disabled
+  scrollDepth: number | null; // percentage 0-100, null = disabled
+  idleTime: number | null; // seconds, null = disabled
+}
+
+export interface PopupTargetingConfig {
+  pageUrls: string[]; // glob patterns, empty = all pages
+  utmSources: string[]; // empty = all sources
+  deviceTypes: string[]; // empty = all devices
+  newVisitorsOnly: boolean;
+}
+
+export interface PopupSuppressionConfig {
+  dismissCookieDays: number; // days to suppress after dismiss
+  convertedCookieDays: number; // days to suppress after conversion
+}
+
+export interface PopupStyleConfig {
+  overlayOpacity: number; // 0-1
+  borderRadius: number; // px
+  animation: 'fade' | 'slide_up' | 'scale';
+  maxWidth: number; // px, for modal
+}
+
+export type PopupDisplayMode = 'modal' | 'slide_in' | 'full_screen';
+export type PopupPosition = 'center' | 'bottom_left' | 'bottom_right';
+export type PopupStatus = 'draft' | 'active' | 'paused';
+export type PopupImpressionAction = 'triggered' | 'shown' | 'dismissed' | 'engaged' | 'converted';
