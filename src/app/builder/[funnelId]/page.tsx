@@ -36,7 +36,15 @@ export default function BuilderPage() {
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState("content");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== "undefined") {
+      const tabParam = new URLSearchParams(window.location.search).get("tab");
+      if (tabParam && ["content", "blocks", "brand", "calendars", "emails", "ab-test", "tracking", "popup", "publish"].includes(tabParam)) {
+        return tabParam;
+      }
+    }
+    return "content";
+  });
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingConfigRef = useRef<FunnelConfig | null>(null);

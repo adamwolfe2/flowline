@@ -10,6 +10,7 @@ import type {
   PopupPosition,
   PopupStatus,
 } from "@/types";
+import { PopupFromUrlWizard } from "./PopupFromUrlWizard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ import {
   ChevronUp,
   BarChart3,
   Eye,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -113,6 +115,7 @@ export function PopupCampaignEditor({ funnel }: PopupCampaignEditorProps) {
   const [loadingStats, setLoadingStats] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [scriptCopied, setScriptCopied] = useState(false);
+  const [showUrlWizard, setShowUrlWizard] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     general: true,
     triggers: false,
@@ -302,6 +305,14 @@ export function PopupCampaignEditor({ funnel }: PopupCampaignEditorProps) {
     }
   }
 
+  // ── URL wizard completion ──
+
+  function handleWizardComplete(result: { funnelId: string; funnelSlug: string; campaignId: string; brandName: string }) {
+    setShowUrlWizard(false);
+    // Redirect to the new funnel's builder with popup tab open
+    window.location.href = `/builder/${result.funnelId}?tab=popup`;
+  }
+
   // ── Section toggle ──
 
   function toggleSection(key: string) {
@@ -368,37 +379,78 @@ export function PopupCampaignEditor({ funnel }: PopupCampaignEditorProps) {
             </span>
           )}
         </div>
-        <Button
-          onClick={handleCreate}
-          size="sm"
-          className="gap-1.5 text-xs"
-          disabled={creating}
-        >
-          {creating ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Plus className="w-3.5 h-3.5" />
-          )}
-          Create Campaign
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setShowUrlWizard(true)}
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-xs"
+            disabled={showUrlWizard}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            From URL
+          </Button>
+          <Button
+            onClick={handleCreate}
+            size="sm"
+            className="gap-1.5 text-xs"
+            disabled={creating}
+          >
+            {creating ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+            This Funnel
+          </Button>
+        </div>
       </div>
 
-      {/* Info banner */}
-      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-        <p className="text-xs text-blue-700 font-medium mb-1">Exit-Intent Popups</p>
-        <p className="text-[11px] text-blue-600 leading-relaxed">
-          Show your funnel as a popup on any website. Configure triggers like exit intent,
-          scroll depth, and time delay to capture visitors before they leave.
-        </p>
-      </div>
+      {/* URL Wizard */}
+      {showUrlWizard && (
+        <PopupFromUrlWizard
+          onComplete={handleWizardComplete}
+          onCancel={() => setShowUrlWizard(false)}
+        />
+      )}
 
       {/* Empty state */}
-      {campaigns.length === 0 && (
-        <div className="text-center py-6">
-          <Zap className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-          <p className="text-sm text-gray-500 mb-1">No popup campaigns yet</p>
-          <p className="text-xs text-gray-400 mb-4">
-            Create a campaign to show your funnel as a popup on any website.
+      {campaigns.length === 0 && !showUrlWizard && (
+        <div className="text-center py-8">
+          <Zap className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+          <p className="text-sm font-medium text-gray-700 mb-1">Create your first popup</p>
+          <p className="text-xs text-gray-400 mb-5 max-w-[280px] mx-auto leading-relaxed">
+            Show interactive quiz popups on any website. Capture leads with exit intent, scroll triggers, and more.
+          </p>
+          <div className="flex flex-col items-center gap-2">
+            <Button
+              onClick={() => setShowUrlWizard(true)}
+              className="gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white"
+            >
+              <Sparkles className="w-4 h-4" />
+              Generate from website URL
+            </Button>
+            <span className="text-[11px] text-gray-400">or</span>
+            <button
+              onClick={handleCreate}
+              disabled={creating || !funnel.published}
+              className="text-xs text-[#2D6A4F] hover:underline disabled:text-gray-400 disabled:no-underline"
+            >
+              {funnel.published
+                ? "Use this funnel as a popup"
+                : "Publish this funnel first to use it as a popup"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Info banner — only show when campaigns exist */}
+      {campaigns.length > 0 && !showUrlWizard && (
+        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+          <p className="text-xs text-blue-700 font-medium mb-1">Exit-Intent Popups</p>
+          <p className="text-[11px] text-blue-600 leading-relaxed">
+            Show your funnel as a popup on any website. Configure triggers like exit intent,
+            scroll depth, and time delay to capture visitors before they leave.
           </p>
         </div>
       )}
