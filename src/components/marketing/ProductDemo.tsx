@@ -16,6 +16,10 @@ import {
   Mail,
   Globe,
   Code,
+  Zap,
+  MousePointerClick,
+  Timer,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -30,6 +34,7 @@ const tabs = [
   { id: "routing", label: "Calendar Routing", icon: Calendar },
   { id: "emails", label: "Email Sequences", icon: Mail },
   { id: "integrations", label: "Integrations", icon: Link2 },
+  { id: "popups", label: "Popups", icon: Zap },
   { id: "publish", label: "Publish", icon: Globe },
 ] as const;
 
@@ -102,6 +107,15 @@ const leftContent: Record<TabId, TabContent> = {
       { icon: Sparkles, text: "Embed on any website with a single link" },
     ],
     cta: "Explore integrations",
+  },
+  popups: {
+    headline: "Exit-intent popups that qualify leads",
+    bullets: [
+      { icon: MousePointerClick, text: "Trigger on exit intent, scroll depth, time delay, or idle" },
+      { icon: Zap, text: "Paste any URL and AI builds your popup quiz in seconds" },
+      { icon: Code, text: "One script tag on your site. Works everywhere" },
+    ],
+    cta: "Try popups free",
   },
   publish: {
     headline: "Publish with your own domain",
@@ -769,6 +783,115 @@ function EmailsMockup() {
   );
 }
 
+/* --- Popups Mockup --- */
+
+function PopupsMockup() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    setPhase(0);
+    const timers = [
+      setTimeout(() => setPhase(1), 500),
+      setTimeout(() => setPhase(2), 1200),
+      setTimeout(() => setPhase(3), 2000),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="w-full max-w-[340px] relative">
+      {/* Fake website background */}
+      <div className="bg-white rounded-lg border border-[#E5E7EB] p-4 space-y-3 opacity-40">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-5 h-5 rounded bg-gray-200" />
+          <div className="w-16 h-2.5 rounded bg-gray-200" />
+          <div className="flex-1" />
+          <div className="w-10 h-2 rounded bg-gray-100" />
+          <div className="w-10 h-2 rounded bg-gray-100" />
+        </div>
+        <div className="space-y-2 py-4">
+          <div className="w-48 h-4 rounded bg-gray-200 mx-auto" />
+          <div className="w-36 h-3 rounded bg-gray-100 mx-auto" />
+          <div className="w-24 h-7 rounded-lg bg-gray-200 mx-auto mt-2" />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="h-16 rounded bg-gray-100" />
+          <div className="h-16 rounded bg-gray-100" />
+          <div className="h-16 rounded bg-gray-100" />
+        </div>
+      </div>
+
+      {/* Popup slide-in */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={phase >= 1 ? { opacity: 1, y: 0, scale: 1 } : {}}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="absolute bottom-2 right-2 w-[200px] bg-white rounded-xl shadow-2xl border border-[#E5E7EB] overflow-hidden"
+      >
+        {/* Close button */}
+        <div className="absolute top-1.5 right-1.5 z-10">
+          <div className="w-5 h-5 rounded-full bg-black/5 flex items-center justify-center">
+            <X className="w-3 h-3 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="p-3 text-center">
+          {/* Brand */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={phase >= 1 ? { opacity: 1 } : {}}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/10 mx-auto mb-2 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-[#2D6A4F]" />
+            </div>
+            <div className="text-[9px] font-semibold text-[#2D6A4F] uppercase tracking-wider mb-1">
+              Quick Quiz
+            </div>
+            <div className="text-xs font-bold text-[#111827] mb-0.5 leading-tight">
+              See If You Qualify
+            </div>
+            <div className="text-[9px] text-[#6B7280] mb-2">
+              3 questions, 30 seconds
+            </div>
+          </motion.div>
+
+          {/* Question preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={phase >= 2 ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2 }}
+            className="space-y-1.5 mb-2"
+          >
+            {["$0-$10K/mo", "$10K-$50K/mo", "$50K+/mo"].map((opt, i) => (
+              <div
+                key={opt}
+                className={`text-[9px] py-1.5 px-2 rounded-md border transition-all ${
+                  i === 2
+                    ? "border-[#2D6A4F] bg-[#2D6A4F]/5 text-[#2D6A4F] font-medium"
+                    : "border-[#E5E7EB] text-[#6B7280]"
+                }`}
+              >
+                {opt}
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Trigger label */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={phase >= 3 ? { opacity: 1 } : {}}
+            className="flex items-center justify-center gap-1 text-[8px] text-[#9CA3AF]"
+          >
+            <MousePointerClick className="w-2.5 h-2.5" />
+            <span>Exit intent trigger</span>
+          </motion.div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 function RightMockup({ tab }: { tab: TabId }) {
   switch (tab) {
     case "builder":
@@ -783,6 +906,8 @@ function RightMockup({ tab }: { tab: TabId }) {
       return <EmailsMockup />;
     case "integrations":
       return <IntegrationsMockup />;
+    case "popups":
+      return <PopupsMockup />;
     case "publish":
       return <PublishMockup />;
   }

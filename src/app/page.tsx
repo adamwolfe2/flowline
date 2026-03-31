@@ -10,6 +10,10 @@ const ProductDemo = dynamic(
   () => import("@/components/marketing/ProductDemo").then((m) => m.ProductDemo),
   { ssr: true }
 );
+const PopupSection = dynamic(
+  () => import("@/components/marketing/PopupSection").then((m) => m.PopupSection),
+  { ssr: true }
+);
 const IntegrationsSection = dynamic(
   () => import("@/components/marketing/IntegrationsSection").then((m) => m.IntegrationsSection),
   { ssr: true }
@@ -40,6 +44,7 @@ export default function HomePage() {
       <StatsBar />
       <ThreeSteps />
       <ProductDemo />
+      <PopupSection />
       <IntegrationsSection />
       <WhySection />
       <TemplatesSection />
