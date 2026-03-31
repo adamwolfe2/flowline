@@ -13,6 +13,7 @@ import { SequenceEditor } from "@/components/builder/SequenceEditor";
 import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { PopupCampaignEditor } from "@/components/builder/PopupCampaignEditor";
+import { PopupPreview } from "@/components/builder/PopupPreview";
 import { UpgradeGate } from "@/components/builder/UpgradeGate";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2, Zap } from "lucide-react";
@@ -46,6 +47,11 @@ export default function BuilderPage() {
     return "content";
   });
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  const [popupPreviewSettings, setPopupPreviewSettings] = useState<{
+    displayMode: "modal" | "slide_in" | "full_screen";
+    position: "center" | "bottom_left" | "bottom_right";
+    styleOverrides: { overlayOpacity: number; borderRadius: number; animation: string; maxWidth: number };
+  } | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingConfigRef = useRef<FunnelConfig | null>(null);
 
@@ -490,7 +496,7 @@ export default function BuilderPage() {
                 </TabsContent>
                 <TabsContent value="popup" className="mt-0">
                   <UpgradeGate feature="Popup Campaigns" plan={userPlan}>
-                    <PopupCampaignEditor funnel={funnel} />
+                    <PopupCampaignEditor funnel={funnel} onPreviewChange={setPopupPreviewSettings} />
                   </UpgradeGate>
                 </TabsContent>
                 <TabsContent value="publish" className="mt-0">
@@ -504,29 +510,41 @@ export default function BuilderPage() {
           </div>
 
           {/* Preview pane — hidden on mobile (use floating button instead) */}
-          <div className={`hidden sm:flex flex-1 bg-gray-50 items-start justify-center overflow-hidden ${previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
+          <div className={`hidden sm:flex flex-1 bg-gray-50 items-start justify-center overflow-hidden ${activeTab === "popup" ? "p-0" : previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
             <ErrorBoundary>
-              <div
-                className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
-                style={{
-                  width: previewMode === "mobile" ? "min(375px, 100%)" : "100%",
-                  maxWidth: previewMode === "desktop" ? "100%" : "375px",
-                  height: "100%",
-                }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
-                  <div className="text-center">
-                    <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
-                    <p className="text-xs text-[#9CA3AF]">Loading preview</p>
-                  </div>
+              {activeTab === "popup" && popupPreviewSettings ? (
+                <div className="relative w-full h-full rounded-xl border border-gray-200 overflow-hidden">
+                  <PopupPreview
+                    key={`popup-${popupPreviewSettings.displayMode}-${popupPreviewSettings.position}`}
+                    funnelId={funnelId}
+                    displayMode={popupPreviewSettings.displayMode}
+                    position={popupPreviewSettings.position}
+                    styleOverrides={popupPreviewSettings.styleOverrides}
+                  />
                 </div>
-                <iframe
-                  key={previewKey}
-                  src={`/f/preview/${funnelId}`}
-                  className="w-full h-full border-0 relative z-10"
-                  title="Funnel preview"
-                />
-              </div>
+              ) : (
+                <div
+                  className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300"
+                  style={{
+                    width: previewMode === "mobile" ? "min(375px, 100%)" : "100%",
+                    maxWidth: previewMode === "desktop" ? "100%" : "375px",
+                    height: "100%",
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
+                    <div className="text-center">
+                      <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
+                      <p className="text-xs text-[#9CA3AF]">Loading preview</p>
+                    </div>
+                  </div>
+                  <iframe
+                    key={previewKey}
+                    src={`/f/preview/${funnelId}`}
+                    className="w-full h-full border-0 relative z-10"
+                    title="Funnel preview"
+                  />
+                </div>
+              )}
             </ErrorBoundary>
           </div>
         </div>

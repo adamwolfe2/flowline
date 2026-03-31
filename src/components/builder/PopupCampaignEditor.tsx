@@ -68,8 +68,15 @@ interface CampaignStats {
   dismissRate: number;
 }
 
+interface PopupPreviewSettings {
+  displayMode: "modal" | "slide_in" | "full_screen";
+  position: "center" | "bottom_left" | "bottom_right";
+  styleOverrides: { overlayOpacity: number; borderRadius: number; animation: string; maxWidth: number };
+}
+
 interface PopupCampaignEditorProps {
   funnel: Funnel;
+  onPreviewChange?: (settings: PopupPreviewSettings | null) => void;
 }
 
 // ── Helpers ──
@@ -105,7 +112,7 @@ const ANIMATIONS: { value: string; label: string }[] = [
 
 // ── Component ──
 
-export function PopupCampaignEditor({ funnel }: PopupCampaignEditorProps) {
+export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEditorProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -129,6 +136,30 @@ export function PopupCampaignEditor({ funnel }: PopupCampaignEditorProps) {
   const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId) ?? null;
 
   // ── Fetch campaigns ──
+
+  // Notify parent of preview settings when selected campaign changes
+  useEffect(() => {
+    if (!onPreviewChange) return;
+    if (!selectedCampaign) {
+      // Show default modal preview if any campaigns exist
+      const first = campaigns[0];
+      if (first) {
+        onPreviewChange({
+          displayMode: first.displayMode,
+          position: first.position,
+          styleOverrides: first.styleOverrides,
+        });
+      } else {
+        onPreviewChange(null);
+      }
+      return;
+    }
+    onPreviewChange({
+      displayMode: selectedCampaign.displayMode,
+      position: selectedCampaign.position,
+      styleOverrides: selectedCampaign.styleOverrides,
+    });
+  }, [selectedCampaign, campaigns, onPreviewChange]);
 
   useEffect(() => {
     setLoading(true);
