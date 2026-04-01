@@ -46,10 +46,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Team name required (max 50 chars)" }, { status: 400 });
     }
 
-    // Create team and add owner as member
+    // Create team — if the owner has Agency plan, auto-set team plan to agency
+    const teamPlan = user.plan === "agency" ? "agency" as const : "free" as const;
+
     const [team] = await db.insert(teams).values({
       name,
       ownerId: userId,
+      plan: teamPlan,
     }).returning();
 
     await db.insert(teamMembers).values({

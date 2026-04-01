@@ -3,10 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { clients, funnels } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getUserTeamRole } from "@/lib/team-access";
+import { getUserTeamRole, checkTeamPermission } from "@/lib/team-access";
 import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { getClientWithFunnels, getClientStats } from "@/db/queries/clients";
 import { logger } from "@/lib/logger";
+import { logAuditEvent } from "@/lib/audit";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,8 +73,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const role = await getUserTeamRole(userId, teamId);
-    if (!role || role === "member") {
+    const canManage = await checkTeamPermission(userId, teamId, "manage_clients");
+    if (!canManage) {
       return NextResponse.json({ error: "Only owners and admins can update clients" }, { status: 403 });
     }
 
@@ -164,8 +165,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const role = await getUserTeamRole(userId, teamId);
-    if (!role || role === "member") {
+    const canManage = await checkTeamPermission(userId, teamId, "manage_clients");
+    if (!canManage) {
       return NextResponse.json({ error: "Only owners and admins can delete clients" }, { status: 403 });
     }
 
@@ -184,6 +185,16 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     if (!deleted) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
+    // Fire-and-forget audit log
+    logAuditEvent({
+      teamId,
+      userId,
+      action: "client.deleted",
+      resourceType: "client",
+      resourceId: clientId,
+      metadata: { name: deleted.name, email: deleted.email },
+    }).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error) {

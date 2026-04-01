@@ -12,6 +12,7 @@ import { eq } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
 import { canCreateFunnel } from "@/lib/plan-limits";
 import { getUserTeamIds, getTeamPlan } from "@/lib/team-access";
+import { logAuditEvent } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
@@ -215,6 +216,19 @@ export async function POST(req: NextRequest) {
     };
 
     const funnel = await createFunnel({ userId, slug, config: finalConfig, teamId: resolvedTeamId ?? null });
+
+    // Fire-and-forget audit log (team funnels only)
+    if (resolvedTeamId) {
+      logAuditEvent({
+        teamId: resolvedTeamId,
+        userId,
+        action: "funnel.created",
+        resourceType: "funnel",
+        resourceId: funnel.id,
+        metadata: { name: finalConfig.brand?.name, slug },
+      }).catch(() => {});
+    }
+
     return NextResponse.json(funnel, { status: 201 });
   } catch (error) {
     logger.error("POST /api/funnels error", { error: error instanceof Error ? error.message : String(error) });

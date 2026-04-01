@@ -22,6 +22,37 @@ const isPlatformDomain = (hostname: string) => {
     || host.includes('vercel.app');
 };
 
+// In-memory cache for dashboard domain lookups to avoid DB calls on every request
+const dashboardDomainCache = new Map<string, { teamId: string | null; expiresAt: number }>();
+const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+async function checkDashboardDomain(hostname: string, reqUrl: string): Promise<string | null> {
+  const host = hostname.split(':')[0].toLowerCase();
+
+  // Check cache first
+  const cached = dashboardDomainCache.get(host);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.teamId;
+  }
+
+  try {
+    const url = new URL('/api/internal/check-dashboard-domain', reqUrl);
+    url.searchParams.set('host', host);
+    const res = await fetch(url.toString());
+    if (res.ok) {
+      const data = await res.json();
+      const teamId = data.teamId ?? null;
+      dashboardDomainCache.set(host, { teamId, expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS });
+      return teamId;
+    }
+  } catch {
+    // Fall through — treat as non-dashboard domain
+  }
+
+  dashboardDomainCache.set(host, { teamId: null, expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS });
+  return null;
+}
+
 export default clerkMiddleware(async (auth, req) => {
   const hostname = req.headers.get('host') ?? '';
   const { userId, redirectToSignIn } = await auth();
@@ -33,6 +64,26 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.next();
     }
 
+    // Check if this is a custom dashboard domain (not a funnel custom domain)
+    const dashboardTeamId = await checkDashboardDomain(hostname, req.url);
+    if (dashboardTeamId) {
+      // Dashboard domain: serve the normal app, set a cookie so the client knows which team
+      if (isProtectedRoute(req) && !userId) {
+        return redirectToSignIn({ returnBackUrl: req.url });
+      }
+
+      const response = NextResponse.next();
+      response.cookies.set('myvsl_team_domain', dashboardTeamId, {
+        httpOnly: false,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24, // 1 day
+      });
+      return response;
+    }
+
+    // Funnel subdomain rewrite
     const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? '';
     if (hostname.endsWith(`.${platformDomain}`)) {
       const slug = hostname.replace(`.${platformDomain}`, '');

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { clients } from "@/db/schema";
-import { getUserTeamRole } from "@/lib/team-access";
+import { getUserTeamRole, checkTeamPermission } from "@/lib/team-access";
 import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { getClientsByTeam } from "@/db/queries/clients";
 import { logger } from "@/lib/logger";
+import { logAuditEvent } from "@/lib/audit";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -70,8 +71,8 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const role = await getUserTeamRole(userId, teamId);
-    if (!role || role === "member") {
+    const canManage = await checkTeamPermission(userId, teamId, "manage_clients");
+    if (!canManage) {
       return NextResponse.json({ error: "Only owners and admins can create clients" }, { status: 403 });
     }
 
@@ -118,6 +119,16 @@ export async function POST(
         notes: notes?.trim() || null,
       })
       .returning();
+
+    // Fire-and-forget audit log
+    logAuditEvent({
+      teamId,
+      userId,
+      action: "client.created",
+      resourceType: "client",
+      resourceId: created.id,
+      metadata: { name: name.trim(), email: email.trim().toLowerCase() },
+    }).catch(() => {});
 
     return NextResponse.json(created, { status: 201 });
   } catch (error) {

@@ -189,9 +189,12 @@ export const teams = pgTable('teams', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   ownerId: text('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  plan: planEnum('plan').default('free').notNull(),
+  stripeCustomerId: text('stripe_customer_id'),
   branding: jsonb('branding')
     .$type<{ logoUrl?: string; logoWidth?: number; primaryColor?: string; appName?: string; faviconUrl?: string }>()
     .default(sql`'{}'::jsonb`),
+  customDashboardDomain: text('custom_dashboard_domain').unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -244,6 +247,24 @@ export const clients = pgTable('clients', {
 ]);
 
 export type Client = typeof clients.$inferSelect;
+
+// ── Audit Logs ──
+
+export const auditLogs = pgTable('audit_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  teamId: uuid('team_id').notNull().references(() => teams.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull(),
+  action: text('action').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id'),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('audit_logs_team_id_idx').on(t.teamId),
+  index('audit_logs_team_id_created_at_idx').on(t.teamId, t.createdAt),
+]);
+
+export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 
 export type User = typeof users.$inferSelect;

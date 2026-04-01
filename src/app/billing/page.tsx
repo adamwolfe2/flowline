@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { CreditCard, Check, Zap, Loader2, ExternalLink } from "lucide-react";
+import { CreditCard, Check, Zap, Loader2, ExternalLink, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useWorkspace } from "@/hooks/useWorkspace";
 
 const PLANS = {
   free: {
@@ -58,21 +59,35 @@ const PRICE_MAP: Record<string, { monthly: string; annual: string }> = {
 
 export default function BillingPage() {
   const { isLoaded } = useUser();
+  const { isTeamContext, activeTeamId, activeTeam } = useWorkspace();
   const [currentPlan, setCurrentPlan] = useState<PlanKey>("free");
   const [annual, setAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/user")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.plan && ["free", "pro", "agency"].includes(data.plan)) {
-          setCurrentPlan(data.plan as PlanKey);
-        }
-      })
-      .catch(() => {});
-  }, []);
+    if (isTeamContext && activeTeamId) {
+      // Fetch team plan
+      fetch(`/api/teams/${activeTeamId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.plan && ["free", "pro", "agency"].includes(data.plan)) {
+            setCurrentPlan(data.plan as PlanKey);
+          }
+        })
+        .catch(() => {});
+    } else {
+      // Fetch personal plan
+      fetch("/api/user")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.plan && ["free", "pro", "agency"].includes(data.plan)) {
+            setCurrentPlan(data.plan as PlanKey);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isTeamContext, activeTeamId]);
 
   async function handleUpgrade(plan: PlanKey) {
     if (plan === "free" || plan === currentPlan) return;
@@ -82,10 +97,15 @@ export default function BillingPage() {
 
     setLoading(plan);
     try {
+      const checkoutBody: { priceId: string; teamId?: string } = { priceId: priceEnvKey };
+      if (isTeamContext && activeTeamId) {
+        checkoutBody.teamId = activeTeamId;
+      }
+
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId: priceEnvKey }),
+        body: JSON.stringify(checkoutBody),
       });
       const data = await res.json();
 
@@ -113,7 +133,16 @@ export default function BillingPage() {
   async function handleManageBilling() {
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const portalBody: { teamId?: string } = {};
+      if (isTeamContext && activeTeamId) {
+        portalBody.teamId = activeTeamId;
+      }
+
+      const res = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(portalBody),
+      });
       const data = await res.json();
 
       if (res.status === 503) {
@@ -154,11 +183,19 @@ export default function BillingPage() {
           className="text-2xl font-semibold text-[#333333]"
           style={{ fontFamily: "var(--font-outfit, inherit)" }}
         >
-          Billing
+          {isTeamContext ? "Team Billing" : "Billing"}
         </h1>
       </div>
+      {isTeamContext && activeTeam && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <Users className="w-3.5 h-3.5 text-[#737373]" />
+          <span className="text-xs text-[#737373]">{activeTeam.name}</span>
+        </div>
+      )}
       <p className="text-sm text-[#737373] mb-8">
-        Manage your subscription and billing details.
+        {isTeamContext
+          ? "Manage your team's subscription and billing details."
+          : "Manage your subscription and billing details."}
       </p>
 
       {/* Monthly / Annual toggle */}

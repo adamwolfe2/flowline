@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
 import { teams, teamMembers } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { checkTeamPermission } from "@/lib/team-access";
+import { logAuditEvent } from "@/lib/audit";
+import { addDomainToVercel, isVercelConfigured } from "@/lib/vercel-domains";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
 const HTTPS_URL_REGEX = /^https:\/\/.+/;
+// Valid hostname: alphanumeric with dots/hyphens, at least one dot, TLD is letters
+const HOSTNAME_REGEX = /^(?!-)[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$/;
 
 interface TeamBranding {
   logoUrl?: string;
@@ -129,13 +134,9 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid team ID" }, { status: 400 });
     }
 
-    // Verify admin/owner
-    const [member] = await db
-      .select()
-      .from(teamMembers)
-      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)));
-
-    if (!member || (member.role !== "owner" && member.role !== "admin")) {
+    // Verify manage_settings permission (owner or admin)
+    const canManage = await checkTeamPermission(userId, teamId, "manage_settings");
+    if (!canManage) {
       return NextResponse.json(
         { error: "Only team owners and admins can update team settings" },
         { status: 403 }
@@ -165,6 +166,71 @@ export async function PATCH(
       updates.branding = body.branding as TeamBranding;
     }
 
+    // Validate customDashboardDomain (Agency plan only)
+    if (body.customDashboardDomain !== undefined) {
+      if (body.customDashboardDomain === null || body.customDashboardDomain === "") {
+        // Allow clearing the domain
+        updates.customDashboardDomain = null;
+      } else {
+        if (typeof body.customDashboardDomain !== "string") {
+          return NextResponse.json({ error: "Custom domain must be a string" }, { status: 400 });
+        }
+
+        const domain = body.customDashboardDomain.trim().toLowerCase();
+
+        // Strip protocol if provided
+        const cleaned = domain.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+
+        if (!HOSTNAME_REGEX.test(cleaned)) {
+          return NextResponse.json(
+            { error: "Invalid domain format. Use a valid hostname like app.youragency.com" },
+            { status: 400 }
+          );
+        }
+
+        // Verify the team has an Agency plan
+        const [team] = await db
+          .select({ plan: teams.plan })
+          .from(teams)
+          .where(eq(teams.id, teamId));
+
+        if (!team || team.plan !== "agency") {
+          return NextResponse.json(
+            { error: "Custom dashboard domains require an Agency plan" },
+            { status: 403 }
+          );
+        }
+
+        // Check uniqueness (exclude current team)
+        const [existing] = await db
+          .select({ id: teams.id })
+          .from(teams)
+          .where(and(eq(teams.customDashboardDomain, cleaned), ne(teams.id, teamId)));
+
+        if (existing) {
+          return NextResponse.json(
+            { error: "This domain is already registered to another team" },
+            { status: 409 }
+          );
+        }
+
+        // Register with Vercel if configured
+        if (isVercelConfigured()) {
+          try {
+            await addDomainToVercel(cleaned);
+          } catch (err) {
+            logger.error("Failed to add dashboard domain to Vercel", {
+              domain: cleaned,
+              error: err instanceof Error ? err.message : String(err),
+            });
+            // Non-blocking — domain can still be saved, Vercel registration can be retried
+          }
+        }
+
+        updates.customDashboardDomain = cleaned;
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
@@ -178,6 +244,21 @@ export async function PATCH(
     if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
+    // Fire-and-forget audit log
+    const auditAction = updates.customDashboardDomain !== undefined
+      ? "team.domain_updated" as const
+      : updates.branding
+        ? "team.branding_updated" as const
+        : "team.settings_updated" as const;
+    logAuditEvent({
+      teamId,
+      userId,
+      action: auditAction,
+      resourceType: "team",
+      resourceId: teamId,
+      metadata: { fields: Object.keys(updates) },
+    }).catch(() => {});
 
     return NextResponse.json(updated);
   } catch (error) {

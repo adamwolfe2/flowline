@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { teams, teamMembers, funnels, users } from "@/db/schema";
+import { teams, teamMembers, funnels } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { isSuperAdmin } from "@/lib/admin";
 
@@ -86,7 +86,8 @@ export async function canAccessFunnel(
 
 /**
  * Check whether a user can edit a funnel.
- * Phase 1: all team members (owner/admin/member) can edit.
+ * Owner/admin can edit any team funnel.
+ * Members can only edit funnels they created.
  * Personal funnels: only the owner.
  */
 export async function canEditFunnel(
@@ -107,12 +108,43 @@ export async function canEditFunnel(
     return true;
   }
 
-  // Team funnel — all roles can edit in Phase 1
-  if (access.role === "owner" || access.role === "admin" || access.role === "member") {
+  // Team funnel: owner and admin can edit any
+  if (access.role === "owner" || access.role === "admin") {
     return true;
   }
 
-  return false;
+  // Member: check if they created the funnel
+  const [funnel] = await db
+    .select({ userId: funnels.userId })
+    .from(funnels)
+    .where(eq(funnels.id, funnelId));
+
+  return funnel?.userId === userId;
+}
+
+/**
+ * Check whether a user has a specific team-level permission.
+ */
+export async function checkTeamPermission(
+  userId: string,
+  teamId: string,
+  action: "manage_members" | "manage_clients" | "manage_settings" | "delete_team"
+): Promise<boolean> {
+  if (await isSuperAdmin(userId)) return true;
+
+  const role = await getUserTeamRole(userId, teamId);
+  if (!role) return false;
+
+  switch (action) {
+    case "manage_members":
+    case "delete_team":
+      return role === "owner";
+    case "manage_clients":
+    case "manage_settings":
+      return role === "owner" || role === "admin";
+    default:
+      return false;
+  }
 }
 
 /**
@@ -152,19 +184,13 @@ export async function requireFunnelAccess(
   }
 
   if (permission === "delete") {
-    // Personal funnel: only the owner
-    if (access.isPersonal) {
-      // Already confirmed ownership via canAccessFunnel
+    if (await isSuperAdmin(userId)) {
+      // Super admin can always delete
+    } else if (access.isPersonal) {
+      // Personal funnel: owner confirmed via canAccessFunnel
     } else {
-      // Team funnel: only owner or admin can delete
+      // Team funnel: only owner or admin can delete — members cannot delete even their own
       if (access.role !== "owner" && access.role !== "admin") {
-        throw { status: 404, error: "Not found" };
-      }
-    }
-
-    // Super admin can always delete
-    if (!access.isPersonal && access.role !== "owner" && access.role !== "admin") {
-      if (!(await isSuperAdmin(userId))) {
         throw { status: 404, error: "Not found" };
       }
     }
@@ -211,23 +237,14 @@ export async function getTeamForWorkspace(
 }
 
 /**
- * Get the plan of the team owner.
+ * Get the team's plan directly from the teams table.
  * Used for plan limit checks when creating funnels in team context.
  */
 export async function getTeamPlan(teamId: string): Promise<string> {
   const [team] = await db
-    .select({ ownerId: teams.ownerId })
+    .select({ plan: teams.plan })
     .from(teams)
     .where(eq(teams.id, teamId));
 
-  if (!team) {
-    return "free";
-  }
-
-  const [owner] = await db
-    .select({ plan: users.plan })
-    .from(users)
-    .where(eq(users.id, team.ownerId));
-
-  return owner?.plan ?? "free";
+  return team?.plan ?? "free";
 }

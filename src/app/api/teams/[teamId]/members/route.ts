@@ -4,6 +4,8 @@ import { db } from "@/db";
 import { teams, teamMembers, teamInvites, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { checkTeamPermission } from "@/lib/team-access";
+import { logAuditEvent } from "@/lib/audit";
 import crypto from "crypto";
 
 // GET team members
@@ -57,12 +59,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tea
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
     }
 
-    // Verify admin/owner
-    const [member] = await db.select()
-      .from(teamMembers)
-      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)));
-    if (!member || (member.role !== "owner" && member.role !== "admin")) {
-      return NextResponse.json({ error: "Only admins can invite members" }, { status: 403 });
+    // Only team owner can manage members (invite/remove)
+    const canManage = await checkTeamPermission(userId, teamId, "manage_members");
+    if (!canManage) {
+      return NextResponse.json({ error: "Only team owners can invite members" }, { status: 403 });
     }
 
     // Max 10 members per team
@@ -108,6 +108,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tea
         // Email send failure is non-critical
       }
     }
+
+    // Fire-and-forget audit log
+    logAuditEvent({
+      teamId,
+      userId,
+      action: "member.invited",
+      resourceType: "member",
+      resourceId: invite.id,
+      metadata: { email, role: role || "member" },
+    }).catch(() => {});
 
     return NextResponse.json(invite, { status: 201 });
   } catch (error) {

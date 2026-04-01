@@ -5,6 +5,7 @@ import { getSessionStats } from "@/db/queries/sessions";
 import { getLeadsByFunnel, getLeadsThisWeek, getLeadsThisMonth, getTierBreakdown } from "@/db/queries/leads";
 import { logger } from "@/lib/logger";
 import { requireFunnelAccess } from "@/lib/team-access";
+import { logAuditEvent } from "@/lib/audit";
 import { db } from "@/db";
 import { clients } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -122,14 +123,29 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { id } = await params;
 
+    let funnelRow;
     try {
-      await requireFunnelAccess(userId, id, "delete");
+      funnelRow = await requireFunnelAccess(userId, id, "delete");
     } catch (err) {
       const e = err as { status?: number; error?: string };
       return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
     }
 
     await deleteFunnel(id, userId);
+
+    // Fire-and-forget audit log (team funnels only)
+    if (funnelRow.teamId) {
+      const config = funnelRow.config as { brand?: { name?: string } } | null;
+      logAuditEvent({
+        teamId: funnelRow.teamId,
+        userId,
+        action: "funnel.deleted",
+        resourceType: "funnel",
+        resourceId: id,
+        metadata: { name: config?.brand?.name, slug: funnelRow.slug },
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("DELETE /api/funnels/[id] error:", { error: error instanceof Error ? error.message : String(error) });

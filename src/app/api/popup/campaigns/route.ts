@@ -8,6 +8,7 @@ import { apiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { getPlanLimits, hasFeature } from "@/lib/plan-limits";
 import { isSuperAdmin } from "@/lib/admin";
 import { getUserTeamIds, requireFunnelAccess } from "@/lib/team-access";
+import { logAuditEvent } from "@/lib/audit";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -128,6 +129,18 @@ export async function POST(req: NextRequest) {
         name: name.trim(),
       })
       .returning();
+
+    // Fire-and-forget audit log (team funnels only)
+    if (funnel.teamId) {
+      logAuditEvent({
+        teamId: funnel.teamId,
+        userId,
+        action: "popup.created",
+        resourceType: "popup_campaign",
+        resourceId: campaign.id,
+        metadata: { name: name.trim(), funnelId },
+      }).catch(() => {});
+    }
 
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {

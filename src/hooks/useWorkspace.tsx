@@ -37,6 +37,8 @@ interface WorkspaceContextValue {
   activeTeam: WorkspaceTeam | null;
   loading: boolean;
   refetchTeams: () => void;
+  /** True when accessed via a custom dashboard domain — workspace is locked to that team */
+  isDashboardDomain: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -44,6 +46,15 @@ interface WorkspaceContextValue {
 // ---------------------------------------------------------------------------
 
 const STORAGE_KEY = "myvsl_workspace";
+const DASHBOARD_DOMAIN_COOKIE = "myvsl_team_domain";
+
+function getDashboardDomainTeamId(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith(`${DASHBOARD_DOMAIN_COOKIE}=`));
+  return match ? match.split("=")[1] || null : null;
+}
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
@@ -54,7 +65,11 @@ const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [teams, setTeams] = useState<WorkspaceTeam[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dashboardDomainTeamId] = useState<string | null>(() => getDashboardDomainTeamId());
   const [workspace, setWorkspaceRaw] = useState<"personal" | string>(() => {
+    // If on a custom dashboard domain, lock to that team
+    const domainTeamId = getDashboardDomainTeamId();
+    if (domainTeamId) return domainTeamId;
     if (typeof window !== "undefined") {
       return localStorage.getItem(STORAGE_KEY) ?? "personal";
     }
@@ -105,14 +120,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     fetchTeams();
   }, [fetchTeams]);
 
-  // Persist workspace selection
+  // Persist workspace selection (locked when on dashboard domain)
   const setWorkspace = useCallback((id: "personal" | string) => {
+    if (dashboardDomainTeamId) return; // Locked to dashboard domain team
     setWorkspaceRaw(id);
     if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, id);
     }
-  }, []);
+  }, [dashboardDomainTeamId]);
 
+  const isDashboardDomain = !!dashboardDomainTeamId;
   const isTeamContext = workspace !== "personal";
   const activeTeamId = isTeamContext ? workspace : null;
   const activeTeam = teams.find((t) => t.id === activeTeamId) ?? null;
@@ -128,6 +145,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         activeTeam,
         loading,
         refetchTeams: fetchTeams,
+        isDashboardDomain,
       }}
     >
       {children}
