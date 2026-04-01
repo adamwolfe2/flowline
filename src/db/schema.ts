@@ -267,6 +267,64 @@ export const auditLogs = pgTable('audit_logs', {
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 
+// ── API Keys ──
+
+export const apiKeys = pgTable('api_keys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  keyPrefix: text('key_prefix').notNull(),
+  keyHash: text('key_hash').notNull(),
+  scopes: jsonb('scopes').$type<string[]>().default(sql`'["read","write"]'::jsonb`).notNull(),
+  lastUsedAt: timestamp('last_used_at'),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('api_keys_user_id_idx').on(t.userId),
+  index('api_keys_key_hash_idx').on(t.keyHash),
+]);
+
+export type ApiKey = typeof apiKeys.$inferSelect;
+
+// ── Shopify Installations ──
+
+export const shopifyInstallations = pgTable('shopify_installations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
+  shopDomain: text('shop_domain').notNull().unique(),
+  accessToken: text('access_token').notNull(),
+  scopes: text('scopes').notNull(),
+  installedAt: timestamp('installed_at').defaultNow().notNull(),
+  uninstalledAt: timestamp('uninstalled_at'),
+}, (t) => [
+  index('shopify_installations_user_id_idx').on(t.userId),
+  index('shopify_installations_shop_domain_idx').on(t.shopDomain),
+]);
+
+export type ShopifyInstallation = typeof shopifyInstallations.$inferSelect;
+
+// ── GHL Connections ──
+
+export const ghlConnections = pgTable('ghl_connections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
+  locationId: text('location_id').notNull().unique(),
+  companyId: text('company_id'),
+  accessToken: text('access_token').notNull(),
+  refreshToken: text('refresh_token').notNull(),
+  tokenExpiresAt: timestamp('token_expires_at').notNull(),
+  scopes: text('scopes'),
+  connectedAt: timestamp('connected_at').defaultNow().notNull(),
+}, (t) => [
+  index('ghl_connections_user_id_idx').on(t.userId),
+  index('ghl_connections_location_id_idx').on(t.locationId),
+]);
+
+export type GhlConnection = typeof ghlConnections.$inferSelect;
+
 export type User = typeof users.$inferSelect;
 export type Funnel = typeof funnels.$inferSelect;
 export type Lead = typeof leads.$inferSelect;

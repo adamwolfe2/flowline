@@ -5,6 +5,7 @@ import { calculateScore, getCalendarTier, getCalendarUrl } from "@/lib/scoring";
 import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { sendLeadNotification, getTeamBrandName } from "@/lib/resend";
 import { fireWebhook } from "@/lib/webhook";
+import { syncLeadToGHL } from "@/lib/ghl-sync";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
 import { leads, users, emailSequences, sequenceEnrollments, funnelSessions } from "@/db/schema";
@@ -210,6 +211,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       const webhookFormat = config.webhook?.format ?? "default";
       fireWebhook(config.webhook.url, webhookPayload, funnelId, 3, webhookFormat).catch(() => {});
     }
+
+    // Sync lead to GoHighLevel if connected (fire-and-forget)
+    syncLeadToGHL(funnel.userId, {
+      email,
+      score,
+      tier: calendarTier,
+      answers,
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,

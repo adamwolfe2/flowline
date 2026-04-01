@@ -11,8 +11,13 @@ import {
   Check,
   Zap,
   Bell,
+  ShoppingBag,
+  Link2,
+  Loader2,
+  Unplug,
 } from "lucide-react";
 import { TeamSettings } from "@/components/settings/TeamSettings";
+import { ApiKeySettings } from "@/components/settings/ApiKeySettings";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +42,21 @@ export default function SettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
 
+  // Shopify state
+  const [shopifyLoading, setShopifyLoading] = useState(true);
+  const [shopifyConnected, setShopifyConnected] = useState(false);
+  const [shopifyDomain, setShopifyDomain] = useState("");
+  const [shopifyInstalledAt, setShopifyInstalledAt] = useState<string | null>(null);
+  const [shopifyShopInput, setShopifyShopInput] = useState("");
+  const [shopifyDisconnecting, setShopifyDisconnecting] = useState(false);
+
+  // GHL state
+  const [ghlLoading, setGhlLoading] = useState(true);
+  const [ghlConnected, setGhlConnected] = useState(false);
+  const [ghlLocationId, setGhlLocationId] = useState("");
+  const [ghlConnectedAt, setGhlConnectedAt] = useState<string | null>(null);
+  const [ghlDisconnecting, setGhlDisconnecting] = useState(false);
+
   useEffect(() => {
     fetch("/api/funnels")
       .then((r) => r.json())
@@ -60,6 +80,74 @@ export default function SettingsPage() {
       })
       .catch(() => {});
   }, []);
+
+  // Fetch Shopify connection status
+  useEffect(() => {
+    fetch("/api/shopify/status")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.connected && data.installation) {
+          setShopifyConnected(true);
+          setShopifyDomain(data.installation.shopDomain ?? "");
+          setShopifyInstalledAt(data.installation.installedAt ?? null);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setShopifyLoading(false));
+  }, []);
+
+  // Fetch GHL connection status
+  useEffect(() => {
+    fetch("/api/ghl/status")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.connected && data.connection) {
+          setGhlConnected(true);
+          setGhlLocationId(data.connection.locationId ?? "");
+          setGhlConnectedAt(data.connection.connectedAt ?? null);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setGhlLoading(false));
+  }, []);
+
+  async function handleShopifyDisconnect() {
+    setShopifyDisconnecting(true);
+    try {
+      const res = await fetch("/api/shopify/disconnect", { method: "POST" });
+      if (res.ok) {
+        setShopifyConnected(false);
+        setShopifyDomain("");
+        setShopifyInstalledAt(null);
+        toast.success("Shopify store disconnected");
+      } else {
+        toast.error("Failed to disconnect Shopify store");
+      }
+    } catch {
+      toast.error("Failed to disconnect Shopify store");
+    } finally {
+      setShopifyDisconnecting(false);
+    }
+  }
+
+  async function handleGhlDisconnect() {
+    setGhlDisconnecting(true);
+    try {
+      const res = await fetch("/api/ghl/disconnect", { method: "POST" });
+      if (res.ok) {
+        setGhlConnected(false);
+        setGhlLocationId("");
+        setGhlConnectedAt(null);
+        toast.success("GoHighLevel disconnected");
+      } else {
+        toast.error("Failed to disconnect GoHighLevel");
+      }
+    } catch {
+      toast.error("Failed to disconnect GoHighLevel");
+    } finally {
+      setGhlDisconnecting(false);
+    }
+  }
 
   async function handleDeleteAccount() {
     setDeleting(true);
@@ -285,6 +373,139 @@ export default function SettingsPage() {
           </div>
         </div>
 
+      </section>
+
+      {/* API Keys */}
+      <ApiKeySettings />
+
+      {/* Shopify */}
+      <section className="bg-white rounded-xl border border-[#EBEBEB] p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <ShoppingBag className="w-4 h-4 text-[#737373]" />
+          <h2 className="text-sm font-semibold text-[#333333] uppercase tracking-wider">
+            Shopify
+          </h2>
+        </div>
+
+        {shopifyLoading ? (
+          <div className="flex items-center gap-2 text-sm text-[#737373]">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Checking connection...
+          </div>
+        ) : shopifyConnected ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-green-100 text-green-700">
+                Connected
+              </span>
+              <span className="text-sm text-[#333333] font-medium">
+                {shopifyDomain}
+              </span>
+            </div>
+            {shopifyInstalledAt && (
+              <p className="text-xs text-[#737373]">
+                Connected {new Date(shopifyInstalledAt).toLocaleDateString()}
+              </p>
+            )}
+            <button
+              onClick={handleShopifyDisconnect}
+              disabled={shopifyDisconnecting}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
+            >
+              {shopifyDisconnecting ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Unplug className="w-3 h-3" />
+              )}
+              Disconnect
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-[#737373]">
+              Install on your Shopify store to automatically show popups to visitors.
+            </p>
+            <div className="flex items-center gap-2">
+              <Input
+                value={shopifyShopInput}
+                onChange={(e) => setShopifyShopInput(e.target.value)}
+                placeholder="your-store.myshopify.com"
+                className="max-w-xs text-sm"
+              />
+              <a
+                href={shopifyShopInput ? `/api/shopify/install?shop=${encodeURIComponent(shopifyShopInput)}` : "#"}
+                onClick={(e) => {
+                  if (!shopifyShopInput || !shopifyShopInput.endsWith(".myshopify.com")) {
+                    e.preventDefault();
+                    toast.error("Enter a valid .myshopify.com domain");
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors shrink-0"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Connect Shopify
+              </a>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* GoHighLevel */}
+      <section className="bg-white rounded-xl border border-[#EBEBEB] p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Link2 className="w-4 h-4 text-[#737373]" />
+          <h2 className="text-sm font-semibold text-[#333333] uppercase tracking-wider">
+            GoHighLevel
+          </h2>
+        </div>
+
+        {ghlLoading ? (
+          <div className="flex items-center gap-2 text-sm text-[#737373]">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Checking connection...
+          </div>
+        ) : ghlConnected ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-green-100 text-green-700">
+                Connected
+              </span>
+              <span className="text-sm text-[#333333] font-medium">
+                Location: {ghlLocationId}
+              </span>
+            </div>
+            {ghlConnectedAt && (
+              <p className="text-xs text-[#737373]">
+                Connected {new Date(ghlConnectedAt).toLocaleDateString()}
+              </p>
+            )}
+            <button
+              onClick={handleGhlDisconnect}
+              disabled={ghlDisconnecting}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
+            >
+              {ghlDisconnecting ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Unplug className="w-3 h-3" />
+              )}
+              Disconnect
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-[#737373]">
+              Connect your GHL sub-account to sync leads automatically.
+            </p>
+            <a
+              href="/api/ghl/install"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors"
+            >
+              <Link2 className="w-3.5 h-3.5" />
+              Connect GoHighLevel
+            </a>
+          </div>
+        )}
       </section>
 
       {/* Team */}

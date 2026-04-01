@@ -27,6 +27,8 @@ export const apiLimiter = createRateLimiter(30, "1 m");      // 30 authenticated
 export const sharedAnalyticsLimiter = createRateLimiter(20, "1 m"); // 20 shared analytics requests per IP per minute
 export const popupWidgetLimiter = createRateLimiter(30, "1 m");    // 30 popup widget requests per IP per minute
 export const popupImpressionLimiter = createRateLimiter(60, "1 m"); // 60 popup impression events per IP per minute
+export const v1LeadsLimiter = createRateLimiter(60, "1 m");        // 60 v1 leads API requests per key per minute
+export const v1FunnelsLimiter = createRateLimiter(30, "1 m");      // 30 v1 funnels API requests per key per minute
 
 export interface RateLimitResult {
   limited: boolean;
