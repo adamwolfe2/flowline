@@ -41,6 +41,28 @@ export async function addDomainToVercel(domain: string) {
   });
 }
 
+export async function getDomainStatus(domain: string) {
+  if (!VERCEL_PROJECT_ID) throw new Error("VERCEL_PROJECT_ID not configured");
+
+  try {
+    const result = await vercelFetch(
+      `/v9/projects/${VERCEL_PROJECT_ID}/domains/${domain}/verify`,
+      { method: "POST" }
+    );
+    return {
+      verified: result.verified ?? false,
+      verification: result.verification ?? [],
+    };
+  } catch (error) {
+    // If domain not found in Vercel, return unverified with empty verification
+    if (error instanceof Error && error.message.includes("404")) {
+      return { verified: false, verification: [] };
+    }
+    // For other errors, try to parse verification info from the error
+    return { verified: false, verification: [] };
+  }
+}
+
 export async function removeDomainFromVercel(domain: string) {
   if (!VERCEL_PROJECT_ID) throw new Error("VERCEL_PROJECT_ID not configured");
 

@@ -26,14 +26,16 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [savingDomain, setSavingDomain] = useState(false);
   const [checkingDns, setCheckingDns] = useState(false);
   const [dnsStatus, setDnsStatus] = useState<"unknown" | "configured" | "pending" | "error">("unknown");
+  const [verificationRecords, setVerificationRecords] = useState<Array<{ type: string; domain: string; value: string }>>([]);
   const [shareToken, setShareToken] = useState<string | null>(funnel.shareToken ?? null);
   const [shareExpiresAt, setShareExpiresAt] = useState<Date | string | null>(funnel.shareTokenExpiresAt ?? null);
   const [generatingShare, setGeneratingShare] = useState(false);
   const [revokingShare, setRevokingShare] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
-  const domain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
-  const funnelUrl = `${domain}/f/${funnel.slug}`;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${domain}`;
+  const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
+  const liveDomain = funnel.customDomain || platformDomain;
+  const funnelUrl = funnel.customDomain ? liveDomain : `${platformDomain}/f/${funnel.slug}`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `https://${platformDomain}`;
   const shareUrl = shareToken ? `${appUrl}/analytics/shared/${shareToken}` : null;
 
   // Client assignment
@@ -41,6 +43,24 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [clients, setClients] = useState<Array<{ id: string; name: string; email: string }>>([]);
   const [clientDropdownOpen, setClientDropdownOpen] = useState(false);
   const [savingClient, setSavingClient] = useState(false);
+
+  // Fetch domain verification status on load if domain is set
+  useEffect(() => {
+    if (!funnel.customDomain) return;
+    fetch(`/api/funnels/${funnel.id}/domain`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        if (data.verified) {
+          setDnsStatus("configured");
+          setVerificationRecords([]);
+        } else if (data.verification?.length) {
+          setDnsStatus("pending");
+          setVerificationRecords(data.verification);
+        }
+      })
+      .catch(() => {});
+  }, [funnel.customDomain, funnel.id]);
 
   useEffect(() => {
     if (!activeTeamId) return;
@@ -299,7 +319,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
               </Button>
             </div>
             <div className="flex gap-2 mt-3">
-              <a href={`/f/${funnel.slug}`} target="_blank" rel="noopener noreferrer" className="flex-1">
+              <a href={`https://${funnelUrl}`} target="_blank" rel="noopener noreferrer" className="flex-1">
                 <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
                   <ExternalLink className="w-3 h-3" />
                   View Live
@@ -358,7 +378,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
               <div className="relative">
                 <pre className="text-[10px] text-[#737373] font-mono bg-white border border-[#E5E7EB] rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-all">
 {`<div id="myvsl-quiz-${funnel.id}"></div>
-<script src="https://${domain}/api/embed/${funnel.id}/script.js" async></script>`}
+<script src="https://${platformDomain}/api/embed/${funnel.id}/script.js" async></script>`}
                 </pre>
                 <Button
                   variant="outline"
@@ -366,7 +386,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                   className="absolute top-2 right-2 text-[10px] h-6 px-2"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `<div id="myvsl-quiz-${funnel.id}"></div>\n<script src="https://${domain}/api/embed/${funnel.id}/script.js" async></script>`
+                      `<div id="myvsl-quiz-${funnel.id}"></div>\n<script src="https://${platformDomain}/api/embed/${funnel.id}/script.js" async></script>`
                     );
                     setWidgetCopied(true);
                     setTimeout(() => setWidgetCopied(false), 2000);
@@ -390,7 +410,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
             <div className="mb-3">
               <Label className="text-[11px] text-gray-400 mb-1">Your funnel URL</Label>
               <div className="flex items-center gap-1 text-sm text-gray-500 font-mono bg-white border border-gray-200 rounded-md px-3 py-2">
-                {domain}/f/<span className="font-semibold text-gray-900">{funnel.slug}</span>
+                {platformDomain}/f/<span className="font-semibold text-gray-900">{funnel.slug}</span>
               </div>
             </div>
             {!showPublishConfirm ? (
@@ -404,7 +424,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
             ) : (
               <div className="mt-3 p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg">
                 <p className="text-sm text-[#111827] font-medium mb-2">Ready to go live?</p>
-                <p className="text-xs text-[#6B7280] mb-3">Your funnel will be accessible at {domain}/f/{funnel.slug}</p>
+                <p className="text-xs text-[#6B7280] mb-3">Your funnel will be accessible at {platformDomain}/f/{funnel.slug}</p>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handlePublish} disabled={publishing} className="flex-1">
                     {publishing ? "Publishing..." : "Confirm & Publish"}
@@ -533,9 +553,11 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                         body: JSON.stringify({ domain: customDomain }),
                       });
                       if (res.ok) {
-                        const updated = await res.json();
-                        onUpdate(updated);
-                        setDnsStatus("pending");
+                        const data = await res.json();
+                        const { verification, verified, ...funnelData } = data;
+                        onUpdate(funnelData);
+                        if (verification?.length) setVerificationRecords(verification);
+                        setDnsStatus(verified ? "configured" : "pending");
                         toast.success("Domain saved. Set up your DNS records below.");
                       } else {
                         const data = await res.json();
@@ -552,31 +574,77 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
 
             {/* DNS instructions */}
             {funnel.customDomain && (
-              <div className="bg-white border border-[#E5E7EB] rounded-lg p-3 space-y-2.5">
+              <div className="bg-white border border-[#E5E7EB] rounded-lg p-3 space-y-3">
                 <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">DNS Setup</p>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">Type</span>
-                    <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">CNAME</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText("CNAME"); toast.success("Copied CNAME"); }}>
-                      <Copy className="w-3 h-3 text-[#9CA3AF]" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">Name</span>
-                    <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{funnel.customDomain}</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(funnel.customDomain || ""); toast.success("Copied domain"); }}>
-                      <Copy className="w-3 h-3 text-[#9CA3AF]" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0">Value</span>
-                    <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">cname.vercel-dns.com</span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText("cname.vercel-dns.com"); toast.success("Copied value"); }}>
-                      <Copy className="w-3 h-3 text-[#9CA3AF]" />
-                    </Button>
+                <p className="text-[10px] text-[#6B7280]">Add both records below in your DNS provider.</p>
+
+                {/* Record 1: CNAME */}
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-semibold text-[#374151]">Record 1 — CNAME</p>
+                  <div className="space-y-1.5 bg-[#F9FAFB] rounded p-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Type</span>
+                      <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">CNAME</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText("CNAME"); toast.success("Copied"); }}>
+                        <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Name</span>
+                      <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{funnel.customDomain}</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(funnel.customDomain || ""); toast.success("Copied"); }}>
+                        <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Value</span>
+                      <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">cname.vercel-dns.com</span>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText("cname.vercel-dns.com"); toast.success("Copied"); }}>
+                        <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
+
+                {/* Record 2: TXT verification */}
+                {verificationRecords.length > 0 ? (
+                  verificationRecords.map((rec, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-[#374151]">Record {i + 2} — {rec.type} (Verification)</p>
+                      <div className="space-y-1.5 bg-[#FFF7ED] rounded p-2 border border-amber-200">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Type</span>
+                          <span className="text-[11px] font-mono font-medium text-[#111827] flex-1">{rec.type}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(rec.type); toast.success("Copied"); }}>
+                            <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Name</span>
+                          <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{rec.domain}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(rec.domain); toast.success("Copied"); }}>
+                            <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Value</span>
+                          <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 break-all text-[10px]">{rec.value}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(rec.value); toast.success("Copied"); }}>
+                            <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : dnsStatus !== "configured" ? (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-semibold text-[#374151]">Record 2 — TXT (Verification)</p>
+                    <p className="text-[10px] text-[#6B7280] bg-[#F9FAFB] rounded p-2">
+                      Click &quot;Check DNS&quot; to load the verification record from Vercel.
+                    </p>
+                  </div>
+                ) : null}
+
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -586,17 +654,25 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                     onClick={async () => {
                       setCheckingDns(true);
                       try {
-                        const res = await fetch(`/api/funnels/${funnel.id}/domain`, {
-                          method: "PUT",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ domain: funnel.customDomain }),
-                        });
+                        const res = await fetch(`/api/funnels/${funnel.id}/domain`);
                         if (res.ok) {
-                          setDnsStatus("configured");
-                          toast.success("DNS is configured correctly");
+                          const data = await res.json();
+                          if (data.verified) {
+                            setDnsStatus("configured");
+                            setVerificationRecords([]);
+                            toast.success("Domain verified and active");
+                          } else {
+                            setDnsStatus("pending");
+                            if (data.verification?.length) {
+                              setVerificationRecords(data.verification);
+                              toast("Verification pending. Add the TXT record below, then check again.");
+                            } else {
+                              toast("DNS not propagated yet. This can take up to 48 hours.");
+                            }
+                          }
                         } else {
-                          setDnsStatus("pending");
-                          toast("DNS not propagated yet. This can take up to 48 hours.");
+                          setDnsStatus("error");
+                          toast.error("Failed to check domain status");
                         }
                       } catch {
                         setDnsStatus("error");
@@ -612,7 +688,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                     </span>
                   )}
                   {dnsStatus === "pending" && (
-                    <span className="text-[10px] text-amber-600">Waiting for DNS propagation</span>
+                    <span className="text-[10px] text-amber-600">Waiting for verification</span>
                   )}
                 </div>
               </div>

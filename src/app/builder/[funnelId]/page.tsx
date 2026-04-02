@@ -268,7 +268,7 @@ export default function BuilderPage() {
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Top bar */}
-      <div className="h-12 border-b border-gray-100 flex items-center justify-between px-2 sm:px-4 flex-shrink-0">
+      <div className="h-12 border-b border-gray-100 flex items-center justify-between px-2 sm:px-4 flex-shrink-0 relative z-20">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link href="/dashboard">
             <Button variant="ghost" size="sm" className="gap-1 sm:gap-1.5 text-xs px-2 sm:px-3">
@@ -389,7 +389,7 @@ export default function BuilderPage() {
       {/* Main area — tabs on top, content + preview below */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         {/* Tab bar — hidden on mobile, shown via bottom bar */}
-        <div className="hidden sm:flex border-b border-gray-100 items-center gap-2 px-2 sm:px-4 flex-shrink-0 overflow-x-auto scrollbar-hide">
+        <div className="hidden sm:flex border-b border-gray-100 items-center gap-2 px-2 sm:px-4 flex-shrink-0 overflow-x-auto scrollbar-hide relative z-20">
           <div className="overflow-x-auto scrollbar-hide">
             <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
               {builderTabs.map(tab => (
