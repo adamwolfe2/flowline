@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { funnels, emailSequences, emailSteps, users } from "@/db/schema";
-import { eq, and, asc } from "drizzle-orm";
+import { emailSequences, emailSteps, users } from "@/db/schema";
+import { eq, asc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { isSuperAdmin } from "@/lib/admin";
 import { getPlanLimits } from "@/lib/plan-limits";
+import { requireFunnelAccess } from "@/lib/team-access";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -14,10 +15,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
 
-    const [funnel] = await db.select({ id: funnels.id })
-      .from(funnels)
-      .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
-    if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    try {
+      await requireFunnelAccess(userId, id, "view");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
 
     const sequences = await db.select().from(emailSequences)
       .where(eq(emailSequences.funnelId, id));
@@ -71,10 +74,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "triggerType must be 'lead_created' or 'abandoned'" }, { status: 400 });
     }
 
-    const [funnel] = await db.select({ id: funnels.id })
-      .from(funnels)
-      .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
-    if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    try {
+      await requireFunnelAccess(userId, id, "edit");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
 
     // Max 3 sequences per funnel
     const existing = await db.select({ id: emailSequences.id })

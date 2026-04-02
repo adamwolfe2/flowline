@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/db";
-import { funnels, emailSequences, emailSteps } from "@/db/schema";
+import { emailSequences, emailSteps } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
 import { logger } from "@/lib/logger";
+import { requireFunnelAccess } from "@/lib/team-access";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string; sequenceId: string }> }) {
   try {
@@ -12,10 +13,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { id, sequenceId } = await params;
 
-    const [funnel] = await db.select({ id: funnels.id })
-      .from(funnels)
-      .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
-    if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    try {
+      await requireFunnelAccess(userId, id, "edit");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
 
     const body = await req.json();
 
@@ -106,10 +109,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     const { id, sequenceId } = await params;
 
-    const [funnel] = await db.select({ id: funnels.id })
-      .from(funnels)
-      .where(and(eq(funnels.id, id), eq(funnels.userId, userId)));
-    if (!funnel) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    try {
+      await requireFunnelAccess(userId, id, "edit");
+    } catch (err) {
+      const e = err as { status?: number; error?: string };
+      return NextResponse.json({ error: e.error || "Not found" }, { status: e.status || 404 });
+    }
 
     await db.delete(emailSequences)
       .where(and(eq(emailSequences.id, sequenceId), eq(emailSequences.funnelId, id)));
