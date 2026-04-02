@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Trash2, MessageSquareQuote, ImageIcon, Video, Type, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, MessageSquareQuote, ImageIcon, Video, Type, ChevronDown, ChevronUp, Plus, Check } from "lucide-react";
 
 interface ContentBlocksEditorProps {
   config: FunnelConfig;
@@ -46,6 +45,7 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
     const newConfig = JSON.parse(JSON.stringify(config));
     newConfig.quiz.contentBlocks = newConfig.quiz.contentBlocks?.filter((b: ContentBlock) => b.id !== blockId);
     onSave(newConfig);
+    if (expandedBlock === blockId) setExpandedBlock(null);
   }
 
   const typeIcon: Record<string, React.ReactNode> = {
@@ -62,22 +62,60 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
     text: "Text Block",
   };
 
+  const blockTypes = [
+    { type: "testimonial" as const, icon: <MessageSquareQuote className="w-4 h-4" />, label: "Testimonial", desc: "Social proof quote" },
+    { type: "image" as const, icon: <ImageIcon className="w-4 h-4" />, label: "Image", desc: "Photo or graphic" },
+    { type: "video" as const, icon: <Video className="w-4 h-4" />, label: "Video", desc: "YouTube, Vimeo, Loom" },
+    { type: "text" as const, icon: <Type className="w-4 h-4" />, label: "Text", desc: "Heading + paragraph" },
+  ];
+
   return (
     <div className="space-y-5">
       <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
         <p className="text-xs text-blue-700 font-medium mb-1">Content Blocks</p>
         <p className="text-[11px] text-blue-600 leading-relaxed">
-          Add testimonials, images, videos, or text between the welcome screen and quiz questions
-          to build trust and increase conversions.
+          These appear between your welcome screen and quiz questions.
+          Add social proof, images, or context to increase conversions. Changes save automatically.
         </p>
       </div>
 
-      {blocks.length === 0 ? (
-        <div className="text-center py-4">
-          <p className="text-xs text-gray-400 mb-3">No content blocks yet. Add one to enhance your funnel.</p>
+      {/* Add block buttons — always visible at top */}
+      {blocks.length < 5 && (
+        <div>
+          <p className="text-[11px] font-medium text-gray-500 mb-2 flex items-center gap-1.5">
+            <Plus className="w-3 h-3" />
+            Add a block {blocks.length > 0 && <span className="text-gray-300 font-normal">({blocks.length}/5)</span>}
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {blockTypes.map(({ type, icon, label, desc }) => (
+              <button
+                key={type}
+                onClick={() => addBlock(type)}
+                className="flex items-start gap-2.5 p-2.5 border border-gray-200 rounded-lg hover:border-[#2D6A4F] hover:bg-green-50/50 transition-colors text-left group"
+              >
+                <span className="text-gray-400 group-hover:text-[#2D6A4F] mt-0.5">{icon}</span>
+                <div>
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-[#2D6A4F]">{label}</span>
+                  <span className="text-[10px] text-gray-400 block">{desc}</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      ) : (
+      )}
+      {blocks.length >= 5 && (
+        <p className="text-[10px] text-gray-400 flex items-center gap-1">
+          <Check className="w-3 h-3" /> Maximum 5 blocks reached
+        </p>
+      )}
+
+      {/* Existing blocks */}
+      {blocks.length > 0 && (
         <div className="space-y-2">
+          <p className="text-[11px] font-medium text-gray-500">
+            Your blocks ({blocks.length})
+            <span className="font-normal text-gray-400"> — shown in this order</span>
+          </p>
           {blocks.map((block) => (
             <div key={block.id} className="border border-gray-100 rounded-lg overflow-hidden">
               <button
@@ -87,6 +125,12 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
                 <div className="flex items-center gap-2">
                   <span className="text-gray-400">{typeIcon[block.type]}</span>
                   <span className="text-xs font-medium text-gray-700">{typeLabel[block.type]}</span>
+                  {block.type === "testimonial" && block.content.author && (
+                    <span className="text-[10px] text-gray-400 truncate max-w-[120px]">— {block.content.author}</span>
+                  )}
+                  {block.type === "text" && block.content.heading && (
+                    <span className="text-[10px] text-gray-400 truncate max-w-[120px]">— {block.content.heading}</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   <button
@@ -201,29 +245,6 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
           ))}
         </div>
       )}
-
-      <Separator />
-
-      <div>
-        <p className="text-[10px] text-gray-400 mb-2">Add a block:</p>
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" size="sm" className="text-xs gap-1.5 h-8" onClick={() => addBlock("testimonial")} disabled={blocks.length >= 5}>
-            <MessageSquareQuote className="w-3 h-3" /> Testimonial
-          </Button>
-          <Button variant="outline" size="sm" className="text-xs gap-1.5 h-8" onClick={() => addBlock("image")} disabled={blocks.length >= 5}>
-            <ImageIcon className="w-3 h-3" /> Image
-          </Button>
-          <Button variant="outline" size="sm" className="text-xs gap-1.5 h-8" onClick={() => addBlock("video")} disabled={blocks.length >= 5}>
-            <Video className="w-3 h-3" /> Video
-          </Button>
-          <Button variant="outline" size="sm" className="text-xs gap-1.5 h-8" onClick={() => addBlock("text")} disabled={blocks.length >= 5}>
-            <Type className="w-3 h-3" /> Text
-          </Button>
-        </div>
-        {blocks.length >= 5 && (
-          <p className="text-[10px] text-gray-400 mt-1">Maximum 5 blocks</p>
-        )}
-      </div>
     </div>
   );
 }
