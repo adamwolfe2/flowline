@@ -389,7 +389,7 @@ export default function BuilderPage() {
       {/* Main area — tabs on top, content + preview below */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         {/* Tab bar — hidden on mobile, shown via bottom bar */}
-        <div className="hidden sm:flex border-b border-gray-100 items-center gap-2 px-2 sm:px-4 flex-shrink-0 overflow-x-auto scrollbar-hide relative z-20">
+        <div className="hidden sm:flex border-b border-gray-100 items-center gap-2 px-2 sm:px-4 flex-shrink-0 relative z-20">
           <div className="overflow-x-auto scrollbar-hide">
             <TabsList className="inline-flex w-max gap-0.5 bg-transparent p-0 h-10">
               {builderTabs.map(tab => (
