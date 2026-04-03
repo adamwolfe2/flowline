@@ -11,6 +11,16 @@ const columns = [
     ],
   },
   {
+    title: "Compare",
+    links: [
+      { label: "vs ClickFunnels", href: "/compare/clickfunnels" },
+      { label: "vs Typeform", href: "/compare/typeform" },
+      { label: "vs Leadpages", href: "/compare/leadpages" },
+      { label: "vs Unbounce", href: "/compare/unbounce" },
+      { label: "vs Interact", href: "/compare/interact" },
+    ],
+  },
+  {
     title: "Use Cases",
     links: [
       { label: "Coaches", href: "/build" },
@@ -39,7 +49,7 @@ export function MarketingFooter() {
   return (
     <footer className="bg-white border-t border-[#E5E7EB] py-10 md:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-4 gap-4 sm:gap-6 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] md:gap-10 mb-10 md:mb-12">
+        <div className="grid grid-cols-4 gap-4 sm:gap-6 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] md:gap-8 mb-10 md:mb-12">
           {/* Brand */}
           <div className="col-span-4 md:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-2 md:mb-4">
