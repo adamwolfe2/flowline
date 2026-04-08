@@ -76,7 +76,7 @@ interface AnalyticsData {
   answers: Record<string, Array<{ answerId: string | null; answerLabel: string | null; count: number }>>;
   abandons: Array<{ stepIndex: number; stepLabel: string; abandonCount: number }>;
   devices: Array<{ deviceType: string | null; count: number }>;
-  utmSources: Array<{ utmSource: string | null; count: number }>;
+  utmSources: Array<{ utmSource: string | null; utmMedium: string | null; utmCampaign: string | null; count: number }>;
   tiers: Array<{ tier: string | null; count: number }>;
   timeSeries: Array<{ date: string; count: number }>;
   variantPerformance: Array<{
@@ -650,23 +650,30 @@ export default function AnalyticsDashboard() {
               )}
             </div>
 
-            {/* UTM Sources */}
+            {/* Lead Sources */}
             <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">Top Sources</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Sources</h3>
               {utmSources.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-4">No UTM data yet</p>
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-400 mb-1">No source data yet</p>
+                  <p className="text-[10px] text-gray-300">Add tracking parameters to your funnel links to see where leads come from</p>
+                </div>
               ) : (
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-gray-400 border-b border-gray-100">
                       <th className="text-left py-2 font-medium">Source</th>
+                      <th className="text-left py-2 font-medium hidden sm:table-cell">Medium</th>
+                      <th className="text-left py-2 font-medium hidden sm:table-cell">Campaign</th>
                       <th className="text-right py-2 font-medium">Leads</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {utmSources.map((u) => (
-                      <tr key={u.utmSource} className="border-b border-gray-50">
-                        <td className="py-2 text-gray-700">{u.utmSource}</td>
+                    {utmSources.map((u, i) => (
+                      <tr key={`${u.utmSource}-${u.utmMedium}-${u.utmCampaign}-${i}`} className="border-b border-gray-50">
+                        <td className="py-2 text-gray-700">{u.utmSource || "--"}</td>
+                        <td className="py-2 text-gray-500 hidden sm:table-cell">{u.utmMedium || "--"}</td>
+                        <td className="py-2 text-gray-500 hidden sm:table-cell">{u.utmCampaign || "--"}</td>
                         <td className="py-2 text-right text-gray-900 font-medium">{u.count}</td>
                       </tr>
                     ))}

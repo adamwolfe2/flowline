@@ -16,6 +16,8 @@ interface LeadRow {
   score: number;
   calendarTier: string;
   answers: Record<string, string>;
+  utmSource: string | null;
+  utmMedium: string | null;
   createdAt: string;
 }
 
@@ -39,6 +41,7 @@ export default function LeadsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dateRange, setDateRange] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [sourceFilter, setSourceFilter] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const { isTeamContext, activeTeam } = useWorkspace();
@@ -52,7 +55,7 @@ export default function LeadsPage() {
   // Reset to page 0 when filters change
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, funnelFilter, tierFilter, dateRange, sortBy]);
+  }, [debouncedSearch, funnelFilter, tierFilter, dateRange, sortBy, sourceFilter]);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -99,13 +102,26 @@ export default function LeadsPage() {
     );
   };
 
+  const uniqueSources = useMemo(() => {
+    const sources = new Set<string>();
+    for (const lead of leads) {
+      if (lead.utmSource) sources.add(lead.utmSource);
+    }
+    return Array.from(sources).sort();
+  }, [leads]);
+
   const displayedLeads = useMemo(() => {
     let filtered = leads;
     if (dateRange !== "all") {
       const now = new Date();
       const days = dateRange === "7d" ? 7 : dateRange === "30d" ? 30 : 90;
       const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      filtered = leads.filter((l) => new Date(l.createdAt) >= cutoff);
+      filtered = filtered.filter((l) => new Date(l.createdAt) >= cutoff);
+    }
+    if (sourceFilter === "__direct__") {
+      filtered = filtered.filter((l) => !l.utmSource);
+    } else if (sourceFilter) {
+      filtered = filtered.filter((l) => l.utmSource === sourceFilter);
     }
     const sorted = [...filtered];
     switch (sortBy) {
@@ -122,7 +138,7 @@ export default function LeadsPage() {
         sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     return sorted;
-  }, [leads, dateRange, sortBy]);
+  }, [leads, dateRange, sortBy, sourceFilter]);
 
   function toggleSelectAll() {
     if (selectedIds.size === displayedLeads.length) {
@@ -294,6 +310,20 @@ export default function LeadsPage() {
           <option value="mid">Mid</option>
           <option value="low">Low</option>
         </select>
+        {uniqueSources.length > 0 && (
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+            aria-label="Filter by source"
+          >
+            <option value="">All sources</option>
+            <option value="__direct__">Direct (no source)</option>
+            {uniqueSources.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        )}
         <select
           value={dateRange}
           onChange={(e) => setDateRange(e.target.value)}
@@ -392,6 +422,9 @@ export default function LeadsPage() {
                   <th className="text-left text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider px-4 py-3">
                     Tier
                   </th>
+                  <th className="text-left text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider px-4 py-3 hidden lg:table-cell">
+                    Source
+                  </th>
                   <th className="text-left text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider px-4 py-3 hidden sm:table-cell">
                     Date
                   </th>
@@ -430,6 +463,15 @@ export default function LeadsPage() {
                     </td>
                     <td className="px-4 py-3" onClick={() => setSelectedLeadId(lead.id)}>
                       {tierBadge(lead.calendarTier)}
+                    </td>
+                    <td className="px-4 py-3 hidden lg:table-cell" onClick={() => setSelectedLeadId(lead.id)}>
+                      {lead.utmSource ? (
+                        <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">
+                          {lead.utmSource}{lead.utmMedium ? ` / ${lead.utmMedium}` : ""}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-gray-300">Direct</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#6B7280] hidden sm:table-cell" onClick={() => setSelectedLeadId(lead.id)}>
                       {new Date(lead.createdAt).toLocaleDateString()}

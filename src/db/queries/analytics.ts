@@ -179,18 +179,20 @@ export async function getDeviceBreakdown(funnelId: string, timeRange = 'all') {
 
 export async function getUTMBreakdown(funnelId: string, timeRange = 'all') {
   const cutoff = getDateCutoff(timeRange);
-  const baseConditions = [eq(leads.funnelId, funnelId), sql`${leads.utmSource} is not null`];
+  const baseConditions = [eq(leads.funnelId, funnelId), sql`(${leads.utmSource} is not null OR ${leads.utmMedium} is not null)`];
   if (cutoff) baseConditions.push(gte(leads.createdAt, cutoff));
   const whereClause = and(...baseConditions);
 
   return db.select({
     utmSource: leads.utmSource,
+    utmMedium: leads.utmMedium,
+    utmCampaign: leads.utmCampaign,
     count: sql<number>`count(*)::int`,
   }).from(leads)
     .where(whereClause)
-    .groupBy(leads.utmSource)
+    .groupBy(leads.utmSource, leads.utmMedium, leads.utmCampaign)
     .orderBy(sql`count(*) desc`)
-    .limit(10);
+    .limit(20);
 }
 
 export async function getTierDistribution(funnelId: string, timeRange = 'all') {

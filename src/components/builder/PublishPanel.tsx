@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Globe, Copy, ExternalLink, Code, BarChart2, Link2, Trash2, Users, X, ChevronDown } from "lucide-react";
+import { CheckCircle, Globe, Copy, ExternalLink, Code, BarChart2, Link2, Trash2, Users, X, ChevronDown, Plus, Crosshair } from "lucide-react";
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 import { useWorkspace, workspaceFetch } from "@/hooks/useWorkspace";
@@ -32,6 +32,27 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [generatingShare, setGeneratingShare] = useState(false);
   const [revokingShare, setRevokingShare] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
+
+  // Tracking links
+  type TrackingLink = { id: string; name: string; source: string; medium: string; campaign: string };
+  const [trackingLinks, setTrackingLinks] = useState<TrackingLink[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem(`tracking-links-${funnel.id}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+  const [showLinkBuilder, setShowLinkBuilder] = useState(false);
+  const [newLink, setNewLink] = useState({ name: "", source: "", medium: "", campaign: "" });
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
+
+  // Persist tracking links
+  useEffect(() => {
+    try {
+      localStorage.setItem(`tracking-links-${funnel.id}`, JSON.stringify(trackingLinks));
+    } catch { /* storage full or unavailable */ }
+  }, [trackingLinks, funnel.id]);
+
   const platformDomain = process.env.NEXT_PUBLIC_PLATFORM_DOMAIN || "localhost:3000";
   const liveDomain = funnel.customDomain || platformDomain;
   const funnelUrl = funnel.customDomain ? liveDomain : `${platformDomain}/f/${funnel.slug}`;
@@ -206,6 +227,51 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
     setShareLinkCopied(true);
     setTimeout(() => setShareLinkCopied(false), 2000);
     toast.success("Share link copied");
+  }
+
+  function buildTrackedUrl(link: { source: string; medium: string; campaign: string }): string {
+    const base = `https://${funnelUrl}`;
+    const params = new URLSearchParams();
+    if (link.source) params.set("utm_source", link.source);
+    if (link.medium) params.set("utm_medium", link.medium);
+    if (link.campaign) params.set("utm_campaign", link.campaign);
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+  }
+
+  function addTrackingLink() {
+    if (!newLink.source.trim()) return;
+    const link: TrackingLink = {
+      id: crypto.randomUUID(),
+      name: newLink.name || `${newLink.source} / ${newLink.medium || "link"}`,
+      source: newLink.source,
+      medium: newLink.medium,
+      campaign: newLink.campaign,
+    };
+    setTrackingLinks(prev => [...prev, link]);
+    setNewLink({ name: "", source: "", medium: "", campaign: "" });
+    setShowLinkBuilder(false);
+    toast.success("Tracking link created");
+  }
+
+  function removeTrackingLink(id: string) {
+    setTrackingLinks(prev => prev.filter((l) => l.id !== id));
+  }
+
+  function copyTrackingLink(link: TrackingLink) {
+    const url = buildTrackedUrl(link);
+    navigator.clipboard.writeText(url).catch(() => {
+      // Fallback for restricted contexts
+      const input = document.createElement("input");
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+    });
+    setCopiedLinkId(link.id);
+    setTimeout(() => setCopiedLinkId(null), 2000);
+    toast.success("Tracking link copied");
   }
 
   function getDaysUntilExpiry(expiresAt: Date | string | null): number | null {
@@ -498,6 +564,169 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
           </Button>
         )}
       </div>
+
+      {/* Tracking Links */}
+      {funnel.published && (
+        <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Crosshair className="w-3.5 h-3.5 text-gray-500" />
+              <p className="text-[11px] text-gray-500 font-medium">Tracking Links</p>
+            </div>
+            {trackingLinks.length > 0 && !showLinkBuilder && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-[10px] h-6 px-2 gap-1"
+                onClick={() => setShowLinkBuilder(true)}
+              >
+                <Plus className="w-3 h-3" />
+                Add
+              </Button>
+            )}
+          </div>
+
+          {trackingLinks.length === 0 && !showLinkBuilder && (
+            <div className="text-center py-3">
+              <p className="text-[10px] text-gray-400 mb-2">
+                Create tagged links to track where your leads come from — ads, emails, social posts, etc.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs gap-1.5"
+                onClick={() => setShowLinkBuilder(true)}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Create Tracking Link
+              </Button>
+            </div>
+          )}
+
+          {/* Existing links */}
+          {trackingLinks.length > 0 && (
+            <div className="space-y-2 mb-3">
+              {trackingLinks.map((link) => (
+                <div key={link.id} className="bg-white border border-[#E5E7EB] rounded-lg p-2.5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium text-gray-900">{link.name}</span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => copyTrackingLink(link)}
+                      >
+                        {copiedLinkId === link.id ? <CheckCircle className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3 text-gray-400" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                        onClick={() => removeTrackingLink(link.id)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mb-1.5">
+                    {link.source && (
+                      <span className="text-[9px] bg-[#2D6A4F]/10 text-[#2D6A4F] px-1.5 py-0.5 rounded font-medium">{link.source}</span>
+                    )}
+                    {link.medium && (
+                      <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-medium">{link.medium}</span>
+                    )}
+                    {link.campaign && (
+                      <span className="text-[9px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded font-medium">{link.campaign}</span>
+                    )}
+                  </div>
+                  <p className="text-[9px] text-gray-400 font-mono truncate">{buildTrackedUrl(link)}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Link builder form */}
+          {showLinkBuilder && (
+            <div className="bg-white border border-[#E5E7EB] rounded-lg p-3 space-y-2.5">
+              <div>
+                <Label className="text-[10px] text-gray-500 mb-1">Link Name</Label>
+                <Input
+                  value={newLink.name}
+                  onChange={(e) => setNewLink({ ...newLink, name: e.target.value })}
+                  placeholder='e.g. "LinkedIn Spring Campaign"'
+                  className="text-xs h-8"
+                />
+              </div>
+              <div>
+                <Label className="text-[10px] text-gray-500 mb-1">Source <span className="text-red-400">*</span></Label>
+                <Input
+                  value={newLink.source}
+                  onChange={(e) => setNewLink({ ...newLink, source: e.target.value.toLowerCase().replace(/\s+/g, "_") })}
+                  placeholder="e.g. linkedin, meta, google, email"
+                  className="text-xs h-8 font-mono"
+                />
+                <p className="text-[9px] text-gray-400 mt-0.5">Where the traffic comes from</p>
+              </div>
+              <div>
+                <Label className="text-[10px] text-gray-500 mb-1">Medium</Label>
+                <Input
+                  value={newLink.medium}
+                  onChange={(e) => setNewLink({ ...newLink, medium: e.target.value.toLowerCase().replace(/\s+/g, "_") })}
+                  placeholder="e.g. cpc, email, social, webinar"
+                  className="text-xs h-8 font-mono"
+                />
+                <p className="text-[9px] text-gray-400 mt-0.5">How the traffic gets here (ad, email, post)</p>
+              </div>
+              <div>
+                <Label className="text-[10px] text-gray-500 mb-1">Campaign</Label>
+                <Input
+                  value={newLink.campaign}
+                  onChange={(e) => setNewLink({ ...newLink, campaign: e.target.value.toLowerCase().replace(/\s+/g, "_") })}
+                  placeholder="e.g. spring_promo, webinar_replay"
+                  className="text-xs h-8 font-mono"
+                />
+                <p className="text-[9px] text-gray-400 mt-0.5">The specific campaign or promotion</p>
+              </div>
+
+              {/* Live preview */}
+              {newLink.source && (
+                <div className="bg-[#F9FAFB] rounded p-2">
+                  <p className="text-[9px] text-gray-500 mb-1">Preview</p>
+                  <p className="text-[9px] font-mono text-gray-600 break-all">
+                    {buildTrackedUrl(newLink)}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <Button
+                  size="sm"
+                  className="flex-1 text-xs h-8"
+                  disabled={!newLink.source.trim()}
+                  onClick={addTrackingLink}
+                >
+                  Create Link
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-8"
+                  onClick={() => { setShowLinkBuilder(false); setNewLink({ name: "", source: "", medium: "", campaign: "" }); }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {trackingLinks.length > 0 && (
+            <p className="text-[9px] text-gray-400 mt-2">
+              Leads from these links will appear in your analytics under &quot;Lead Sources&quot;.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Custom Domain */}
       <div className="p-3 bg-gray-50 rounded-lg">
