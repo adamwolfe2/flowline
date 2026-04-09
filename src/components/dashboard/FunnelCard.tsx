@@ -149,6 +149,16 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
                       {funnel.clientName}
                     </span>
                   )}
+                  {funnel.creationSource === 'template' && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 font-medium">
+                      Template
+                    </span>
+                  )}
+                  {funnel.creationSource === 'ai' && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">
+                      AI
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -61,7 +61,7 @@ function DashboardContent() {
       workspaceFetch("/api/funnels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config: savedConfig, slug: savedSlug }),
+        body: JSON.stringify({ config: savedConfig, slug: savedSlug, creationSource: 'ai' }),
       })
         .then(async (res) => {
           if (!res.ok) {

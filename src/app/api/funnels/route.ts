@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { config: bodyConfig, slug: rawSlug, templateId } = body;
+    const { config: bodyConfig, slug: rawSlug, templateId, creationSource: rawCreationSource } = body;
 
     // If templateId is provided, use the template config as the base (deep merge)
     let config = bodyConfig;
@@ -215,7 +215,9 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const funnel = await createFunnel({ userId, slug, config: finalConfig, teamId: resolvedTeamId ?? null });
+    const validSources = ['ai', 'template', 'manual'] as const;
+    const creationSource = validSources.includes(rawCreationSource) ? rawCreationSource as 'ai' | 'template' | 'manual' : null;
+    const funnel = await createFunnel({ userId, slug, config: finalConfig, teamId: resolvedTeamId ?? null, creationSource });
 
     // Fire-and-forget audit log (team funnels only)
     if (resolvedTeamId) {
