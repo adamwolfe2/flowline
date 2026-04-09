@@ -3,11 +3,14 @@
 import { useState, useReducer, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, ArrowRight, Sparkles, ChevronRight, Eye, X, Upload, Trash2 } from "lucide-react";
+import { Check, Loader2, ArrowRight, Sparkles, ChevronRight, Eye, X, Upload, Trash2, LayoutTemplate } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
+
+const QuickStartPicker = dynamic(() => import("@/components/builder/QuickStartPicker"), { ssr: false });
 
 // --- Types ---
 
@@ -430,6 +433,11 @@ function BuildContent() {
   const searchParams = useSearchParams();
   const initialPrompt = searchParams.get("prompt") || "";
   const initialUrl = searchParams.get("url") || "";
+  const modeParam = searchParams.get("mode");
+
+  const [activeTab, setActiveTab] = useState<"ai" | "template">(
+    modeParam === "template" ? "template" : "ai"
+  );
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
@@ -770,6 +778,38 @@ function BuildContent() {
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* LEFT PANEL */}
         <div className="w-full lg:w-[420px] xl:w-[460px] border-r border-[#E5E7EB] flex flex-col flex-shrink-0 overflow-y-auto">
+
+          {/* Tab switcher */}
+          <div className="flex border-b border-[#E5E7EB] px-4 pt-3 gap-1">
+            <button
+              onClick={() => setActiveTab("ai")}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${
+                activeTab === "ai"
+                  ? "text-[#2D6A4F] border-[#2D6A4F] bg-[#F9FAFB]"
+                  : "text-[#6B7280] border-transparent hover:text-[#111827]"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              AI Builder
+            </button>
+            <button
+              onClick={() => setActiveTab("template")}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${
+                activeTab === "template"
+                  ? "text-[#2D6A4F] border-[#2D6A4F] bg-[#F9FAFB]"
+                  : "text-[#6B7280] border-transparent hover:text-[#111827]"
+              }`}
+            >
+              <LayoutTemplate className="w-3.5 h-3.5" />
+              Quick Start Templates
+            </button>
+          </div>
+
+          {/* Quick Start Templates tab */}
+          {activeTab === "template" && <QuickStartPicker />}
+
+          {/* AI Builder tab */}
+          {activeTab === "ai" && <>
 
           {/* Phase: Prompt */}
           {state.phase === "prompt" && (
@@ -1176,12 +1216,27 @@ function BuildContent() {
               </div>
             </div>
           )}
+          </>}
         </div>
 
         {/* RIGHT PANEL */}
         <div className="flex-1 bg-[#F9FAFB] flex items-center justify-center p-6 md:p-10 overflow-y-auto hidden lg:flex">
           <AnimatePresence mode="wait">
-            {state.phase === "prompt" && (
+            {activeTab === "template" && (
+              <motion.div key="template-idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="text-center max-w-sm">
+                <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <LayoutTemplate className="w-8 h-8 text-[#2D6A4F]" />
+                </div>
+                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>
+                  Start from a proven template
+                </p>
+                <p className="text-sm text-[#9CA3AF]">
+                  Choose your industry, pick a funnel type, and fill in your details — your funnel will be ready in seconds.
+                </p>
+              </motion.div>
+            )}
+            {activeTab === "ai" && state.phase === "prompt" && (
               <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="text-center max-w-sm">
                 <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">

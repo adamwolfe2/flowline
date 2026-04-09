@@ -24,6 +24,8 @@ export const users = pgTable('users', {
   email: text('email').notNull(),
   stripeCustomerId: text('stripe_customer_id'),
   plan: planEnum('plan').default('free').notNull(),
+  hadTrial: boolean('had_trial').default(false).notNull(),
+  trialEndsAt: timestamp('trial_ends_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   notificationPreferences: jsonb('notification_preferences')
     .$type<{ leadAlerts: boolean; weeklyDigest: boolean }>()
@@ -47,6 +49,7 @@ export const funnels = pgTable('funnels', {
   shareDailyDigest: boolean('share_daily_digest').default(false),
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
   clientId: uuid('client_id').references(() => clients.id, { onDelete: 'set null' }),
+  creationSource: text('creation_source').$type<'ai' | 'template' | 'manual'>(),
 }, (t) => [
   index('funnels_user_id_idx').on(t.userId),
   index('funnels_team_id_idx').on(t.teamId),
@@ -430,3 +433,26 @@ export const funnelInsights = pgTable('funnel_insights', {
 
 export type FunnelInsight = typeof funnelInsights.$inferSelect;
 export type NewFunnelInsight = typeof funnelInsights.$inferInsert;
+
+// ── Behavior Triggers — Lead Events (feature-flagged: ENABLE_BEHAVIOR_TRIGGERS) ──
+
+export const leadEventTypeEnum = pgEnum('lead_event_type', [
+  'email_opened', 'email_clicked', 'calendar_viewed', 'calendar_booked',
+  'page_visited', 'funnel_revisited',
+]);
+
+export const leadEvents = pgTable('lead_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  leadId: uuid('lead_id').notNull().references(() => leads.id, { onDelete: 'cascade' }),
+  funnelId: uuid('funnel_id').references(() => funnels.id, { onDelete: 'set null' }),
+  eventType: leadEventTypeEnum('event_type').notNull(),
+  metadata: jsonb('metadata'),
+  occurredAt: timestamp('occurred_at').defaultNow().notNull(),
+}, (t) => [
+  index('lead_events_lead_id_idx').on(t.leadId),
+  index('lead_events_funnel_id_event_type_idx').on(t.funnelId, t.eventType),
+  index('lead_events_occurred_at_idx').on(t.occurredAt),
+]);
+
+export type LeadEvent = typeof leadEvents.$inferSelect;
+export type NewLeadEvent = typeof leadEvents.$inferInsert;

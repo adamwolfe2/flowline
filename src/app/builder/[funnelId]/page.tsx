@@ -14,9 +14,10 @@ import { TrackingEditor } from "@/components/builder/TrackingEditor";
 import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { PopupCampaignEditor } from "@/components/builder/PopupCampaignEditor";
 import { PopupPreview } from "@/components/builder/PopupPreview";
+import { EngagementEditor } from "@/components/builder/EngagementEditor";
 import { UpgradeGate } from "@/components/builder/UpgradeGate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2, Zap } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2, Zap, Bell } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -41,7 +42,7 @@ export default function BuilderPage() {
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window !== "undefined") {
       const tabParam = new URLSearchParams(window.location.search).get("tab");
-      if (tabParam && ["content", "blocks", "brand", "calendars", "emails", "ab-test", "tracking", "popup", "publish"].includes(tabParam)) {
+      if (tabParam && ["content", "blocks", "brand", "calendars", "emails", "ab-test", "tracking", "popup", "engagement", "publish"].includes(tabParam)) {
         return tabParam;
       }
     }
@@ -262,6 +263,7 @@ export default function BuilderPage() {
     { value: "ab-test", label: "A/B", icon: FlaskConical },
     { value: "tracking", label: "Tracking", icon: BarChart3 },
     { value: "popup", label: "Popup", icon: Zap },
+    { value: "engagement", label: "Engage", icon: Bell },
     { value: "publish", label: "Publish", icon: Send },
   ];
 
@@ -499,6 +501,9 @@ export default function BuilderPage() {
                   <UpgradeGate feature="Popup Campaigns" plan={userPlan}>
                     <PopupCampaignEditor funnel={funnel} onPreviewChange={setPopupPreviewSettings} />
                   </UpgradeGate>
+                </TabsContent>
+                <TabsContent value="engagement" className="mt-0">
+                  <EngagementEditor config={config} onSave={saveConfig} />
                 </TabsContent>
                 <TabsContent value="publish" className="mt-0">
                   <PublishPanel funnel={funnel} config={config} onUpdate={setFunnel} />

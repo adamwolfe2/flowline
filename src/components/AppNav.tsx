@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 import { CommandPalette } from "@/components/CommandPalette";
+import { TrialBanner } from "@/components/TrialBanner";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 const navLinks = [
@@ -31,6 +32,7 @@ function darkenHex(hex: string, percent: number): string {
 export function AppNav() {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<Date | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [wsDropdownOpen, setWsDropdownOpen] = useState(false);
@@ -48,7 +50,10 @@ export function AppNav() {
   useEffect(() => {
     fetch("/api/user")
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.isAdmin) setIsAdmin(true); })
+      .then(data => {
+        if (data?.isAdmin) setIsAdmin(true);
+        if (data?.trialEndsAt) setTrialEndsAt(new Date(data.trialEndsAt));
+      })
       .catch(() => {});
   }, []);
 
@@ -83,7 +88,9 @@ export function AppNav() {
   }, [pathname]);
 
   return (
-    <nav className="bg-white border-b border-[#E5E7EB] sticky top-0 z-50">
+    <div className="sticky top-0 z-50">
+      {trialEndsAt && <TrialBanner trialEndsAt={trialEndsAt} />}
+    <nav className="bg-white border-b border-[#E5E7EB]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-bold text-[#111827]" style={{ fontFamily: "var(--font-plus-jakarta)" }}>
@@ -304,5 +311,6 @@ export function AppNav() {
         onOpenChange={setPaletteOpen}
       />
     </nav>
+    </div>
   );
 }

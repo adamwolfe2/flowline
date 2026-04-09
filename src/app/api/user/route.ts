@@ -39,6 +39,7 @@ export async function GET() {
       email: user?.email ?? null,
       isAdmin,
       notificationPreferences: user?.notificationPreferences ?? { leadAlerts: true, weeklyDigest: true },
+      trialEndsAt: user?.trialEndsAt ?? null,
     }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=120" },
     });

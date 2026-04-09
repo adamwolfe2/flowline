@@ -128,6 +128,16 @@ export async function POST(req: Request) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";
+    const isProPlan = priceId === "pro_monthly" || priceId === "pro_annual";
+    const offerTrial = isProPlan && !user.hadTrial;
+
+    if (offerTrial) {
+      await db.update(users).set({ hadTrial: true }).where(eq(users.id, userId));
+      user = { ...user, hadTrial: true };
+    }
+
+    const trialDays = offerTrial ? 14 : undefined;
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [{ price: resolvedPriceId, quantity: 1 }],
@@ -135,7 +145,10 @@ export async function POST(req: Request) {
       success_url: `${appUrl}/dashboard?upgraded=true`,
       cancel_url: `${appUrl}/billing`,
       metadata: { clerkUserId: userId },
-      subscription_data: { metadata: { clerkUserId: userId } },
+      subscription_data: {
+        metadata: { clerkUserId: userId },
+        ...(trialDays !== undefined ? { trial_period_days: trialDays } : {}),
+      },
       allow_promotion_codes: true,
     });
 

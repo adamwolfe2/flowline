@@ -14,7 +14,7 @@ import { useTracking } from "./useTracking";
 import { TrackingPixels, fireConversionEvent, fireQuizStartEvent, fireQuizCompletedEvent, fireQuestionViewEvent } from "./TrackingPixels";
 import { toast } from "sonner";
 import { EditableOverlay } from "./EditableOverlay";
-import { Pencil, ExternalLink } from "lucide-react";
+import { Pencil, ExternalLink, X } from "lucide-react";
 
 interface FunnelClientProps {
   config: FunnelConfig;
@@ -235,6 +235,65 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
     }
   }, [step, questionStartStep, emailStep, currentQuestion, currentQuestionIndex, activeConfig.tracking]);
 
+  // ── Exit-intent ──────────────────────────────────────────────────────────
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const exitIntentFired = useRef(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const cfg = activeConfig.engagementTriggers?.exitIntent;
+    if (!cfg?.enabled || isEmbedMode || isPopupMode || step === 0 || step >= successStep) return;
+
+    // Desktop: mouseleave toward top of viewport
+    function onMouseLeave(e: MouseEvent) {
+      if (exitIntentFired.current) return;
+      if (e.clientY <= 10) {
+        exitIntentFired.current = true;
+        setShowExitIntent(true);
+      }
+    }
+
+    // Mobile: quick scroll-up gesture
+    function onScroll() {
+      if (exitIntentFired.current) return;
+      const delta = lastScrollY.current - window.scrollY;
+      if (delta > 60 && window.scrollY < 80) {
+        exitIntentFired.current = true;
+        setShowExitIntent(true);
+      }
+      lastScrollY.current = window.scrollY;
+    }
+
+    document.addEventListener("mouseleave", onMouseLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      document.removeEventListener("mouseleave", onMouseLeave);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [activeConfig.engagementTriggers, step, successStep, isEmbedMode, isPopupMode]);
+
+  // ── Urgency timer ─────────────────────────────────────────────────────────
+  const [urgencySeconds, setUrgencySeconds] = useState<number | null>(null);
+
+  useEffect(() => {
+    const cfg = activeConfig.engagementTriggers?.urgency;
+    if (!cfg?.enabled) { setUrgencySeconds(null); return; }
+    const totalSeconds = (cfg.deadlineMinutes ?? 10) * 60;
+    setUrgencySeconds(totalSeconds);
+  }, [activeConfig.engagementTriggers?.urgency]);
+
+  useEffect(() => {
+    if (urgencySeconds === null || urgencySeconds <= 0) return;
+    const id = setInterval(() => {
+      setUrgencySeconds((s) => (s !== null && s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [urgencySeconds !== null]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const urgencyDisplay = urgencySeconds !== null
+    ? `${Math.floor(urgencySeconds / 60)}:${String(urgencySeconds % 60).padStart(2, "0")}`
+    : null;
+
   // For progress bar, map question steps to 1..totalQuestions range
   const progressStep =
     step >= questionStartStep && step < emailStep
@@ -289,7 +348,52 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
         cursivePixelId={activeConfig.tracking?.cursivePixelId}
         customScripts={activeConfig.tracking?.customScripts}
       />
+      {/* Exit-intent modal */}
+      {showExitIntent && activeConfig.engagementTriggers?.exitIntent?.enabled && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center relative"
+          >
+            <button
+              onClick={() => setShowExitIntent(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 p-1"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <h3
+              className="text-xl font-bold text-gray-900 mb-2"
+              style={{ fontFamily: activeConfig.brand.fontHeading }}
+            >
+              {activeConfig.engagementTriggers.exitIntent.headline || "Wait! Don't leave yet."}
+            </h3>
+            <p className="text-sm text-gray-500 mb-5">
+              {activeConfig.engagementTriggers.exitIntent.subtext || "You're one step away from finding out if you qualify."}
+            </p>
+            <button
+              onClick={() => setShowExitIntent(false)}
+              className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90"
+              style={{ backgroundColor: activeConfig.brand.primaryColor }}
+            >
+              {activeConfig.engagementTriggers.exitIntent.ctaText || "Continue"}
+            </button>
+          </motion.div>
+        </div>
+      )}
+
       <div className={`w-full max-w-lg mx-auto ${isPopupMode ? "py-3 px-3" : "py-12 px-4"}`}>
+        {/* Urgency timer */}
+        {!isPopupMode && urgencyDisplay && activeConfig.engagementTriggers?.urgency?.enabled && (
+          <div
+            className="flex items-center justify-center gap-2 mb-3 px-3 py-1.5 rounded-full text-xs font-semibold w-fit mx-auto"
+            style={{ backgroundColor: activeConfig.brand.primaryColorLight, color: activeConfig.brand.primaryColor }}
+          >
+            <span>{activeConfig.engagementTriggers.urgency.label || "Offer expires in"}</span>
+            <span className="font-mono tabular-nums">{urgencyDisplay}</span>
+          </div>
+        )}
         {!isPopupMode && <ProgressBar config={activeConfig} step={progressStep} totalQuestions={totalQuestions} />}
 
         <AnimatePresence mode="wait">

@@ -42,6 +42,14 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
   }, [config.tracking]);
   const { brand } = config;
   const [calEmbedFailed, setCalEmbedFailed] = useState(false);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobileScreen(window.innerWidth < 600);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // Tier-specific results
   const tierResults = config.quiz.results?.[tier as keyof typeof config.quiz.results];
@@ -200,11 +208,24 @@ export function SuccessStep({ config, calendarUrl, email, score, tier }: Success
         transition={{ delay: 0.3, duration: 0.4 }}
         className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
       >
-        {useCalEmbed && effectiveCalLink && !calEmbedFailed ? (
+        {useCalEmbed && effectiveCalLink && !calEmbedFailed && !isMobileScreen ? (
           <div
             id={`cal-embed-${effectiveNamespace}`}
             style={{ width: "100%", height: "min(700px, 80vh)", overflow: "auto" }}
           />
+        ) : (useCalEmbed && effectiveCalLink && !calEmbedFailed && isMobileScreen) || (isMobileScreen && safeCalendarUrl) ? (
+          <div className="text-center py-10">
+            <p className="text-sm text-gray-500 mb-5">Tap below to book your call.</p>
+            <a
+              href={safeCalendarUrl || `https://cal.com/${effectiveCalLink}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-white font-semibold text-base shadow-lg transition-all hover:opacity-90"
+              style={{ backgroundColor: brand.primaryColor }}
+            >
+              Book Your Call
+            </a>
+          </div>
         ) : safeCalendarUrl ? (
           <iframe
             src={safeCalendarUrl}
