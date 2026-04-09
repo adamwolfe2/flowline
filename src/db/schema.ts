@@ -405,3 +405,28 @@ export type PopupCampaign = typeof popupCampaigns.$inferSelect;
 export type NewPopupCampaign = typeof popupCampaigns.$inferInsert;
 export type PopupImpression = typeof popupImpressions.$inferSelect;
 export type NewPopupImpression = typeof popupImpressions.$inferInsert;
+
+// ── Funnel Insights (AI-generated) ──
+
+export const funnelInsights = pgTable('funnel_insights', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  funnelId: uuid('funnel_id').notNull().references(() => funnels.id, { onDelete: 'cascade' }),
+  configHash: text('config_hash').notNull(),
+  timeRange: text('time_range').notNull(),
+  payload: jsonb('payload').notNull(),
+  inputsSnapshot: jsonb('inputs_snapshot').notNull(),
+  model: text('model').notNull(),
+  promptTokens: integer('prompt_tokens').notNull(),
+  completionTokens: integer('completion_tokens').notNull(),
+  costUsd: integer('cost_usd_millicents'),
+  generationMs: integer('generation_ms').notNull(),
+  sessionCountAtGeneration: integer('session_count_at_generation').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  index('funnel_insights_funnel_id_idx').on(t.funnelId),
+  index('funnel_insights_funnel_id_expires_at_idx').on(t.funnelId, t.expiresAt),
+]);
+
+export type FunnelInsight = typeof funnelInsights.$inferSelect;
+export type NewFunnelInsight = typeof funnelInsights.$inferInsert;

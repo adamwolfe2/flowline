@@ -62,6 +62,19 @@ export interface FunnelConfig {
     cursivePixelId?: string;
     customScripts?: string[];
   };
+  engagementTriggers?: {
+    exitIntent?: {
+      enabled: boolean;
+      headline?: string;
+      subtext?: string;
+      ctaText?: string;
+    };
+    urgency?: {
+      enabled: boolean;
+      deadlineMinutes?: number;
+      label?: string;
+    };
+  };
 }
 
 export interface ContentBlock {

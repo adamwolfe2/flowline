@@ -319,10 +319,119 @@ export async function getVariantPerformance(funnelId: string, timeRange = 'all')
   return results;
 }
 
+export async function getSourceConversion(funnelId: string, timeRange = 'all'): Promise<Array<{ source: string | null; sessions: number; conversions: number; conversionRate: number }>> {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
+    : eq(funnelSessions.funnelId, funnelId);
+
+  const rows = await db.select({
+    source: funnelSessions.utmSource,
+    sessions: sql<number>`count(*)::int`,
+    conversions: sql<number>`coalesce(sum(case when ${funnelSessions.converted} then 1 else 0 end), 0)::int`,
+  }).from(funnelSessions)
+    .where(whereClause)
+    .groupBy(funnelSessions.utmSource)
+    .orderBy(sql`count(*) desc`)
+    .limit(10);
+
+  return rows.map((r) => {
+    const sessions = Number(r.sessions);
+    const conversions = Number(r.conversions);
+    return {
+      source: r.source,
+      sessions,
+      conversions,
+      conversionRate: sessions > 0 ? Math.round((conversions / sessions) * 100) : 0,
+    };
+  });
+}
+
+export async function getDeviceConversion(funnelId: string, timeRange = 'all'): Promise<Array<{ deviceType: string | null; sessions: number; completed: number; completionRate: number }>> {
+  const cutoff = getDateCutoff(timeRange);
+  const whereClause = cutoff
+    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
+    : eq(funnelSessions.funnelId, funnelId);
+
+  const rows = await db.select({
+    deviceType: funnelSessions.deviceType,
+    sessions: sql<number>`count(*)::int`,
+    completed: sql<number>`coalesce(sum(case when ${funnelSessions.completed} then 1 else 0 end), 0)::int`,
+  }).from(funnelSessions)
+    .where(whereClause)
+    .groupBy(funnelSessions.deviceType);
+
+  return rows.map((r) => {
+    const sessions = Number(r.sessions);
+    const completed = Number(r.completed);
+    return {
+      deviceType: r.deviceType,
+      sessions,
+      completed,
+      completionRate: sessions > 0 ? Math.round((completed / sessions) * 100) : 0,
+    };
+  });
+}
+
+export async function getTimeToConvertHistogram(funnelId: string, timeRange = 'all'): Promise<Array<{ bucket: string; count: number }>> {
+  const cutoff = getDateCutoff(timeRange);
+  const baseConditions = [
+    eq(funnelSessions.funnelId, funnelId),
+    sql`${funnelSessions.converted} = true`,
+    sql`${funnelSessions.endedAt} is not null`,
+  ];
+  if (cutoff) baseConditions.push(gte(funnelSessions.startedAt, cutoff));
+  const whereClause = and(...baseConditions);
+
+  const rows = await db.select({
+    bucket: sql<string>`
+      case
+        when extract(epoch from (${funnelSessions.endedAt} - ${funnelSessions.startedAt})) / 60 < 1 then '0-1min'
+        when extract(epoch from (${funnelSessions.endedAt} - ${funnelSessions.startedAt})) / 60 < 5 then '1-5min'
+        when extract(epoch from (${funnelSessions.endedAt} - ${funnelSessions.startedAt})) / 60 < 30 then '5-30min'
+        else '30min+'
+      end
+    `,
+    count: sql<number>`count(*)::int`,
+  }).from(funnelSessions)
+    .where(whereClause)
+    .groupBy(sql`
+      case
+        when extract(epoch from (${funnelSessions.endedAt} - ${funnelSessions.startedAt})) / 60 < 1 then '0-1min'
+        when extract(epoch from (${funnelSessions.endedAt} - ${funnelSessions.startedAt})) / 60 < 5 then '1-5min'
+        when extract(epoch from (${funnelSessions.endedAt} - ${funnelSessions.startedAt})) / 60 < 30 then '5-30min'
+        else '30min+'
+      end
+    `);
+
+  // Normalize to fixed bucket order, filling in zeros for missing buckets
+  const bucketOrder = ['0-1min', '1-5min', '5-30min', '30min+'];
+  const countMap: Record<string, number> = {};
+  for (const row of rows) {
+    countMap[row.bucket] = Number(row.count);
+  }
+  return bucketOrder.map((bucket) => ({ bucket, count: countMap[bucket] ?? 0 }));
+}
+
 export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRange = 'all', config?: FunnelConfig | null) {
   const leadsLimit = 25;
   const leadsOffset = leadsPage * leadsLimit;
-  const [stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount, variantPerformance] = await Promise.all([
+  const [
+    stats,
+    dropoff,
+    answers,
+    abandons,
+    devices,
+    utmSources,
+    tiers,
+    timeSeries,
+    recentLeads,
+    totalLeadCount,
+    variantPerformance,
+    sourceConversion,
+    deviceConversion,
+    timeToConvertHistogram,
+  ] = await Promise.all([
     getFunnelOverview(funnelId, timeRange),
     getDropoffWaterfall(funnelId, timeRange, config),
     getAnswerDistribution(funnelId, timeRange),
@@ -334,6 +443,24 @@ export async function getFullAnalytics(funnelId: string, leadsPage = 0, timeRang
     getLeadsForTable(funnelId, leadsLimit, leadsOffset, timeRange),
     getLeadCount(funnelId, timeRange),
     getVariantPerformance(funnelId, timeRange),
+    getSourceConversion(funnelId, timeRange),
+    getDeviceConversion(funnelId, timeRange),
+    getTimeToConvertHistogram(funnelId, timeRange),
   ]);
-  return { stats, dropoff, answers, abandons, devices, utmSources, tiers, timeSeries, recentLeads, totalLeadCount, variantPerformance };
+  return {
+    stats,
+    dropoff,
+    answers,
+    abandons,
+    devices,
+    utmSources,
+    tiers,
+    timeSeries,
+    recentLeads,
+    totalLeadCount,
+    variantPerformance,
+    sourceConversion,
+    deviceConversion,
+    timeToConvertHistogram,
+  };
 }

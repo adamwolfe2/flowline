@@ -29,6 +29,8 @@ export const popupWidgetLimiter = createRateLimiter(30, "1 m");    // 30 popup w
 export const popupImpressionLimiter = createRateLimiter(60, "1 m"); // 60 popup impression events per IP per minute
 export const v1LeadsLimiter = createRateLimiter(60, "1 m");        // 60 v1 leads API requests per key per minute
 export const v1FunnelsLimiter = createRateLimiter(30, "1 m");      // 30 v1 funnels API requests per key per minute
+export const insightsProLimiter = createRateLimiter(5, "1 d");     // 5 insight regenerations per pro user per day
+export const insightsAgencyLimiter = createRateLimiter(20, "1 d"); // 20 insight regenerations per agency user per day
 
 export interface RateLimitResult {
   limited: boolean;

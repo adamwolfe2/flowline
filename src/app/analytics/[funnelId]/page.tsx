@@ -48,6 +48,35 @@ const WaterfallChart = dynamic(
   }
 );
 
+const SourceConversionChart = dynamic(
+  () => import("@/components/analytics/SourceConversionChart").then((m) => m.SourceConversionChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 bg-gray-50 rounded-xl animate-pulse" />,
+  }
+);
+
+const DeviceConversionChart = dynamic(
+  () => import("@/components/analytics/DeviceConversionChart").then((m) => m.DeviceConversionChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 bg-gray-50 rounded-xl animate-pulse" />,
+  }
+);
+
+const TimeToConvertChart = dynamic(
+  () => import("@/components/analytics/TimeToConvertChart").then((m) => m.TimeToConvertChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 bg-gray-50 rounded-xl animate-pulse" />,
+  }
+);
+
+const InsightsCard = dynamic(
+  () => import("@/components/analytics/InsightsCard").then((m) => m.InsightsCard),
+  { ssr: false, loading: () => <div className="h-48 bg-gray-50 rounded-xl animate-pulse" /> }
+);
+
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -66,6 +95,8 @@ interface AnalyticsData {
     conversionRate: number;
     avgCompletionTimeSec: number;
   };
+  userPlan?: string;
+  isAdmin?: boolean;
   dropoff: Array<{
     stepIndex: number;
     stepLabel: string;
@@ -91,6 +122,19 @@ interface AnalyticsData {
     conversionRate: number;
     avgScore: number;
   }>;
+  sourceConversion: Array<{
+    source: string | null;
+    sessions: number;
+    conversions: number;
+    conversionRate: number;
+  }>;
+  deviceConversion: Array<{
+    deviceType: string | null;
+    sessions: number;
+    completed: number;
+    completionRate: number;
+  }>;
+  timeToConvertHistogram: Array<{ bucket: string; count: number }>;
   totalLeadCount: number;
   recentLeads: Array<{
     id: string;
@@ -377,7 +421,7 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel, variantPerformance } = data;
+  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel, variantPerformance, sourceConversion, deviceConversion, timeToConvertHistogram } = data;
   const leadsPerPage = 25;
   const totalLeadPages = Math.max(1, Math.ceil(totalLeadCount / leadsPerPage));
 
@@ -538,6 +582,25 @@ export default function AnalyticsDashboard() {
             </motion.div>
           ))}
         </div>
+
+        {/* ---- AI Insights ---- */}
+        {data.userPlan && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.28 }}
+          >
+            <ErrorBoundary>
+              <InsightsCard
+                key={timeRange}
+                funnelId={funnelId}
+                timeRange={timeRange}
+                userPlan={data.userPlan as 'free' | 'pro' | 'agency'}
+                isAdmin={data.isAdmin ?? false}
+              />
+            </ErrorBoundary>
+          </motion.div>
+        )}
 
         {/* ---- Waterfall Chart ---- */}
         <motion.div
@@ -743,6 +806,35 @@ export default function AnalyticsDashboard() {
             </div>
           );
         })()}
+
+        {/* ---- Audience Insights ---- */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+        >
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Audience Insights</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <ErrorBoundary>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Traffic Source Conversion</h4>
+                <SourceConversionChart data={sourceConversion ?? []} />
+              </div>
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Device Completion Rate</h4>
+                <DeviceConversionChart data={deviceConversion ?? []} />
+              </div>
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Time to Convert</h4>
+                <TimeToConvertChart data={timeToConvertHistogram ?? []} />
+              </div>
+            </ErrorBoundary>
+          </div>
+        </motion.div>
 
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>

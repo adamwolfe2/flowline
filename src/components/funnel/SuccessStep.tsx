@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
+import { fireBookingEvent } from "./TrackingPixels";
 
 declare global {
   interface Window {
@@ -19,6 +20,26 @@ interface SuccessStepProps {
 }
 
 export function SuccessStep({ config, calendarUrl, email, score, tier }: SuccessStepProps) {
+  // Listen for Cal.com booking confirmation postMessage and fire pixel booking event
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      try {
+        const data = event.data;
+        if (!data || typeof data !== "object") return;
+        const isBookingSuccess =
+          data.type === "CAL:BOOKING_SUCCESSFUL" ||
+          data.type === "bookingSuccessfulV2" ||
+          (data.namespace === "calcom" && data.action === "bookingSuccessful");
+        if (isBookingSuccess) {
+          fireBookingEvent(config.tracking);
+        }
+      } catch {
+        // Never throw — booking pixel is best-effort
+      }
+    }
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [config.tracking]);
   const { brand } = config;
   const [calEmbedFailed, setCalEmbedFailed] = useState(false);
 

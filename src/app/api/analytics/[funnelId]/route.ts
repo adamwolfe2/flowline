@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getFullAnalytics } from "@/db/queries/analytics";
 import { logger } from "@/lib/logger";
 import { requireFunnelAccess } from "@/lib/team-access";
+import { isSuperAdmin } from "@/lib/admin";
 import type { FunnelConfig } from "@/types";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ funnelId: string }> }) {
@@ -26,7 +30,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     const timeRange = VALID_TIME_RANGES.includes(rawTimeRange) ? rawTimeRange : "all";
     const funnelConfig = funnel.config as FunnelConfig;
     const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange, funnelConfig);
-    return NextResponse.json({ funnel, ...analytics }, {
+
+    const isAdmin = await isSuperAdmin(userId);
+    let userPlan = 'agency';
+    if (!isAdmin) {
+      const [user] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, userId));
+      userPlan = user?.plan ?? 'free';
+    }
+
+    return NextResponse.json({ funnel, ...analytics, userPlan, isAdmin }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
   } catch (error) {

@@ -16,7 +16,7 @@ export function ProgressBar({ config, step, totalQuestions }: ProgressBarProps) 
   if (!visible) return null;
 
   return (
-    <div className="w-full mb-8">
+    <div className="w-full mb-6 sm:mb-8 sticky top-0 sm:static bg-white sm:bg-transparent py-3 sm:py-0 z-20 shadow-sm sm:shadow-none">
       <div className="flex justify-between items-center mb-2">
         <span className="text-xs text-gray-400 font-medium">
           {step <= totalQuestions ? `Question ${step} of ${totalQuestions}` : "Almost done"}

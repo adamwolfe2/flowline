@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
 import { WelcomeStep } from "./WelcomeStep";
@@ -11,7 +11,7 @@ import { VideoStep } from "./VideoStep";
 import { ContentBlockDisplay } from "./ContentBlockDisplay";
 import { ProgressBar } from "./ProgressBar";
 import { useTracking } from "./useTracking";
-import { TrackingPixels, fireConversionEvent, fireQuizStartEvent } from "./TrackingPixels";
+import { TrackingPixels, fireConversionEvent, fireQuizStartEvent, fireQuizCompletedEvent, fireQuestionViewEvent } from "./TrackingPixels";
 import { toast } from "sonner";
 import { EditableOverlay } from "./EditableOverlay";
 import { Pencil, ExternalLink } from "lucide-react";
@@ -218,6 +218,22 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
     step >= questionStartStep && step < emailStep
       ? activeConfig.quiz.questions[currentQuestionIndex]
       : undefined;
+
+  // Fire pixel quiz-completed event — at most once per session
+  const hasFiredCompletion = useRef(false);
+  useEffect(() => {
+    if (step === successStep && !hasFiredCompletion.current) {
+      hasFiredCompletion.current = true;
+      fireQuizCompletedEvent(activeConfig.tracking);
+    }
+  }, [step, successStep, activeConfig.tracking]);
+
+  // Fire pixel question-view event on every question step transition
+  useEffect(() => {
+    if (step >= questionStartStep && step < emailStep && currentQuestion) {
+      fireQuestionViewEvent(activeConfig.tracking, currentQuestionIndex + 1, currentQuestion.key);
+    }
+  }, [step, questionStartStep, emailStep, currentQuestion, currentQuestionIndex, activeConfig.tracking]);
 
   // For progress bar, map question steps to 1..totalQuestions range
   const progressStep =

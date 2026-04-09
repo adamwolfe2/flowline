@@ -153,3 +153,76 @@ export function fireQuizStartEvent(tracking?: { fbPixelId?: string; tiktokPixelI
     window.gtag("event", "quiz_start");
   }
 }
+
+// Fire quiz completed event (reaches success step)
+export function fireQuizCompletedEvent(tracking?: { fbPixelId?: string; tiktokPixelId?: string; ga4MeasurementId?: string }) {
+  if (!tracking) return;
+
+  if (tracking.fbPixelId && window.fbq) {
+    try {
+      window.fbq("track", "CompleteRegistration");
+    } catch {}
+  }
+  if (tracking.tiktokPixelId && window.ttq) {
+    try {
+      window.ttq.track("CompleteRegistration");
+    } catch {}
+  }
+  if (tracking.ga4MeasurementId && window.gtag) {
+    try {
+      window.gtag("event", "quiz_completed");
+    } catch {}
+  }
+}
+
+// Fire booking event (calendar booking confirmed)
+export function fireBookingEvent(tracking?: { fbPixelId?: string; tiktokPixelId?: string; ga4MeasurementId?: string }) {
+  if (!tracking) return;
+
+  if (tracking.fbPixelId && window.fbq) {
+    try {
+      window.fbq("track", "Schedule");
+    } catch {}
+  }
+  if (tracking.tiktokPixelId && window.ttq) {
+    try {
+      window.ttq.track("Subscribe");
+    } catch {}
+  }
+  if (tracking.ga4MeasurementId && window.gtag) {
+    try {
+      window.gtag("event", "book_appointment");
+    } catch {}
+  }
+}
+
+// Fire question view event (user advances to a new question step)
+export function fireQuestionViewEvent(
+  tracking: { fbPixelId?: string; tiktokPixelId?: string; ga4MeasurementId?: string } | undefined,
+  stepIndex: number,
+  questionKey?: string,
+) {
+  if (!tracking) return;
+
+  if (tracking.fbPixelId && window.fbq) {
+    try {
+      window.fbq("track", "ViewContent", {
+        content_name: `Question ${stepIndex}`,
+        content_category: "quiz_question",
+      });
+    } catch {}
+  }
+  if (tracking.tiktokPixelId && window.ttq) {
+    try {
+      window.ttq.track("ViewContent", { content_id: questionKey || `q${stepIndex}` });
+    } catch {}
+  }
+  if (tracking.ga4MeasurementId && window.gtag) {
+    try {
+      window.gtag("event", "view_content", {
+        content_type: "question",
+        step_index: stepIndex,
+      });
+    } catch {}
+  }
+}
