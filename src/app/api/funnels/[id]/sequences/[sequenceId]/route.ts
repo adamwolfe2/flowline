@@ -64,21 +64,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           return NextResponse.json({ error: "Email body must be under 10,000 characters" }, { status: 400 });
         }
       }
+      // Note: neon-http driver does not support transactions, so we run
+      // the delete + inserts sequentially. Validation above ensures all
+      // step payloads are well-formed before any DB writes happen.
       try {
-        await db.transaction(async (tx) => {
-          await tx.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));
+        await db.delete(emailSteps).where(eq(emailSteps.sequenceId, sequenceId));
 
-          for (let i = 0; i < body.steps.length; i++) {
-            const step = body.steps[i];
-            await tx.insert(emailSteps).values({
-              sequenceId,
-              stepOrder: i + 1,
-              subject: step.subject || "Follow up",
-              body: step.body || "",
-              delayHours: step.delayHours ?? 24,
-            });
-          }
-        });
+        if (body.steps.length > 0) {
+          const rows = body.steps.map((step: { subject?: string; body?: string; delayHours?: number }, i: number) => ({
+            sequenceId,
+            stepOrder: i + 1,
+            subject: step.subject || "Follow up",
+            body: step.body || "",
+            delayHours: step.delayHours ?? 24,
+          }));
+          await db.insert(emailSteps).values(rows);
+        }
       } catch (stepError) {
         logger.error("Failed to update sequence steps", {
           sequenceId,
