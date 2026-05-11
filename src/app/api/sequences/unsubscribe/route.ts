@@ -3,12 +3,23 @@ import { db } from "@/db";
 import { sequenceEnrollments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
 
   if (!token) {
     return new NextResponse(htmlPage("Invalid Link", "No unsubscribe token provided."), {
       status: 400,
+      headers: { "Content-Type": "text/html" },
+    });
+  }
+
+  // Validate UUID shape so we return a clean 404 instead of a Postgres
+  // "invalid input syntax for type uuid" 500 on malformed tokens.
+  if (!UUID_REGEX.test(token)) {
+    return new NextResponse(htmlPage("Not Found", "This unsubscribe link is no longer valid."), {
+      status: 404,
       headers: { "Content-Type": "text/html" },
     });
   }
