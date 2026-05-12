@@ -17,7 +17,7 @@ function createRateLimiter(requests: number, window: Duration) {
   });
 }
 
-export const submitLimiter = createRateLimiter(10, "1 h");   // 10 submissions per IP per hour
+export const submitLimiter = createRateLimiter(60, "1 h");   // 60 submissions per IP per hour — sized for shared NAT / mobile carriers during real campaigns
 export const eventLimiter = createRateLimiter(100, "1 m");   // 100 events per IP per minute
 export const aiLimiter = createRateLimiter(5, "1 d");        // 5 AI generations per user per day
 export const sessionLimiter = createRateLimiter(60, "1 m");  // 60 session starts per IP per minute
