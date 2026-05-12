@@ -41,25 +41,83 @@ export async function addDomainToVercel(domain: string) {
   });
 }
 
-export async function getDomainStatus(domain: string) {
+export type DomainStatusReason =
+  | "verified"
+  | "not_attached_to_project"
+  | "dns_not_propagated"
+  | "verification_pending"
+  | "https_not_ready"
+  | "unknown";
+
+export type DomainStatus = {
+  verified: boolean;
+  verification: Array<{ type: string; domain: string; value: string; reason: string }>;
+  reason: DomainStatusReason;
+  httpsReady?: boolean;
+};
+
+export async function getDomainStatus(domain: string): Promise<DomainStatus> {
   if (!VERCEL_PROJECT_ID) throw new Error("VERCEL_PROJECT_ID not configured");
+
+  let attachedToProject = true;
+  let verified = false;
+  let verification: Array<{ type: string; domain: string; value: string; reason: string }> = [];
 
   try {
     const result = await vercelFetch(
       `/v9/projects/${VERCEL_PROJECT_ID}/domains/${domain}/verify`,
       { method: "POST" }
     );
-    return {
-      verified: result.verified ?? false,
-      verification: result.verification ?? [],
-    };
+    verified = result.verified ?? false;
+    verification = result.verification ?? [];
   } catch (error) {
-    // If domain not found in Vercel, return unverified with empty verification
+    // If the domain isn't attached to the project, Vercel returns 404. We
+    // surface that distinctly — DNS may resolve correctly via the Vercel
+    // catch-all even when the domain isn't actually on the project, which
+    // means HTTPS never works and the user sees a cert error.
     if (error instanceof Error && error.message.includes("404")) {
-      return { verified: false, verification: [] };
+      attachedToProject = false;
     }
-    // For other errors, try to parse verification info from the error
-    return { verified: false, verification: [] };
+    // Other errors fall through to unverified
+  }
+
+  if (!attachedToProject) {
+    return { verified: false, verification: [], reason: "not_attached_to_project" };
+  }
+
+  if (!verified) {
+    return {
+      verified: false,
+      verification,
+      reason: verification.length > 0 ? "verification_pending" : "dns_not_propagated",
+    };
+  }
+
+  // Vercel says verified — confirm HTTPS actually serves, since the cert can
+  // take 30-60s to issue after the domain is added.
+  const httpsReady = await checkHttpsReachable(domain);
+
+  return {
+    verified: httpsReady,
+    verification: [],
+    reason: httpsReady ? "verified" : "https_not_ready",
+    httpsReady,
+  };
+}
+
+async function checkHttpsReachable(domain: string): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`https://${domain}/`, {
+      method: "HEAD",
+      signal: controller.signal,
+      redirect: "manual",
+    });
+    clearTimeout(timeout);
+    return res.status > 0;
+  } catch {
+    return false;
   }
 }
 

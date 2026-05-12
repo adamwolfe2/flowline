@@ -10,6 +10,7 @@ import { CheckCircle, Globe, Copy, ExternalLink, Code, BarChart2, Link2, Trash2,
 import { toast } from "sonner";
 import { firePublishConfetti } from "@/lib/confetti";
 import { useWorkspace, workspaceFetch } from "@/hooks/useWorkspace";
+import { splitDomainName } from "@/lib/domain-name";
 
 interface PublishPanelProps {
   funnel: Funnel;
@@ -25,7 +26,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
   const [customDomain, setCustomDomain] = useState(funnel.customDomain || "");
   const [savingDomain, setSavingDomain] = useState(false);
   const [checkingDns, setCheckingDns] = useState(false);
-  const [dnsStatus, setDnsStatus] = useState<"unknown" | "configured" | "pending" | "error">("unknown");
+  const [dnsStatus, setDnsStatus] = useState<"unknown" | "configured" | "pending" | "error" | "not_attached" | "https_pending">("unknown");
   const [verificationRecords, setVerificationRecords] = useState<Array<{ type: string; domain: string; value: string }>>([]);
   const [shareToken, setShareToken] = useState<string | null>(funnel.shareToken ?? null);
   const [shareExpiresAt, setShareExpiresAt] = useState<Date | string | null>(funnel.shareTokenExpiresAt ?? null);
@@ -75,9 +76,24 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
         if (data.verified) {
           setDnsStatus("configured");
           setVerificationRecords([]);
-        } else if (data.verification?.length) {
-          setDnsStatus("pending");
-          setVerificationRecords(data.verification);
+          return;
+        }
+        switch (data.reason) {
+          case "not_attached_to_project":
+            setDnsStatus("not_attached");
+            setVerificationRecords([]);
+            break;
+          case "https_not_ready":
+            setDnsStatus("https_pending");
+            setVerificationRecords([]);
+            break;
+          case "verification_pending":
+            setDnsStatus("pending");
+            setVerificationRecords(data.verification ?? []);
+            break;
+          default:
+            setDnsStatus("pending");
+            if (data.verification?.length) setVerificationRecords(data.verification);
         }
       })
       .catch(() => {});
@@ -786,8 +802,12 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                         const { verification, verified, ...funnelData } = data;
                         onUpdate(funnelData);
                         if (verification?.length) setVerificationRecords(verification);
-                        setDnsStatus(verified ? "configured" : "pending");
-                        toast.success("Domain saved. Set up your DNS records below.");
+                        // Start in "pending" — the Check DNS button will refine
+                        // to configured / https_pending / not_attached. Saving
+                        // "verified=true" immediately misled users when the
+                        // server failed to register with Vercel silently.
+                        setDnsStatus(verified ? "https_pending" : "pending");
+                        toast.success("Domain saved. Add the DNS record below, then click Check DNS.");
                       } else {
                         const data = await res.json();
                         toast.error(data.error || "Failed to save domain");
@@ -802,10 +822,12 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
             </div>
 
             {/* DNS instructions */}
-            {funnel.customDomain && (
+            {funnel.customDomain && (() => {
+              const { host: cnameHost } = splitDomainName(funnel.customDomain);
+              return (
               <div className="bg-white border border-[#E5E7EB] rounded-lg p-3 space-y-3">
                 <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">DNS Setup</p>
-                <p className="text-[10px] text-[#6B7280]">Add both records below in your DNS provider.</p>
+                <p className="text-[10px] text-[#6B7280]">Add the record below at your DNS provider (Cloudflare, GoDaddy, Namecheap, etc.).</p>
 
                 {/* Record 1: CNAME */}
                 <div className="space-y-1.5">
@@ -818,12 +840,20 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                         <Copy className="w-3 h-3 text-[#9CA3AF]" />
                       </Button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Name</span>
-                      <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{funnel.customDomain}</span>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(funnel.customDomain || ""); toast.success("Copied"); }}>
-                        <Copy className="w-3 h-3 text-[#9CA3AF]" />
-                      </Button>
+                    <div className="flex items-start gap-2">
+                      <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center mt-0.5">Name</span>
+                      <div className="flex-1 space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{cnameHost}</span>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(cnameHost); toast.success("Copied"); }}>
+                            <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                          </Button>
+                        </div>
+                        <p className="text-[9px] text-[#9CA3AF] leading-tight">
+                          Use <span className="font-mono text-[#6B7280]">{cnameHost}</span> in most providers (Cloudflare, GoDaddy, Namecheap).
+                          {" "}If yours wants the full hostname, use <span className="font-mono text-[#6B7280] break-all">{funnel.customDomain}</span> instead.
+                        </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Value</span>
@@ -837,7 +867,9 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
 
                 {/* Record 2: TXT verification */}
                 {verificationRecords.length > 0 ? (
-                  verificationRecords.map((rec, i) => (
+                  verificationRecords.map((rec, i) => {
+                    const recHost = splitDomainName(rec.domain).host;
+                    return (
                     <div key={i} className="space-y-1.5">
                       <p className="text-[10px] font-semibold text-[#374151]">Record {i + 2} — {rec.type} (Verification)</p>
                       <div className="space-y-1.5 bg-[#FFF7ED] rounded p-2 border border-amber-200">
@@ -848,12 +880,19 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                             <Copy className="w-3 h-3 text-[#9CA3AF]" />
                           </Button>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Name</span>
-                          <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{rec.domain}</span>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(rec.domain); toast.success("Copied"); }}>
-                            <Copy className="w-3 h-3 text-[#9CA3AF]" />
-                          </Button>
+                        <div className="flex items-start gap-2">
+                          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center mt-0.5">Name</span>
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-mono font-medium text-[#111827] flex-1 truncate">{recHost}</span>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(recHost); toast.success("Copied"); }}>
+                                <Copy className="w-3 h-3 text-[#9CA3AF]" />
+                              </Button>
+                            </div>
+                            <p className="text-[9px] text-[#9CA3AF] leading-tight">
+                              Or full hostname: <span className="font-mono text-[#6B7280] break-all">{rec.domain}</span>
+                            </p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] font-mono px-1.5 py-0.5 rounded flex-shrink-0 w-10 text-center">Value</span>
@@ -864,7 +903,8 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                         </div>
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 ) : dnsStatus !== "configured" ? (
                   <div className="space-y-1.5">
                     <p className="text-[10px] font-semibold text-[#374151]">Record 2 — TXT (Verification)</p>
@@ -889,14 +929,28 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                           if (data.verified) {
                             setDnsStatus("configured");
                             setVerificationRecords([]);
-                            toast.success("Domain verified and active");
+                            toast.success("Domain verified — HTTPS is live");
                           } else {
-                            setDnsStatus("pending");
-                            if (data.verification?.length) {
-                              setVerificationRecords(data.verification);
-                              toast("Verification pending. Add the TXT record below, then check again.");
-                            } else {
-                              toast("DNS not propagated yet. This can take up to 48 hours.");
+                            switch (data.reason) {
+                              case "not_attached_to_project":
+                                setDnsStatus("not_attached");
+                                setVerificationRecords([]);
+                                toast.error("Domain isn't registered on the server. Click Remove, then Save to re-register.");
+                                break;
+                              case "https_not_ready":
+                                setDnsStatus("https_pending");
+                                setVerificationRecords([]);
+                                toast("DNS is correct. SSL cert is still being issued — try again in 30-60 seconds.");
+                                break;
+                              case "verification_pending":
+                                setDnsStatus("pending");
+                                if (data.verification?.length) setVerificationRecords(data.verification);
+                                toast("Verification pending. Add the TXT record below, then check again.");
+                                break;
+                              case "dns_not_propagated":
+                              default:
+                                setDnsStatus("pending");
+                                toast("DNS not propagated yet. This can take up to 48 hours.");
                             }
                           }
                         } else {
@@ -913,15 +967,22 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                   </Button>
                   {dnsStatus === "configured" && (
                     <span className="flex items-center gap-1 text-[10px] text-green-600">
-                      <CheckCircle className="w-3 h-3" /> DNS verified
+                      <CheckCircle className="w-3 h-3" /> Verified — HTTPS ready
                     </span>
                   )}
                   {dnsStatus === "pending" && (
-                    <span className="text-[10px] text-amber-600">Waiting for verification</span>
+                    <span className="text-[10px] text-amber-600">Waiting for DNS</span>
+                  )}
+                  {dnsStatus === "https_pending" && (
+                    <span className="text-[10px] text-amber-600">DNS ok — waiting for SSL cert (30–60s)</span>
+                  )}
+                  {dnsStatus === "not_attached" && (
+                    <span className="text-[10px] text-red-600">Domain not registered — click Remove then Save to retry</span>
                   )}
                 </div>
               </div>
-            )}
+              );
+            })()}
             {!customDomain && !funnel.customDomain && (
               <p className="text-[10px] text-gray-400">
                 Connect your own domain to this funnel. Requires Pro or Agency plan.
