@@ -13,72 +13,61 @@ interface WaterfallChartProps {
   steps: WaterfallStep[];
 }
 
+const BRAND = "#2D6A4F";
+
 export function WaterfallChart({ steps }: WaterfallChartProps) {
   if (steps.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-sm text-gray-400">
+      <div className="flex items-center justify-center h-40 text-sm text-gray-400">
         Share your funnel to start seeing drop-off data
       </div>
     );
   }
 
-  const chartHeight = 240;
-
   return (
-    <div className="w-full">
-      <div className="relative" style={{ height: chartHeight + 60 }}>
-        <svg width="100%" height={chartHeight} viewBox={`0 0 ${steps.length * 100} ${chartHeight}`} preserveAspectRatio="none">
-          {steps.map((step, i) => {
-            const barHeight = (step.retentionFromTop / 100) * (chartHeight - 20);
-            const x = i * 100 + 15;
-            const y = chartHeight - barHeight;
-
-            return (
-              <g key={step.stepLabel}>
-                {/* Drop-off zone */}
-                {i > 0 && step.dropoffFromPrev > 0 && (
-                  <rect
-                    x={x - 15}
-                    y={y}
-                    width={15}
-                    height={barHeight}
-                    fill="#FEE2E2"
-                    opacity={0.5}
-                  />
+    <div className="w-full space-y-2.5">
+      {steps.map((step, i) => {
+        const retention = Math.max(0, Math.min(100, step.retentionFromTop));
+        const dropped = i > 0 && step.dropoffFromPrev > 0;
+        return (
+          <div key={`${step.stepLabel}-${i}`} className="group">
+            {/* Label row */}
+            <div className="flex items-baseline justify-between gap-3 mb-1">
+              <span
+                className="text-xs text-gray-700 truncate"
+                title={step.stepLabel}
+              >
+                {step.stepLabel}
+              </span>
+              <div className="flex items-baseline gap-2 shrink-0 tabular-nums">
+                <span className="text-xs font-semibold text-gray-900">
+                  {step.visitors.toLocaleString()}
+                </span>
+                <span className="text-[11px] text-gray-400 w-9 text-right">
+                  {retention}%
+                </span>
+                {dropped ? (
+                  <span className="text-[10px] font-medium text-gray-400 bg-gray-50 rounded px-1.5 py-0.5 w-12 text-center">
+                    &minus;{step.dropoffFromPrev}%
+                  </span>
+                ) : (
+                  <span className="w-12" />
                 )}
-                {/* Main bar */}
-                <motion.rect
-                  x={x}
-                  y={chartHeight}
-                  width={70}
-                  height={0}
-                  rx={4}
-                  fill="#2D6A4F"
-                  animate={{ y, height: barHeight }}
-                  transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
-                />
-                {/* Retention % above bar */}
-                <text x={x + 35} y={y - 6} textAnchor="middle" className="text-[10px]" fill="#2D6A4F" fontWeight={600}>
-                  {step.retentionFromTop}%
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Labels below */}
-        <div className="flex justify-between px-2 mt-2">
-          {steps.map((step, i) => (
-            <div key={i} className="text-center flex-1">
-              <p className="text-xs font-medium text-gray-900">{step.visitors.toLocaleString()}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">{step.stepLabel}</p>
-              {step.dropoffFromPrev > 0 && i > 0 && (
-                <p className="text-[10px] text-red-500 mt-0.5">-{step.dropoffFromPrev}%</p>
-              )}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+            {/* Bar */}
+            <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: BRAND }}
+                initial={{ width: 0 }}
+                animate={{ width: `${retention}%` }}
+                transition={{ duration: 0.5, delay: i * 0.06, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

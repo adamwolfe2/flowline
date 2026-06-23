@@ -1,20 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Mail, Clock, Smartphone, Monitor, Tablet, Globe, Target, ArrowRight } from "lucide-react";
+import { Mail, Clock, Smartphone, Monitor, Tablet, Globe, ArrowRight, Trash2 } from "lucide-react";
 
 interface LeadDetailModalProps {
   leadId: string | null;
   onClose: () => void;
+  onDeleted?: () => void;
 }
 
-export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
+export function LeadDetailModal({ leadId, onClose, onDeleted }: LeadDetailModalProps) {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!leadId) return;
+    if (!window.confirm("Delete this lead? This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/leads/${leadId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      toast.success("Lead deleted");
+      onDeleted?.();
+      onClose();
+    } catch {
+      toast.error("Failed to delete lead");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!leadId) { setData(null); setError(false); return; }
@@ -218,6 +238,18 @@ export function LeadDetailModal({ leadId, onClose }: LeadDetailModalProps) {
                 </div>
               </div>
             )}
+
+            {/* Delete */}
+            <div className="pt-2 border-t border-[#EBEBEB]">
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                {deleting ? "Deleting..." : "Delete lead"}
+              </button>
+            </div>
           </div>
         ) : null}
       </SheetContent>

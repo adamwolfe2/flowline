@@ -16,7 +16,7 @@ const BUCKET_COLORS: Record<string, string> = {
   "0-1min": "#52B788",
   "1-5min": "#2D6A4F",
   "5-30min": "#1B4332",
-  "30min+": "#95A5A6",
+  "30min+": "#B7E4C7",
 };
 
 const BUCKET_LABELS: Record<string, string> = {

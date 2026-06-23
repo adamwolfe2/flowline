@@ -53,3 +53,33 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ lea
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ leadId: string }> }) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { leadId } = await params;
+
+    if (!uuidRegex.test(leadId)) {
+      return NextResponse.json({ error: "Invalid lead ID" }, { status: 400 });
+    }
+
+    // Fetch lead to resolve its funnel
+    const lead = await db.select().from(leads).where(eq(leads.id, leadId));
+    if (!lead[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    // Verify ownership: the lead's funnel must belong to the caller
+    const funnel = await db.select().from(funnels)
+      .where(and(eq(funnels.id, lead[0].funnelId), eq(funnels.userId, userId)));
+    if (!funnel[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    // Delete the lead row (sessions/events are kept; leads.session_id has no FK)
+    await db.delete(leads).where(eq(leads.id, leadId));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error("DELETE /api/leads error:", { error: error instanceof Error ? error.message : String(error) });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

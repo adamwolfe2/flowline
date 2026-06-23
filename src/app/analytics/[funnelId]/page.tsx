@@ -19,6 +19,7 @@ import {
   Tablet,
   ChevronLeft,
   ChevronRight,
+  Trash2,
   Share2,
   Link2,
   Link2Off,
@@ -163,7 +164,7 @@ function StatCard({
   suffix?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col gap-1">
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-gray-400">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
@@ -223,6 +224,8 @@ export default function AnalyticsDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [leadsPage, setLeadsPage] = useState(0);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
+  const [deletingLeads, setDeletingLeads] = useState(false);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [shareClientEmail, setShareClientEmail] = useState<string>("");
@@ -383,6 +386,48 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     fetchData(leadsPage, timeRange);
   }, [fetchData, leadsPage, timeRange]);
+
+  // Clear lead selection whenever the visible page or range changes
+  useEffect(() => {
+    setSelectedLeads(new Set());
+  }, [leadsPage, timeRange]);
+
+  const toggleLead = (id: string) => {
+    setSelectedLeads((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    const ids = Array.from(selectedLeads);
+    if (ids.length === 0) return;
+    const confirmed = window.confirm(
+      `Delete ${ids.length} lead${ids.length === 1 ? "" : "s"}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingLeads(true);
+    try {
+      const results = await Promise.allSettled(
+        ids.map((id) => fetch(`/api/leads/${id}`, { method: "DELETE" }))
+      );
+      const failed = results.filter(
+        (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok)
+      ).length;
+      const deleted = ids.length - failed;
+      if (deleted > 0) toast.success(`Deleted ${deleted} lead${deleted === 1 ? "" : "s"}`);
+      if (failed > 0) toast.error(`Failed to delete ${failed} lead${failed === 1 ? "" : "s"}`);
+      setSelectedLeads(new Set());
+      await fetchData(leadsPage, timeRange);
+    } catch {
+      toast.error("Failed to delete leads");
+    } finally {
+      setDeletingLeads(false);
+    }
+  };
 
   /* ---------- Loading ---------- */
   if (loading) {
@@ -609,7 +654,7 @@ export default function AnalyticsDashboard() {
           transition={{ duration: 0.4, delay: 0.3 }}
         >
           <ErrorBoundary>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 overflow-x-auto">
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 overflow-x-auto">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
               <WaterfallChart steps={dropoff} />
             </div>
@@ -626,7 +671,7 @@ export default function AnalyticsDashboard() {
                 const maxCount = Math.max(...opts.map((o) => o.count), 1);
                 const totalCount = opts.reduce((s, o) => s + o.count, 0) || 1;
                 return (
-                  <div key={qKey} className="bg-white rounded-xl border border-gray-100 p-5">
+                  <div key={qKey} className="bg-white rounded-xl border border-[#E5E7EB] p-5">
                     <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">{qKey}</p>
                     <div className="space-y-2.5">
                       {opts.map((opt) => {
@@ -643,8 +688,8 @@ export default function AnalyticsDashboard() {
                             </div>
                             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-indigo-500 rounded-full transition-all"
-                                style={{ width: `${(opt.count / maxCount) * 100}%` }}
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${(opt.count / maxCount) * 100}%`, backgroundColor: "#2D6A4F" }}
                               />
                             </div>
                           </div>
@@ -661,7 +706,7 @@ export default function AnalyticsDashboard() {
         {/* ---- Abandon + Device + UTM ---- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Abandon Heatmap */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandon Heatmap</h3>
             {abandons.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">No abandon data yet</p>
@@ -678,7 +723,8 @@ export default function AnalyticsDashboard() {
                         className="h-full rounded-full transition-all"
                         style={{
                           width: `${(a.abandonCount / maxAbandon) * 100}%`,
-                          backgroundColor: a.abandonCount === maxAbandon ? "#F59E0B" : "#6366F1",
+                          backgroundColor: "#2D6A4F",
+                          opacity: 0.35 + 0.65 * (a.abandonCount / maxAbandon),
                         }}
                       />
                     </div>
@@ -691,7 +737,7 @@ export default function AnalyticsDashboard() {
           {/* Device + UTM */}
           <div className="space-y-6">
             {/* Device Breakdown */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Device Breakdown</h3>
               {devices.length === 0 ? (
                 <p className="text-sm text-gray-400 text-center py-4">No device data yet</p>
@@ -714,7 +760,7 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Lead Sources */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Sources</h3>
               {utmSources.length === 0 ? (
                 <div className="text-center py-4">
@@ -756,7 +802,7 @@ export default function AnalyticsDashboard() {
             : null;
 
           return (
-            <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">A/B Test Performance</h3>
               <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
                 <table className="w-full text-xs min-w-[600px]">
@@ -816,19 +862,19 @@ export default function AnalyticsDashboard() {
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Audience Insights</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
                 <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Traffic Source Conversion</h4>
                 <SourceConversionChart data={sourceConversion ?? []} />
               </div>
             </ErrorBoundary>
             <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
                 <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Device Completion Rate</h4>
                 <DeviceConversionChart data={deviceConversion ?? []} />
               </div>
             </ErrorBoundary>
             <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
                 <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Time to Convert</h4>
                 <TimeToConvertChart data={timeToConvertHistogram ?? []} />
               </div>
@@ -838,21 +884,31 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 overflow-x-auto">
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
             <LeadsChart data={timeSeries} timeRange={timeRange} />
           </div>
         </ErrorBoundary>
 
         {/* ---- Leads Table ---- */}
-        <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <h3 className="text-sm font-semibold text-gray-900">Recent Leads</h3>
             {recentLeads.length > 0 && (
               <div className="flex items-center gap-2">
+                {selectedLeads.size > 0 && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    disabled={deletingLeads}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete ({selectedLeads.size})
+                  </button>
+                )}
                 <button
                   onClick={() => downloadCSV(recentLeads, funnel.slug)}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
                   <Download className="w-3 h-3" />
                   <span className="hidden sm:inline">Export Page</span>
@@ -860,7 +916,7 @@ export default function AnalyticsDashboard() {
                 </button>
                 <a
                   href={`/api/analytics/${funnelId}/export?timeRange=${timeRange}`}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
                   <Download className="w-3 h-3" />
                   <span className="hidden sm:inline">Export All ({totalLeadCount})</span>
@@ -878,6 +934,19 @@ export default function AnalyticsDashboard() {
                 <table className="w-full text-xs min-w-[500px]">
                   <thead>
                     <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="w-8 py-2">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all leads on this page"
+                          className="w-3.5 h-3.5 rounded border-gray-300 text-[#2D6A4F] focus:ring-[#2D6A4F] accent-[#2D6A4F] align-middle cursor-pointer"
+                          checked={recentLeads.length > 0 && recentLeads.every((l) => selectedLeads.has(l.id))}
+                          onChange={(e) =>
+                            setSelectedLeads(
+                              e.target.checked ? new Set(recentLeads.map((l) => l.id)) : new Set()
+                            )
+                          }
+                        />
+                      </th>
                       <th className="text-left py-2 font-medium">Email</th>
                       <th className="text-center py-2 font-medium">Score</th>
                       <th className="text-center py-2 font-medium">Tier</th>
@@ -888,7 +957,22 @@ export default function AnalyticsDashboard() {
                   </thead>
                   <tbody>
                     {recentLeads.map((lead) => (
-                      <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer" onClick={() => setSelectedLeadId(lead.id)}>
+                      <tr
+                        key={lead.id}
+                        className={`border-b border-gray-50 cursor-pointer transition-colors ${
+                          selectedLeads.has(lead.id) ? "bg-[#2D6A4F]/5" : "hover:bg-gray-50/50"
+                        }`}
+                        onClick={() => setSelectedLeadId(lead.id)}
+                      >
+                        <td className="py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${lead.email}`}
+                            className="w-3.5 h-3.5 rounded border-gray-300 accent-[#2D6A4F] align-middle cursor-pointer"
+                            checked={selectedLeads.has(lead.id)}
+                            onChange={() => toggleLead(lead.id)}
+                          />
+                        </td>
                         <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
                         <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
                         <td className="py-2.5 text-center">
@@ -916,7 +1000,7 @@ export default function AnalyticsDashboard() {
                   <button
                     onClick={() => setLeadsPage((p) => Math.max(0, p - 1))}
                     disabled={leadsPage === 0}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
+                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     <ChevronLeft className="w-3 h-3" />
                     Prev
@@ -927,7 +1011,7 @@ export default function AnalyticsDashboard() {
                   <button
                     onClick={() => setLeadsPage((p) => Math.min(totalLeadPages - 1, p + 1))}
                     disabled={leadsPage >= totalLeadPages - 1}
-                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
+                    className="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     Next
                     <ChevronRight className="w-3 h-3" />
@@ -939,7 +1023,11 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      <LeadDetailModal leadId={selectedLeadId} onClose={() => setSelectedLeadId(null)} />
+      <LeadDetailModal
+        leadId={selectedLeadId}
+        onClose={() => setSelectedLeadId(null)}
+        onDeleted={() => fetchData(leadsPage, timeRange)}
+      />
 
       {/* Share Modal */}
       {shareModalOpen && (
