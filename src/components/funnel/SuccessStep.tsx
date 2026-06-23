@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FunnelConfig } from "@/types";
 import { fireBookingEvent } from "./TrackingPixels";
@@ -17,29 +17,58 @@ interface SuccessStepProps {
   email: string;
   score?: number;
   tier?: string;
+  funnelId?: string;
+  sessionId?: string;
 }
 
-export function SuccessStep({ config, calendarUrl, email, score, tier }: SuccessStepProps) {
-  // Listen for Cal.com booking confirmation postMessage and fire pixel booking event
+export function SuccessStep({ config, calendarUrl, email, score, tier, funnelId, sessionId }: SuccessStepProps) {
+  // Listen for calendar booking confirmation postMessage (Cal.com + Calendly),
+  // fire the ad pixel, and notify the backend so the booking webhook can fire.
+  const bookingFired = useRef(false);
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       try {
+        // Only trust booking messages from the calendar providers we support
+        let trustedOrigin = false;
+        try {
+          const h = new URL(event.origin).hostname.toLowerCase();
+          trustedOrigin =
+            h === "cal.com" || h.endsWith(".cal.com") ||
+            h === "calendly.com" || h.endsWith(".calendly.com");
+        } catch {
+          return;
+        }
+        if (!trustedOrigin) return;
         const data = event.data;
         if (!data || typeof data !== "object") return;
-        const isBookingSuccess =
+        const isCalDotCom =
           data.type === "CAL:BOOKING_SUCCESSFUL" ||
           data.type === "bookingSuccessfulV2" ||
           (data.namespace === "calcom" && data.action === "bookingSuccessful");
-        if (isBookingSuccess) {
-          fireBookingEvent(config.tracking);
+        // Calendly emits { event: "calendly.event_scheduled" }
+        const isCalendly = data.event === "calendly.event_scheduled";
+        if (!isCalDotCom && !isCalendly) return;
+        if (bookingFired.current) return; // one booking signal per mount
+        bookingFired.current = true;
+
+        fireBookingEvent(config.tracking);
+
+        // Notify backend to fire the booking_confirmed webhook (best-effort)
+        if (funnelId && sessionId) {
+          fetch(`/api/funnels/${funnelId}/booking`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }),
+            keepalive: true,
+          }).catch(() => {});
         }
       } catch {
-        // Never throw — booking pixel is best-effort
+        // Never throw — booking tracking is best-effort
       }
     }
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [config.tracking]);
+  }, [config.tracking, funnelId, sessionId]);
   const { brand } = config;
   const [calEmbedFailed, setCalEmbedFailed] = useState(false);
   const [isMobileScreen, setIsMobileScreen] = useState(false);

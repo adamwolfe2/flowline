@@ -480,6 +480,8 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
                 email={email}
                 score={leadScore}
                 tier={leadTier}
+                funnelId={funnelId}
+                sessionId={sessionId}
               />
             </motion.div>
           )}

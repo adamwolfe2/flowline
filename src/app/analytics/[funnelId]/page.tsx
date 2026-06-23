@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Info,
   Share2,
   Link2,
   Link2Off,
@@ -86,7 +87,7 @@ interface AnalyticsData {
   funnel: {
     id: string;
     slug: string;
-    config: { brand: { name: string; primaryColor: string } };
+    config: { brand: { name: string; primaryColor: string; logoUrl?: string } };
     published: boolean;
   };
   stats: {
@@ -157,17 +158,24 @@ function StatCard({
   value,
   icon: Icon,
   suffix,
+  hint,
 }: {
   label: string;
   value: number | string;
   icon: React.ComponentType<{ className?: string }>;
   suffix?: string;
+  hint?: string;
 }) {
   return (
     <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-gray-400">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
+        {hint && (
+          <span title={hint} className="ml-auto cursor-help" aria-label={hint}>
+            <Info className="w-3.5 h-3.5 text-gray-300" />
+          </span>
+        )}
       </div>
       <p className="text-2xl font-bold text-gray-900">
         {value}
@@ -541,12 +549,21 @@ export default function AnalyticsDashboard() {
             <Link href="/dashboard" className="p-2 hover:bg-gray-50 rounded-lg transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center">
               <ArrowLeft className="w-4 h-4 text-gray-500" />
             </Link>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
-              style={{ backgroundColor: funnel.config.brand.primaryColor }}
-            >
-              {funnel.config.brand.name.charAt(0).toUpperCase()}
-            </div>
+            {funnel.config.brand.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={funnel.config.brand.logoUrl}
+                alt={`${funnel.config.brand.name} logo`}
+                className="w-8 h-8 rounded-lg object-contain bg-white border border-[#E5E7EB] shrink-0"
+              />
+            ) : (
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0"
+                style={{ backgroundColor: funnel.config.brand.primaryColor }}
+              >
+                {funnel.config.brand.name.charAt(0).toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0">
               <h1 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{funnel.config.brand.name}</h1>
               <p className="text-xs text-gray-400 truncate">{funnel.slug}</p>
@@ -603,9 +620,9 @@ export default function AnalyticsDashboard() {
         {/* ---- Stats Bar ---- */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
           {([
-            { label: "Sessions", value: stats.totalSessions.toLocaleString(), icon: Eye },
-            { label: "Completion", value: stats.completionRate, icon: Target, suffix: "%" },
-            { label: "Conversion", value: stats.conversionRate, icon: BarChart3, suffix: "%" },
+            { label: "Sessions", value: stats.totalSessions.toLocaleString(), icon: Eye, hint: "Real visitors who started the funnel (fired at least one event). Excludes bots, link-preview crawlers, and SSR previews that load the page but never run the quiz." },
+            { label: "Completion", value: stats.completionRate, icon: Target, suffix: "%", hint: "Share of engaged sessions that reached the final step." },
+            { label: "Conversion", value: stats.conversionRate, icon: BarChart3, suffix: "%", hint: "Share of engaged sessions that submitted their email / became a lead." },
             {
               label: "Avg. Time",
               value: stats.avgCompletionTimeSec > 0
@@ -614,8 +631,9 @@ export default function AnalyticsDashboard() {
                   : `${stats.avgCompletionTimeSec}s`
                 : "--",
               icon: Clock,
+              hint: "Average time engaged visitors spent completing the funnel.",
             },
-            { label: "Leads", value: stats.totalLeads.toLocaleString(), icon: Users },
+            { label: "Leads", value: stats.totalLeads.toLocaleString(), icon: Users, hint: "Total leads captured (email submitted) in this time range." },
           ] as const).map((card, index) => (
             <motion.div
               key={card.label}
@@ -623,7 +641,7 @@ export default function AnalyticsDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: index * 0.07 }}
             >
-              <StatCard label={card.label} value={card.value} icon={card.icon} suffix={"suffix" in card ? card.suffix : undefined} />
+              <StatCard label={card.label} value={card.value} icon={card.icon} suffix={"suffix" in card ? card.suffix : undefined} hint={"hint" in card ? card.hint : undefined} />
             </motion.div>
           ))}
         </div>

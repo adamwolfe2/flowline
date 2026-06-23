@@ -47,6 +47,69 @@ export function formatForGHL(payload: Record<string, unknown>): Record<string, u
   };
 }
 
+/**
+ * Block obvious SSRF targets at send time (defense in depth beyond save-time
+ * validation, and covers stale configs). Rejects non-http(s) schemes and
+ * loopback / private / link-local / cloud-metadata hosts. Does not fully
+ * defeat DNS rebinding, but stops direct-IP and well-known internal hosts.
+ */
+export function isSafeWebhookUrl(rawUrl: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+
+  const host = u.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    host === "localhost" ||
+    host === "0.0.0.0" ||
+    host === "::1" ||
+    host === "::" ||
+    host.endsWith(".local") ||
+    host.endsWith(".internal") ||
+    host === "metadata.google.internal"
+  ) {
+    return false;
+  }
+
+  // Normalize IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1) down to its IPv4 form so
+  // the private-range checks below catch it instead of being bypassed.
+  const mapped = host.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
+  const checkHost = mapped ? mapped[1] : host;
+
+  // IPv4 literal in private / loopback / link-local ranges
+  const v4 = checkHost.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    if (a === 127 || a === 10 || a === 0) return false;
+    if (a === 169 && b === 254) return false; // link-local incl. 169.254.169.254 metadata
+    if (a === 172 && b >= 16 && b <= 31) return false;
+    if (a === 192 && b === 168) return false;
+  }
+
+  // IPv6 unique-local (fc00::/7) and link-local (fe80::/10)
+  if (host.startsWith("fc") || host.startsWith("fd") || host.startsWith("fe8") || host.startsWith("fe9") || host.startsWith("fea") || host.startsWith("feb")) {
+    if (host.includes(":")) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Whether a given funnel event should fire the webhook.
+ * Undefined events config = all enabled (backward compatible).
+ */
+export function webhookEnabledFor(
+  webhook: { url?: string; events?: { lead?: boolean; completed?: boolean; booking?: boolean } } | undefined,
+  key: "lead" | "completed" | "booking"
+): boolean {
+  if (!webhook?.url) return false;
+  return webhook.events?.[key] !== false;
+}
+
 export async function fireWebhook(
   url: string,
   payload: Record<string, unknown>,
@@ -57,6 +120,13 @@ export async function fireWebhook(
   let lastStatusCode: number | null = null;
   let lastError: string | null = null;
   let success = false;
+
+  // SSRF guard: never fetch internal/private/metadata targets
+  if (!isSafeWebhookUrl(url)) {
+    logger.warn("[webhook] blocked unsafe webhook URL", { funnelId });
+    if (funnelId) logDelivery(funnelId, url, null, false, 0, "blocked: unsafe target URL").catch(() => {});
+    return false;
+  }
 
   const finalPayload = format === "ghl" ? formatForGHL(payload) : payload;
   const body = JSON.stringify(finalPayload);

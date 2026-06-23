@@ -87,6 +87,7 @@ export const funnelSessions = pgTable('funnel_sessions', {
   utmCampaign: text('utm_campaign'),
   deviceType: deviceTypeEnum('device_type'),
   partialEmail: text('partial_email'),
+  bookingConfirmedAt: timestamp('booking_confirmed_at'),
   totalDurationMs: integer('total_duration_ms'),
   endedAt: timestamp('ended_at'),
   startedAt: timestamp('started_at').defaultNow().notNull(),

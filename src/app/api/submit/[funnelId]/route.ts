@@ -4,7 +4,7 @@ import { insertLead } from "@/db/queries/leads";
 import { calculateScore, getCalendarTier, getCalendarUrl } from "@/lib/scoring";
 import { submitLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { sendLeadNotification, getTeamBrandName } from "@/lib/resend";
-import { fireWebhook } from "@/lib/webhook";
+import { fireWebhook, webhookEnabledFor } from "@/lib/webhook";
 import { syncLeadToGHL } from "@/lib/ghl-sync";
 import { db } from "@/db";
 import { logger } from "@/lib/logger";
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
     }
 
     // Fire webhook if configured (retries with exponential backoff, non-blocking)
-    if (config.webhook?.url) {
+    if (webhookEnabledFor(config.webhook, "lead")) {
       // Build enhanced webhook payload
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
       const funnelUrl = `${appUrl}/f/${funnel.slug}`;
@@ -190,6 +190,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       }
 
       const webhookPayload: Record<string, unknown> = {
+        event: "lead_captured",
         email,
         answers,
         score,

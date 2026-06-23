@@ -1,9 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { events, funnelSessions } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { events, funnelSessions, funnels, leads } from "@/db/schema";
+import { eq, and, sql } from "drizzle-orm";
 import { checkRateLimit, eventLimiter } from "@/lib/rate-limit";
+import { fireWebhook, webhookEnabledFor } from "@/lib/webhook";
 import { logger } from "@/lib/logger";
+import type { FunnelConfig } from "@/types";
+
+/**
+ * Fire the "funnel_completed" webhook when a visitor reaches the thank-you
+ * screen. Called only on the false->true completion transition (idempotent),
+ * so client retries never double-send.
+ */
+async function fireCompletionWebhook(
+  funnelId: string,
+  session: { leadId: string | null; utmSource: string | null; utmMedium: string | null; utmCampaign: string | null; deviceType: string | null },
+  sessionDurationMs: number | null
+) {
+  try {
+    const [funnel] = await db
+      .select({ config: funnels.config, slug: funnels.slug })
+      .from(funnels)
+      .where(eq(funnels.id, funnelId));
+    if (!funnel) return;
+
+    const config = funnel.config as FunnelConfig;
+    if (!webhookEnabledFor(config.webhook, "completed")) return;
+
+    // Authoritative lead data from the DB (never trust client payload for PII)
+    let lead: { email: string; score: number; calendarTier: string; answers: unknown } | null = null;
+    if (session.leadId) {
+      const [l] = await db
+        .select({ email: leads.email, score: leads.score, calendarTier: leads.calendarTier, answers: leads.answers })
+        .from(leads)
+        .where(eq(leads.id, session.leadId));
+      lead = l ?? null;
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
+    const payload: Record<string, unknown> = {
+      event: "funnel_completed",
+      email: lead?.email ?? null,
+      answers: lead?.answers ?? {},
+      score: lead?.score ?? null,
+      calendar_tier: lead?.calendarTier ?? null,
+      timestamp: new Date().toISOString(),
+      source: config.brand?.name ?? "",
+      funnel_slug: funnel.slug,
+      funnel_url: `${appUrl}/f/${funnel.slug}`,
+      utm_source: session.utmSource,
+      utm_medium: session.utmMedium,
+      utm_campaign: session.utmCampaign,
+      device_type: session.deviceType,
+      session_duration_ms: sessionDurationMs,
+    };
+    const format = config.webhook?.format ?? "default";
+    await fireWebhook(config.webhook.url, payload, funnelId, 3, format);
+  } catch (err) {
+    logger.error("[webhook] completion fire failed", { error: err instanceof Error ? err.message : String(err) });
+  }
+}
 
 const VALID_EVENT_TYPES = [
   "funnel_viewed", "page_viewed", "answer_selected", "field_focused",
@@ -69,31 +125,44 @@ export async function POST(req: NextRequest) {
           score: e.score ?? null,
         });
 
-        // Side effects (same as individual events route)
+        // Side effects. Every session mutation is bound to (sessionId AND funnelId)
+        // so a client cannot mutate or exfiltrate another funnel's session/leads.
+        const ownsSession = and(eq(funnelSessions.id, e.sessionId), eq(funnelSessions.funnelId, e.funnelId));
         if (e.eventType === "funnel_abandoned") {
           await db.update(funnelSessions)
             .set({ abandonedAtStep: e.abandonedAtStep, totalDurationMs: e.sessionDurationMs, endedAt: new Date() })
-            .where(eq(funnelSessions.id, e.sessionId));
+            .where(ownsSession);
         }
         if (e.eventType === "funnel_completed") {
-          await db.update(funnelSessions)
+          // Only act on the false->true transition so retries don't double-fire
+          const completed = await db.update(funnelSessions)
             .set({ completed: true, totalDurationMs: e.sessionDurationMs, endedAt: new Date() })
-            .where(eq(funnelSessions.id, e.sessionId));
+            .where(and(ownsSession, eq(funnelSessions.completed, false)))
+            .returning({
+              leadId: funnelSessions.leadId,
+              utmSource: funnelSessions.utmSource,
+              utmMedium: funnelSessions.utmMedium,
+              utmCampaign: funnelSessions.utmCampaign,
+              deviceType: funnelSessions.deviceType,
+            });
+          if (completed[0]) {
+            fireCompletionWebhook(e.funnelId, completed[0], e.sessionDurationMs ?? null).catch(() => {});
+          }
         }
         if (e.eventType === "lead_created" && e.leadId) {
           await db.update(funnelSessions)
             .set({ converted: true, leadId: e.leadId })
-            .where(eq(funnelSessions.id, e.sessionId));
+            .where(ownsSession);
         }
         if (e.eventType === "email_captured" && e.email && typeof e.email === "string") {
           await db.update(funnelSessions)
             .set({ partialEmail: e.email })
-            .where(eq(funnelSessions.id, e.sessionId));
+            .where(ownsSession);
         }
         if (e.stepIndex !== undefined) {
           await db.update(funnelSessions)
             .set({ furthestStepReached: sql`greatest(${funnelSessions.furthestStepReached}, ${e.stepIndex})` })
-            .where(eq(funnelSessions.id, e.sessionId));
+            .where(ownsSession);
         }
       } catch {
         // Skip individual event errors

@@ -54,9 +54,15 @@ function extractConfigMeta(config: FunnelConfig | null | undefined): {
 
 export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
   const cutoff = getDateCutoff(timeRange);
+  // "Engaged" sessions only: a real visitor fires at least one client event
+  // (funnel_viewed/page_viewed). Bots, crawlers, link-preview fetchers, and
+  // SSR previews create a session row server-side but never run the quiz JS,
+  // so they have zero events. Excluding them makes Sessions / completion /
+  // conversion reflect real humans instead of inflated page-render counts.
+  const engaged = sql`exists (select 1 from events ev where ev.session_id = ${funnelSessions.id})`;
   const sessionWhere = cutoff
-    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
-    : eq(funnelSessions.funnelId, funnelId);
+    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff), engaged)
+    : and(eq(funnelSessions.funnelId, funnelId), engaged);
   const leadWhere = cutoff
     ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
     : eq(leads.funnelId, funnelId);
@@ -79,8 +85,8 @@ export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
   return {
     totalSessions: total,
     totalLeads: Number(leadStats[0]?.count ?? 0),
-    completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-    conversionRate: total > 0 ? Math.round((converted / total) * 100) : 0,
+    completionRate: total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0,
+    conversionRate: total > 0 ? Math.min(100, Math.round((converted / total) * 100)) : 0,
     avgCompletionTimeSec: s?.avgDuration ? Math.round(Number(s.avgDuration) / 1000) : 0,
   };
 }

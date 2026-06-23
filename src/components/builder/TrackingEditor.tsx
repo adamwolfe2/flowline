@@ -126,9 +126,46 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
           className="text-sm font-mono"
         />
         <p className="text-[10px] text-gray-400 mt-1">
-          Receives a POST with lead data (email, score, tier, answers) on every submission.
+          Receives a POST when funnel events fire. Each payload includes an <code className="font-mono">event</code> field
+          (<code className="font-mono">lead_captured</code>, <code className="font-mono">funnel_completed</code>, <code className="font-mono">booking_confirmed</code>) plus lead data.
         </p>
       </div>
+
+      {/* Webhook Events */}
+      {config.webhook?.url && (
+        <div>
+          <Label className="text-xs text-gray-500 mb-1.5">Fire on</Label>
+          <div className="space-y-1.5">
+            {([
+              { key: "lead", label: "Lead captured", hint: "Visitor submits their email" },
+              { key: "completed", label: "Funnel completed", hint: "Visitor reaches the thank-you screen" },
+              { key: "booking", label: "Booking confirmed", hint: "Cal.com / Calendly booking confirmed" },
+            ] as const).map(({ key, label, hint }) => {
+              const enabled = config.webhook?.events?.[key] !== false;
+              return (
+                <label key={key} className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enabled}
+                    onChange={e => {
+                      const newConfig = JSON.parse(JSON.stringify(config));
+                      if (!newConfig.webhook) newConfig.webhook = {};
+                      if (!newConfig.webhook.events) newConfig.webhook.events = {};
+                      newConfig.webhook.events[key] = e.target.checked;
+                      onSave(newConfig);
+                    }}
+                    className="w-3.5 h-3.5 mt-0.5 rounded border-gray-300 accent-[#2D6A4F] cursor-pointer"
+                  />
+                  <span className="leading-tight">
+                    <span className="text-xs text-gray-700">{label}</span>
+                    <span className="block text-[10px] text-gray-400">{hint}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Webhook Format */}
       {config.webhook?.url && (

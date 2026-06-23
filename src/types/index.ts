@@ -50,6 +50,12 @@ export interface FunnelConfig {
   webhook: {
     url: string;
     format?: "default" | "ghl";
+    // Which funnel events fire the webhook. Undefined = all enabled (back-compat).
+    events?: {
+      lead?: boolean;       // email captured / lead created
+      completed?: boolean;  // reached the thank-you screen
+      booking?: boolean;    // confirmed a Cal.com / Calendly booking
+    };
   };
   meta: {
     title: string;

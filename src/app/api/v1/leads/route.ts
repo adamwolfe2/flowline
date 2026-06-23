@@ -5,7 +5,7 @@ import { eq, desc, sql } from "drizzle-orm";
 import { apiKeyAuth } from "@/lib/api-key";
 import { checkRateLimit, v1LeadsLimiter } from "@/lib/rate-limit";
 import { insertLead } from "@/db/queries/leads";
-import { fireWebhook } from "@/lib/webhook";
+import { fireWebhook, webhookEnabledFor } from "@/lib/webhook";
 import { getUserTeamIds } from "@/lib/team-access";
 import { logger } from "@/lib/logger";
 import type { FunnelConfig } from "@/types";
@@ -157,11 +157,12 @@ export async function POST(req: NextRequest) {
       .where(eq(funnels.id, funnelId));
     if (funnel) {
       const config = funnel.config as FunnelConfig;
-      if (config.webhook?.url) {
+      if (webhookEnabledFor(config.webhook, "lead")) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
         fireWebhook(
           config.webhook.url,
           {
+            event: "lead_captured",
             email,
             answers: answers ?? {},
             score: resolvedScore,
