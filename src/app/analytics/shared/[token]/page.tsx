@@ -27,7 +27,7 @@ interface SharedAnalytics {
     totalLeads: number;
     completionRate: number;
     conversionRate: number;
-    avgCompletionTimeSec: number;
+    medianCompletionTimeSec: number;
   };
   dropoff: Array<{ stepLabel: string; visitors: number; retentionFromTop: number }>;
   tiers: Array<{ tier: string; count: number }>;
@@ -140,11 +140,11 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
     { label: "Completion Rate", value: `${data.stats.completionRate ?? 0}%`, icon: Target },
     { label: "Conversion Rate", value: `${data.stats.conversionRate ?? 0}%`, icon: BarChart3 },
     {
-      label: "Avg. Time",
-      value: data.stats.avgCompletionTimeSec > 0
-        ? data.stats.avgCompletionTimeSec >= 60
-          ? `${Math.floor(data.stats.avgCompletionTimeSec / 60)}m ${data.stats.avgCompletionTimeSec % 60}s`
-          : `${data.stats.avgCompletionTimeSec}s`
+      label: "Median Time",
+      value: data.stats.medianCompletionTimeSec > 0
+        ? data.stats.medianCompletionTimeSec >= 60
+          ? `${Math.floor(data.stats.medianCompletionTimeSec / 60)}m ${data.stats.medianCompletionTimeSec % 60}s`
+          : `${data.stats.medianCompletionTimeSec}s`
         : "--",
       icon: Clock,
     },

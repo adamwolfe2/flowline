@@ -15,6 +15,14 @@ interface WaterfallChartProps {
 
 const BRAND = "#2D6A4F";
 
+// Semantic severity palette for drop-off (§4 color hierarchy):
+// small loss = on-brand green, moderate = amber warning, large = red alert.
+function dropSeverity(drop: number): { text: string; bg: string; border: string } {
+  if (drop <= 10) return { text: "#2D6A4F", bg: "#2D6A4F14", border: "#2D6A4F33" };
+  if (drop <= 30) return { text: "#B45309", bg: "#D9770614", border: "#D9770633" };
+  return { text: "#B91C1C", bg: "#DC262614", border: "#DC262633" };
+}
+
 export function WaterfallChart({ steps }: WaterfallChartProps) {
   if (steps.length === 0) {
     return (
@@ -25,37 +33,42 @@ export function WaterfallChart({ steps }: WaterfallChartProps) {
   }
 
   return (
-    <div className="w-full space-y-2.5">
+    <div className="w-full space-y-3">
       {steps.map((step, i) => {
         const retention = Math.max(0, Math.min(100, step.retentionFromTop));
         const dropped = i > 0 && step.dropoffFromPrev > 0;
+        const sev = dropSeverity(step.dropoffFromPrev);
         return (
-          <div key={`${step.stepLabel}-${i}`} className="group">
-            {/* Label row */}
-            <div className="flex items-baseline justify-between gap-3 mb-1">
+          <div key={`${step.stepLabel}-${i}`}>
+            {/* Label + numbers */}
+            <div className="flex items-start justify-between gap-3 mb-1.5">
               <span
-                className="text-xs text-gray-700 truncate"
+                className="text-xs text-gray-700 leading-snug break-words flex-1 min-w-0"
                 title={step.stepLabel}
               >
                 {step.stepLabel}
               </span>
-              <div className="flex items-baseline gap-2 shrink-0 tabular-nums">
-                <span className="text-xs font-semibold text-gray-900">
-                  {step.visitors.toLocaleString()}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-gray-500 tabular-nums whitespace-nowrap">
+                  <span className="font-semibold text-gray-900">{step.visitors.toLocaleString()}</span>
+                  <span className="text-gray-400"> · {retention}% kept</span>
                 </span>
-                <span className="text-[11px] text-gray-400 w-9 text-right">
-                  {retention}%
-                </span>
+                {/* Drop-off % is the visual hero, color-coded by severity */}
                 {dropped ? (
-                  <span className="text-[10px] font-medium text-gray-400 bg-gray-50 rounded px-1.5 py-0.5 w-12 text-center">
+                  <span
+                    className="text-xs font-semibold tabular-nums rounded-md px-2 py-0.5 border whitespace-nowrap"
+                    style={{ color: sev.text, backgroundColor: sev.bg, borderColor: sev.border }}
+                  >
                     &minus;{step.dropoffFromPrev}%
                   </span>
                 ) : (
-                  <span className="w-12" />
+                  <span className="text-[10px] font-medium text-gray-400 rounded-md px-2 py-0.5 bg-gray-50 whitespace-nowrap">
+                    start
+                  </span>
                 )}
               </div>
             </div>
-            {/* Bar */}
+            {/* Retention bar */}
             <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
               <motion.div
                 className="h-full rounded-full"

@@ -34,7 +34,7 @@ export interface InsightInputs {
     leads: number;
     completionRate: number;
     conversionRate: number;
-    avgCompletionSec: number;
+    medianCompletionSec: number;
   };
   steps: Array<{
     stepIndex: number;
@@ -222,7 +222,7 @@ export async function getInsightInputs(
       leads: overview.totalLeads,
       completionRate: overview.completionRate,
       conversionRate: overview.conversionRate,
-      avgCompletionSec: overview.avgCompletionTimeSec,
+      medianCompletionSec: overview.medianCompletionTimeSec,
     },
     steps,
     answers,

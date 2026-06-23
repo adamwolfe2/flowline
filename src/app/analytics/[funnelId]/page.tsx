@@ -95,7 +95,7 @@ interface AnalyticsData {
     totalLeads: number;
     completionRate: number;
     conversionRate: number;
-    avgCompletionTimeSec: number;
+    medianCompletionTimeSec: number;
   };
   userPlan?: string;
   isAdmin?: boolean;
@@ -620,20 +620,22 @@ export default function AnalyticsDashboard() {
         {/* ---- Stats Bar ---- */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
           {([
-            { label: "Sessions", value: stats.totalSessions.toLocaleString(), icon: Eye, hint: "Real visitors who started the funnel (fired at least one event). Excludes bots, link-preview crawlers, and SSR previews that load the page but never run the quiz." },
-            { label: "Completion", value: stats.completionRate, icon: Target, suffix: "%", hint: "Share of engaged sessions that reached the final step." },
+            // Client-first order: what they paid for (leads, conversion) leads;
+            // engagement vanity metrics (sessions, time) sit lower.
+            { label: "Leads", value: stats.totalLeads.toLocaleString(), icon: Users, hint: "Total leads captured (email submitted) in this time range." },
             { label: "Conversion", value: stats.conversionRate, icon: BarChart3, suffix: "%", hint: "Share of engaged sessions that submitted their email / became a lead." },
+            { label: "Completion", value: stats.completionRate, icon: Target, suffix: "%", hint: "Share of engaged sessions that reached the final step." },
+            { label: "Sessions", value: stats.totalSessions.toLocaleString(), icon: Eye, hint: "Real visitors who started the funnel (fired at least one event). Excludes bots, link-preview crawlers, and SSR previews that load the page but never run the quiz." },
             {
-              label: "Avg. Time",
-              value: stats.avgCompletionTimeSec > 0
-                ? stats.avgCompletionTimeSec >= 60
-                  ? `${Math.floor(stats.avgCompletionTimeSec / 60)}m ${stats.avgCompletionTimeSec % 60}s`
-                  : `${stats.avgCompletionTimeSec}s`
+              label: "Median Time",
+              value: stats.medianCompletionTimeSec > 0
+                ? stats.medianCompletionTimeSec >= 60
+                  ? `${Math.floor(stats.medianCompletionTimeSec / 60)}m ${stats.medianCompletionTimeSec % 60}s`
+                  : `${stats.medianCompletionTimeSec}s`
                 : "--",
               icon: Clock,
-              hint: "Average time engaged visitors spent completing the funnel.",
+              hint: "Median time to complete the funnel (completed sessions only, outliers over 2h excluded). Median, not average, so a few left-open tabs don't skew it.",
             },
-            { label: "Leads", value: stats.totalLeads.toLocaleString(), icon: Users, hint: "Total leads captured (email submitted) in this time range." },
           ] as const).map((card, index) => (
             <motion.div
               key={card.label}
@@ -665,6 +667,35 @@ export default function AnalyticsDashboard() {
           </motion.div>
         )}
 
+        {/* ---- Audience Insights (conversion by source/device — the client story) ---- */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Audience Insights</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <ErrorBoundary>
+              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Traffic Source Conversion</h4>
+                <SourceConversionChart data={sourceConversion ?? []} />
+              </div>
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Device Completion Rate</h4>
+                <DeviceConversionChart data={deviceConversion ?? []} />
+              </div>
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Time to Convert</h4>
+                <TimeToConvertChart data={timeToConvertHistogram ?? []} />
+              </div>
+            </ErrorBoundary>
+          </div>
+        </motion.div>
+
         {/* ---- Waterfall Chart ---- */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -688,20 +719,27 @@ export default function AnalyticsDashboard() {
                 const opts = answers[qKey];
                 const maxCount = Math.max(...opts.map((o) => o.count), 1);
                 const totalCount = opts.reduce((s, o) => s + o.count, 0) || 1;
+                const smallSample = totalCount < 6;
                 return (
                   <div key={qKey} className="bg-white rounded-xl border border-[#E5E7EB] p-5">
-                    <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">{qKey}</p>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide truncate">{qKey}</p>
+                      <span className={`text-[10px] font-medium shrink-0 rounded px-1.5 py-0.5 ${smallSample ? "text-[#B45309] bg-[#D9770614]" : "text-gray-400 bg-gray-50"}`} title={smallSample ? "Small sample — read the raw counts, not the %" : undefined}>
+                        n={totalCount}
+                      </span>
+                    </div>
                     <div className="space-y-2.5">
                       {opts.map((opt) => {
                         const pct = Math.round((opt.count / totalCount) * 100);
                         return (
                           <div key={opt.answerId ?? opt.answerLabel}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs text-gray-700 truncate max-w-[60%]">
+                            <div className="flex items-center justify-between mb-1 gap-2">
+                              <span className="text-xs text-gray-700 truncate max-w-[55%]">
                                 {opt.answerLabel ?? opt.answerId ?? "Unknown"}
                               </span>
-                              <span className="text-xs text-gray-400">
-                                {opt.count} ({pct}%)
+                              <span className="text-xs shrink-0 tabular-nums">
+                                <span className="font-semibold text-gray-900">{opt.count}</span>
+                                <span className="text-gray-400"> ({pct}%)</span>
                               </span>
                             </div>
                             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -723,26 +761,27 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Abandon + Device + UTM ---- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Abandon Heatmap */}
+          {/* Abandonment by Step */}
           <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandon Heatmap</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandonment by Step</h3>
             {abandons.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">No abandon data yet</p>
+              <p className="text-sm text-gray-400 text-center py-8">No abandonment data yet</p>
             ) : (
               <div className="space-y-3">
                 {abandons.map((a) => (
                   <div key={a.stepIndex}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">{a.stepLabel}</span>
-                      <span className="text-xs font-medium text-gray-900">{a.abandonCount}</span>
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <span className="text-xs text-gray-600 leading-snug break-words flex-1 min-w-0" title={a.stepLabel}>{a.stepLabel}</span>
+                      <span className="text-xs font-semibold text-gray-900 shrink-0 tabular-nums">{a.abandonCount}</span>
                     </div>
+                    {/* Amber = abandonment is a warning signal (§4 semantic color) */}
                     <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
                           width: `${(a.abandonCount / maxAbandon) * 100}%`,
-                          backgroundColor: "#2D6A4F",
-                          opacity: 0.35 + 0.65 * (a.abandonCount / maxAbandon),
+                          backgroundColor: "#D97706",
+                          opacity: 0.5 + 0.5 * (a.abandonCount / maxAbandon),
                         }}
                       />
                     </div>
@@ -871,40 +910,15 @@ export default function AnalyticsDashboard() {
           );
         })()}
 
-        {/* ---- Audience Insights ---- */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.35 }}
-        >
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Audience Insights</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
-                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Traffic Source Conversion</h4>
-                <SourceConversionChart data={sourceConversion ?? []} />
-              </div>
-            </ErrorBoundary>
-            <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
-                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Device Completion Rate</h4>
-                <DeviceConversionChart data={deviceConversion ?? []} />
-              </div>
-            </ErrorBoundary>
-            <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
-                <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Time to Convert</h4>
-                <TimeToConvertChart data={timeToConvertHistogram ?? []} />
-              </div>
-            </ErrorBoundary>
-          </div>
-        </motion.div>
-
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
           <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
-            <LeadsChart data={timeSeries} timeRange={timeRange} />
+            {timeSeries.some((d) => d.count > 0) ? (
+              <LeadsChart data={timeSeries} timeRange={timeRange} />
+            ) : (
+              <p className="text-xs text-gray-400 py-2">No leads in this period yet. They&rsquo;ll chart here as they come in.</p>
+            )}
           </div>
         </ErrorBoundary>
 
@@ -945,7 +959,7 @@ export default function AnalyticsDashboard() {
           </div>
 
           {recentLeads.length === 0 && totalLeadCount === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-12">No leads captured yet</p>
+            <p className="text-xs text-gray-400 py-2">No leads captured yet. Share your funnel link to start collecting.</p>
           ) : (
             <>
               <div className="overflow-x-auto -mx-6 px-6">

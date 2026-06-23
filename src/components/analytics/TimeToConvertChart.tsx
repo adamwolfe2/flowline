@@ -91,13 +91,20 @@ export function TimeToConvertChart({ data }: TimeToConvertChartProps) {
         </ResponsiveContainer>
       </div>
 
-      {/* Summary insight */}
+      {/* Summary insight — when n is small, lead with raw counts, not % */}
       {peakBucket && peakBucket.count > 0 && (
-        <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-          Most converters complete in{" "}
-          <span className="font-semibold text-[#2D6A4F]">{peakBucket.label}</span>
-          {" "}— {peakBucket.pct}% of {total.toLocaleString()} total converters
-        </p>
+        total < 6 ? (
+          <p className="text-xs text-[#B45309] bg-[#D9770614] rounded-lg px-3 py-2">
+            Only {total.toLocaleString()} converter{total === 1 ? "" : "s"} so far — {peakBucket.count} in{" "}
+            <span className="font-semibold">{peakBucket.label}</span>. Too few to read percentages yet.
+          </p>
+        ) : (
+          <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+            Most converters complete in{" "}
+            <span className="font-semibold text-[#2D6A4F]">{peakBucket.label}</span>
+            {" "}— {peakBucket.pct}% of {total.toLocaleString()} total converters
+          </p>
+        )
       )}
 
       {/* Bucket breakdown */}

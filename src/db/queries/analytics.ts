@@ -13,6 +13,23 @@ function getDateCutoff(timeRange: string): Date | null {
   }
 }
 
+/**
+ * SINGLE SOURCE OF TRUTH for "a session that counts".
+ *
+ * An engaged session is a real visitor that fired at least one client event.
+ * Bots, crawlers, link-preview fetchers and SSR previews create a session row
+ * server-side but never run the quiz JS, so they have zero events. Every
+ * session-based widget (overview cards, device breakdown, source/device
+ * conversion) filters through this so the hero metrics and the detail charts
+ * always reconcile on the same number — and respect the same date range.
+ */
+function engagedSessionWhere(funnelId: string, cutoff: Date | null) {
+  const engaged = sql`exists (select 1 from events ev where ev.session_id = ${funnelSessions.id})`;
+  return cutoff
+    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff), engaged)
+    : and(eq(funnelSessions.funnelId, funnelId), engaged);
+}
+
 function getStepLabel(
   index: number,
   totalQuestions: number,
@@ -26,14 +43,13 @@ function getStepLabel(
   if (index >= qStart && index < qStart + totalQuestions) {
     const qIndex = index - qStart;
     const text = questionTexts?.[qIndex];
-    if (text) {
-      const truncated = text.length > 30 ? `${text.slice(0, 27)}...` : text;
-      return `Q${qIndex + 1}: ${truncated}`;
-    }
+    // Full text — the UI wraps and shows it on hover; no "..." truncation.
+    if (text) return `Q${qIndex + 1}: ${text}`;
     return `Question ${qIndex + 1}`;
   }
   if (index === qStart + totalQuestions) return "Email";
   if (index === qStart + totalQuestions + 1) return "Booked";
+  if (index === qStart + totalQuestions + 2) return "Thank You";
   return `Step ${index}`;
 }
 
@@ -54,40 +70,47 @@ function extractConfigMeta(config: FunnelConfig | null | undefined): {
 
 export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
   const cutoff = getDateCutoff(timeRange);
-  // "Engaged" sessions only: a real visitor fires at least one client event
-  // (funnel_viewed/page_viewed). Bots, crawlers, link-preview fetchers, and
-  // SSR previews create a session row server-side but never run the quiz JS,
-  // so they have zero events. Excluding them makes Sessions / completion /
-  // conversion reflect real humans instead of inflated page-render counts.
-  const engaged = sql`exists (select 1 from events ev where ev.session_id = ${funnelSessions.id})`;
-  const sessionWhere = cutoff
-    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff), engaged)
-    : and(eq(funnelSessions.funnelId, funnelId), engaged);
+  const sessionWhere = engagedSessionWhere(funnelId, cutoff);
   const leadWhere = cutoff
     ? and(eq(leads.funnelId, funnelId), gte(leads.createdAt, cutoff))
     : eq(leads.funnelId, funnelId);
 
-  const [sessionStats, leadStats] = await Promise.all([
+  // Median completion time: only completed sessions, with a sane duration
+  // (0 < t <= 2h) so abandoned/left-open tabs don't inflate the figure.
+  // The old average read ~64m because outliers dominated; median is robust.
+  const MAX_COMPLETION_MS = 2 * 60 * 60 * 1000; // 2 hours
+  const medianWhere = and(
+    sessionWhere,
+    eq(funnelSessions.completed, true),
+    sql`${funnelSessions.totalDurationMs} is not null`,
+    sql`${funnelSessions.totalDurationMs} > 0`,
+    sql`${funnelSessions.totalDurationMs} <= ${MAX_COMPLETION_MS}`,
+  );
+
+  const [sessionStats, leadStats, medianStats] = await Promise.all([
     db.select({
       total: sql<number>`count(*)::int`,
       completed: sql<number>`coalesce(sum(case when ${funnelSessions.completed} then 1 else 0 end), 0)::int`,
       converted: sql<number>`coalesce(sum(case when ${funnelSessions.converted} then 1 else 0 end), 0)::int`,
-      avgDuration: avg(funnelSessions.totalDurationMs),
     }).from(funnelSessions).where(sessionWhere),
     db.select({ count: sql<number>`count(*)::int` }).from(leads).where(leadWhere),
+    db.select({
+      median: sql<number | null>`percentile_cont(0.5) within group (order by ${funnelSessions.totalDurationMs})`,
+    }).from(funnelSessions).where(medianWhere),
   ]);
 
   const s = sessionStats[0];
   const total = Number(s?.total ?? 0);
   const completed = Number(s?.completed ?? 0);
   const converted = Number(s?.converted ?? 0);
+  const medianMs = medianStats[0]?.median != null ? Number(medianStats[0].median) : 0;
 
   return {
     totalSessions: total,
     totalLeads: Number(leadStats[0]?.count ?? 0),
     completionRate: total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0,
     conversionRate: total > 0 ? Math.min(100, Math.round((converted / total) * 100)) : 0,
-    avgCompletionTimeSec: s?.avgDuration ? Math.round(Number(s.avgDuration) / 1000) : 0,
+    medianCompletionTimeSec: medianMs > 0 ? Math.round(medianMs / 1000) : 0,
   };
 }
 
@@ -171,9 +194,7 @@ export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', con
 
 export async function getDeviceBreakdown(funnelId: string, timeRange = 'all') {
   const cutoff = getDateCutoff(timeRange);
-  const whereClause = cutoff
-    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
-    : eq(funnelSessions.funnelId, funnelId);
+  const whereClause = engagedSessionWhere(funnelId, cutoff);
 
   return db.select({
     deviceType: funnelSessions.deviceType,
@@ -327,9 +348,7 @@ export async function getVariantPerformance(funnelId: string, timeRange = 'all')
 
 export async function getSourceConversion(funnelId: string, timeRange = 'all'): Promise<Array<{ source: string | null; sessions: number; conversions: number; conversionRate: number }>> {
   const cutoff = getDateCutoff(timeRange);
-  const whereClause = cutoff
-    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
-    : eq(funnelSessions.funnelId, funnelId);
+  const whereClause = engagedSessionWhere(funnelId, cutoff);
 
   const rows = await db.select({
     source: funnelSessions.utmSource,
@@ -355,9 +374,7 @@ export async function getSourceConversion(funnelId: string, timeRange = 'all'): 
 
 export async function getDeviceConversion(funnelId: string, timeRange = 'all'): Promise<Array<{ deviceType: string | null; sessions: number; completed: number; completionRate: number }>> {
   const cutoff = getDateCutoff(timeRange);
-  const whereClause = cutoff
-    ? and(eq(funnelSessions.funnelId, funnelId), gte(funnelSessions.startedAt, cutoff))
-    : eq(funnelSessions.funnelId, funnelId);
+  const whereClause = engagedSessionWhere(funnelId, cutoff);
 
   const rows = await db.select({
     deviceType: funnelSessions.deviceType,
