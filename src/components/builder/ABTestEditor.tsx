@@ -257,7 +257,7 @@ export function ABTestEditor({ funnel, onVariantsChange, variantStats }: ABTestE
                 : null;
 
               return (
-                <div key={variant.id} className="p-3 border border-gray-100 rounded-lg">
+                <div key={variant.id} className="p-3 border border-[#E5E7EB] rounded-lg">
                   <div className="flex items-center justify-between mb-3">
                     <Input
                       value={variant.name}
@@ -343,7 +343,7 @@ export function ABTestEditor({ funnel, onVariantsChange, variantStats }: ABTestE
 
           {/* Statistical significance hint */}
           {hasLowConversions && (
-            <div className="flex items-start gap-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex items-start gap-2 p-2.5 bg-gray-50 rounded-lg border border-[#E5E7EB]">
               <Info className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] text-gray-500 leading-relaxed">
                 Need at least 50 conversions per variant for statistical significance.

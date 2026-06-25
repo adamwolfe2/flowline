@@ -1,6 +1,7 @@
 "use client";
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart as LineChartIcon } from "lucide-react";
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -14,9 +15,11 @@ interface LeadsChartProps {
 export function LeadsChart({ data, timeRange }: LeadsChartProps) {
   if (data.length === 0) {
     return (
-      <p className="text-sm text-gray-400 text-center py-12">
-        No leads captured in this time range
-      </p>
+      <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
+        <LineChartIcon className="w-8 h-8 text-gray-200" />
+        <p className="text-sm text-gray-400">No leads captured in this time range</p>
+        <p className="text-xs text-gray-300">Leads appear here as visitors convert through your funnel</p>
+      </div>
     );
   }
 

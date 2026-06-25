@@ -328,6 +328,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                   className="text-[10px] h-6 w-6 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
                   disabled={savingClient}
                   onClick={handleRemoveClient}
+                  aria-label="Remove client"
                 >
                   <X className="w-3 h-3" />
                 </Button>
@@ -485,7 +486,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
             </div>
           </div>
         ) : (
-          <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg">
+          <div className="p-4 bg-gray-50 border border-[#E5E7EB] rounded-lg">
             <p className="text-sm text-gray-600 mb-3">
               Your funnel is in draft mode. Publish it to make it accessible to visitors.
             </p>
@@ -640,6 +641,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                         size="sm"
                         className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
                         onClick={() => removeTrackingLink(link.id)}
+                        aria-label="Remove tracking link"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>

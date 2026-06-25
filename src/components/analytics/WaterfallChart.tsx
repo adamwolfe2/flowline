@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { TrendingDown } from "lucide-react";
 
 interface WaterfallStep {
   stepLabel: string;
@@ -26,8 +27,9 @@ function dropSeverity(drop: number): { text: string; bg: string; border: string 
 export function WaterfallChart({ steps }: WaterfallChartProps) {
   if (steps.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-sm text-gray-400">
-        Share your funnel to start seeing drop-off data
+      <div className="flex flex-col items-center justify-center h-40 gap-2 text-center">
+        <TrendingDown className="w-8 h-8 text-gray-200" />
+        <p className="text-sm text-gray-400">Share your funnel to start seeing drop-off data</p>
       </div>
     );
   }

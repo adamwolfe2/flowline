@@ -117,7 +117,7 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
             <span className="font-normal text-gray-400"> — shown in this order</span>
           </p>
           {blocks.map((block) => (
-            <div key={block.id} className="border border-gray-100 rounded-lg overflow-hidden">
+            <div key={block.id} className="border border-[#E5E7EB] rounded-lg overflow-hidden">
               <button
                 onClick={() => setExpandedBlock(expandedBlock === block.id ? null : block.id)}
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors"
