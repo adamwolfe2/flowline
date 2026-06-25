@@ -29,6 +29,20 @@
       "when": 1774994169171,
       "tag": "0003_spotty_microbe",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782375770851,
+      "tag": "0004_reconcile_drift_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782374791978,
+      "tag": "0005_reconcile_teams_domain_unique",
+      "breakpoints": true
     }
   ]
 }

@@ -19,7 +19,6 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { priceId, teamId } = await req.json();
-    if (!priceId) return NextResponse.json({ error: "Missing priceId" }, { status: 400 });
 
     const PRICE_LOOKUP: Record<string, string | undefined> = {
       pro_monthly: process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
@@ -28,14 +27,22 @@ export async function POST(req: Request) {
       agency_annual: process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID,
     };
 
-    const resolvedPriceId = PRICE_LOOKUP[priceId];
-    if (!resolvedPriceId) {
-      return NextResponse.json({ error: "Invalid or unconfigured plan" }, { status: 400 });
+    // Validate the requested plan key is a known string before any lookup or
+    // logging. This rejects non-string / object / oversized payloads up front
+    // and guarantees only a bounded enum value is ever logged.
+    const planKey = typeof priceId === "string" ? priceId : "";
+    if (!Object.prototype.hasOwnProperty.call(PRICE_LOOKUP, planKey)) {
+      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    if (!resolvedPriceId.startsWith("price_")) {
+    const resolvedPriceId = PRICE_LOOKUP[planKey];
+    // Unconfigured price (env var missing) or malformed value is an operational
+    // gap, not a user error. Surface a distinct, stable code so the client can
+    // tell the user the plan isn't available yet instead of asking them to retry.
+    if (!resolvedPriceId || !resolvedPriceId.startsWith("price_")) {
+      logger.warn("Checkout requested for unconfigured plan", { plan: planKey });
       return NextResponse.json(
-        { error: "Stripe price not configured. Set STRIPE_*_PRICE_ID env vars with valid Stripe price IDs." },
+        { error: "This plan isn't available for purchase yet.", code: "plan_unconfigured" },
         { status: 400 }
       );
     }
@@ -128,7 +135,7 @@ export async function POST(req: Request) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyvsl.com";
-    const isProPlan = priceId === "pro_monthly" || priceId === "pro_annual";
+    const isProPlan = planKey === "pro_monthly" || planKey === "pro_annual";
     const offerTrial = isProPlan && !user.hadTrial;
 
     if (offerTrial) {
