@@ -53,7 +53,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
         {status === "success" && (
           <>
             <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">You're in!</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">You&apos;re in!</h2>
             <p className="text-sm text-gray-500">Redirecting to your dashboard...</p>
           </>
         )}

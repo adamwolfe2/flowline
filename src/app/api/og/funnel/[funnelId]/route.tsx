@@ -71,6 +71,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
                   src={logoUrl}
                   width={48}
                   height={48}
+                  alt=""
                   style={{ borderRadius: "12px", objectFit: "contain" }}
                 />
               ) : (

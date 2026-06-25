@@ -100,8 +100,7 @@ export function DeviceConversionChart({ data }: DeviceConversionChartProps) {
                 border: "1px solid #E5E7EB",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
               }}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(value: unknown, name: any) => {
+            formatter={(value: unknown, name: unknown) => {
                 const v = Number(value);
                 if (name === "sessions") return [v.toLocaleString(), "Sessions"];
                 if (name === "completionRate") return [`${v}%`, "Completion Rate"];
