@@ -264,7 +264,7 @@ export function ContentEditor({ config, onSave }: ContentEditorProps) {
 
           <div className="space-y-2">
             {config.quiz.questions.map((q: QuizQuestion, qi: number) => (
-              <div key={q.key} className="border border-gray-100 rounded-lg overflow-hidden">
+              <div key={q.key} className="border border-[#E5E7EB] rounded-lg overflow-hidden">
                 <div className="flex items-center p-3 hover:bg-gray-50 transition-colors">
                   <button
                     onClick={() => setExpandedQ(expandedQ === qi ? null : qi)}

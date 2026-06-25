@@ -210,7 +210,7 @@ export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryPro
         {FUNNEL_TEMPLATES.map((template) => (
           <div
             key={template.id}
-            className="text-left p-4 border border-gray-100 rounded-xl hover:border-[#2D6A4F] hover:shadow-sm transition-all disabled:opacity-50 group"
+            className="text-left p-4 border border-[#E5E7EB] rounded-xl hover:border-[#2D6A4F] hover:shadow-sm transition-all disabled:opacity-50 group"
           >
             <div className="flex items-center gap-2 mb-3">
               {(() => {

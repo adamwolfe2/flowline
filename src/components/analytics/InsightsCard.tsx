@@ -184,7 +184,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
   // ---- Plan gated ----
   if (state.kind === "plan_gated") {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col items-center text-center gap-3">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 flex flex-col items-center text-center gap-3">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
           <Lock className="w-5 h-5 text-gray-400" />
         </div>
@@ -208,7 +208,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
   // ---- Loading ----
   if (state.kind === "loading") {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#2D6A4F] animate-pulse" />
           <span className="text-sm font-medium text-gray-600">Analyzing your funnel...</span>
@@ -227,7 +227,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
   // ---- Insufficient data ----
   if (state.kind === "insufficient_data") {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col gap-3">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-[#2D6A4F]" />
           <span className="text-sm font-semibold text-gray-900">AI Insights</span>
@@ -254,7 +254,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
   // ---- Error ----
   if (state.kind === "error") {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-6 flex items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-500">{state.message}</span>
@@ -273,7 +273,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
   const { insight, generatedAt, stale } = state;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 space-y-5">
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
@@ -358,7 +358,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
           {insight.issues.map((issue, i) => (
             <div
               key={i}
-              className="border border-gray-100 rounded-lg p-4 space-y-2"
+              className="border border-[#E5E7EB] rounded-lg p-4 space-y-2"
             >
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">

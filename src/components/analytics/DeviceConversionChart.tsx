@@ -36,6 +36,7 @@ export function DeviceConversionChart({ data }: DeviceConversionChartProps) {
       <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
         <Monitor className="w-8 h-8 text-gray-200" />
         <p className="text-sm text-gray-400">No device data yet</p>
+        <p className="text-xs text-gray-300">Data appears once visitors reach your funnel</p>
       </div>
     );
   }

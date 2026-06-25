@@ -25,7 +25,14 @@ export function ProgressBar({ config, step, totalQuestions }: ProgressBarProps) 
           {Math.round((questionProgress / totalQuestions) * 100)}%
         </span>
       </div>
-      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+      <div
+        className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={totalQuestions}
+        aria-valuenow={questionProgress}
+        aria-label="Funnel progress"
+      >
         <motion.div
           className="h-1.5 rounded-full"
           style={{ backgroundColor: config.brand.primaryColor }}

@@ -196,7 +196,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
       ) : (
         <>
           {sequences.map((seq) => (
-            <div key={seq.id} className="border border-gray-100 rounded-lg overflow-hidden">
+            <div key={seq.id} className="border border-[#E5E7EB] rounded-lg overflow-hidden">
               <button
                 onClick={() => setExpandedSeq(expandedSeq === seq.id ? null : seq.id)}
                 className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors"

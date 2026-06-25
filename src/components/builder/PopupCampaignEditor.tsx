@@ -1100,7 +1100,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
                           )}
                         </button>
                       </div>
-                      <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                      <div className="p-2.5 bg-gray-50 rounded-lg border border-[#E5E7EB]">
                         <p className="text-[10px] text-gray-500 leading-relaxed">
                           The widget script automatically loads your active popup campaigns
                           and handles all trigger logic, impression tracking, and cookie suppression.

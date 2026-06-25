@@ -50,6 +50,7 @@ export function PopupPreview({
           <button
             onClick={() => setDismissed(true)}
             className="absolute top-2 right-3 z-20 w-7 h-7 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-colors"
+            aria-label="Close popup"
           >
             <X className="w-4 h-4 text-gray-600" />
           </button>
@@ -76,6 +77,7 @@ export function PopupPreview({
           <button
             onClick={() => setDismissed(true)}
             className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-colors"
+            aria-label="Close popup"
           >
             <X className="w-3.5 h-3.5 text-gray-600" />
           </button>
@@ -112,6 +114,7 @@ export function PopupPreview({
               <button
                 onClick={() => setDismissed(true)}
                 className="absolute top-2 right-3 z-20 w-7 h-7 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-colors"
+                aria-label="Close popup"
               >
                 <X className="w-4 h-4 text-gray-600" />
               </button>

@@ -123,7 +123,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
         whileHover={{ y: -2, transition: { duration: 0.15 } }}
         className="group"
       >
-        <Card className="p-5 transition-shadow duration-200 group-hover:shadow-lg border-gray-100">
+        <Card className="p-5 transition-shadow duration-200 group-hover:shadow-lg border-[#E5E7EB]">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               {funnel.config.brand.logoUrl ? (
