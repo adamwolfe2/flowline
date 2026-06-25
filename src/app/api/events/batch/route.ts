@@ -164,8 +164,13 @@ export async function POST(req: NextRequest) {
             .set({ furthestStepReached: sql`greatest(${funnelSessions.furthestStepReached}, ${e.stepIndex})` })
             .where(ownsSession);
         }
-      } catch {
-        // Skip individual event errors
+      } catch (err) {
+        // Skip individual event errors so one bad row never fails the batch,
+        // but surface them so systemic write failures stay observable.
+        logger.warn("[events/batch] event insert/update skipped", {
+          eventType: typeof e?.eventType === "string" ? e.eventType : "unknown",
+          error: err instanceof Error ? err.message : String(err),
+        });
       }
     }
 

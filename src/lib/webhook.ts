@@ -75,10 +75,24 @@ export function isSafeWebhookUrl(rawUrl: string): boolean {
     return false;
   }
 
-  // Normalize IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1) down to its IPv4 form so
-  // the private-range checks below catch it instead of being bypassed.
-  const mapped = host.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
-  const checkHost = mapped ? mapped[1] : host;
+  // Normalize IPv4-mapped IPv6 down to its IPv4 form so the private-range
+  // checks below catch it instead of being bypassed. The URL parser may keep
+  // the dotted form (::ffff:127.0.0.1) OR compress the trailing octets to hex
+  // (::ffff:7f00:1) — handle both. Any ::ffff:-mapped address that we cannot
+  // decode to a dotted quad is rejected outright (fail closed).
+  let checkHost = host;
+  const mappedDotted = host.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/);
+  const mappedHex = host.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (mappedDotted) {
+    checkHost = mappedDotted[1];
+  } else if (mappedHex) {
+    const hi = parseInt(mappedHex[1], 16);
+    const lo = parseInt(mappedHex[2], 16);
+    if (Number.isNaN(hi) || Number.isNaN(lo)) return false;
+    checkHost = `${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`;
+  } else if (host.startsWith("::ffff:")) {
+    return false;
+  }
 
   // IPv4 literal in private / loopback / link-local ranges
   const v4 = checkHost.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
