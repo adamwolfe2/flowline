@@ -116,7 +116,11 @@ export default function BillingPage() {
       }
 
       if (!res.ok) {
-        toast.error("Failed to start checkout. Please try again.");
+        toast.error(
+          data?.code === "plan_unconfigured"
+            ? "This plan isn't available for purchase yet. Check back soon!"
+            : "Failed to start checkout. Please try again."
+        );
         setLoading(null);
         return;
       }
