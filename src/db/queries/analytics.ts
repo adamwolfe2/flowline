@@ -173,9 +173,16 @@ export async function getAnswerDistribution(funnelId: string, timeRange = 'all')
 export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', config?: FunnelConfig | null) {
   const { totalQuestions, hasVideo, questionTexts } = extractConfigMeta(config);
   const cutoff = getDateCutoff(timeRange);
-  const whereClause = cutoff
-    ? and(eq(funnelSessions.funnelId, funnelId), sql`${funnelSessions.abandonedAtStep} is not null`, gte(funnelSessions.startedAt, cutoff))
-    : and(eq(funnelSessions.funnelId, funnelId), sql`${funnelSessions.abandonedAtStep} is not null`);
+  // Route through the same engaged-session definition as every other session
+  // widget so the abandon chart can never count a bot/SSR zero-event row. In
+  // practice abandoned_at_step is only set by the funnel_abandoned client event
+  // (so an abandoned session is always engaged), but this makes the guarantee
+  // structural rather than relying on that invariant — and keeps the owner +
+  // shared client views honest on the same basis.
+  const whereClause = and(
+    engagedSessionWhere(funnelId, cutoff),
+    sql`${funnelSessions.abandonedAtStep} is not null`,
+  );
 
   const result = await db.select({
     stepIndex: funnelSessions.abandonedAtStep,

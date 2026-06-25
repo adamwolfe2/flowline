@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { funnels, leads, teams } from "@/db/schema";
 import { eq, and, gte, desc } from "drizzle-orm";
-import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries, getDeviceBreakdown } from "@/db/queries/analytics";
+import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries, getDeviceBreakdown, getAbandonHeatmap } from "@/db/queries/analytics";
 import { logger } from "@/lib/logger";
 import { sharedAnalyticsLimiter, checkRateLimit } from "@/lib/rate-limit";
 import type { FunnelConfig, TeamBranding } from "@/types";
@@ -94,9 +94,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       ? and(eq(leads.funnelId, funnel.id), gte(leads.createdAt, cutoff))
       : eq(leads.funnelId, funnel.id);
 
-    const [stats, dropoff, tiers, timeSeries, devices, recentLeads] = await Promise.all([
+    const [stats, dropoff, abandons, tiers, timeSeries, devices, recentLeads] = await Promise.all([
       getFunnelOverview(funnel.id, timeRange),
       getDropoffWaterfall(funnel.id, timeRange, config),
+      getAbandonHeatmap(funnel.id, timeRange, config),
       getTierDistribution(funnel.id, timeRange),
       getLeadsTimeSeries(funnel.id, timeRange),
       getDeviceBreakdown(funnel.id, timeRange),
@@ -120,6 +121,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       teamBranding,
       stats,
       dropoff,
+      abandons,
       tiers,
       timeSeries,
       devices,

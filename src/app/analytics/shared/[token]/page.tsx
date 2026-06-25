@@ -1,17 +1,24 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import dynamic from "next/dynamic";
 import {
   BarChart3,
   Users,
   Target,
-  TrendingUp,
+  Eye,
   Clock,
   Smartphone,
   Monitor,
   Tablet,
 } from "lucide-react";
 import Image from "next/image";
+
+// Lazy-load the chart so the shared client view stays light on first paint.
+const WaterfallChart = dynamic(
+  () => import("@/components/analytics/WaterfallChart").then((m) => m.WaterfallChart),
+  { ssr: false, loading: () => <div className="h-40" /> }
+);
 
 interface SharedAnalytics {
   funnelName: string;
@@ -29,7 +36,8 @@ interface SharedAnalytics {
     conversionRate: number;
     medianCompletionTimeSec: number;
   };
-  dropoff: Array<{ stepLabel: string; visitors: number; retentionFromTop: number }>;
+  dropoff: Array<{ stepLabel: string; visitors: number; dropoffFromPrev: number; retentionFromTop: number }>;
+  abandons: Array<{ stepIndex: number; stepLabel: string; abandonCount: number }>;
   tiers: Array<{ tier: string; count: number }>;
   timeSeries: Array<{ date: string; count: number }>;
   devices: Array<{ deviceType: string | null; count: number }>;
@@ -134,11 +142,13 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
   const poweredByName = data.teamBranding?.appName || "MyVSL";
   const poweredByUrl = data.teamBranding?.appName ? null : "https://getmyvsl.com";
 
+  // Client-first order: leads + conversion (what they paid for) lead;
+  // engagement vanity metrics (sessions, median time) sit lower. Mirrors owner view.
   const statCards = [
-    { label: "Sessions", value: data.stats.totalSessions.toLocaleString(), icon: TrendingUp },
     { label: "Leads", value: data.stats.totalLeads.toLocaleString(), icon: Users },
-    { label: "Completion Rate", value: `${data.stats.completionRate ?? 0}%`, icon: Target },
     { label: "Conversion Rate", value: `${data.stats.conversionRate ?? 0}%`, icon: BarChart3 },
+    { label: "Completion Rate", value: `${data.stats.completionRate ?? 0}%`, icon: Target },
+    { label: "Sessions", value: data.stats.totalSessions.toLocaleString(), icon: Eye },
     {
       label: "Median Time",
       value: data.stats.medianCompletionTimeSec > 0
@@ -156,6 +166,9 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
   data.devices.forEach((d) => {
     deviceMap[d.deviceType ?? "unknown"] = d.count;
   });
+
+  const abandons = data.abandons ?? [];
+  const maxAbandon = Math.max(...abandons.map((a) => a.abandonCount), 1);
 
   const hasNoData = data.stats.totalSessions === 0 && data.stats.totalLeads === 0;
 
@@ -215,31 +228,42 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
           </div>
         )}
 
-        {/* Dropoff waterfall */}
+        {/* Funnel Drop-off — color-coded severity hero (matches owner view) */}
+        {!hasNoData && (
+          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 overflow-x-auto">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
+            <WaterfallChart steps={data.dropoff} />
+          </div>
+        )}
+
+        {/* Abandonment by Step — amber, the warning signal (matches owner view) */}
         {!hasNoData && (
           <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
-            {data.dropoff.length > 0 ? (
-              <div className="space-y-2">
-                {data.dropoff.map((step) => (
-                  <div key={step.stepLabel} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 w-16 sm:w-24 shrink-0 truncate">{step.stepLabel}</span>
-                    <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-                      <div
-                        className="h-full rounded-full flex items-center justify-end px-2 transition-all"
-                        style={{ width: `${Math.max(step.retentionFromTop, 2)}%`, backgroundColor: accentColor }}
-                      >
-                        {step.retentionFromTop >= 10 && (
-                          <span className="text-[10px] text-white font-medium">{step.visitors}</span>
-                        )}
-                      </div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandonment by Step</h3>
+            {abandons.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-6">No abandonment data yet</p>
+            ) : (
+              <div className="space-y-3">
+                {abandons.map((a) => (
+                  <div key={a.stepIndex}>
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <span className="text-xs text-gray-600 leading-snug break-words flex-1 min-w-0" title={a.stepLabel}>{a.stepLabel}</span>
+                      <span className="text-xs font-semibold text-gray-900 shrink-0 tabular-nums">{a.abandonCount}</span>
                     </div>
-                    <span className="text-xs text-gray-400 w-10 text-right">{step.retentionFromTop}%</span>
+                    {/* Amber = abandonment is a warning signal (§4 semantic color) */}
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${(a.abandonCount / maxAbandon) * 100}%`,
+                          backgroundColor: "#D97706",
+                          opacity: 0.5 + 0.5 * (a.abandonCount / maxAbandon),
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-gray-400 text-center py-6">No drop-off data yet</p>
             )}
           </div>
         )}
@@ -272,7 +296,23 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
 
             {/* Tier distribution */}
             <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Quality</h3>
+              {(() => {
+                const tierTotal = data.tiers.reduce((s, t) => s + t.count, 0);
+                const smallSample = tierTotal > 0 && tierTotal < 6;
+                return (
+                  <div className="flex items-center justify-between mb-4 gap-2">
+                    <h3 className="text-sm font-semibold text-gray-900">Lead Quality</h3>
+                    {tierTotal > 0 && (
+                      <span
+                        className={`text-[10px] font-medium shrink-0 rounded px-1.5 py-0.5 ${smallSample ? "text-[#B45309] bg-[#D9770614]" : "text-gray-400 bg-gray-50"}`}
+                        title={smallSample ? "Small sample — read the raw counts, not the %" : undefined}
+                      >
+                        n={tierTotal}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
               {data.tiers.length > 0 ? (
                 <div className="flex gap-3">
                   {data.tiers.map(({ tier, count }) => (
