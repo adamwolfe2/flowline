@@ -7,6 +7,31 @@ import { fireWebhook, webhookEnabledFor } from "@/lib/webhook";
 import { logger } from "@/lib/logger";
 import type { FunnelConfig } from "@/types";
 
+type FunnelInfo = { config: FunnelConfig; slug: string };
+type FunnelResolver = (funnelId: string) => Promise<FunnelInfo | null>;
+
+/**
+ * Per-request funnel config cache: the funnel row is fetched at most once per
+ * request (lazily, only when a webhook path needs it), shared between the
+ * completion webhook and raw event forwarding. Caches the promise so
+ * concurrent fire-and-forget callers never double-fetch.
+ */
+function createFunnelResolver(): FunnelResolver {
+  const cache = new Map<string, Promise<FunnelInfo | null>>();
+  return (funnelId: string) => {
+    let cached = cache.get(funnelId);
+    if (!cached) {
+      cached = db
+        .select({ config: funnels.config, slug: funnels.slug })
+        .from(funnels)
+        .where(eq(funnels.id, funnelId))
+        .then(([f]) => (f ? { config: f.config as FunnelConfig, slug: f.slug } : null));
+      cache.set(funnelId, cached);
+    }
+    return cached;
+  };
+}
+
 /**
  * Fire the "funnel_completed" webhook when a visitor reaches the thank-you
  * screen. Called only on the false->true completion transition (idempotent),
@@ -14,17 +39,16 @@ import type { FunnelConfig } from "@/types";
  */
 async function fireCompletionWebhook(
   funnelId: string,
+  sessionId: string,
+  getFunnel: FunnelResolver,
   session: { leadId: string | null; utmSource: string | null; utmMedium: string | null; utmCampaign: string | null; deviceType: string | null },
   sessionDurationMs: number | null
 ) {
   try {
-    const [funnel] = await db
-      .select({ config: funnels.config, slug: funnels.slug })
-      .from(funnels)
-      .where(eq(funnels.id, funnelId));
+    const funnel = await getFunnel(funnelId);
     if (!funnel) return;
 
-    const config = funnel.config as FunnelConfig;
+    const config = funnel.config;
     if (!webhookEnabledFor(config.webhook, "completed")) return;
 
     // Authoritative lead data from the DB (never trust client payload for PII)
@@ -52,12 +76,42 @@ async function fireCompletionWebhook(
       utm_medium: session.utmMedium,
       utm_campaign: session.utmCampaign,
       device_type: session.deviceType,
+      session_id: sessionId,
       session_duration_ms: sessionDurationMs,
     };
     const format = config.webhook?.format ?? "default";
-    await fireWebhook(config.webhook.url, payload, funnelId, 3, format);
+    await fireWebhook(config.webhook.url, payload, funnelId, 3, format, { authToken: config.webhook?.authToken });
   } catch (err) {
     logger.error("[webhook] completion fire failed", { error: err instanceof Error ? err.message : String(err) });
+  }
+}
+
+/**
+ * Forward raw step-level events to the funnel's webhook so a downstream
+ * attribution system can compute funnel drop-off. Explicit opt-in via
+ * webhook.events.raw === true (default OFF), and never sent in GHL format
+ * (GHL expects contact-shaped payloads, not event streams).
+ */
+async function forwardRawEvents(
+  funnelId: string,
+  rawEvents: Record<string, unknown>[],
+  getFunnel: FunnelResolver
+) {
+  try {
+    const funnel = await getFunnel(funnelId);
+    if (!funnel) return;
+
+    const config = funnel.config;
+    if (!webhookEnabledFor(config.webhook, "raw")) return;
+    if ((config.webhook?.format ?? "default") === "ghl") return;
+
+    const payload: Record<string, unknown> = {
+      funnel_slug: funnel.slug,
+      events: rawEvents,
+    };
+    await fireWebhook(config.webhook.url, payload, funnelId, 3, "default", { authToken: config.webhook?.authToken });
+  } catch (err) {
+    logger.error("[webhook] raw event forward failed", { error: err instanceof Error ? err.message : String(err) });
   }
 }
 
@@ -89,6 +143,15 @@ export async function POST(req: NextRequest) {
     // Cap batch size and validate
     const batch = eventList.slice(0, 20);
 
+    // Funnel config is fetched at most once per request, only when a webhook
+    // path (completion or raw forwarding) actually needs it.
+    const getFunnel = createFunnelResolver();
+
+    // Validated events collected for raw forwarding (opt-in), stamped with
+    // the server receive time.
+    const receivedAt = new Date().toISOString();
+    const validatedForForwarding: Record<string, unknown>[] = [];
+
     for (const e of batch) {
       if (
         !e.sessionId || typeof e.sessionId !== "string" || !UUID_RE.test(e.sessionId) ||
@@ -97,6 +160,21 @@ export async function POST(req: NextRequest) {
       ) {
         continue;
       }
+
+      validatedForForwarding.push({
+        eventType: e.eventType,
+        sessionId: e.sessionId,
+        funnelId: e.funnelId,
+        stepIndex: e.stepIndex ?? 0,
+        stepKey: e.stepKey ?? "unknown",
+        timeOnStepMs: e.timeOnStepMs ?? null,
+        sessionDurationMs: e.sessionDurationMs ?? 0,
+        utmSource: e.utmSource ?? null,
+        utmMedium: e.utmMedium ?? null,
+        utmCampaign: e.utmCampaign ?? null,
+        deviceType: e.deviceType ?? "desktop",
+        timestamp: receivedAt,
+      });
 
       try {
         await db.insert(events).values({
@@ -146,7 +224,7 @@ export async function POST(req: NextRequest) {
               deviceType: funnelSessions.deviceType,
             });
           if (completed[0]) {
-            fireCompletionWebhook(e.funnelId, completed[0], e.sessionDurationMs ?? null).catch(() => {});
+            fireCompletionWebhook(e.funnelId, e.sessionId, getFunnel, completed[0], e.sessionDurationMs ?? null).catch(() => {});
           }
         }
         if (e.eventType === "lead_created" && e.leadId) {
@@ -171,6 +249,17 @@ export async function POST(req: NextRequest) {
           eventType: typeof e?.eventType === "string" ? e.eventType : "unknown",
           error: err instanceof Error ? err.message : String(err),
         });
+      }
+    }
+
+    // Raw event forwarding (fire-and-forget, never blocks the response).
+    // Grouped per funnel so a mixed batch can never leak one funnel's events
+    // to another funnel's webhook.
+    if (validatedForForwarding.length > 0) {
+      const funnelIds = new Set(validatedForForwarding.map(ev => String(ev.funnelId)));
+      for (const funnelId of funnelIds) {
+        const rawEvents = validatedForForwarding.filter(ev => ev.funnelId === funnelId);
+        forwardRawEvents(funnelId, rawEvents, getFunnel).catch(() => {});
       }
     }
 

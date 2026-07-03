@@ -114,14 +114,24 @@ export function isSafeWebhookUrl(rawUrl: string): boolean {
 
 /**
  * Whether a given funnel event should fire the webhook.
- * Undefined events config = all enabled (backward compatible).
+ * Undefined events config = all enabled (backward compatible) — EXCEPT "raw",
+ * which is explicit opt-in: raw event forwarding fires only when
+ * events.raw === true (default OFF, never implied by an absent config).
  */
 export function webhookEnabledFor(
-  webhook: { url?: string; events?: { lead?: boolean; completed?: boolean; booking?: boolean } } | undefined,
-  key: "lead" | "completed" | "booking"
+  webhook: { url?: string; events?: { lead?: boolean; completed?: boolean; booking?: boolean; raw?: boolean } } | undefined,
+  key: "lead" | "completed" | "booking" | "raw"
 ): boolean {
   if (!webhook?.url) return false;
+  if (key === "raw") return webhook.events?.raw === true;
   return webhook.events?.[key] !== false;
+}
+
+export interface FireWebhookOptions {
+  // Sent as Authorization: Bearer header; for endpoints that require bearer
+  // auth, e.g. the AM Collective attribution webhook. Composes with HMAC
+  // signing (both are applied when configured).
+  authToken?: string;
 }
 
 export async function fireWebhook(
@@ -129,7 +139,8 @@ export async function fireWebhook(
   payload: Record<string, unknown>,
   funnelId?: string,
   retries = 3,
-  format: "default" | "ghl" = "default"
+  format: "default" | "ghl" = "default",
+  options?: FireWebhookOptions
 ): Promise<boolean> {
   let lastStatusCode: number | null = null;
   let lastError: string | null = null;
@@ -152,6 +163,9 @@ export async function fireWebhook(
       const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
       const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (options?.authToken) {
+        headers["Authorization"] = `Bearer ${options.authToken}`;
+      }
       if (signingSecret) {
         const timestamp = Math.floor(Date.now() / 1000).toString();
         const signaturePayload = `${timestamp}.${body}`;

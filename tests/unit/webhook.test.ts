@@ -78,6 +78,26 @@ describe("webhookEnabledFor", () => {
     expect(webhookEnabledFor(wh, "completed")).toBe(false);
     expect(webhookEnabledFor(wh, "booking")).toBe(false);
   });
+
+  it("treats raw as explicit opt-in: undefined and false are disabled", () => {
+    // No events config at all
+    expect(webhookEnabledFor({ url: "https://x.com" }, "raw")).toBe(false);
+    // Events config present but raw not set
+    expect(webhookEnabledFor({ url: "https://x.com", events: {} }, "raw")).toBe(false);
+    // Explicitly disabled
+    expect(webhookEnabledFor({ url: "https://x.com", events: { raw: false } }, "raw")).toBe(false);
+    // Only explicit true enables it
+    expect(webhookEnabledFor({ url: "https://x.com", events: { raw: true } }, "raw")).toBe(true);
+    // And never without a url
+    expect(webhookEnabledFor({ url: "", events: { raw: true } }, "raw")).toBe(false);
+  });
+
+  it("raw opt-in does not change lead/completed/booking back-compat defaults", () => {
+    const wh = { url: "https://x.com", events: { raw: true } };
+    expect(webhookEnabledFor(wh, "lead")).toBe(true);
+    expect(webhookEnabledFor(wh, "completed")).toBe(true);
+    expect(webhookEnabledFor(wh, "booking")).toBe(true);
+  });
 });
 
 describe("formatForGHL", () => {
@@ -146,6 +166,38 @@ describe("fireWebhook", () => {
     global.fetch = fetchSpy as unknown as typeof fetch;
     await fireWebhook("https://hooks.example.com/x", { event: "lead" });
     const [, init] = fetchSpy.mock.calls[0];
+    expect(init.headers["X-Webhook-Signature"]).toMatch(/^[0-9a-f]{64}$/);
+    expect(init.headers["X-Webhook-Timestamp"]).toMatch(/^\d+$/);
+  });
+
+  it("sets the Authorization header when an auth token is provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+    global.fetch = fetchSpy as unknown as typeof fetch;
+    await fireWebhook("https://hooks.example.com/x", { event: "lead" }, undefined, 3, "default", { authToken: "tok-123" });
+    const [, init] = fetchSpy.mock.calls[0];
+    expect(init.headers["Authorization"]).toBe("Bearer tok-123");
+  });
+
+  it("omits the Authorization header when no auth token is provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+    global.fetch = fetchSpy as unknown as typeof fetch;
+    await fireWebhook("https://hooks.example.com/x", { event: "lead" });
+    const [, init] = fetchSpy.mock.calls[0];
+    expect(init.headers["Authorization"]).toBeUndefined();
+
+    // Empty token counts as absent too
+    await fireWebhook("https://hooks.example.com/x", { event: "lead" }, undefined, 3, "default", { authToken: "" });
+    const [, init2] = fetchSpy.mock.calls[1];
+    expect(init2.headers["Authorization"]).toBeUndefined();
+  });
+
+  it("keeps HMAC signature headers alongside the bearer token", async () => {
+    process.env.WEBHOOK_SIGNING_SECRET = "topsecret";
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+    global.fetch = fetchSpy as unknown as typeof fetch;
+    await fireWebhook("https://hooks.example.com/x", { event: "lead" }, undefined, 3, "default", { authToken: "tok-123" });
+    const [, init] = fetchSpy.mock.calls[0];
+    expect(init.headers["Authorization"]).toBe("Bearer tok-123");
     expect(init.headers["X-Webhook-Signature"]).toMatch(/^[0-9a-f]{64}$/);
     expect(init.headers["X-Webhook-Timestamp"]).toMatch(/^\d+$/);
   });

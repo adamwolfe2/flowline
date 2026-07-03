@@ -203,6 +203,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
         device_type: deviceType,
+        session_id: sessionId ?? null,
         session_duration_ms: sessionDurationMs,
         quiz_answers_formatted: quizAnswersFormatted,
         total_questions: totalQuestions,
@@ -210,7 +211,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ fun
       };
 
       const webhookFormat = config.webhook?.format ?? "default";
-      fireWebhook(config.webhook.url, webhookPayload, funnelId, 3, webhookFormat).catch(() => {});
+      fireWebhook(config.webhook.url, webhookPayload, funnelId, 3, webhookFormat, { authToken: config.webhook?.authToken }).catch(() => {});
     }
 
     // Sync lead to GoHighLevel if connected (fire-and-forget)

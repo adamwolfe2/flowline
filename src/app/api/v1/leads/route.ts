@@ -174,7 +174,8 @@ export async function POST(req: NextRequest) {
           },
           funnelId,
           3,
-          config.webhook?.format ?? "default"
+          config.webhook?.format ?? "default",
+          { authToken: config.webhook?.authToken }
         ).catch(() => {});
       }
     }

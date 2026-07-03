@@ -131,17 +131,47 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
         </p>
       </div>
 
+      {/* Webhook Bearer Token */}
+      {config.webhook?.url && (
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Label className="text-xs text-gray-500">Bearer token</Label>
+            <span className="text-[9px] text-[#9CA3AF] bg-[#F3F4F6] px-1.5 py-0.5 rounded">Optional</span>
+          </div>
+          <Input
+            value={config.webhook?.authToken ?? ""}
+            onChange={e => {
+              const newConfig = JSON.parse(JSON.stringify(config));
+              if (!newConfig.webhook) newConfig.webhook = {};
+              newConfig.webhook.authToken = e.target.value;
+              onSave(newConfig);
+            }}
+            placeholder="your-secret-token"
+            className="text-sm font-mono"
+          />
+          <p className="text-[10px] text-gray-400 mt-1">
+            Sent as an <code className="font-mono">Authorization: Bearer</code> header on every webhook request.
+            Only needed if your endpoint requires bearer authentication.
+          </p>
+        </div>
+      )}
+
       {/* Webhook Events */}
       {config.webhook?.url && (
         <div>
           <Label className="text-xs text-gray-500 mb-1.5">Fire on</Label>
           <div className="space-y-1.5">
             {([
-              { key: "lead", label: "Lead captured", hint: "Visitor submits their email" },
-              { key: "completed", label: "Funnel completed", hint: "Visitor reaches the thank-you screen" },
-              { key: "booking", label: "Booking confirmed", hint: "Cal.com / Calendly booking confirmed" },
-            ] as const).map(({ key, label, hint }) => {
-              const enabled = config.webhook?.events?.[key] !== false;
+              { key: "lead", label: "Lead captured", hint: "Visitor submits their email", optIn: false },
+              { key: "completed", label: "Funnel completed", hint: "Visitor reaches the thank-you screen", optIn: false },
+              { key: "booking", label: "Booking confirmed", hint: "Cal.com / Calendly booking confirmed", optIn: false },
+              { key: "raw", label: "Raw funnel events (step-level analytics)", hint: "Forwards every tracked step event for drop-off analysis. Off by default", optIn: true },
+            ] as const).map(({ key, label, hint, optIn }) => {
+              // Opt-in events (raw) are off unless explicitly enabled;
+              // the others default to on (back-compat).
+              const enabled = optIn
+                ? config.webhook?.events?.[key] === true
+                : config.webhook?.events?.[key] !== false;
               return (
                 <label key={key} className="flex items-start gap-2 cursor-pointer">
                   <input

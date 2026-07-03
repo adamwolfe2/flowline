@@ -91,9 +91,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       utm_medium: session.utmMedium,
       utm_campaign: session.utmCampaign,
       device_type: session.deviceType,
+      session_id: sessionId,
     };
     const format = config.webhook?.format ?? "default";
-    fireWebhook(config.webhook.url, payload, funnelId, 3, format).catch(() => {});
+    fireWebhook(config.webhook.url, payload, funnelId, 3, format, { authToken: config.webhook?.authToken }).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error) {
