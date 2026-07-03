@@ -239,7 +239,7 @@ export function AppNav() {
           <Link href="/build">
             <Button
               size="sm"
-              className="gap-1.5 rounded-full"
+              className="gap-1.5"
               style={{ backgroundColor: brandColor, color: "#fff" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = brandHoverColor; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = brandColor; }}

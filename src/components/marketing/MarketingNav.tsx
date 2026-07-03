@@ -48,7 +48,7 @@ export function MarketingNav() {
             <Link
               key={link.label}
               href={link.href}
-              className="text-[15px] font-medium text-[#0A0A0A]/80 hover:text-[#0A0A0A] hover:bg-black/[0.04] rounded-full px-4 py-2 transition-colors"
+              className="text-[15px] font-medium text-[#0A0A0A]/80 hover:text-[#0A0A0A] hover:bg-black/[0.04] rounded-[10px] px-4 py-2 transition-colors"
             >
               {link.label}
             </Link>
@@ -65,7 +65,7 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/sign-up"
-            className="group inline-flex items-center gap-2 bg-[#0A0A0A] text-white rounded-full pl-5 pr-4 py-2.5 text-[15px] font-semibold hover:bg-[#232323] transition-all hover:shadow-lg hover:shadow-black/10"
+            className="group inline-flex items-center gap-2 bg-[#0A0A0A] text-white rounded-[10px] pl-5 pr-4 py-2.5 text-[15px] font-semibold hover:bg-[#232323] transition-all hover:shadow-lg hover:shadow-black/10 active:scale-[0.97]"
           >
             Get started
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
@@ -101,7 +101,7 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/sign-up"
-            className="bg-[#0A0A0A] text-white rounded-full px-5 py-3.5 text-base font-semibold text-center hover:bg-[#232323] transition-colors"
+            className="bg-[#0A0A0A] text-white rounded-[12px] px-5 py-3.5 text-base font-semibold text-center hover:bg-[#232323] transition-colors"
           >
             Get started
           </Link>

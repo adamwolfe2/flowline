@@ -246,7 +246,7 @@ export function PopupSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.4 }}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-5 hover:shadow-sm transition-shadow"
+                className="bg-white border border-[#E5E7EB] rounded-xl p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgba(6,60,110,0.2)]"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#0A9AFF]/10 flex items-center justify-center flex-shrink-0">
@@ -288,7 +288,7 @@ export function PopupSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08, duration: 0.35 }}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-4 text-center hover:shadow-sm transition-shadow"
+                className="bg-white border border-[#E5E7EB] rounded-xl p-4 text-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgba(6,60,110,0.2)]"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#0A9AFF]/10 flex items-center justify-center mx-auto mb-3">
                   <trigger.icon className="w-5 h-5 text-[#0A9AFF]" />
@@ -308,7 +308,7 @@ export function PopupSection() {
         <div className="text-center">
           <Link
             href="/build"
-            className="inline-flex items-center gap-2 bg-[#0A0A0A] text-white text-[15px] font-semibold px-6 py-3 rounded-full hover:bg-[#232323] transition-all hover:shadow-lg hover:shadow-black/15"
+            className="inline-flex items-center gap-2 bg-[#0A0A0A] text-white text-[15px] font-semibold px-6 py-3 rounded-[10px] hover:bg-[#232323] transition-all hover:shadow-lg hover:shadow-black/15"
           >
             Create your first popup
             <ArrowRight className="w-4 h-4" />

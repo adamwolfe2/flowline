@@ -91,17 +91,34 @@ export function HeroSection() {
           </Link>
         </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.05 }}
+        <h1
           className="text-[40px] sm:text-[64px] md:text-[76px] lg:text-[84px] font-bold leading-[1.02] tracking-[-0.03em] text-[#0A0A0A] max-w-5xl"
           style={{ fontFamily: "var(--font-instrument-sans)" }}
         >
-          Your VSL funnel,
-          <br />
-          built in 60 seconds.
-        </motion.h1>
+          {[
+            ["Your", "VSL", "funnel,"],
+            ["built", "in", "60", "seconds."],
+          ].map((line, li) => (
+            <span key={li} className="block">
+              {line.map((word, wi) => (
+                <motion.span
+                  key={`${word}-${wi}`}
+                  className="inline-block whitespace-pre will-change-transform"
+                  initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{
+                    duration: 0.65,
+                    delay: 0.08 + (li * line.length + wi) * 0.06,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                >
+                  {word}
+                  {wi < line.length - 1 ? " " : ""}
+                </motion.span>
+              ))}
+            </span>
+          ))}
+        </h1>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -164,7 +181,7 @@ export function HeroSection() {
                   <button
                     type="button"
                     onClick={() => { setShowTemplates(!showTemplates); setShowStyles(false); }}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${showTemplates ? "bg-[#0A9AFF]/10 text-[#0A9AFF]" : "text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6]"}`}
+                    className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-colors ${showTemplates ? "bg-[#0A9AFF]/10 text-[#0A9AFF]" : "text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6]"}`}
                     title="Templates"
                     aria-label="Quick start templates"
                   >
@@ -204,7 +221,7 @@ export function HeroSection() {
                   <button
                     type="button"
                     onClick={() => { setShowStyles(!showStyles); setShowTemplates(false); }}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${showStyles ? "bg-[#0A9AFF]/10 text-[#0A9AFF]" : "text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6]"}`}
+                    className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-colors ${showStyles ? "bg-[#0A9AFF]/10 text-[#0A9AFF]" : "text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F3F4F6]"}`}
                     title="Brand color"
                     aria-label="Brand color picker"
                   >
@@ -243,7 +260,7 @@ export function HeroSection() {
                 <button
                   onClick={handleSubmit}
                   disabled={urlLoading}
-                  className="group flex items-center gap-2 text-[15px] font-semibold pl-5 pr-4 py-2.5 rounded-full bg-[#0A0A0A] text-white transition-all hover:bg-[#232323] hover:shadow-lg hover:shadow-black/15 disabled:opacity-60"
+                  className="group flex items-center gap-2 text-[15px] font-semibold pl-5 pr-4 py-2.5 rounded-[10px] bg-[#0A0A0A] text-white transition-all hover:bg-[#232323] hover:shadow-lg hover:shadow-black/15 active:scale-[0.97] disabled:opacity-60"
                 >
                   {urlLoading ? (
                     <>
