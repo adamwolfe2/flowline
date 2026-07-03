@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     const brandName = config.brand?.name || "My Funnel";
     const headline = config.quiz?.headline || "Take the quiz";
     const subheadline = config.quiz?.subheadline || "";
-    const primaryColor = config.brand?.primaryColor || "#2D6A4F";
+    const primaryColor = config.brand?.primaryColor || "#0A9AFF";
     const lightColor = config.brand?.primaryColorLight || "#E8F5E9";
     const logoUrl = config.brand?.logoUrl || "";
     const ctaText = config.quiz?.ctaButtonText || "Take the Quiz";

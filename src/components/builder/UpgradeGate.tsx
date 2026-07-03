@@ -23,7 +23,7 @@ export function UpgradeGate({ feature, plan, children }: UpgradeGateProps) {
       </p>
       <Link
         href="/billing"
-        className="bg-[#2D6A4F] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#245840] transition-colors"
+        className="bg-[#0A9AFF] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#0883DB] transition-colors"
       >
         Upgrade to Pro
       </Link>

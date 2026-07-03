@@ -58,7 +58,7 @@ type BuilderAction =
   | { type: "RESET" };
 
 const COLOR_PRESETS = [
-  { label: "Forest", color: "#2D6A4F" },
+  { label: "Forest", color: "#0A9AFF" },
   { label: "Ocean", color: "#2563EB" },
   { label: "Violet", color: "#7C3AED" },
   { label: "Teal", color: "#0891B2" },
@@ -147,7 +147,7 @@ const initialState: BuilderState = {
   currentQuestionIndex: 0,
   answers: {},
   generatedData: null,
-  primaryColor: "#2D6A4F",
+  primaryColor: "#0A9AFF",
   buildStep: 0,
   reasoningSteps: [],
   error: null,
@@ -165,15 +165,15 @@ function PhaseIndicator({ phase }: { phase: BuilderState["phase"] }) {
       {phases.map((p, i) => (
         <div key={p} className="flex items-center gap-1.5">
           <div className={`w-2 h-2 rounded-full transition-colors ${
-            i < currentIdx ? "bg-[#2D6A4F]" :
-            i === currentIdx ? "bg-[#2D6A4F] ring-2 ring-[#2D6A4F]/20" :
+            i < currentIdx ? "bg-[#0A9AFF]" :
+            i === currentIdx ? "bg-[#0A9AFF] ring-2 ring-[#0A9AFF]/20" :
             "bg-[#D1D5DB]"
           }`} />
           <span className={`text-[10px] font-medium hidden sm:inline ${
-            i <= currentIdx ? "text-[#2D6A4F]" : "text-[#D1D5DB]"
+            i <= currentIdx ? "text-[#0A9AFF]" : "text-[#D1D5DB]"
           }`}>{labels[i]}</span>
           {i < phases.length - 1 && (
-            <div className={`w-4 h-px ${i < currentIdx ? "bg-[#2D6A4F]" : "bg-[#D1D5DB]"}`} />
+            <div className={`w-4 h-px ${i < currentIdx ? "bg-[#0A9AFF]" : "bg-[#D1D5DB]"}`} />
           )}
         </div>
       ))}
@@ -188,12 +188,12 @@ function MultipleChoiceInput({ options, selected, onSelect }: { options: string[
         <button key={opt} onClick={() => onSelect(opt)}
           className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all flex items-center gap-3 ${
             selected === opt
-              ? "border-[#2D6A4F] bg-[#2D6A4F]/5 text-[#111827]"
+              ? "border-[#0A9AFF] bg-[#0A9AFF]/5 text-[#111827]"
               : "border-[#E5E7EB] text-[#374151] hover:border-[#9CA3AF] hover:bg-[#F9FAFB]"
           }`}>
           <span className="w-5 h-5 rounded-md border flex items-center justify-center text-[10px] font-medium flex-shrink-0" style={{
-            borderColor: selected === opt ? "#2D6A4F" : "#D1D5DB",
-            backgroundColor: selected === opt ? "#2D6A4F" : "transparent",
+            borderColor: selected === opt ? "#0A9AFF" : "#D1D5DB",
+            backgroundColor: selected === opt ? "#0A9AFF" : "transparent",
             color: selected === opt ? "white" : "#9CA3AF",
           }}>
             {String.fromCharCode(65 + i)}
@@ -211,7 +211,7 @@ function ColorPickerInput({ selected, onSelect }: { selected?: string; onSelect:
       {COLOR_PRESETS.map((c) => (
         <button key={c.color} onClick={() => onSelect(c.color)}
           className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
-            selected === c.color ? "border-[#2D6A4F] bg-[#F9FAFB]" : "border-[#E5E7EB] hover:border-[#9CA3AF]"
+            selected === c.color ? "border-[#0A9AFF] bg-[#F9FAFB]" : "border-[#E5E7EB] hover:border-[#9CA3AF]"
           }`}>
           <div className="w-8 h-8 rounded-full border border-black/10" style={{ backgroundColor: c.color }} />
           <span className="text-[10px] text-[#6B7280]">{c.label}</span>
@@ -264,10 +264,10 @@ function LogoUploadInput({ logoUrl, onUpload, onRemove }: { logoUrl: string; onU
   }
 
   return (
-    <label className={`flex flex-col items-center gap-2 border-2 border-dashed border-[#E5E7EB] rounded-xl p-6 cursor-pointer hover:border-[#2D6A4F] hover:bg-[#F9FAFB] transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+    <label className={`flex flex-col items-center gap-2 border-2 border-dashed border-[#E5E7EB] rounded-xl p-6 cursor-pointer hover:border-[#0A9AFF] hover:bg-[#F9FAFB] transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
       <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} />
       {uploading ? (
-        <Loader2 className="w-6 h-6 text-[#2D6A4F] animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#0A9AFF] animate-spin" />
       ) : (
         <Upload className="w-6 h-6 text-[#9CA3AF]" />
       )}
@@ -278,7 +278,7 @@ function LogoUploadInput({ logoUrl, onUpload, onRemove }: { logoUrl: string; onU
 }
 
 function LivePreview({ answers, description }: { answers: Record<string, string>; description: string }) {
-  const color = answers.brand_color || "#2D6A4F";
+  const color = answers.brand_color || "#0A9AFF";
   const logoUrl = answers.logo_url || "";
   const businessType = answers.business_type || "";
   const audience = answers.target_audience || "";
@@ -416,7 +416,7 @@ function FunnelPreview({ data, color, logoUrl }: { data: Record<string, unknown>
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
             <div className="text-center">
               <p className="text-sm font-medium text-[#111827] mb-2">Sign up to customize & publish</p>
-              <Link href="/sign-up" className="text-xs text-[#2D6A4F] font-medium hover:underline">
+              <Link href="/sign-up" className="text-xs text-[#0A9AFF] font-medium hover:underline">
                 Create free account
               </Link>
             </div>
@@ -583,7 +583,7 @@ function BuildContent() {
       dispatch({ type: "SET_REASONING", steps: [...urlSteps] });
       await new Promise((r) => setTimeout(r, 300));
 
-      const color = data.config?.brand?.primaryColor || "#2D6A4F";
+      const color = data.config?.brand?.primaryColor || "#0A9AFF";
       const generatedData = {
         brandName: data.brandName || data.config?.brand?.name || "",
         headline: data.config?.quiz?.headline || "",
@@ -634,7 +634,7 @@ function BuildContent() {
     }
     // Default color if not picked
     if (currentQ.type === "color" && !state.answers[currentQ.id]) {
-      dispatch({ type: "ANSWER_QUESTION", questionId: currentQ.id, answer: "#2D6A4F" });
+      dispatch({ type: "ANSWER_QUESTION", questionId: currentQ.id, answer: "#0A9AFF" });
     }
 
     // Guard: require an answer for multiple_choice questions
@@ -671,7 +671,7 @@ function BuildContent() {
     dispatch({ type: "SET_REASONING", steps: [...genSteps] });
 
     try {
-      const color = state.answers.brand_color || "#2D6A4F";
+      const color = state.answers.brand_color || "#0A9AFF";
 
       const fetchPromise = fetch("/api/ai/generate", {
         method: "POST",
@@ -762,7 +762,7 @@ function BuildContent() {
         <PhaseIndicator phase={state.phase} />
         <div className="flex items-center gap-2 sm:gap-3">
           {state.phase === "preview" && (
-            <Link href="/sign-up" className="bg-[#2D6A4F] text-white text-xs sm:text-sm font-medium px-3 sm:px-4 py-2 rounded-lg hover:bg-[#245840] transition-colors flex items-center gap-1.5 min-h-[44px]">
+            <Link href="/sign-up" className="bg-[#0A9AFF] text-white text-xs sm:text-sm font-medium px-3 sm:px-4 py-2 rounded-lg hover:bg-[#0883DB] transition-colors flex items-center gap-1.5 min-h-[44px]">
               <span className="hidden sm:inline">Save & Publish</span>
               <span className="sm:hidden">Save</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -785,7 +785,7 @@ function BuildContent() {
               onClick={() => setActiveTab("ai")}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${
                 activeTab === "ai"
-                  ? "text-[#2D6A4F] border-[#2D6A4F] bg-[#F9FAFB]"
+                  ? "text-[#0A9AFF] border-[#0A9AFF] bg-[#F9FAFB]"
                   : "text-[#6B7280] border-transparent hover:text-[#111827]"
               }`}
             >
@@ -796,7 +796,7 @@ function BuildContent() {
               onClick={() => setActiveTab("template")}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${
                 activeTab === "template"
-                  ? "text-[#2D6A4F] border-[#2D6A4F] bg-[#F9FAFB]"
+                  ? "text-[#0A9AFF] border-[#0A9AFF] bg-[#F9FAFB]"
                   : "text-[#6B7280] border-transparent hover:text-[#111827]"
               }`}
             >
@@ -815,8 +815,8 @@ function BuildContent() {
           {state.phase === "prompt" && (
             <div className="p-4 sm:p-6 flex-1 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-[#2D6A4F]" />
+                <div className="w-7 h-7 rounded-lg bg-[#0A9AFF]/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-[#0A9AFF]" />
                 </div>
                 <span className="text-sm font-semibold text-[#111827]">AI Builder</span>
               </div>
@@ -827,7 +827,7 @@ function BuildContent() {
                   onClick={() => dispatch({ type: "SET_MODE", mode: "describe" })}
                   className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors ${
                     state.mode === "describe"
-                      ? "bg-[#2D6A4F] text-white"
+                      ? "bg-[#0A9AFF] text-white"
                       : "text-[#6B7280] hover:text-[#111827]"
                   }`}
                 >
@@ -837,7 +837,7 @@ function BuildContent() {
                   onClick={() => dispatch({ type: "SET_MODE", mode: "url" })}
                   className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors ${
                     state.mode === "url"
-                      ? "bg-[#2D6A4F] text-white"
+                      ? "bg-[#0A9AFF] text-white"
                       : "text-[#6B7280] hover:text-[#111827]"
                   }`}
                 >
@@ -856,13 +856,13 @@ function BuildContent() {
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startPlanning(); } }}
                     placeholder="I run a coaching business helping SaaS founders scale from $50k to $500k MRR through outbound sales systems..."
                     rows={5}
-                    className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] resize-none outline-none border border-[#E5E7EB] rounded-xl p-4 focus:border-[#2D6A4F] transition-colors"
+                    className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] resize-none outline-none border border-[#E5E7EB] rounded-xl p-4 focus:border-[#0A9AFF] transition-colors"
                     style={{ fontSize: "15px" }}
                     aria-label="Describe your business"
                   />
                   {describeError && <p className="text-xs text-red-500 mt-1">{describeError}</p>}
                   <button onClick={() => startPlanning()} disabled={state.businessDescription.length < 10}
-                    className="w-full mt-4 py-3 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
+                    className="w-full mt-4 py-3 bg-[#0A9AFF] hover:bg-[#0883DB] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4" /> Start Building
                   </button>
                 </>
@@ -883,13 +883,13 @@ function BuildContent() {
                       onChange={(e) => setUrlInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); startUrlGeneration(); } }}
                       placeholder="https://yourwebsite.com"
-                      className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl pl-9 pr-4 py-3.5 focus:border-[#2D6A4F] transition-colors"
+                      className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl pl-9 pr-4 py-3.5 focus:border-[#0A9AFF] transition-colors"
                       style={{ fontSize: "15px" }}
                       aria-label="Paste your website URL"
                     />
                   </div>
                   <button onClick={() => startUrlGeneration()} disabled={!urlInput || urlInput.trim().length < 4}
-                    className="w-full mt-4 py-3 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
+                    className="w-full mt-4 py-3 bg-[#0A9AFF] hover:bg-[#0883DB] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                     </svg>
@@ -913,7 +913,7 @@ function BuildContent() {
 
               {/* AI header */}
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-md bg-[#2D6A4F] flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-[#0A9AFF] flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <span className="text-sm font-semibold text-[#111827]">
@@ -929,11 +929,11 @@ function BuildContent() {
                     transition={{ delay: i * 0.05 }}
                     className="flex items-start gap-2.5">
                     {step.status === "done" ? (
-                      <div className="w-5 h-5 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-5 h-5 rounded-full bg-[#0A9AFF] flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Check className="w-3 h-3 text-white" />
                       </div>
                     ) : step.status === "active" ? (
-                      <Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin flex-shrink-0 mt-0.5" />
+                      <Loader2 className="w-5 h-5 text-[#0A9AFF] animate-spin flex-shrink-0 mt-0.5" />
                     ) : (
                       <div className="w-5 h-5 rounded-full border-2 border-[#E5E7EB] flex-shrink-0 mt-0.5" />
                     )}
@@ -965,8 +965,8 @@ function BuildContent() {
               {state.thinking && (
                 <div className="px-6 pt-4">
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="w-6 h-6 rounded-md bg-[#2D6A4F]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                    <div className="w-6 h-6 rounded-md bg-[#0A9AFF]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#0A9AFF]" />
                     </div>
                     <p className="text-xs text-[#6B7280] italic">{state.thinking}</p>
                   </div>
@@ -978,7 +978,7 @@ function BuildContent() {
                 {state.questions.slice(0, state.currentQuestionIndex).map((q) => (
                   <motion.div key={q.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     className="flex items-center gap-2 text-xs">
-                    <Check className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />
+                    <Check className="w-4 h-4 text-[#0A9AFF] flex-shrink-0" />
                     <span className="text-[#9CA3AF]">{q.text}</span>
                     <span className="text-[#111827] font-medium ml-auto truncate max-w-[160px]">
                       {q.type === "color" ? (
@@ -997,7 +997,7 @@ function BuildContent() {
                 <div className="flex-1 flex flex-col p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-[#2D6A4F] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-[#0A9AFF] flex items-center justify-center">
                         <span className="text-[10px] text-white font-bold">{state.currentQuestionIndex + 1}</span>
                       </div>
                       <span className="text-xs text-[#9CA3AF]">of {state.questions.length}</span>
@@ -1028,7 +1028,7 @@ function BuildContent() {
                           onChange={(e) => setTextInput(e.target.value)}
                           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleNext(); } }}
                           placeholder="e.g., We help them build a predictable outbound pipeline"
-                          className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#2D6A4F] transition-colors"
+                          className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#0A9AFF] transition-colors"
                           autoFocus
                         />
                       )}
@@ -1041,7 +1041,7 @@ function BuildContent() {
                             onChange={(e) => setTextInput(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleNext(); } }}
                             placeholder="https://cal.com/you/discovery-call"
-                            className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#2D6A4F] transition-colors"
+                            className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] outline-none border border-[#E5E7EB] rounded-xl p-3 focus:border-[#0A9AFF] transition-colors"
                             autoFocus
                           />
                           <p className="text-xs text-[#9CA3AF] mt-1">Enter your booking link to auto-route qualified leads, or skip to continue.</p>
@@ -1075,7 +1075,7 @@ function BuildContent() {
                       </button>
                     )}
                     <button onClick={handleNext} disabled={!canAdvance}
-                      className="ml-auto flex items-center gap-1.5 bg-[#2D6A4F] hover:bg-[#245840] disabled:opacity-40 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-all">
+                      className="ml-auto flex items-center gap-1.5 bg-[#0A9AFF] hover:bg-[#0883DB] disabled:opacity-40 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-all">
                       {state.currentQuestionIndex === state.questions.length - 1 ? "Generate" : "Next"}
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -1094,7 +1094,7 @@ function BuildContent() {
 
               {/* AI header */}
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-md bg-[#2D6A4F] flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-[#0A9AFF] flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 text-white" />
                 </div>
                 <span className="text-sm font-semibold text-[#111827]">Building your funnel</span>
@@ -1120,11 +1120,11 @@ function BuildContent() {
                     transition={{ delay: i * 0.05 }}
                     className="flex items-start gap-2.5">
                     {step.status === "done" ? (
-                      <div className="w-5 h-5 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-5 h-5 rounded-full bg-[#0A9AFF] flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Check className="w-3 h-3 text-white" />
                       </div>
                     ) : step.status === "active" ? (
-                      <Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin flex-shrink-0 mt-0.5" />
+                      <Loader2 className="w-5 h-5 text-[#0A9AFF] animate-spin flex-shrink-0 mt-0.5" />
                     ) : (
                       <div className="w-5 h-5 rounded-full border-2 border-[#E5E7EB] flex-shrink-0 mt-0.5" />
                     )}
@@ -1147,7 +1147,7 @@ function BuildContent() {
             <div className="flex-1 flex flex-col">
               <div className="p-6 flex-1">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 rounded-lg bg-[#2D6A4F] flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-[#0A9AFF] flex items-center justify-center">
                     <Check className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-sm font-semibold text-[#111827]">Your funnel is ready</span>
@@ -1209,7 +1209,7 @@ function BuildContent() {
 
               <div className="p-5 border-t border-[#E5E7EB]">
                 <Link href="/sign-up"
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#2D6A4F] text-white text-sm font-semibold rounded-xl hover:bg-[#245840] transition-colors">
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#0A9AFF] text-white text-sm font-semibold rounded-xl hover:bg-[#0883DB] transition-colors">
                   Save & Publish My Funnel <ArrowRight className="w-4 h-4" />
                 </Link>
                 <p className="text-center text-[10px] text-[#9CA3AF] mt-2">Free plan. No credit card required.</p>
@@ -1225,8 +1225,8 @@ function BuildContent() {
             {activeTab === "template" && (
               <motion.div key="template-idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="text-center max-w-sm">
-                <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <LayoutTemplate className="w-8 h-8 text-[#2D6A4F]" />
+                <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <LayoutTemplate className="w-8 h-8 text-[#0A9AFF]" />
                 </div>
                 <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>
                   Start from a proven template
@@ -1239,8 +1239,8 @@ function BuildContent() {
             {activeTab === "ai" && state.phase === "prompt" && (
               <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="text-center max-w-sm">
-                <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-[#2D6A4F]" />
+                <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-[#0A9AFF]" />
                 </div>
                 <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>
                   Your funnel will appear here
@@ -1260,7 +1260,7 @@ function BuildContent() {
             {state.phase === "generating" && (
               <motion.div key="generating" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="text-center">
-                <div className="w-12 h-12 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-4" />
+                <div className="w-12 h-12 border-2 border-[#E5E7EB] border-t-[#0A9AFF] rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-sm font-medium text-[#111827] mb-1">Crafting your funnel</p>
                 <p className="text-xs text-[#9CA3AF]">
                   {state.reasoningSteps.find(s => s.status === "active")?.label || "Assembling..."}
@@ -1281,7 +1281,7 @@ function BuildContent() {
       {state.phase !== "prompt" && (
         <button
           onClick={() => setShowMobilePreview(true)}
-          className="lg:hidden fixed bottom-6 right-6 z-40 w-12 h-12 bg-[#2D6A4F] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#245840] transition-colors"
+          className="lg:hidden fixed bottom-6 right-6 z-40 w-12 h-12 bg-[#0A9AFF] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0883DB] transition-colors"
           aria-label="Preview funnel"
         >
           <Eye className="w-5 h-5" />
@@ -1316,7 +1316,7 @@ function BuildContent() {
                 {(state.phase === "planning" || state.phase === "questions") && <LivePreview answers={state.answers} description={state.businessDescription} />}
                 {state.phase === "generating" && (
                   <div className="text-center py-10">
-                    <div className="w-10 h-10 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-3" />
+                    <div className="w-10 h-10 border-2 border-[#E5E7EB] border-t-[#0A9AFF] rounded-full animate-spin mx-auto mb-3" />
                     <p className="text-sm text-[#6B7280]">{state.reasoningSteps.find(s => s.status === "active")?.label || "Building..."}</p>
                   </div>
                 )}
@@ -1334,7 +1334,7 @@ function BuildContent() {
 
 export default function BuildPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#2D6A4F]" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-[#0A9AFF]" /></div>}>
       <BuildContent />
     </Suspense>
   );

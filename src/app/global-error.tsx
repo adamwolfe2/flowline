@@ -36,7 +36,7 @@ export default function GlobalError({
               justifyContent: "center",
               margin: "0 auto 20px",
             }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0A9AFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -66,7 +66,7 @@ export default function GlobalError({
                   alignItems: "center",
                   padding: "10px 20px",
                   borderRadius: "12px",
-                  backgroundColor: "#2D6A4F",
+                  backgroundColor: "#0A9AFF",
                   color: "#ffffff",
                   fontSize: "14px",
                   fontWeight: 500,

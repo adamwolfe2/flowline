@@ -20,9 +20,9 @@ export const FUNNEL_TEMPLATES: FunnelTemplate[] = [
       brand: {
         name: "My Coaching Program",
         logoUrl: "",
-        primaryColor: "#2D6A4F",
+        primaryColor: "#0A9AFF",
         primaryColorLight: "#D1FAE5",
-        primaryColorDark: "#1B4332",
+        primaryColorDark: "#0668B3",
         fontHeading: "DM Sans",
         fontBody: "Inter",
       },

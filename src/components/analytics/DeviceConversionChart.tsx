@@ -15,10 +15,10 @@ interface DeviceConversionChartProps {
 }
 
 const DEVICE_COLORS: Record<string, string> = {
-  desktop: "#2D6A4F",
-  mobile: "#52B788",
+  desktop: "#0A9AFF",
+  mobile: "#5CBEFF",
   tablet: "#74C69D",
-  unknown: "#B7E4C7",
+  unknown: "#BFE5FF",
 };
 
 function displayDevice(deviceType: string | null): string {
@@ -27,7 +27,7 @@ function displayDevice(deviceType: string | null): string {
 }
 
 function getDeviceColor(deviceType: string | null): string {
-  return DEVICE_COLORS[deviceType ?? "unknown"] ?? "#B7E4C7";
+  return DEVICE_COLORS[deviceType ?? "unknown"] ?? "#BFE5FF";
 }
 
 export function DeviceConversionChart({ data }: DeviceConversionChartProps) {
@@ -125,11 +125,11 @@ export function DeviceConversionChart({ data }: DeviceConversionChartProps) {
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs text-gray-500">
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#2D6A4F]" />
+          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#0A9AFF]" />
           Sessions (solid)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#2D6A4F] opacity-40" />
+          <span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#0A9AFF] opacity-40" />
           Completion % (light)
         </span>
       </div>
@@ -144,7 +144,7 @@ export function DeviceConversionChart({ data }: DeviceConversionChartProps) {
             </div>
             <span className="text-gray-400 shrink-0">
               {d.sessions.toLocaleString()} sessions
-              <span className="ml-2 text-[#2D6A4F] font-semibold">{d.completionRate}%</span>
+              <span className="ml-2 text-[#0A9AFF] font-semibold">{d.completionRate}%</span>
             </span>
           </div>
         ))}

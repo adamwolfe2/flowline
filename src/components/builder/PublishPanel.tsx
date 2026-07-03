@@ -649,7 +649,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-1.5">
                     {link.source && (
-                      <span className="text-[9px] bg-[#2D6A4F]/10 text-[#2D6A4F] px-1.5 py-0.5 rounded font-medium">{link.source}</span>
+                      <span className="text-[9px] bg-[#0A9AFF]/10 text-[#0A9AFF] px-1.5 py-0.5 rounded font-medium">{link.source}</span>
                     )}
                     {link.medium && (
                       <span className="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-medium">{link.medium}</span>

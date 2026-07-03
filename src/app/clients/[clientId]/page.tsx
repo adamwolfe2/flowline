@@ -80,7 +80,7 @@ export default function ClientDetailPage() {
   const params = useParams();
   const clientId = params.clientId as string;
   const { isTeamContext, activeTeamId, activeTeam } = useWorkspace();
-  const brandColor = activeTeam?.branding?.primaryColor ?? "#2D6A4F";
+  const brandColor = activeTeam?.branding?.primaryColor ?? "#0A9AFF";
 
   const [client, setClient] = useState<ClientDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -488,7 +488,7 @@ export default function ClientDetailPage() {
                     variant="secondary"
                     className={`text-[10px] ${
                       funnel.published
-                        ? "bg-white border border-[#E5E7EB] text-[#2D6A4F]"
+                        ? "bg-white border border-[#E5E7EB] text-[#0A9AFF]"
                         : ""
                     }`}
                   >
@@ -562,7 +562,7 @@ export default function ClientDetailPage() {
                 onChange={(e) => setEditNotes(e.target.value)}
                 placeholder="Any notes about this client (optional)"
                 rows={3}
-                className="w-full px-2.5 py-1.5 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors resize-none"
+                className="w-full px-2.5 py-1.5 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors resize-none"
               />
             </div>
           </div>
@@ -672,7 +672,7 @@ export default function ClientDetailPage() {
                         variant="secondary"
                         className={`text-[10px] ${
                           funnel.published
-                            ? "bg-white border border-[#E5E7EB] text-[#2D6A4F]"
+                            ? "bg-white border border-[#E5E7EB] text-[#0A9AFF]"
                             : ""
                         }`}
                       >

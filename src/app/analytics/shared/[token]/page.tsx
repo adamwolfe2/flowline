@@ -59,7 +59,7 @@ function formatDate(d: string) {
 }
 
 function tierBadgeColor(tier: string): string {
-  if (tier === "high") return "bg-[#2D6A4F]/10 text-[#2D6A4F]";
+  if (tier === "high") return "bg-[#0A9AFF]/10 text-[#0A9AFF]";
   if (tier === "mid") return "bg-[#D97706]/10 text-[#D97706]";
   return "bg-gray-100 text-gray-600";
 }
@@ -73,7 +73,7 @@ function deviceIcon(type: string | null) {
 /** Validate brand color is a safe CSS color value */
 function sanitizeColor(color: string): string {
   if (/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
-  return "#2D6A4F";
+  return "#0A9AFF";
 }
 
 export default function SharedAnalyticsPage({ params }: { params: Promise<{ token: string }> }) {
@@ -117,7 +117,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-6 h-6 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-6 h-6 border-2 border-[#0A9AFF] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-xs text-gray-400">Loading analytics...</p>
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
   }
 
   const teamColor = data.teamBranding?.primaryColor ? sanitizeColor(data.teamBranding.primaryColor) : null;
-  const accentColor = teamColor || sanitizeColor(data.brandColor || "#2D6A4F");
+  const accentColor = teamColor || sanitizeColor(data.brandColor || "#0A9AFF");
   const funnelName = data.funnelName || "Funnel";
   const headerLogoUrl = data.teamBranding?.logoUrl || data.brandLogoUrl;
   const poweredByName = data.teamBranding?.appName || "MyVSL";

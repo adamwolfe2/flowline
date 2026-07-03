@@ -91,11 +91,11 @@ export function ContentBlocksEditor({ config, onSave }: ContentBlocksEditorProps
               <button
                 key={type}
                 onClick={() => addBlock(type)}
-                className="flex items-start gap-2.5 p-2.5 border border-gray-200 rounded-lg hover:border-[#2D6A4F] hover:bg-green-50/50 transition-colors text-left group"
+                className="flex items-start gap-2.5 p-2.5 border border-gray-200 rounded-lg hover:border-[#0A9AFF] hover:bg-green-50/50 transition-colors text-left group"
               >
-                <span className="text-gray-400 group-hover:text-[#2D6A4F] mt-0.5">{icon}</span>
+                <span className="text-gray-400 group-hover:text-[#0A9AFF] mt-0.5">{icon}</span>
                 <div>
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-[#2D6A4F]">{label}</span>
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-[#0A9AFF]">{label}</span>
                   <span className="text-[10px] text-gray-400 block">{desc}</span>
                 </div>
               </button>

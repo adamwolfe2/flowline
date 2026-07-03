@@ -6,19 +6,19 @@ import { MessageSquare, Sparkles, Globe } from "lucide-react";
 
 const steps = [
   {
-    number: 1,
+    number: "01",
     icon: MessageSquare,
     title: "Describe",
     description: "Tell AI about your business in one sentence",
   },
   {
-    number: 2,
+    number: "02",
     icon: Sparkles,
     title: "Customize",
     description: "Edit your quiz, branding, and scoring in the visual editor",
   },
   {
-    number: 3,
+    number: "03",
     icon: Globe,
     title: "Launch",
     description: "Publish with a custom domain or embed on your site",
@@ -32,19 +32,19 @@ export function ThreeSteps() {
   const isInView = useInView(ref, { once: true });
 
   return (
-    <section ref={ref} className="py-20 px-6 bg-white">
-      <div className="max-w-4xl mx-auto text-center">
+    <section ref={ref} className="py-20 sm:py-28 px-5 sm:px-8 bg-white">
+      <div className="max-w-5xl mx-auto text-center">
         <h2
-          className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
-          style={{ fontFamily: "var(--font-plus-jakarta)" }}
+          className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] tracking-[-0.03em] mb-4"
+          style={{ fontFamily: "var(--font-instrument-sans)" }}
         >
-          How it works
+          How it works.
         </h2>
-        <p className="text-gray-500 text-base mb-14 max-w-xl mx-auto">
-          Go from idea to live funnel in under 5 minutes
+        <p className="text-[#6B7280] text-lg mb-16 max-w-xl mx-auto">
+          Go from idea to live funnel in under 5 minutes.
         </p>
 
-        <div className="grid grid-cols-3 gap-3 sm:gap-8">
+        <div className="grid sm:grid-cols-3 gap-4 sm:gap-6">
           {steps.map((step, i) => {
             const Icon = step.icon;
             return (
@@ -53,23 +53,20 @@ export function ThreeSteps() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: isInView ? 1 : 0, y: isInView ? 0 : 24 }}
                 transition={{ duration: 0.5, delay: DELAYS[i] }}
-                className="relative flex flex-col items-center text-center px-1 sm:px-4"
+                className="relative flex flex-col items-start text-left rounded-[28px] bg-[#FAFAF8] ring-1 ring-black/[0.04] p-7 sm:p-8 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(6,60,110,0.25)] transition-all duration-300"
               >
-                {/* Numbered circle */}
-                <div className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-bold flex items-center justify-center mb-3 sm:mb-4 text-[#6B7280]">
+                <span className="text-sm font-semibold text-[#0A9AFF] mb-6 tracking-wide">
                   {step.number}
+                </span>
+
+                <div className="w-12 h-12 rounded-2xl bg-[#E5F3FF] flex items-center justify-center mb-5">
+                  <Icon className="w-5 h-5 text-[#0A9AFF]" />
                 </div>
 
-                {/* Icon */}
-                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#2D6A4F]/5 border border-[#E5E7EB] flex items-center justify-center mb-3 sm:mb-4">
-                  <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-[#2D6A4F]" />
-                </div>
-
-                {/* Text */}
-                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
+                <h3 className="text-xl font-semibold text-[#0A0A0A] tracking-tight mb-2">
                   {step.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                <p className="text-[15px] text-[#6B7280] leading-relaxed">
                   {step.description}
                 </p>
               </motion.div>

@@ -322,7 +322,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
           <div className="flex items-center gap-2">
             <a
               href={`/builder/${funnelId}`}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#2D6A4F] hover:text-[#245840] bg-white border border-[#E5E7EB] rounded-md px-2.5 py-1 transition-colors"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#0A9AFF] hover:text-[#0883DB] bg-white border border-[#E5E7EB] rounded-md px-2.5 py-1 transition-colors"
             >
               <Pencil className="w-3 h-3" />
               Edit
@@ -332,7 +332,7 @@ export function FunnelClient({ config, funnelId, sessionId, hideBranding, embedM
                 href={`/f/${slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#2D6A4F] hover:text-[#245840] bg-white border border-[#E5E7EB] rounded-md px-2.5 py-1 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#0A9AFF] hover:text-[#0883DB] bg-white border border-[#E5E7EB] rounded-md px-2.5 py-1 transition-colors"
               >
                 <ExternalLink className="w-3 h-3" />
                 View Live

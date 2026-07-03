@@ -75,7 +75,7 @@ export function FunnelHealthWidget({ health }: { health: FunnelHealth }) {
               className="flex items-start gap-2 py-1"
             >
               {check.passed ? (
-                <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0 mt-0.5" />
+                <Check className="w-3.5 h-3.5 text-[#0A9AFF] shrink-0 mt-0.5" />
               ) : (
                 <Circle className="w-3.5 h-3.5 text-[#D1D5DB] shrink-0 mt-0.5" />
               )}

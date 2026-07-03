@@ -41,7 +41,7 @@ function formatRelativeTime(dateStr: string): string {
 function ScoreBadge({ score, label }: { score: number; label: string }) {
   const color =
     label === "excellent"
-      ? "#2D6A4F"
+      ? "#0A9AFF"
       : label === "good"
       ? "#059669"
       : label === "fair"
@@ -62,7 +62,7 @@ function SeverityBadge({ severity }: { severity: "critical" | "high" | "medium" 
   const map = {
     critical: { color: "#DC2626", bg: "#FEF2F2", label: "Critical" },
     high: { color: "#D97706", bg: "#FFFBEB", label: "High" },
-    medium: { color: "#2D6A4F", bg: "#F0FDF4", label: "Medium" },
+    medium: { color: "#0A9AFF", bg: "#F0FDF4", label: "Medium" },
   };
   const { color, bg, label } = map[severity];
   return (
@@ -197,7 +197,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
         <a
           href="/billing"
           className="text-xs font-medium px-4 py-2 rounded-lg text-white"
-          style={{ backgroundColor: "#2D6A4F" }}
+          style={{ backgroundColor: "#0A9AFF" }}
         >
           Upgrade to Pro
         </a>
@@ -210,7 +210,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
     return (
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#2D6A4F] animate-pulse" />
+          <Sparkles className="w-4 h-4 text-[#0A9AFF] animate-pulse" />
           <span className="text-sm font-medium text-gray-600">Analyzing your funnel...</span>
         </div>
         <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4" />
@@ -229,7 +229,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
     return (
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-[#2D6A4F]" />
+          <Info className="w-4 h-4 text-[#0A9AFF]" />
           <span className="text-sm font-semibold text-gray-900">AI Insights</span>
         </div>
         <p className="text-sm text-gray-600">{state.message}</p>
@@ -238,7 +238,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
             <div
               className="h-2 rounded-full"
               style={{
-                backgroundColor: "#2D6A4F",
+                backgroundColor: "#0A9AFF",
                 width: `${Math.min(100, Math.round((state.currentSessions / state.requiredSessions) * 100))}%`,
               }}
             />
@@ -261,7 +261,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
         </div>
         <button
           onClick={() => triggerRegenerate(false)}
-          className="text-xs font-medium text-[#2D6A4F] hover:underline whitespace-nowrap"
+          className="text-xs font-medium text-[#0A9AFF] hover:underline whitespace-nowrap"
         >
           Retry
         </button>
@@ -277,7 +277,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Sparkles className="w-4 h-4 text-[#2D6A4F] shrink-0" />
+          <Sparkles className="w-4 h-4 text-[#0A9AFF] shrink-0" />
           <span className="text-sm font-semibold text-gray-900">AI Insights</span>
           <ScoreBadge score={insight.score} label={insight.scoreLabel} />
           {stale && (
@@ -307,7 +307,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
         {(["completionRate", "conversionRate"] as const).map((key) => {
           const bm = insight.benchmarkComparison[key];
           const statusColor =
-            bm.status === "above" ? "#2D6A4F" : bm.status === "at" ? "#D97706" : "#DC2626";
+            bm.status === "above" ? "#0A9AFF" : bm.status === "at" ? "#D97706" : "#DC2626";
           const label = key === "completionRate" ? "Completion Rate" : "Conversion Rate";
           return (
             <div key={key} className="bg-gray-50 rounded-lg p-3">
@@ -334,12 +334,12 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
               key={i}
               className="flex items-start gap-3 p-3 rounded-lg bg-[#F0FDF4] border border-[#BBF7D0]"
             >
-              <CheckCircle2 className="w-4 h-4 text-[#2D6A4F] mt-0.5 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#0A9AFF] mt-0.5 shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900">{win.title}</p>
                 <p className="text-xs text-gray-600 mt-0.5">{win.detail}</p>
                 {win.metric && (
-                  <span className="text-xs font-medium text-[#2D6A4F] mt-1 inline-block">
+                  <span className="text-xs font-medium text-[#0A9AFF] mt-1 inline-block">
                     {win.metric}
                   </span>
                 )}
@@ -370,7 +370,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
                           ? "#DC2626"
                           : issue.severity === "high"
                           ? "#D97706"
-                          : "#2D6A4F",
+                          : "#0A9AFF",
                     }}
                   />
                   <p className="text-sm font-medium text-gray-900">{issue.title}</p>
@@ -388,7 +388,7 @@ export function InsightsCard({ funnelId, timeRange, userPlan, isAdmin }: Insight
               <div className="flex items-center justify-end">
                 <span
                   className="text-xs font-medium px-2 py-0.5 rounded-full text-white"
-                  style={{ backgroundColor: "#2D6A4F" }}
+                  style={{ backgroundColor: "#0A9AFF" }}
                 >
                   Expected lift: {issue.expectedLift}
                 </span>

@@ -103,14 +103,14 @@ function DashboardContent() {
             description: "Your account has been upgraded. All features are now unlocked.",
             duration: 6000,
           });
-          firePublishConfetti("#2D6A4F");
+          firePublishConfetti("#0A9AFF");
         })
         .catch(() => {
           toast.success("Your account has been upgraded!", {
             description: "All features are now unlocked.",
             duration: 6000,
           });
-          firePublishConfetti("#2D6A4F");
+          firePublishConfetti("#0A9AFF");
         });
       window.history.replaceState({}, "", "/dashboard");
     }
@@ -197,7 +197,7 @@ function DashboardContent() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
               aria-label="Sort funnels"
             >
               <option value="newest">Newest</option>
@@ -208,7 +208,7 @@ function DashboardContent() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
               aria-label="Filter by status"
             >
               <option value="all">All</option>

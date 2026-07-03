@@ -36,7 +36,7 @@ export function EmailPreview({
   subject,
   body,
   brandName,
-  brandColor = "#2D6A4F",
+  brandColor = "#0A9AFF",
 }: EmailPreviewProps) {
   const renderedSubject = replacePlaceholders(subject, brandName);
   const renderedBody = bodyToHtml(replacePlaceholders(body, brandName));

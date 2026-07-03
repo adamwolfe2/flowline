@@ -213,7 +213,7 @@ export default function BillingPage() {
           aria-checked={annual}
           aria-label="Toggle annual billing"
           className={`relative w-12 h-7 rounded-full transition-colors ${
-            annual ? "bg-[#2D6A4F]" : "bg-gray-300"
+            annual ? "bg-[#0A9AFF]" : "bg-gray-300"
           }`}
         >
           <div
@@ -226,7 +226,7 @@ export default function BillingPage() {
           Annual
         </span>
         {annual && (
-          <span className="text-xs font-semibold text-[#2D6A4F] bg-green-50 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-semibold text-[#0A9AFF] bg-green-50 px-2 py-0.5 rounded-full">
             Save 20%
           </span>
         )}
@@ -246,14 +246,14 @@ export default function BillingPage() {
               whileHover={{ y: -3, transition: { duration: 0.15 } }}
               className={`bg-white rounded-xl border p-6 transition-colors ${
                 isCurrent
-                  ? "border-[#2D6A4F] ring-1 ring-[#2D6A4F]"
+                  ? "border-[#0A9AFF] ring-1 ring-[#0A9AFF]"
                   : "border-[#EBEBEB] hover:border-gray-300"
               }`}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-[#333333]">{plan.name}</h3>
                 {isCurrent && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#2D6A4F]/10 text-[#2D6A4F]">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#0A9AFF]/10 text-[#0A9AFF]">
                     Current
                   </span>
                 )}
@@ -298,7 +298,7 @@ export default function BillingPage() {
                 <button
                   onClick={() => handleUpgrade(key)}
                   disabled={loading !== null}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#245840] transition-colors disabled:opacity-50"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0A9AFF] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#0883DB] transition-colors disabled:opacity-50"
                 >
                   {loading === key ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -316,7 +316,7 @@ export default function BillingPage() {
               <ul className="space-y-2">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-sm text-[#737373]">
-                    <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                    <Check className="w-3.5 h-3.5 text-[#0A9AFF] shrink-0" />
                     {feature}
                   </li>
                 ))}

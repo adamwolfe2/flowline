@@ -44,7 +44,7 @@ export default function ClientsPage() {
   const [formCompany, setFormCompany] = useState("");
   const [formNotes, setFormNotes] = useState("");
 
-  const brandColor = activeTeam?.branding?.primaryColor ?? "#2D6A4F";
+  const brandColor = activeTeam?.branding?.primaryColor ?? "#0A9AFF";
 
   const loadClients = useCallback(async () => {
     if (!activeTeamId) return;
@@ -304,7 +304,7 @@ export default function ClientsPage() {
                 onChange={(e) => setFormNotes(e.target.value)}
                 placeholder="Any notes about this client (optional)"
                 rows={3}
-                className="w-full px-2.5 py-1.5 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors resize-none"
+                className="w-full px-2.5 py-1.5 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors resize-none"
               />
             </div>
           </div>

@@ -103,7 +103,7 @@ export const TEMPLATE_META: TemplateMeta[] = [
 
 const BASE_BRAND: FunnelConfig["brand"] = {
   name: "Your Business Name",
-  primaryColor: "#2D6A4F",
+  primaryColor: "#0A9AFF",
   primaryColorLight: "#E8F5E9",
   primaryColorDark: "#1B5E20",
   fontHeading: "Inter",

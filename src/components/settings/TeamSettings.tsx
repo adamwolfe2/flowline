@@ -362,7 +362,7 @@ function BrandingSection({ teamId }: { teamId: string }) {
     }
   }
 
-  const displayColor = branding.primaryColor || "#2D6A4F";
+  const displayColor = branding.primaryColor || "#0A9AFF";
   const displayName = branding.appName || "MyVSL";
 
   if (loading) {
@@ -448,14 +448,14 @@ function BrandingSection({ teamId }: { teamId: string }) {
           <div className="flex items-center gap-3">
             <input
               type="color"
-              value={HEX_COLOR_REGEX.test(primaryColor) ? primaryColor : "#2D6A4F"}
+              value={HEX_COLOR_REGEX.test(primaryColor) ? primaryColor : "#0A9AFF"}
               onChange={handleColorInputChange}
               className="w-9 h-9 rounded border border-[#E5E7EB] cursor-pointer p-0.5"
             />
             <Input
               value={primaryColor}
               onChange={(e) => handleColorChange(e.target.value)}
-              placeholder="#2D6A4F"
+              placeholder="#0A9AFF"
               className="text-sm w-32 font-mono"
               maxLength={7}
             />
@@ -877,7 +877,7 @@ export function TeamSettings() {
                 <select
                   value={inviteRole}
                   onChange={e => setInviteRole(e.target.value as "admin" | "member")}
-                  className="text-sm rounded-md border border-input bg-background px-2 py-1.5 text-[#333333] focus:outline-none focus:ring-1 focus:ring-[#2D6A4F]"
+                  className="text-sm rounded-md border border-input bg-background px-2 py-1.5 text-[#333333] focus:outline-none focus:ring-1 focus:ring-[#0A9AFF]"
                 >
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>

@@ -163,12 +163,12 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              <Badge variant="secondary" className={`text-[10px] ${funnel.published ? "bg-white border border-[#E5E7EB] text-[#2D6A4F]" : ""}`}>
+              <Badge variant="secondary" className={`text-[10px] ${funnel.published ? "bg-white border border-[#E5E7EB] text-[#0A9AFF]" : ""}`}>
                 {funnel.published ? (
                   <span className="flex items-center gap-1">
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2D6A4F] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#2D6A4F]" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0A9AFF] opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#0A9AFF]" />
                     </span>
                     Live
                   </span>

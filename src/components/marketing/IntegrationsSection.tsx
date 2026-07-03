@@ -30,12 +30,12 @@ const featured = [
 
 export function IntegrationsSection() {
   return (
-    <section className="bg-white py-20 sm:py-28 border-t border-[#F3F4F6]">
+    <section className="bg-white py-20 sm:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] tracking-[-0.03em]">
               Connect to the tools<br className="hidden sm:block" /> you already use
             </h2>
           </div>
@@ -69,7 +69,7 @@ export function IntegrationsSection() {
         {/* Featured integration cards */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {featured.map((f) => (
-            <div key={f.title} className="p-4 sm:p-6 rounded-2xl border border-[#E5E7EB] hover:shadow-md transition-shadow">
+            <div key={f.title} className="p-4 sm:p-6 rounded-[24px] border border-[#E5E7EB] hover:shadow-md transition-shadow">
               <h3 className="text-sm sm:text-base font-semibold text-[#111827] mb-1 sm:mb-2">{f.title}</h3>
               <p className="text-xs sm:text-sm text-[#6B7280] mb-3 sm:mb-4">{f.description}</p>
               <div className="flex flex-wrap gap-2">

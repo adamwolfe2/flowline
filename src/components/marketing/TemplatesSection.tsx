@@ -13,7 +13,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 border border-[#E5E7EB] bg-white rounded-full px-3 py-1 text-sm font-medium text-[#111827]">
+    <div className="inline-flex items-center gap-1.5 border border-black/10 bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium text-[#0A0A0A]/75">
       {icon}
       {children}
     </div>
@@ -34,7 +34,7 @@ const templates = [
   { title: "Executive Coach Intake", color: "#4BC0A0", questions: 5, category: "Coaching", prompt: "I provide executive coaching for C-suite leaders at mid-size companies" },
   { title: "Group Coaching Screener", color: "#9B6FE8", questions: 3, category: "Coaching", prompt: "I run group coaching programs for entrepreneurs scaling to 7 figures" },
   { title: "Agency Lead Scorer", color: "#E85D75", questions: 6, category: "Agencies", prompt: "I run a digital marketing agency for ecommerce brands" },
-  { title: "Creative Agency Qualifier", color: "#2D6A4F", questions: 4, category: "Agencies", prompt: "I run a creative agency specializing in brand identity and web design" },
+  { title: "Creative Agency Qualifier", color: "#0A9AFF", questions: 4, category: "Agencies", prompt: "I run a creative agency specializing in brand identity and web design" },
   { title: "Marketing Agency Intake", color: "#4A90D9", questions: 5, category: "Agencies", prompt: "I run a marketing agency helping B2B SaaS companies grow" },
   { title: "SaaS Discovery Call", color: "#4A90D9", questions: 5, category: "SaaS", prompt: "I sell a B2B SaaS product for team collaboration and project management" },
   { title: "Product Demo Qualifier", color: "#9B6FE8", questions: 4, category: "SaaS", prompt: "I sell an AI-powered analytics platform for ecommerce stores" },
@@ -44,8 +44,8 @@ const templates = [
   { title: "Investment Property Lead", color: "#E85D75", questions: 4, category: "Real Estate", prompt: "I help real estate investors find and evaluate rental properties" },
   { title: "Fitness Assessment", color: "#9B6FE8", questions: 5, category: "Fitness", prompt: "I sell online fitness coaching for busy professionals" },
   { title: "Personal Training Intake", color: "#4BC0A0", questions: 3, category: "Fitness", prompt: "I'm a personal trainer specializing in strength training and nutrition" },
-  { title: "Nutrition Coach Screener", color: "#2D6A4F", questions: 4, category: "Fitness", prompt: "I'm a nutrition coach helping clients with meal planning and weight loss" },
-  { title: "Consulting Intake", color: "#2D6A4F", questions: 7, category: "& more", prompt: "I provide business consulting for small to mid-size companies" },
+  { title: "Nutrition Coach Screener", color: "#0A9AFF", questions: 4, category: "Fitness", prompt: "I'm a nutrition coach helping clients with meal planning and weight loss" },
+  { title: "Consulting Intake", color: "#0A9AFF", questions: 7, category: "& more", prompt: "I provide business consulting for small to mid-size companies" },
   { title: "Legal Consultation Funnel", color: "#333333", questions: 4, category: "& more", prompt: "I'm a lawyer offering legal consultation for small businesses" },
   { title: "Financial Advisor Qualifier", color: "#4A90D9", questions: 5, category: "& more", prompt: "I'm a financial advisor helping professionals plan for retirement" },
 ];
@@ -96,15 +96,15 @@ export function TemplatesSection() {
   const [activeCategory, setActiveCategory] = useState("Coaching");
 
   return (
-    <section className="border-t border-[#E5E7EB] bg-white py-12 sm:py-20 px-4 sm:px-6">
+    <section id="templates" className="bg-white py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-8">
           <SectionLabel icon={<LayoutGrid className="w-3.5 h-3.5" />}>
             Templates
           </SectionLabel>
           <h2
-            className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] tracking-[-0.03em] leading-[1.08]"
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             Start with a template. Live in minutes.
           </h2>
@@ -121,7 +121,7 @@ export function TemplatesSection() {
               onClick={() => setActiveCategory(cat)}
               className={`text-sm px-4 py-2.5 rounded-full transition-colors border min-h-[44px] ${
                 activeCategory === cat
-                  ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                  ? "bg-[#0A0A0A] text-white border-[#0A0A0A]"
                   : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
               }`}
             >
@@ -143,7 +143,7 @@ export function TemplatesSection() {
               >
                 <Link
                   href={`/build?prompt=${encodeURIComponent(t.prompt)}`}
-                  className="group block bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#D1D5DB] transition-all duration-200"
+                  className="group block bg-white border border-[#E5E7EB] rounded-[24px] overflow-hidden hover:shadow-md hover:border-[#D1D5DB] transition-all duration-200"
                 >
                   <TemplateMockup color={t.color} questions={t.questions} />
                   <div className="p-3 sm:p-5 border-t border-[#E5E7EB]">
@@ -154,7 +154,7 @@ export function TemplatesSection() {
                       <span className="text-[10px] sm:text-xs text-[#9CA3AF]">
                         {t.questions} questions
                       </span>
-                      <span className="flex items-center gap-1 text-xs font-medium text-[#2D6A4F] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <span className="flex items-center gap-1 text-xs font-medium text-[#0A9AFF] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         Use this template
                         <ArrowUpRight className="w-3 h-3" />
                       </span>

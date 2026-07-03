@@ -5,9 +5,20 @@ const columns = [
   {
     title: "Product",
     links: [
-      { label: "Builder", href: "/#features" },
+      { label: "AI Builder", href: "/#features" },
       { label: "Analytics", href: "/#features" },
-      { label: "Templates", href: "/#demo" },
+      { label: "Templates", href: "/#templates" },
+      { label: "Pricing", href: "/pricing" },
+    ],
+  },
+  {
+    title: "Use cases",
+    links: [
+      { label: "Coaches", href: "/build" },
+      { label: "Agencies", href: "/build" },
+      { label: "SaaS", href: "/build" },
+      { label: "Consultants", href: "/build" },
+      { label: "Real Estate", href: "/build" },
     ],
   },
   {
@@ -21,24 +32,9 @@ const columns = [
     ],
   },
   {
-    title: "Use Cases",
+    title: "Company",
     links: [
-      { label: "Coaches", href: "/build" },
-      { label: "Agencies", href: "/build" },
-      { label: "SaaS", href: "/build" },
-      { label: "Consultants", href: "/build" },
-      { label: "Real Estate", href: "/build" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Contact Support", href: "mailto:support@getmyvsl.com" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
+      { label: "Support", href: "mailto:support@getmyvsl.com" },
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
     ],
@@ -47,37 +43,36 @@ const columns = [
 
 export function MarketingFooter() {
   return (
-    <footer className="bg-white border-t border-[#E5E7EB] py-10 md:py-12 px-4 sm:px-6">
+    <footer className="bg-white pt-16 md:pt-24 pb-10 px-5 sm:px-8">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-4 gap-4 sm:gap-6 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] md:gap-8 mb-10 md:mb-12">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-[1.4fr_1fr_1fr_1fr_1fr] md:gap-10 mb-16">
           {/* Brand */}
-          <div className="col-span-4 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 mb-2 md:mb-4">
-              <Image src="/logo.png" alt="MyVSL" width={20} height={20} />
+          <div className="col-span-2 md:col-span-1">
+            <Link href="/" className="flex items-center gap-2.5 mb-4">
+              <Image src="/logo.png" alt="MyVSL" width={26} height={26} />
               <span
-                className="text-lg font-semibold text-[#171717]"
-                style={{ fontFamily: "var(--font-plus-jakarta)" }}
+                className="text-xl font-bold tracking-tight text-[#0A0A0A]"
+                style={{ fontFamily: "var(--font-instrument-sans)" }}
               >
                 MyVSL
               </span>
             </Link>
-            <p className="hidden md:block text-sm text-[#6B7280] leading-relaxed max-w-xs">
-              VSL funnels. Built in minutes. No agency needed.
+            <p className="text-[15px] text-[#6B7280] leading-relaxed max-w-xs">
+              AI funnels that qualify, score, and book your best leads while you
+              sleep.
             </p>
           </div>
 
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <p className="text-[10px] sm:text-xs font-semibold text-[#111827] uppercase tracking-wider mb-2 sm:mb-4">
-                {col.title}
-              </p>
-              <ul className="space-y-1.5 sm:space-y-2.5">
+              <p className="text-[15px] text-[#9CA3AF] mb-5">{col.title}</p>
+              <ul className="space-y-3.5">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-xs sm:text-sm text-[#6B7280] hover:text-[#111827] transition-colors"
+                      className="text-[16px] font-medium text-[#0A0A0A] hover:text-[#0A9AFF] transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -88,9 +83,10 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="border-t border-[#E5E7EB] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[#9CA3AF]">
-            &copy; 2026 MyVSL, Inc.
+        <div className="border-t border-black/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-[#9CA3AF]">&copy; 2026 MyVSL, Inc.</p>
+          <p className="text-sm text-[#9CA3AF]">
+            Crafted for both you and your leads.
           </p>
         </div>
       </div>

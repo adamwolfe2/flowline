@@ -13,10 +13,10 @@ interface TimeToConvertChartProps {
 }
 
 const BUCKET_COLORS: Record<string, string> = {
-  "0-1min": "#52B788",
-  "1-5min": "#2D6A4F",
-  "5-30min": "#1B4332",
-  "30min+": "#B7E4C7",
+  "0-1min": "#5CBEFF",
+  "1-5min": "#0A9AFF",
+  "5-30min": "#0668B3",
+  "30min+": "#BFE5FF",
 };
 
 const BUCKET_LABELS: Record<string, string> = {
@@ -42,7 +42,7 @@ export function TimeToConvertChart({ data }: TimeToConvertChartProps) {
   const chartData = data.map((d) => ({
     ...d,
     label: BUCKET_LABELS[d.bucket] ?? d.bucket,
-    color: BUCKET_COLORS[d.bucket] ?? "#2D6A4F",
+    color: BUCKET_COLORS[d.bucket] ?? "#0A9AFF",
     pct: total > 0 ? Math.round((d.count / total) * 100) : 0,
   }));
 
@@ -101,7 +101,7 @@ export function TimeToConvertChart({ data }: TimeToConvertChartProps) {
         ) : (
           <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
             Most converters complete in{" "}
-            <span className="font-semibold text-[#2D6A4F]">{peakBucket.label}</span>
+            <span className="font-semibold text-[#0A9AFF]">{peakBucket.label}</span>
             {" "}— {peakBucket.pct}% of {total.toLocaleString()} total converters
           </p>
         )

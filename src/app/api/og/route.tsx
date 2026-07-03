@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
             left: 0,
             right: 0,
             height: 6,
-            backgroundColor: "#2D6A4F",
+            backgroundColor: "#0A9AFF",
           }}
         />
 
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
           style={{
             width: 64,
             height: 64,
-            backgroundColor: "#2D6A4F",
+            backgroundColor: "#0A9AFF",
             borderRadius: 16,
             display: "flex",
             alignItems: "center",
@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
             style={{
               width: 28,
               height: 28,
-              backgroundColor: "#2D6A4F",
+              backgroundColor: "#0A9AFF",
               borderRadius: 7,
               display: "flex",
               alignItems: "center",

@@ -130,7 +130,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         <div className="text-center mb-12">
           <h2
             className="text-3xl sm:text-4xl font-semibold text-[#111827] mb-3"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             {standalone ? "Simple, transparent pricing" : "Pricing"}
           </h2>
@@ -153,7 +153,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
           <button
             onClick={() => setAnnual(!annual)}
             className={`relative h-7 w-12 rounded-full transition-colors ${
-              annual ? "bg-[#2D6A4F]" : "bg-[#D1D5DB]"
+              annual ? "bg-[#0A9AFF]" : "bg-[#D1D5DB]"
             }`}
             aria-label="Toggle annual billing"
           >
@@ -171,7 +171,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
             Annual
           </span>
           {annual && (
-            <span className="text-xs font-semibold text-[#2D6A4F] bg-[#2D6A4F]/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-semibold text-[#0A9AFF] bg-[#0A9AFF]/10 px-2 py-0.5 rounded-full">
               Save 20%
             </span>
           )}
@@ -187,13 +187,13 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                 key={plan.name}
                 className={`relative rounded-2xl border p-5 sm:p-8 flex flex-col min-w-[260px] md:min-w-0 snap-center shrink-0 md:shrink ${
                   plan.popular
-                    ? "border-[#2D6A4F] shadow-[0_0_0_1px_#2D6A4F] bg-white"
+                    ? "border-[#0A9AFF] shadow-[0_0_0_1px_#0A9AFF] bg-white"
                     : "border-[#E5E7EB] bg-white"
                 }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#2D6A4F] text-white">
+                    <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#0A9AFF] text-white">
                       Most popular
                     </span>
                   </div>
@@ -221,7 +221,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                     </p>
                   )}
                   {price > 0 && !annual && (
-                    <p className="text-xs text-[#2D6A4F] mt-1">
+                    <p className="text-xs text-[#0A9AFF] mt-1">
                       Switch to annual and save 20%
                     </p>
                   )}
@@ -238,7 +238,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                       key={feature}
                       className="flex items-start gap-2.5 text-sm text-[#6B7280]"
                     >
-                      <Check className="w-4 h-4 text-[#2D6A4F] shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-[#0A9AFF] shrink-0 mt-0.5" />
                       {feature}
                     </li>
                   ))}
@@ -248,7 +248,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
                   href={plan.href}
                   className={`w-full text-center rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                     plan.popular
-                      ? "bg-[#2D6A4F] text-white hover:bg-[#245840]"
+                      ? "bg-[#0A9AFF] text-white hover:bg-[#0883DB]"
                       : "border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB]"
                   }`}
                 >
@@ -263,7 +263,7 @@ export function PricingSection({ standalone = false }: { standalone?: boolean })
         <div className="mt-20 max-w-2xl mx-auto">
           <h3
             className="text-2xl font-semibold text-[#111827] text-center mb-8"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             Frequently asked questions
           </h3>

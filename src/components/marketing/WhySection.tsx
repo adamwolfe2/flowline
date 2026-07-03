@@ -12,7 +12,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 border border-[#E5E7EB] bg-white rounded-full px-3 py-1 text-sm font-medium text-[#111827]">
+    <div className="inline-flex items-center gap-1.5 border border-black/10 bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium text-[#0A0A0A]/75">
       {icon}
       {children}
     </div>
@@ -22,10 +22,10 @@ function SectionLabel({
 function WaterfallChart() {
   const bars = [
     { label: "Visitors", pct: 100, color: "#D1D5DB" },
-    { label: "Started", pct: 78, color: "#2D6A4F" },
-    { label: "Completed", pct: 56, color: "#2D6A4F" },
-    { label: "Qualified", pct: 38, color: "#2D6A4F" },
-    { label: "Booked", pct: 28, color: "#2D6A4F" },
+    { label: "Started", pct: 78, color: "#0A9AFF" },
+    { label: "Completed", pct: 56, color: "#0A9AFF" },
+    { label: "Qualified", pct: 38, color: "#0A9AFF" },
+    { label: "Booked", pct: 28, color: "#0A9AFF" },
   ];
 
   return (
@@ -70,7 +70,7 @@ function ScoringDiagram() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          className="bg-[#2D6A4F] text-white text-xs font-medium px-4 py-2 rounded-lg w-full text-center"
+          className="bg-[#0A9AFF] text-white text-xs font-medium px-4 py-2 rounded-lg w-full text-center"
         >
           AI Scores Lead
         </motion.div>
@@ -91,7 +91,7 @@ function ScoringDiagram() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.65, duration: 0.35 }}
-          className="bg-[#2D6A4F] text-white text-xs font-semibold px-4 py-2 rounded-lg w-full text-center"
+          className="bg-[#0A9AFF] text-white text-xs font-semibold px-4 py-2 rounded-lg w-full text-center"
         >
           Branch by Score
         </motion.div>
@@ -213,15 +213,15 @@ export function WhySection() {
   ];
 
   return (
-    <section className="border-t border-[#E5E7EB] bg-white py-12 sm:py-20 px-4 sm:px-6">
+    <section className="bg-white py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<BarChart3 className="w-3.5 h-3.5" />}>
             Why MyVSL?
           </SectionLabel>
           <h2
-            className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] tracking-[-0.03em] leading-[1.08]"
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             Know exactly why leads don&apos;t book
           </h2>
@@ -238,7 +238,7 @@ export function WhySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
+              className="bg-white border border-[#E5E7EB] rounded-[24px] overflow-hidden hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
             >
               {card.illustration}
               <div className="p-5 sm:p-6">

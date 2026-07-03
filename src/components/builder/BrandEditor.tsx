@@ -76,7 +76,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
             </button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-[#E5E7EB] rounded-xl cursor-pointer hover:border-[#2D6A4F] transition-colors bg-[#F9FAFB]">
+          <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-[#E5E7EB] rounded-xl cursor-pointer hover:border-[#0A9AFF] transition-colors bg-[#F9FAFB]">
             <Upload className="w-5 h-5 text-[#9CA3AF] mb-1" />
             <span className="text-xs text-[#9CA3AF]">Click to upload logo</span>
             <span className="text-[10px] text-[#D1D5DB]">PNG, JPG, SVG up to 2MB</span>
@@ -139,7 +139,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
               if (/^#[0-9a-fA-F]{6}$/.test(v)) updateColor(v);
             }}
             className="text-sm font-mono w-28"
-            placeholder="#2D6A4F"
+            placeholder="#0A9AFF"
             maxLength={7}
           />
           <div className="flex gap-1">
@@ -150,7 +150,7 @@ export function BrandEditor({ config, onSave }: BrandEditorProps) {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {[
-            "#2D6A4F", "#1B4332", "#0B6E4F", "#0077B6", "#023E8A",
+            "#0A9AFF", "#0668B3", "#0B6E4F", "#0077B6", "#023E8A",
             "#7209B7", "#9B2226", "#DC2626", "#E63946", "#D97706",
             "#F59E0B", "#FBBF24", "#16A34A", "#0D9488", "#6366F1",
             "#8B5CF6", "#EC4899", "#F43F5E", "#1E293B", "#111827",

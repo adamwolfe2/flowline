@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 const PROMPTS = [
   "I sell business coaching to 6-figure entrepreneurs",
@@ -51,73 +50,42 @@ export function BottomCTA() {
   }, [typewriter]);
 
   return (
-    <section className="bg-[#F9FAFB] py-8 px-4">
-      <div className="bg-white/60 backdrop-blur-xl border border-[#E5E7EB] rounded-2xl sm:rounded-[40px] max-w-6xl mx-auto py-10 sm:py-20 md:py-28 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+    <section className="bg-white py-6 sm:py-10 px-4 sm:px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="sky-cta relative overflow-hidden rounded-[32px] sm:rounded-[40px] max-w-6xl mx-auto py-20 sm:py-28 md:py-32 px-6 sm:px-10"
+      >
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
           <h2
-            className="text-2xl sm:text-[36px] md:text-[48px] lg:text-[56px] font-semibold text-[#111827] leading-tight mb-10"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            className="text-[34px] sm:text-[48px] md:text-[56px] font-bold text-[#0A0A0A] tracking-[-0.03em] leading-[1.08] mb-4"
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
-            Ready to build your first funnel?
+            Built for you and
+            <br />
+            your best leads.
           </h2>
-        </motion.div>
+          <p className="text-lg sm:text-xl text-[#0A0A0A]/60 mb-10 max-w-xl mx-auto">
+            <span className="hidden sm:inline">Try it with your own business: </span>
+            <span className="italic">&ldquo;{displayText}</span>
+            <span className="animate-pulse not-italic">|</span>
+            <span className="italic">&rdquo;</span>
+          </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="max-w-2xl mx-auto"
-        >
-          {/* Dark prompt box */}
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm">
-            {/* Browser chrome */}
-            <div className="h-9 flex items-center px-4 gap-1.5 border-b border-[#E5E7EB]">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#D1D5DB]" />
-            </div>
-
-            {/* Prompt area */}
-            <div className="px-6 py-5 min-h-[100px] text-left">
-              <p className="text-base text-[#9CA3AF]">
-                {displayText}
-                <span className="animate-pulse text-[#D1D5DB]">|</span>
-              </p>
-            </div>
-
-            {/* Bottom bar */}
-            <div className="flex items-center justify-between px-5 pb-4">
-              <div className="flex -space-x-1.5" title="Integrates with Calendly, Slack, HubSpot">
-                <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                  <Image src="/integrations/calendly.svg" alt="Calendly" width={14} height={14} className="w-3.5 h-3.5 object-contain" />
-                </div>
-                <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                  <Image src="/integrations/slack.svg" alt="Slack" width={14} height={14} className="w-3.5 h-3.5 object-contain" />
-                </div>
-                <div className="w-6 h-6 rounded-full border-2 border-white bg-white flex items-center justify-center overflow-hidden">
-                  <Image src="/integrations/hubspot-svgrepo-com.svg" alt="HubSpot" width={14} height={14} className="w-3.5 h-3.5 object-contain" />
-                </div>
-              </div>
-              <button
-                onClick={() => router.push("/sign-up")}
-                className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-lg transition-all hover:brightness-95"
-                style={{ backgroundColor: "#2D6A4F", color: "#ffffff" }}
-              >
-                Get Started Free
-                <ChevronDown className="w-3.5 h-3.5 -rotate-90" />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-      </div>
+          <button
+            onClick={() => router.push("/sign-up")}
+            className="group inline-flex items-center gap-2.5 bg-[#0A0A0A] text-white text-base sm:text-lg font-semibold pl-7 pr-6 py-3.5 sm:py-4 rounded-full hover:bg-[#232323] transition-all hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5"
+          >
+            Start building free
+            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+          </button>
+          <p className="text-sm text-[#0A0A0A]/45 mt-5">
+            No credit card required. Live in minutes.
+          </p>
+        </div>
+      </motion.div>
     </section>
   );
 }

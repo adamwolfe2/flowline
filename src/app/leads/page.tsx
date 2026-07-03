@@ -91,7 +91,7 @@ export default function LeadsPage() {
 
   const tierBadge = (tier: string) => {
     const styles: Record<string, string> = {
-      high: "bg-[#2D6A4F]/10 text-[#2D6A4F]",
+      high: "bg-[#0A9AFF]/10 text-[#0A9AFF]",
       mid: "bg-[#D97706]/10 text-[#D97706]",
       low: "bg-gray-100 text-gray-600",
     };
@@ -284,14 +284,14 @@ export default function LeadsPage() {
             placeholder="Search by email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
             aria-label="Search leads by email"
           />
         </div>
         <select
           value={funnelFilter}
           onChange={(e) => setFunnelFilter(e.target.value)}
-          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
         >
           <option value="">All funnels</option>
           {funnels.map((f) => (
@@ -303,7 +303,7 @@ export default function LeadsPage() {
         <select
           value={tierFilter}
           onChange={(e) => setTierFilter(e.target.value)}
-          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
         >
           <option value="">All tiers</option>
           <option value="high">High</option>
@@ -314,7 +314,7 @@ export default function LeadsPage() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+            className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
             aria-label="Filter by source"
           >
             <option value="">All sources</option>
@@ -327,7 +327,7 @@ export default function LeadsPage() {
         <select
           value={dateRange}
           onChange={(e) => setDateRange(e.target.value)}
-          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
           aria-label="Filter by date range"
         >
           <option value="all">All time</option>
@@ -338,7 +338,7 @@ export default function LeadsPage() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F] transition-colors min-h-[44px]"
+          className="flex-1 sm:flex-none px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
           aria-label="Sort leads"
         >
           <option value="newest">Newest first</option>
@@ -379,15 +379,15 @@ export default function LeadsPage() {
               </>
             ) : (
               <>
-                <div className="w-14 h-14 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-4">
-                  <Users className="w-7 h-7 text-[#2D6A4F]" />
+                <div className="w-14 h-14 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mb-4">
+                  <Users className="w-7 h-7 text-[#0A9AFF]" />
                 </div>
                 <p className="text-base font-semibold text-[#111827] mb-1">No leads yet</p>
                 <p className="text-sm text-[#9CA3AF] max-w-xs mb-5">
                   Publish a funnel and share the link to start collecting qualified leads here.
                 </p>
                 <Link href="/dashboard"
-                  className="inline-flex items-center gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+                  className="inline-flex items-center gap-2 bg-[#0A9AFF] hover:bg-[#0883DB] text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
                   Go to Dashboard
                   <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
@@ -402,9 +402,9 @@ export default function LeadsPage() {
                   <th className="px-3 py-3 w-10">
                     <button onClick={toggleSelectAll} className="p-0.5 text-[#9CA3AF] hover:text-[#6B7280] transition-colors" aria-label="Select all">
                       {selectedIds.size === displayedLeads.length && displayedLeads.length > 0 ? (
-                        <CheckSquare className="w-4 h-4 text-[#2D6A4F]" />
+                        <CheckSquare className="w-4 h-4 text-[#0A9AFF]" />
                       ) : selectedIds.size > 0 ? (
-                        <MinusSquare className="w-4 h-4 text-[#2D6A4F]" />
+                        <MinusSquare className="w-4 h-4 text-[#0A9AFF]" />
                       ) : (
                         <Square className="w-4 h-4" />
                       )}
@@ -446,7 +446,7 @@ export default function LeadsPage() {
                         aria-label={`Select ${lead.email}`}
                       >
                         {selectedIds.has(lead.id) ? (
-                          <CheckSquare className="w-4 h-4 text-[#2D6A4F]" />
+                          <CheckSquare className="w-4 h-4 text-[#0A9AFF]" />
                         ) : (
                           <Square className="w-4 h-4" />
                         )}

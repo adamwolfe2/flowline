@@ -163,8 +163,8 @@ export default function AdminPage() {
           <p className="text-2xl font-bold text-[#333333]">{stats.planBreakdown.free}</p>
         </div>
         <div className="bg-white border border-[#EBEBEB] rounded-lg p-4">
-          <p className="text-xs text-[#2D6A4F] mb-1">Pro Users</p>
-          <p className="text-2xl font-bold text-[#2D6A4F]">{stats.planBreakdown.pro}</p>
+          <p className="text-xs text-[#0A9AFF] mb-1">Pro Users</p>
+          <p className="text-2xl font-bold text-[#0A9AFF]">{stats.planBreakdown.pro}</p>
         </div>
         <div className="bg-white border border-[#EBEBEB] rounded-lg p-4">
           <p className="text-xs text-[#7C3AED] mb-1">Agency Users</p>
@@ -252,7 +252,7 @@ export default function AdminPage() {
               {stats.topFunnels.map((f) => (
                 <tr key={f.funnelId} className="border-b border-[#EBEBEB] last:border-0">
                   <td className="px-4 py-2">
-                    <Link href={`/analytics/${f.funnelId}`} className="text-[#2D6A4F] hover:underline font-mono text-xs">
+                    <Link href={`/analytics/${f.funnelId}`} className="text-[#0A9AFF] hover:underline font-mono text-xs">
                       {f.funnelId.slice(0, 8)}...
                     </Link>
                   </td>
@@ -276,7 +276,7 @@ export default function AdminPage() {
           <button
             onClick={loadDiagnostics}
             disabled={diagLoading}
-            className="text-[10px] px-3 py-1 bg-[#2D6A4F] text-white rounded hover:bg-[#245840] transition-colors disabled:opacity-50"
+            className="text-[10px] px-3 py-1 bg-[#0A9AFF] text-white rounded hover:bg-[#0883DB] transition-colors disabled:opacity-50"
           >
             {diagLoading ? "Loading..." : "Run Diagnostics"}
           </button>
@@ -358,7 +358,7 @@ export default function AdminPage() {
                 <tbody>
                   {diagnostics.recentSessions.map((s) => (
                     <tr key={s.id} className="border-b border-[#EBEBEB] last:border-0">
-                      <td className="px-4 py-2 text-xs font-mono text-[#2D6A4F]">{s.funnelSlug}</td>
+                      <td className="px-4 py-2 text-xs font-mono text-[#0A9AFF]">{s.funnelSlug}</td>
                       <td className="px-4 py-2 text-xs text-[#737373]">
                         {new Date(s.startedAt).toLocaleString()}
                       </td>
@@ -418,7 +418,7 @@ export default function AdminPage() {
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <Globe className="w-3.5 h-3.5 text-[#737373]" />
-                      <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-[#2D6A4F] hover:underline font-mono text-xs">
+                      <a href={`https://${d.domain}`} target="_blank" rel="noopener noreferrer" className="text-[#0A9AFF] hover:underline font-mono text-xs">
                         {d.domain}
                       </a>
                     </div>
@@ -462,7 +462,7 @@ export default function AdminPage() {
                             } catch {}
                             setDomainAction(null);
                           }}
-                          className="text-[10px] px-2 py-1 bg-[#2D6A4F] text-white rounded hover:bg-[#245840] transition-colors"
+                          className="text-[10px] px-2 py-1 bg-[#0A9AFF] text-white rounded hover:bg-[#0883DB] transition-colors"
                         >
                           {domainAction === d.domain ? "..." : "Register"}
                         </button>

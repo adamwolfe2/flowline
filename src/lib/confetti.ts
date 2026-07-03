@@ -9,7 +9,7 @@ function lighten(hex: string, amount: number): string {
 }
 
 export function firePublishConfetti(brandColor?: string) {
-  const primary = brandColor || "#2D6A4F";
+  const primary = brandColor || "#0A9AFF";
   const light = lighten(primary, 0.3);
   const lighter = lighten(primary, 0.5);
   const colors = [primary, light, lighter, "#FFFFFF"];

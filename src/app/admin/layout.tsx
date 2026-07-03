@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </Link>
         <div className="h-4 w-px bg-[#EBEBEB]" />
         <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-[#2D6A4F]" />
+          <Shield className="w-3.5 h-3.5 text-[#0A9AFF]" />
           <span className="text-sm font-semibold text-[#333333]">Admin</span>
         </div>
       </div>

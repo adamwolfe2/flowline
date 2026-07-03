@@ -14,12 +14,12 @@ interface WaterfallChartProps {
   steps: WaterfallStep[];
 }
 
-const BRAND = "#2D6A4F";
+const BRAND = "#0A9AFF";
 
 // Semantic severity palette for drop-off (§4 color hierarchy):
 // small loss = on-brand green, moderate = amber warning, large = red alert.
 function dropSeverity(drop: number): { text: string; bg: string; border: string } {
-  if (drop <= 10) return { text: "#2D6A4F", bg: "#2D6A4F14", border: "#2D6A4F33" };
+  if (drop <= 10) return { text: "#0A9AFF", bg: "#0A9AFF14", border: "#0A9AFF33" };
   if (drop <= 30) return { text: "#B45309", bg: "#D9770614", border: "#D9770633" };
   return { text: "#B91C1C", bg: "#DC262614", border: "#DC262633" };
 }

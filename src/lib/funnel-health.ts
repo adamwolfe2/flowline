@@ -54,7 +54,7 @@ export function calculateFunnelHealth(
     {
       id: "color",
       label: "Custom brand color",
-      passed: config.brand.primaryColor !== "#2D6A4F",
+      passed: config.brand.primaryColor !== "#0A9AFF",
       points: 5,
       tip: "Set your brand color in the Brand tab",
     },
@@ -112,7 +112,7 @@ export function calculateFunnelHealth(
   let color: string;
   if (score >= 80) {
     label = "Excellent";
-    color = "#2D6A4F";
+    color = "#0A9AFF";
   } else if (score >= 50) {
     label = "Good";
     color = "#D97706";
