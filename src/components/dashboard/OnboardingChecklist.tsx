@@ -93,7 +93,7 @@ export function OnboardingChecklist({
   const progressPct = Math.round((completedCount / items.length) * 100);
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl mb-6 overflow-hidden">
+    <div className="bg-white ring-1 ring-black/[0.06] rounded-[18px] mb-6 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4">
         <button

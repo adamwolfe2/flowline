@@ -123,7 +123,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
         whileHover={{ y: -2, transition: { duration: 0.15 } }}
         className="group"
       >
-        <Card className="p-5 transition-shadow duration-200 group-hover:shadow-lg border-[#E5E7EB]">
+        <Card className="p-5 rounded-[18px] ring-black/[0.06] transition-all duration-300 group-hover:shadow-[0_16px_40px_-18px_rgba(6,60,110,0.28)]">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               {funnel.config.brand.logoUrl ? (
@@ -139,7 +139,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
                 </div>
               )}
               <div>
-                <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+                <h3 className="font-semibold tracking-tight text-[#0A0A0A] text-sm leading-tight">
                   {funnel.config.brand.name}
                 </h3>
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -208,7 +208,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-center p-2.5 bg-[#FAFAF8] ring-1 ring-black/[0.04] rounded-[12px]">
               <div className="flex items-center justify-center gap-1 mb-0.5">
                 <Eye className="w-3 h-3 text-gray-400" />
               </div>
@@ -217,7 +217,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
               </p>
               <p className="text-[10px] text-gray-400">Views</p>
             </div>
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-center p-2.5 bg-[#FAFAF8] ring-1 ring-black/[0.04] rounded-[12px]">
               <div className="flex items-center justify-center gap-1 mb-0.5">
                 <Users className="w-3 h-3 text-gray-400" />
               </div>
@@ -226,7 +226,7 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
               </p>
               <p className="text-[10px] text-gray-400">Leads</p>
             </div>
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
+            <div className="text-center p-2.5 bg-[#FAFAF8] ring-1 ring-black/[0.04] rounded-[12px]">
               <div className="flex items-center justify-center gap-1 mb-0.5">
                 <Target className="w-3 h-3 text-gray-400" />
               </div>

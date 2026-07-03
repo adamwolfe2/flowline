@@ -145,7 +145,7 @@ export default function ClientsPage() {
         className="flex items-start sm:items-center justify-between gap-3 mb-8"
       >
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
             {activeTeam ? `${activeTeam.name} Clients` : "Clients"}
           </h1>
           <p className="text-sm text-gray-500 mt-1">

@@ -90,10 +90,10 @@ export function AppNav() {
   return (
     <div className="sticky top-0 z-50">
       {trialEndsAt && <TrialBanner trialEndsAt={trialEndsAt} />}
-    <nav className="bg-white border-b border-[#E5E7EB]">
+    <nav className="bg-white/90 backdrop-blur-xl border-b border-black/[0.06]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-[#111827]" style={{ fontFamily: "var(--font-instrument-sans)" }}>
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold tracking-tight text-[#0A0A0A]" style={{ fontFamily: "var(--font-instrument-sans)" }}>
             {branding?.logoUrl ? (
               <img
                 src={branding.logoUrl}
@@ -113,7 +113,7 @@ export function AppNav() {
             <div className="relative" ref={wsDropdownRef}>
               <button
                 onClick={() => setWsDropdownOpen(!wsDropdownOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#374151]"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] text-xs font-medium transition-colors border border-black/[0.08] hover:bg-[#F5F5F3] text-[#374151]"
               >
                 {workspace === "personal" ? (
                   <User className="w-3.5 h-3.5 text-[#6B7280]" />
@@ -180,7 +180,7 @@ export function AppNav() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                  className={`relative text-sm px-3 py-1.5 rounded-[10px] transition-colors ${
                     isActive
                       ? "font-medium"
                       : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]"
@@ -190,7 +190,7 @@ export function AppNav() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-active-bg"
-                      className="absolute inset-0 rounded-lg"
+                      className="absolute inset-0 rounded-[10px]"
                       style={{ backgroundColor: `${brandColor}0D` }}
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
@@ -202,7 +202,7 @@ export function AppNav() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`relative text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+                className={`relative text-sm px-3 py-1.5 rounded-[10px] transition-colors flex items-center gap-1 ${
                   pathname === "/admin"
                     ? "font-medium"
                     : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB]"
@@ -212,7 +212,7 @@ export function AppNav() {
                 {pathname === "/admin" && (
                   <motion.div
                     layoutId="nav-active-bg"
-                    className="absolute inset-0 rounded-lg"
+                    className="absolute inset-0 rounded-[10px]"
                     style={{ backgroundColor: `${brandColor}0D` }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
@@ -227,7 +227,7 @@ export function AppNav() {
           {/* Cmd+K hint — desktop only */}
           <button
             onClick={() => setPaletteOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F9FAFB] border border-[#E5E7EB] transition-colors"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] text-xs text-[#9CA3AF] hover:text-[#6B7280] hover:bg-[#F5F5F3] border border-black/[0.08] transition-colors"
             aria-label="Open command palette"
           >
             <span>Search</span>

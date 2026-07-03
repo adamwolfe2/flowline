@@ -762,7 +762,7 @@ function BuildContent() {
         <PhaseIndicator phase={state.phase} />
         <div className="flex items-center gap-2 sm:gap-3">
           {state.phase === "preview" && (
-            <Link href="/sign-up" className="bg-[#0A9AFF] text-white text-xs sm:text-sm font-medium px-3 sm:px-4 py-2 rounded-lg hover:bg-[#0883DB] transition-colors flex items-center gap-1.5 min-h-[44px]">
+            <Link href="/sign-up" className="bg-[#0A0A0A] text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-[10px] hover:bg-[#232323] transition-colors flex items-center gap-1.5 min-h-[44px]">
               <span className="hidden sm:inline">Save & Publish</span>
               <span className="sm:hidden">Save</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -1228,7 +1228,7 @@ function BuildContent() {
                 <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <LayoutTemplate className="w-8 h-8 text-[#0A9AFF]" />
                 </div>
-                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>
+                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-sans)", letterSpacing: "-0.02em" }}>
                   Start from a proven template
                 </p>
                 <p className="text-sm text-[#9CA3AF]">
@@ -1242,7 +1242,7 @@ function BuildContent() {
                 <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-[#0A9AFF]" />
                 </div>
-                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-serif)" }}>
+                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-sans)", letterSpacing: "-0.02em" }}>
                   Your funnel will appear here
                 </p>
                 <p className="text-sm text-[#9CA3AF]">

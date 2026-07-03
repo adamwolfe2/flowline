@@ -209,7 +209,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
         {/* Stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
           {statCards.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="bg-white rounded-xl border border-[#E5E7EB] p-4">
+            <div key={label} className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4">
               <div className="flex items-center gap-1.5 mb-1">
                 <Icon className="w-3.5 h-3.5 text-gray-400" />
                 <span className="text-[10px] text-gray-400 uppercase tracking-wider">{label}</span>
@@ -221,7 +221,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
 
         {/* Empty state when no data at all */}
         {hasNoData && (
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-12 text-center">
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-12 text-center">
             <BarChart3 className="w-8 h-8 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-500">No traffic data yet.</p>
             <p className="text-xs text-gray-400 mt-1">Analytics will appear once the funnel receives visitors.</p>
@@ -230,7 +230,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
 
         {/* Funnel Drop-off — color-coded severity hero (matches owner view) */}
         {!hasNoData && (
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 overflow-x-auto">
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
             <WaterfallChart steps={data.dropoff} />
           </div>
@@ -238,7 +238,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
 
         {/* Abandonment by Step — amber, the warning signal (matches owner view) */}
         {!hasNoData && (
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandonment by Step</h3>
             {abandons.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-6">No abandonment data yet</p>
@@ -272,7 +272,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
         {!hasNoData && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Device Breakdown */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Device Breakdown</h3>
               {totalDevices > 0 ? (
                 <div className="grid grid-cols-3 gap-3">
@@ -295,7 +295,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
             </div>
 
             {/* Tier distribution */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
               {(() => {
                 const tierTotal = data.tiers.reduce((s, t) => s + t.count, 0);
                 const smallSample = tierTotal > 0 && tierTotal < 6;
@@ -320,7 +320,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${tierBadgeColor(tier)}`}>
                         {tier.toUpperCase()}
                       </span>
-                      <p className="text-2xl font-bold text-gray-900 mt-2">{count}</p>
+                      <p className="text-2xl font-bold tracking-tight text-[#0A0A0A] mt-2">{count}</p>
                     </div>
                   ))}
                 </div>
@@ -333,7 +333,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
 
         {/* Recent Leads Table */}
         {!hasNoData && (
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Leads</h3>
             {data.recentLeads.length > 0 ? (
               <div className="overflow-x-auto -mx-6 px-6">

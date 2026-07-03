@@ -420,7 +420,7 @@ export default function ClientDetailPage() {
               <stat.icon className="w-3.5 h-3.5 text-gray-400" />
               <span className="text-xs text-gray-500">{stat.label}</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <p className="text-2xl font-bold tracking-tight text-[#0A0A0A]">{stat.value}</p>
           </div>
         ))}
       </div>
