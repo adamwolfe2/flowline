@@ -111,7 +111,7 @@ export default function OnboardingPage() {
               {/* Logo mark */}
               <div
                 className="w-14 h-14 rounded-2xl mx-auto mb-8 flex items-center justify-center"
-                style={{ backgroundColor: "#2D6A4F" }}
+                style={{ backgroundColor: "#0A9AFF" }}
               >
                 <Target className="w-7 h-7 text-white" />
               </div>
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
                       className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: "#EBF5F0" }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: "#2D6A4F" }} />
+                      <Icon className="w-5 h-5" style={{ color: "#0A9AFF" }} />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-900">{title}</p>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
               <Button
                 onClick={advance}
                 className="w-full h-11 text-sm font-medium gap-2"
-                style={{ backgroundColor: "#2D6A4F" }}
+                style={{ backgroundColor: "#0A9AFF" }}
               >
                 Get Started
                 <ArrowRight className="w-4 h-4" />
@@ -181,14 +181,14 @@ export default function OnboardingPage() {
                 {/* Build with AI */}
                 <button
                   onClick={() => finish("/build")}
-                  className="w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-[#2D6A4F] hover:bg-[#EBF5F0] transition-all group"
+                  className="w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-[#0A9AFF] hover:bg-[#EBF5F0] transition-all group"
                 >
                   <div className="flex items-start gap-4">
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
                       style={{ backgroundColor: "#EBF5F0" }}
                     >
-                      <Wand2 className="w-5 h-5" style={{ color: "#2D6A4F" }} />
+                      <Wand2 className="w-5 h-5" style={{ color: "#0A9AFF" }} />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-900 mb-0.5">Build with AI</p>
@@ -196,21 +196,21 @@ export default function OnboardingPage() {
                         Describe your business and we&apos;ll generate a complete funnel
                       </p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#2D6A4F] ml-auto self-center flex-shrink-0 transition-colors" />
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#0A9AFF] ml-auto self-center flex-shrink-0 transition-colors" />
                   </div>
                 </button>
 
                 {/* Start from template */}
                 <button
                   onClick={() => finish("/dashboard")}
-                  className="w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-[#2D6A4F] hover:bg-[#EBF5F0] transition-all group"
+                  className="w-full text-left p-5 rounded-xl border-2 border-gray-100 hover:border-[#0A9AFF] hover:bg-[#EBF5F0] transition-all group"
                 >
                   <div className="flex items-start gap-4">
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform"
                       style={{ backgroundColor: "#EBF5F0" }}
                     >
-                      <LayoutTemplate className="w-5 h-5" style={{ color: "#2D6A4F" }} />
+                      <LayoutTemplate className="w-5 h-5" style={{ color: "#0A9AFF" }} />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-900 mb-0.5">Start from template</p>
@@ -218,7 +218,7 @@ export default function OnboardingPage() {
                         Choose from pre-built funnel templates
                       </p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#2D6A4F] ml-auto self-center flex-shrink-0 transition-colors" />
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-[#0A9AFF] ml-auto self-center flex-shrink-0 transition-colors" />
                   </div>
                 </button>
               </div>
@@ -235,7 +235,7 @@ export default function OnboardingPage() {
               style={{
                 width: i === step ? 20 : 8,
                 height: 8,
-                backgroundColor: i === step ? "#2D6A4F" : "#E5E7EB",
+                backgroundColor: i === step ? "#0A9AFF" : "#E5E7EB",
               }}
             />
           ))}

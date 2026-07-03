@@ -123,7 +123,7 @@ export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryPro
             {/* Score thresholds */}
             <div className="flex items-center gap-4 mb-4">
               <div className="flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                <Target className="w-3.5 h-3.5 text-[#0A9AFF]" />
                 <span className="text-xs text-[#6B7280]">High: {thresholds.high}+</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -135,7 +135,7 @@ export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryPro
             <Button
               onClick={() => createFromTemplate(previewing)}
               disabled={creating !== null}
-              className="gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white"
+              className="gap-2 bg-[#0A9AFF] hover:bg-[#0883DB] text-white"
             >
               {creating === previewing.id ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating...</>
@@ -197,10 +197,10 @@ export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryPro
             setOpen(false);
             router.push("/build");
           }}
-          className="text-left p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-[#2D6A4F] hover:bg-green-50/30 transition-all group"
+          className="text-left p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-[#0A9AFF] hover:bg-green-50/30 transition-all group"
         >
           <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-green-100 transition-colors">
-            <Plus className="w-4 h-4 text-gray-400 group-hover:text-[#2D6A4F]" />
+            <Plus className="w-4 h-4 text-gray-400 group-hover:text-[#0A9AFF]" />
           </div>
           <p className="text-sm font-medium text-gray-900">Blank Funnel</p>
           <p className="text-xs text-gray-400 mt-0.5">Start from scratch with AI assistance</p>
@@ -210,7 +210,7 @@ export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryPro
         {FUNNEL_TEMPLATES.map((template) => (
           <div
             key={template.id}
-            className="text-left p-4 border border-[#E5E7EB] rounded-xl hover:border-[#2D6A4F] hover:shadow-sm transition-all disabled:opacity-50 group"
+            className="text-left p-4 border border-[#E5E7EB] rounded-xl hover:border-[#0A9AFF] hover:shadow-sm transition-all disabled:opacity-50 group"
           >
             <div className="flex items-center gap-2 mb-3">
               {(() => {
@@ -239,7 +239,7 @@ export const TemplateGallery = forwardRef<TemplateGalleryRef, TemplateGalleryPro
               <button
                 onClick={() => createFromTemplate(template)}
                 disabled={creating !== null}
-                className="text-[11px] font-medium text-[#2D6A4F] hover:underline transition-colors disabled:opacity-50"
+                className="text-[11px] font-medium text-[#0A9AFF] hover:underline transition-colors disabled:opacity-50"
               >
                 {creating === template.id ? (
                   <span className="flex items-center gap-1">

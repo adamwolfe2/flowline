@@ -168,7 +168,7 @@ export function ApiKeySettings() {
         <Button
           size="sm"
           onClick={() => setCreateOpen(true)}
-          className="bg-[#2D6A4F] text-white hover:bg-[#245840] h-8 text-xs"
+          className="bg-[#0A9AFF] text-white hover:bg-[#0883DB] h-8 text-xs"
         >
           <Plus className="w-3.5 h-3.5 mr-1" />
           Create API Key
@@ -343,7 +343,7 @@ export function ApiKeySettings() {
                           type="checkbox"
                           checked={newKeyScopes.includes(scope)}
                           onChange={() => toggleScope(scope)}
-                          className="rounded border-gray-300 text-[#2D6A4F] focus:ring-[#2D6A4F]"
+                          className="rounded border-gray-300 text-[#0A9AFF] focus:ring-[#0A9AFF]"
                         />
                         <span className="text-sm text-[#333333]">{info.label}</span>
                       </label>
@@ -362,7 +362,7 @@ export function ApiKeySettings() {
                 <Button
                   onClick={handleCreate}
                   disabled={creating || !newKeyName.trim() || newKeyScopes.length === 0}
-                  className="bg-[#2D6A4F] text-white hover:bg-[#245840]"
+                  className="bg-[#0A9AFF] text-white hover:bg-[#0883DB]"
                 >
                   {creating ? (
                     <>

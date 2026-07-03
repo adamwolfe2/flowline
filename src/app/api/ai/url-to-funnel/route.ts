@@ -359,7 +359,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 4: Build full FunnelConfig-compatible response
-    const primaryColor = aiData.primaryColor || "#2D6A4F";
+    const primaryColor = aiData.primaryColor || "#0A9AFF";
     const brandName = aiData.brandName || domain;
     const slug = brandName
       .toLowerCase()

@@ -37,7 +37,7 @@ export default function BuilderLoading() {
         {/* Preview pane */}
         <div className="flex-1 bg-gray-50 flex items-center justify-center p-6">
           <div className="text-center">
-            <div className="w-8 h-8 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-8 h-8 border-2 border-[#0A9AFF] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <p className="text-sm text-[#6B7280]">Loading builder...</p>
           </div>
         </div>

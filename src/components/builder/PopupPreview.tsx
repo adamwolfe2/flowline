@@ -31,7 +31,7 @@ export function PopupPreview({
         {/* Re-trigger button */}
         <button
           onClick={() => setDismissed(false)}
-          className="absolute bottom-4 right-4 z-20 bg-[#2D6A4F] text-white text-xs px-3 py-2 rounded-lg shadow-lg hover:bg-[#245840] transition-colors"
+          className="absolute bottom-4 right-4 z-20 bg-[#0A9AFF] text-white text-xs px-3 py-2 rounded-lg shadow-lg hover:bg-[#0883DB] transition-colors"
         >
           Show popup again
         </button>

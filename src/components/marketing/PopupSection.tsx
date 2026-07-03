@@ -131,10 +131,10 @@ function PopupMockupAnimation() {
               </div>
 
               <div className="text-center">
-                <div className="w-10 h-10 rounded-xl bg-[#2D6A4F]/10 mx-auto mb-3 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-[#2D6A4F]" />
+                <div className="w-10 h-10 rounded-xl bg-[#0A9AFF]/10 mx-auto mb-3 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-[#0A9AFF]" />
                 </div>
-                <div className="text-[10px] font-semibold text-[#2D6A4F] uppercase tracking-wider mb-1">
+                <div className="text-[10px] font-semibold text-[#0A9AFF] uppercase tracking-wider mb-1">
                   Free Assessment
                 </div>
                 <div className="text-sm font-bold text-[#111827] mb-1">
@@ -159,7 +159,7 @@ function PopupMockupAnimation() {
                         transition={{ delay: i * 0.12, duration: 0.25 }}
                         className={`text-[10px] py-2 px-3 rounded-lg border text-left transition-colors ${
                           i === 2 && phase >= 4
-                            ? "border-[#2D6A4F] bg-[#2D6A4F]/5 text-[#2D6A4F] font-medium"
+                            ? "border-[#0A9AFF] bg-[#0A9AFF]/5 text-[#0A9AFF] font-medium"
                             : "border-[#E5E7EB] text-[#374151]"
                         }`}
                       >
@@ -183,7 +183,7 @@ function PopupMockupAnimation() {
             transition={{ duration: 1.2, times: [0, 0.3, 0.8, 1] }}
             className="absolute top-12 left-1/2 pointer-events-none"
           >
-            <MousePointerClick className="w-5 h-5 text-[#2D6A4F]" />
+            <MousePointerClick className="w-5 h-5 text-[#0A9AFF]" />
           </motion.div>
         </div>
       </div>
@@ -193,7 +193,7 @@ function PopupMockupAnimation() {
 
 export function PopupSection() {
   return (
-    <section className="border-t border-[#E5E7EB] bg-[#F9FAFB]">
+    <section className="bg-[#FAFAF8]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">
@@ -204,14 +204,14 @@ export function PopupSection() {
             transition={{ duration: 0.5 }}
           >
             <div className="inline-flex items-center gap-2 border border-[#E5E7EB] bg-white rounded-full px-4 py-1.5 mb-4">
-              <Zap className="w-3.5 h-3.5 text-[#2D6A4F]" />
+              <Zap className="w-3.5 h-3.5 text-[#0A9AFF]" />
               <span className="text-xs font-medium text-[#374151]">
                 New: Interactive Popups
               </span>
             </div>
             <h2
-              className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#111827] mb-4"
-              style={{ fontFamily: "var(--font-plus-jakarta)" }}
+              className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] tracking-[-0.03em] mb-4"
+              style={{ fontFamily: "var(--font-instrument-sans)" }}
             >
               Turn your website traffic into
               <br />
@@ -249,8 +249,8 @@ export function PopupSection() {
                 className="bg-white border border-[#E5E7EB] rounded-xl p-5 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-4 h-4 text-[#2D6A4F]" />
+                  <div className="w-8 h-8 rounded-lg bg-[#0A9AFF]/10 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="w-4 h-4 text-[#0A9AFF]" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-[#111827] mb-1">
@@ -276,7 +276,7 @@ export function PopupSection() {
         >
           <h3
             className="text-lg sm:text-xl font-bold text-[#111827] text-center mb-8"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             Four trigger types to capture every visitor
           </h3>
@@ -290,8 +290,8 @@ export function PopupSection() {
                 transition={{ delay: i * 0.08, duration: 0.35 }}
                 className="bg-white border border-[#E5E7EB] rounded-xl p-4 text-center hover:shadow-sm transition-shadow"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#2D6A4F]/10 flex items-center justify-center mx-auto mb-3">
-                  <trigger.icon className="w-5 h-5 text-[#2D6A4F]" />
+                <div className="w-10 h-10 rounded-xl bg-[#0A9AFF]/10 flex items-center justify-center mx-auto mb-3">
+                  <trigger.icon className="w-5 h-5 text-[#0A9AFF]" />
                 </div>
                 <h4 className="text-xs font-semibold text-[#111827] mb-1">
                   {trigger.title}
@@ -308,7 +308,7 @@ export function PopupSection() {
         <div className="text-center">
           <Link
             href="/build"
-            className="inline-flex items-center gap-2 bg-[#2D6A4F] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#245840] transition-colors"
+            className="inline-flex items-center gap-2 bg-[#0A0A0A] text-white text-[15px] font-semibold px-6 py-3 rounded-full hover:bg-[#232323] transition-all hover:shadow-lg hover:shadow-black/15"
           >
             Create your first popup
             <ArrowRight className="w-4 h-4" />

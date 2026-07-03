@@ -88,8 +88,8 @@ export function LeadDetailModal({ leadId, onClose, onDeleted }: LeadDetailModalP
             {/* Lead info card */}
             <div className="bg-[#FBFBFB] border border-[#EBEBEB] rounded-xl p-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-[#2D6A4F]" />
+                <div className="w-10 h-10 bg-[#0A9AFF]/10 rounded-full flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-[#0A9AFF]" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-[#333333]">{lead.email as string}</p>
@@ -184,7 +184,7 @@ export function LeadDetailModal({ leadId, onClose, onDeleted }: LeadDetailModalP
                         <div className="absolute left-[11px] top-6 bottom-0 w-px bg-[#EBEBEB]" />
                       )}
                       <div className="w-6 h-6 rounded-full bg-[#FBFBFB] border border-[#EBEBEB] flex items-center justify-center flex-shrink-0 z-10">
-                        <div className="w-2 h-2 rounded-full bg-[#2D6A4F]" />
+                        <div className="w-2 h-2 rounded-full bg-[#0A9AFF]" />
                       </div>
                       <div className="pb-4 flex-1">
                         <p className="text-xs font-medium text-[#333333]">
@@ -199,7 +199,7 @@ export function LeadDetailModal({ leadId, onClose, onDeleted }: LeadDetailModalP
                             </span>
                           ) : null}
                           {event.answerLabel ? (
-                            <span className="text-[10px] text-[#2D6A4F] font-medium">
+                            <span className="text-[10px] text-[#0A9AFF] font-medium">
                               <ArrowRight className="w-2.5 h-2.5 inline mr-0.5" />
                               {event.answerLabel as string}
                             </span>

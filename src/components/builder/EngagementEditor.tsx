@@ -53,7 +53,7 @@ export function EngagementEditor({ config, onSave }: EngagementEditorProps) {
       <div className="border border-[#E5E7EB] rounded-xl p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-[#2D6A4F]" />
+            <Bell className="w-4 h-4 text-[#0A9AFF]" />
             <span className="text-sm font-semibold text-gray-900">Exit-Intent Popup</span>
           </div>
           <Switch
@@ -103,7 +103,7 @@ export function EngagementEditor({ config, onSave }: EngagementEditorProps) {
       <div className="border border-[#E5E7EB] rounded-xl p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#2D6A4F]" />
+            <Clock className="w-4 h-4 text-[#0A9AFF]" />
             <span className="text-sm font-semibold text-gray-900">Urgency Countdown Timer</span>
           </div>
           <Switch

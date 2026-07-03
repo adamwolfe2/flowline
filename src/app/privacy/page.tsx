@@ -73,7 +73,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-[#111827]">7. Contact</h2>
-            <p>Questions about this policy? Email us at <a href="mailto:support@getmyvsl.com" className="text-[#2D6A4F] underline">support@getmyvsl.com</a>.</p>
+            <p>Questions about this policy? Email us at <a href="mailto:support@getmyvsl.com" className="text-[#0A9AFF] underline">support@getmyvsl.com</a>.</p>
           </section>
         </div>
       </main>

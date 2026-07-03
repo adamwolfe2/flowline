@@ -100,7 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tea
           subject: `You're invited to join ${team?.name || "a team"} on MyVSL`,
           html: `
             <p>You've been invited to join <strong>${team?.name}</strong> on MyVSL.</p>
-            <p><a href="${appUrl}/invite/${token}" style="display:inline-block;padding:12px 24px;background:#2D6A4F;color:white;border-radius:8px;text-decoration:none;font-weight:600;">Accept Invite</a></p>
+            <p><a href="${appUrl}/invite/${token}" style="display:inline-block;padding:12px 24px;background:#0A9AFF;color:white;border-radius:8px;text-decoration:none;font-weight:600;">Accept Invite</a></p>
             <p style="color:#666;font-size:12px;">This invite expires in 7 days.</p>
           `,
         });

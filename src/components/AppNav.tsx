@@ -41,10 +41,10 @@ export function AppNav() {
   const { workspace, setWorkspace, teams, activeTeam, loading: wsLoading } = useWorkspace();
 
   const branding = activeTeam?.branding;
-  const brandColor = branding?.primaryColor ?? "#2D6A4F";
+  const brandColor = branding?.primaryColor ?? "#0A9AFF";
   const brandHoverColor = branding?.primaryColor
     ? darkenHex(branding.primaryColor, 15)
-    : "#245840";
+    : "#0883DB";
   const appName = branding?.appName ?? "MyVSL";
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function AppNav() {
     <nav className="bg-white border-b border-[#E5E7EB]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-[#111827]" style={{ fontFamily: "var(--font-plus-jakarta)" }}>
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-[#111827]" style={{ fontFamily: "var(--font-instrument-sans)" }}>
             {branding?.logoUrl ? (
               <img
                 src={branding.logoUrl}
@@ -239,7 +239,7 @@ export function AppNav() {
           <Link href="/build">
             <Button
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 rounded-full"
               style={{ backgroundColor: brandColor, color: "#fff" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = brandHoverColor; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = brandColor; }}

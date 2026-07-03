@@ -25,8 +25,8 @@ const steps = [
 export function EmptyState({ onOpenTemplates }: { onOpenTemplates?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-14 h-14 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-5">
-        <Layers className="w-7 h-7 text-[#2D6A4F]" />
+      <div className="w-14 h-14 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mb-5">
+        <Layers className="w-7 h-7 text-[#0A9AFF]" />
       </div>
       <h2 className="text-xl font-semibold text-gray-900 mb-2">Build Your First Funnel</h2>
       <p className="text-sm text-gray-500 max-w-sm mb-8">
@@ -42,8 +42,8 @@ export function EmptyState({ onOpenTemplates }: { onOpenTemplates?: () => void }
               {i < steps.length - 1 && (
                 <div className="absolute top-5 left-[55%] w-[90%] h-px bg-[#E5E7EB] hidden sm:block" />
               )}
-              <div className="w-10 h-10 rounded-xl bg-[#2D6A4F]/5 border border-[#E5E7EB] flex items-center justify-center mb-2 relative z-10">
-                <Icon className="w-4 h-4 text-[#2D6A4F]" />
+              <div className="w-10 h-10 rounded-xl bg-[#0A9AFF]/5 border border-[#E5E7EB] flex items-center justify-center mb-2 relative z-10">
+                <Icon className="w-4 h-4 text-[#0A9AFF]" />
               </div>
               <p className="text-xs font-semibold text-[#111827]">{step.title}</p>
               <p className="text-[10px] text-[#6B7280] mt-0.5">{step.description}</p>
@@ -54,7 +54,7 @@ export function EmptyState({ onOpenTemplates }: { onOpenTemplates?: () => void }
 
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <Link href="/build">
-          <Button className="gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white px-6 py-2.5 text-base">
+          <Button className="gap-2 bg-[#0A9AFF] hover:bg-[#0883DB] text-white px-6 py-2.5 text-base">
             Build Your First Funnel
             <ArrowRight className="w-4 h-4" />
           </Button>

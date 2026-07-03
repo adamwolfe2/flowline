@@ -225,7 +225,7 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                   isActive
-                    ? "border-[#2D6A4F] text-[#2D6A4F]"
+                    ? "border-[#0A9AFF] text-[#0A9AFF]"
                     : "border-transparent text-[#6B7280] hover:text-[#374151] hover:border-[#D1D5DB]"
                 }`}
               >
@@ -253,7 +253,7 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={() => openUserProfile()}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2D6A4F] hover:text-[#245840] transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#0A9AFF] hover:text-[#0883DB] transition-colors"
               >
                 Manage Account
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -293,7 +293,7 @@ export default function SettingsPage() {
                 <span className="text-sm font-medium text-[#111827]">
                   {plan.charAt(0).toUpperCase() + plan.slice(1)} Plan
                 </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#2D6A4F]/10 text-[#2D6A4F]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#0A9AFF]/10 text-[#0A9AFF]">
                   {plan.charAt(0).toUpperCase() + plan.slice(1)}
                 </span>
               </div>
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                 <ul className="space-y-2">
                   {["Unlimited funnels", "Custom domains", "Advanced analytics & scoring", "Priority support", "Remove MyVSL branding"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-[#6B7280]">
-                      <Check className="w-3.5 h-3.5 text-[#2D6A4F] shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-[#0A9AFF] shrink-0" />
                       {f}
                     </li>
                   ))}
@@ -319,7 +319,7 @@ export default function SettingsPage() {
               </div>
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0A9AFF] px-4 py-2 text-sm font-medium text-white hover:bg-[#0883DB] transition-colors"
               >
                 <Zap className="w-3.5 h-3.5" />
                 Upgrade to Pro
@@ -328,7 +328,7 @@ export default function SettingsPage() {
           ) : (
             <Link
               href="/billing"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2D6A4F] hover:text-[#245840] transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#0A9AFF] hover:text-[#0883DB] transition-colors"
             >
               Manage Billing
               <ExternalLink className="w-3.5 h-3.5" />
@@ -351,7 +351,7 @@ export default function SettingsPage() {
               <button
                 disabled={saving}
                 onClick={() => togglePref("leadAlerts", leadAlerts, setLeadAlerts)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${leadAlerts ? "bg-[#2D6A4F]" : "bg-gray-200"}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${leadAlerts ? "bg-[#0A9AFF]" : "bg-gray-200"}`}
                 role="switch"
                 aria-checked={leadAlerts}
               >
@@ -367,7 +367,7 @@ export default function SettingsPage() {
               <button
                 disabled={saving}
                 onClick={() => togglePref("weeklyDigest", weeklyDigest, setWeeklyDigest)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${weeklyDigest ? "bg-[#2D6A4F]" : "bg-gray-200"}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-60 ${weeklyDigest ? "bg-[#0A9AFF]" : "bg-gray-200"}`}
                 role="switch"
                 aria-checked={weeklyDigest}
               >
@@ -428,7 +428,7 @@ export default function SettingsPage() {
                         toast.error("Enter a valid .myshopify.com domain");
                       }
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors shrink-0"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#0A9AFF] px-4 py-2 text-sm font-medium text-white hover:bg-[#0883DB] transition-colors shrink-0"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     Connect Shopify
@@ -469,7 +469,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-[#6B7280]">Connect your GHL sub-account to sync leads automatically.</p>
                 <a
                   href="/api/ghl/install"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#2D6A4F] px-4 py-2 text-sm font-medium text-white hover:bg-[#245840] transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0A9AFF] px-4 py-2 text-sm font-medium text-white hover:bg-[#0883DB] transition-colors"
                 >
                   <Link2 className="w-3.5 h-3.5" />
                   Connect GoHighLevel

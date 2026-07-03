@@ -65,7 +65,7 @@ export async function sendLeadNotification(params: {
       from: fromLine,
       to: params.toEmail,
       subject: `New lead on ${params.funnelName} (${params.calendarTier} tier)`,
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${escapeHtml(params.calendarTier)} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${escapeHtml(params.calendarTier)}</p></div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a><p style="color:#9CA3AF;font-size:11px;margin-top:24px;">Powered by ${escapeHtml(brand)}</p></div>`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${escapeHtml(params.calendarTier)} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${escapeHtml(params.calendarTier)}</p></div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a><p style="color:#9CA3AF;font-size:11px;margin-top:24px;">Powered by ${escapeHtml(brand)}</p></div>`,
     });
   } catch (err) {
     logger.error("[resend] lead notification failed", { error: err instanceof Error ? err.message : String(err) });
@@ -79,7 +79,7 @@ export async function sendWelcomeEmail(email: string) {
       from: FROM,
       to: email,
       subject: "Welcome to MyVSL! Let's build your first funnel",
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">Welcome to MyVSL</h2><p style="color:#6B7280">You're 60 seconds away from your first VSL funnel.</p><div style="margin:24px 0"><p><strong>1.</strong> Describe your business</p><p><strong>2.</strong> Upload your logo + pick a color</p><p><strong>3.</strong> Add your calendar link + publish</p></div><a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com"}/build" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">Build My First Funnel</a><p style="color:#9CA3AF;font-size:12px;margin-top:24px">No credit card required. Free plan forever.</p></div>`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">Welcome to MyVSL</h2><p style="color:#6B7280">You're 60 seconds away from your first VSL funnel.</p><div style="margin:24px 0"><p><strong>1.</strong> Describe your business</p><p><strong>2.</strong> Upload your logo + pick a color</p><p><strong>3.</strong> Add your calendar link + publish</p></div><a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com"}/build" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">Build My First Funnel</a><p style="color:#9CA3AF;font-size:12px;margin-top:24px">No credit card required. Free plan forever.</p></div>`,
     });
   } catch (err) {
     logger.error("[resend] welcome email failed", { error: err instanceof Error ? err.message : String(err) });
@@ -114,7 +114,7 @@ export async function sendClientInviteEmail(params: {
                 <tr><td style="padding:32px;color:#374151;font-size:15px;line-height:1.6;">
                   <p style="margin:0 0 16px 0;">Hi,</p>
                   <p style="margin:0 0 16px 0;">You've been invited to view the analytics for <strong>${escapeHtml(params.brandName)}</strong>. Click below to see your funnel's performance.</p>
-                  <a href="${escapeHtml(params.shareUrl)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Analytics</a>
+                  <a href="${escapeHtml(params.shareUrl)}" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Analytics</a>
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
@@ -153,7 +153,7 @@ export async function sendWeeklyDigestEmail(params: {
     const convDelta = params.thisWeekConversion - params.lastWeekConversion;
 
     function arrow(value: number, suffix = ""): string {
-      if (value > 0) return `<span style="color:#2D6A4F;">+${value}${suffix}</span>`;
+      if (value > 0) return `<span style="color:#0A9AFF;">+${value}${suffix}</span>`;
       if (value < 0) return `<span style="color:#DC2626;">${value}${suffix}</span>`;
       return `<span style="color:#9CA3AF;">0${suffix}</span>`;
     }
@@ -216,7 +216,7 @@ export async function sendWeeklyDigestEmail(params: {
                   </table>
                   ` : ""}
 
-                  <a href="${escapeHtml(APP_URL)}/dashboard" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Dashboard</a>
+                  <a href="${escapeHtml(APP_URL)}/dashboard" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Dashboard</a>
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">
@@ -256,7 +256,7 @@ export async function sendDailyDigestEmail(params: {
     const convDelta = params.yesterdayConversionRate - params.prevDayConversionRate;
 
     function formatDelta(value: number, suffix = ""): string {
-      if (value > 0) return `<span style="color:#2D6A4F;">+${value}${suffix}</span>`;
+      if (value > 0) return `<span style="color:#0A9AFF;">+${value}${suffix}</span>`;
       if (value < 0) return `<span style="color:#DC2626;">${value}${suffix}</span>`;
       return `<span style="color:#9CA3AF;">0${suffix}</span>`;
     }
@@ -299,7 +299,7 @@ export async function sendDailyDigestEmail(params: {
                       </td>
                     </tr>
                   </table>
-                  <a href="${escapeHtml(params.shareUrl)}" style="background:#2D6A4F;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Full Analytics</a>
+                  <a href="${escapeHtml(params.shareUrl)}" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500;">View Full Analytics</a>
                 </td></tr>
                 <tr><td style="padding:20px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
                   <p style="margin:0;font-size:11px;color:#9ca3af;">

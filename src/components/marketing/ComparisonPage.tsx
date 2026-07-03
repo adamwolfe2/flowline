@@ -8,8 +8,8 @@ import type { CompetitorData } from "@/app/compare/data";
 function FeatureIcon({ value }: { value: boolean | string }) {
   if (value === true) {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#2D6A4F]/10">
-        <Check className="w-4 h-4 text-[#2D6A4F]" />
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#0A9AFF]/10">
+        <Check className="w-4 h-4 text-[#0A9AFF]" />
       </span>
     );
   }
@@ -53,8 +53,8 @@ function FeatureTable({ data }: { data: CompetitorData }) {
         <div className="px-4 sm:px-6 py-3">
           <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider">Feature</span>
         </div>
-        <div className="px-3 sm:px-4 py-3 text-center border-l border-[#E5E7EB] bg-[#2D6A4F]/5">
-          <span className="text-xs font-bold text-[#2D6A4F] uppercase tracking-wider">MyVSL</span>
+        <div className="px-3 sm:px-4 py-3 text-center border-l border-[#E5E7EB] bg-[#0A9AFF]/5">
+          <span className="text-xs font-bold text-[#0A9AFF] uppercase tracking-wider">MyVSL</span>
         </div>
         <div className="px-3 sm:px-4 py-3 text-center border-l border-[#E5E7EB]">
           <span className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider truncate block">
@@ -93,7 +93,7 @@ function FeatureTable({ data }: { data: CompetitorData }) {
                 <div className="px-4 sm:px-6 py-3">
                   <span className="text-sm text-[#374151]">{item.name}</span>
                 </div>
-                <div className="px-3 sm:px-4 py-3 flex items-center justify-center border-l border-[#E5E7EB] bg-[#2D6A4F]/[0.02]">
+                <div className="px-3 sm:px-4 py-3 flex items-center justify-center border-l border-[#E5E7EB] bg-[#0A9AFF]/[0.02]">
                   <FeatureIcon value={item.myvsl} />
                 </div>
                 <div className="px-3 sm:px-4 py-3 flex items-center justify-center border-l border-[#E5E7EB]">
@@ -111,9 +111,9 @@ function PricingComparison({ data }: { data: CompetitorData }) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {/* MyVSL pricing */}
-      <div className="border-2 border-[#2D6A4F] rounded-2xl p-6 relative">
+      <div className="border-2 border-[#0A9AFF] rounded-2xl p-6 relative">
         <div className="absolute -top-3 left-4">
-          <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#2D6A4F] text-white">
+          <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[#0A9AFF] text-white">
             MyVSL
           </span>
         </div>
@@ -162,12 +162,12 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
       {/* Hero */}
       <section className="pt-12 sm:pt-20 pb-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-sm font-medium text-[#2D6A4F] uppercase tracking-wider mb-4">
+          <p className="text-sm font-medium text-[#0A9AFF] uppercase tracking-wider mb-4">
             MyVSL vs {data.name}
           </p>
           <h1
             className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111827] leading-tight mb-6"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             {data.tagline}
           </h1>
@@ -177,7 +177,7 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/build"
-              className="inline-flex items-center gap-2 bg-[#2D6A4F] text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-[#245840] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#0A9AFF] text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-[#0883DB] transition-colors"
             >
               Try MyVSL Free
               <ArrowRight className="w-4 h-4" />
@@ -197,7 +197,7 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
         <div className="max-w-4xl mx-auto">
           <h2
             className="text-2xl sm:text-3xl font-bold text-[#111827] mb-2"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             Feature Comparison
           </h2>
@@ -213,7 +213,7 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
         <div className="max-w-4xl mx-auto">
           <h2
             className="text-2xl sm:text-3xl font-bold text-[#111827] mb-2"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             Pricing Comparison
           </h2>
@@ -231,7 +231,7 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
             <div key={i} className="mb-12 last:mb-0">
               <h2
                 className="text-xl sm:text-2xl font-bold text-[#111827] mb-4"
-                style={{ fontFamily: "var(--font-plus-jakarta)" }}
+                style={{ fontFamily: "var(--font-instrument-sans)" }}
               >
                 {section.heading}
               </h2>
@@ -250,7 +250,7 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
         <div className="max-w-4xl mx-auto text-center">
           <h2
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#111827] mb-4"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             {data.ctaHeading}
           </h2>
@@ -260,7 +260,7 @@ export function ComparisonPage({ data }: { data: CompetitorData }) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/build"
-              className="inline-flex items-center gap-2 bg-[#2D6A4F] text-white rounded-xl px-8 py-3.5 text-base font-semibold hover:bg-[#245840] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#0A9AFF] text-white rounded-xl px-8 py-3.5 text-base font-semibold hover:bg-[#0883DB] transition-colors"
             >
               Build Your Funnel Free
               <ArrowRight className="w-4 h-4" />

@@ -65,7 +65,7 @@ export default function QuickStartPicker() {
   const [form, setForm] = useState<FormState>({
     businessName: "",
     tagline: "",
-    primaryColor: "#2D6A4F",
+    primaryColor: "#0A9AFF",
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<FormState>>({});
@@ -147,16 +147,16 @@ export default function QuickStartPicker() {
               <button
                 key={id}
                 onClick={() => handleIndustrySelect(id)}
-                className="w-full text-left flex items-center gap-4 px-4 py-4 rounded-xl border border-[#E5E7EB] hover:border-[#2D6A4F] hover:bg-[#F9FAFB] transition-all group"
+                className="w-full text-left flex items-center gap-4 px-4 py-4 rounded-xl border border-[#E5E7EB] hover:border-[#0A9AFF] hover:bg-[#F9FAFB] transition-all group"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#2D6A4F]/15 transition-colors">
-                  <Icon className="w-5 h-5 text-[#2D6A4F]" />
+                <div className="w-10 h-10 rounded-lg bg-[#0A9AFF]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#0A9AFF]/15 transition-colors">
+                  <Icon className="w-5 h-5 text-[#0A9AFF]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[#111827]">{label}</p>
                   <p className="text-xs text-[#6B7280] mt-0.5">{description}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#2D6A4F] transition-colors flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#0A9AFF] transition-colors flex-shrink-0" />
               </button>
             ))}
           </div>
@@ -180,10 +180,10 @@ export default function QuickStartPicker() {
               <button
                 key={template.id}
                 onClick={() => handleTemplateSelect(template)}
-                className="w-full text-left flex items-center gap-4 px-4 py-4 rounded-xl border border-[#E5E7EB] hover:border-[#2D6A4F] hover:bg-[#F9FAFB] transition-all group"
+                className="w-full text-left flex items-center gap-4 px-4 py-4 rounded-xl border border-[#E5E7EB] hover:border-[#0A9AFF] hover:bg-[#F9FAFB] transition-all group"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#2D6A4F]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#2D6A4F]/15 transition-colors">
-                  <span className="text-[10px] font-bold text-[#2D6A4F] uppercase tracking-wide">
+                <div className="w-10 h-10 rounded-lg bg-[#0A9AFF]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#0A9AFF]/15 transition-colors">
+                  <span className="text-[10px] font-bold text-[#0A9AFF] uppercase tracking-wide">
                     {ARCHETYPE_LABELS[template.archetype]?.split(" ")[0] ?? ""}
                   </span>
                 </div>
@@ -193,7 +193,7 @@ export default function QuickStartPicker() {
                   </p>
                   <p className="text-xs text-[#6B7280] mt-0.5">{template.description}</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#2D6A4F] transition-colors flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#0A9AFF] transition-colors flex-shrink-0" />
               </button>
             ))}
           </div>
@@ -272,7 +272,7 @@ export default function QuickStartPicker() {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#2D6A4F] hover:bg-[#245840] text-white font-semibold text-sm py-3 rounded-xl transition-colors"
+                className="w-full bg-[#0A9AFF] hover:bg-[#0883DB] text-white font-semibold text-sm py-3 rounded-xl transition-colors"
               >
                 {submitting ? (
                   <span className="flex items-center gap-2">

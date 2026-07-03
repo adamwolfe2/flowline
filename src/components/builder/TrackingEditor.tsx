@@ -154,7 +154,7 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
                       newConfig.webhook.events[key] = e.target.checked;
                       onSave(newConfig);
                     }}
-                    className="w-3.5 h-3.5 mt-0.5 rounded border-gray-300 accent-[#2D6A4F] cursor-pointer"
+                    className="w-3.5 h-3.5 mt-0.5 rounded border-gray-300 accent-[#0A9AFF] cursor-pointer"
                   />
                   <span className="leading-tight">
                     <span className="text-xs text-gray-700">{label}</span>
@@ -179,13 +179,13 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
               newConfig.webhook.format = e.target.value;
               onSave(newConfig);
             }}
-            className="w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:ring-offset-1"
+            className="w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A9AFF] focus:ring-offset-1"
           >
             <option value="default">Default</option>
             <option value="ghl">GoHighLevel</option>
           </select>
           {config.webhook?.format === "ghl" && (
-            <p className="text-[10px] text-[#2D6A4F] bg-green-50 border border-green-100 rounded-md px-2 py-1.5 mt-2">
+            <p className="text-[10px] text-[#0A9AFF] bg-green-50 border border-green-100 rounded-md px-2 py-1.5 mt-2">
               Payload formatted for GoHighLevel contact creation. Includes tags, custom fields, and quiz data.
             </p>
           )}
@@ -319,7 +319,7 @@ export function TrackingEditor({ config, onSave, funnelId }: TrackingEditorProps
               newConfig.tracking.customScripts.push("");
               onSave(newConfig);
             }}
-            className="text-[10px] text-[#2D6A4F] font-medium hover:underline"
+            className="text-[10px] text-[#0A9AFF] font-medium hover:underline"
           >
             + Add script
           </button>

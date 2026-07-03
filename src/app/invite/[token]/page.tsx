@@ -46,7 +46,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
       <div className="text-center max-w-sm px-4">
         {(status === "loading" || status === "accepting") && (
           <>
-            <Loader2 className="w-8 h-8 animate-spin text-[#2D6A4F] mx-auto mb-4" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#0A9AFF] mx-auto mb-4" />
             <p className="text-sm text-gray-500">Accepting your invite...</p>
           </>
         )}

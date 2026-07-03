@@ -74,7 +74,7 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
+  --radius: 0.875rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -142,12 +142,64 @@ main,
   animation: fadeIn 0.15s ease-out;
 }
 
-/* Instrument Serif headings — wider tracking for readability at large sizes */
+/* Grotesk headings — tight tracking for the big, confident look */
 h1 {
-  letter-spacing: 0.02em;
+  letter-spacing: -0.03em;
 }
 h2, h3 {
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sky design system                                                  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --brand: #0A9AFF;
+  --brand-hover: #0883DB;
+  --ink: #0A0A0A;
+  --paper: #FAFAF8;
+}
+
+/* Hero sky: bright airy blue with soft cloud glows */
+.sky-hero {
+  background:
+    radial-gradient(120% 90% at 15% 100%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(90% 70% at 85% 90%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 50%),
+    radial-gradient(70% 55% at 50% 0%, rgba(125, 211, 255, 0.9) 0%, rgba(125, 211, 255, 0) 70%),
+    linear-gradient(180deg, #8FD6FF 0%, #A9E0FF 38%, #D7F0FF 72%, #FFFFFF 100%);
+}
+
+/* CTA card: deeper blue wash with halftone dots fading in from the bottom */
+.sky-cta {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.55) 1.5px, transparent 1.5px),
+    radial-gradient(110% 90% at 50% 115%, #3FAEF9 0%, rgba(63, 174, 249, 0) 60%),
+    linear-gradient(200deg, #EAF6FF 0%, #BFE5FF 42%, #7CC8FB 100%);
+  background-size: 22px 22px, 100% 100%, 100% 100%;
+}
+
+/* Slow drifting clouds for the hero */
+@keyframes cloud-drift {
+  0% { transform: translateX(0) translateZ(0); }
+  100% { transform: translateX(60px) translateZ(0); }
+}
+.cloud {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  filter: blur(28px);
+  animation: cloud-drift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* Gentle float for hero product frame */
+@keyframes float-up {
+  from { opacity: 0; transform: translateY(48px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-float-up {
+  animation: float-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Focus states for keyboard navigation */
@@ -157,7 +209,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid #2D6A4F;
+  outline: 2px solid #0A9AFF;
   outline-offset: 2px;
 }
 

@@ -23,7 +23,7 @@ export default function FunnelError({
       <p className="text-sm text-[#6B7280] mb-6">This funnel could not be loaded. It may have been unpublished.</p>
       <button
         onClick={reset}
-        className="bg-[#2D6A4F] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#245840] transition-colors"
+        className="bg-[#0A9AFF] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#0883DB] transition-colors"
       >
         Try again
       </button>

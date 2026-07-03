@@ -84,7 +84,7 @@ export async function GET(req: Request) {
                           <p style="margin:0 0 16px 0;">Your 14-day free Pro trial ends in <strong>${dayLabel}</strong>.</p>
                           <p style="margin:0 0 24px 0;">Upgrade now to keep access to all Pro features — advanced analytics, custom domains, unlimited submissions, and more.</p>
                           <p style="margin:0 0 0 0;">
-                            <a href="${appUrl}/billing" style="display:inline-block;background-color:#2D6A4F;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+                            <a href="${appUrl}/billing" style="display:inline-block;background-color:#0A9AFF;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
                               Upgrade Now
                             </a>
                           </p>

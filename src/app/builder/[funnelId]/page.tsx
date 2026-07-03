@@ -84,8 +84,8 @@ export default function BuilderPage() {
         const el = document.getElementById(`editor-${field}`);
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "center" });
-          el.classList.add("ring-2", "ring-[#2D6A4F]", "ring-offset-2");
-          setTimeout(() => el.classList.remove("ring-2", "ring-[#2D6A4F]", "ring-offset-2"), 2000);
+          el.classList.add("ring-2", "ring-[#0A9AFF]", "ring-offset-2");
+          setTimeout(() => el.classList.remove("ring-2", "ring-[#0A9AFF]", "ring-offset-2"), 2000);
         }
       }, 100);
     }
@@ -539,7 +539,7 @@ export default function BuilderPage() {
                 >
                   <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
                     <div className="text-center">
-                      <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
+                      <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#0A9AFF] rounded-full animate-spin mx-auto mb-2" />
                       <p className="text-xs text-[#9CA3AF]">Loading preview</p>
                     </div>
                   </div>
@@ -562,7 +562,7 @@ export default function BuilderPage() {
         <Sheet open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>
           <button
             onClick={() => setMobilePreviewOpen(true)}
-            className="absolute -top-12 right-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#2D6A4F] text-white text-xs font-medium shadow-lg"
+            className="absolute -top-12 right-4 flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#0A9AFF] text-white text-xs font-medium shadow-lg"
             aria-label="Open preview"
           >
             <Eye className="w-3.5 h-3.5" />
@@ -598,7 +598,7 @@ export default function BuilderPage() {
                 >
                   <div className="absolute inset-0 flex items-center justify-center bg-[#F9FAFB]">
                     <div className="text-center">
-                      <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#2D6A4F] rounded-full animate-spin mx-auto mb-2" />
+                      <div className="w-6 h-6 border-2 border-[#E5E7EB] border-t-[#0A9AFF] rounded-full animate-spin mx-auto mb-2" />
                       <p className="text-xs text-[#9CA3AF]">Loading preview</p>
                     </div>
                   </div>
@@ -623,11 +623,11 @@ export default function BuilderPage() {
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
                 className={`flex-1 min-w-[56px] flex flex-col items-center justify-center gap-1 py-2 px-1 text-[10px] font-medium transition-colors ${
-                  isActive ? "text-[#2D6A4F]" : "text-[#9CA3AF]"
+                  isActive ? "text-[#0A9AFF]" : "text-[#9CA3AF]"
                 }`}
                 aria-label={tab.label}
               >
-                <tab.icon className={`w-4 h-4 ${isActive ? "text-[#2D6A4F]" : "text-[#9CA3AF]"}`} />
+                <tab.icon className={`w-4 h-4 ${isActive ? "text-[#0A9AFF]" : "text-[#9CA3AF]"}`} />
                 {tab.label}
               </button>
             );

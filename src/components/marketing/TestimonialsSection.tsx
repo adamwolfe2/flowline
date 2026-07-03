@@ -11,7 +11,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 border border-[#E5E7EB] bg-white rounded-full px-3 py-1 text-sm font-medium text-[#111827]">
+    <div className="inline-flex items-center gap-1.5 border border-black/10 bg-white/70 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium text-[#0A0A0A]/75">
       {icon}
       {children}
     </div>
@@ -56,15 +56,15 @@ const ratings = [
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-white border-t border-[#E5E7EB] py-12 sm:py-20 px-4 sm:px-6">
+    <section className="bg-[#FAFAF8] py-20 sm:py-28 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center text-center gap-4 mb-12">
           <SectionLabel icon={<Heart className="w-3.5 h-3.5" />}>
             Results
           </SectionLabel>
           <h2
-            className="text-2xl sm:text-[32px] md:text-[40px] font-semibold text-[#111827] leading-tight"
-            style={{ fontFamily: "var(--font-plus-jakarta)" }}
+            className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] tracking-[-0.03em] leading-[1.08]"
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
             What happens when you go live
           </h2>
@@ -79,14 +79,14 @@ export function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
+              className="bg-white border border-[#E5E7EB] rounded-[24px] p-5 sm:p-6 hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
             >
               {/* Stars */}
               <div className="flex items-center gap-0.5 mb-4">
                 {Array.from({ length: 5 }).map((_, j) => (
                   <Star
                     key={j}
-                    className="w-3.5 h-3.5 fill-[#2D6A4F] text-[#2D6A4F]"
+                    className="w-3.5 h-3.5 fill-[#0A9AFF] text-[#0A9AFF]"
                   />
                 ))}
               </div>
@@ -114,7 +114,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Ratings row */}
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+        <div className="bg-white border border-[#E5E7EB] rounded-[24px] overflow-hidden">
           <div className="grid grid-cols-3 divide-x divide-[#E5E7EB]">
             {ratings.map((r) => (
               <div
@@ -126,7 +126,7 @@ export function TestimonialsSection() {
                 </span>
                 <div className="flex items-center gap-0.5 mb-1">
                   {Array.from({ length: r.stars }).map((_, j) => (
-                    <span key={j} className="text-[#2D6A4F] text-sm">
+                    <span key={j} className="text-[#0A9AFF] text-sm">
                       &#9733;
                     </span>
                   ))}

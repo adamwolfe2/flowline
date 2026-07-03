@@ -130,7 +130,7 @@ export function OnboardingChecklist({
       <div className="px-5 pb-3">
         <div className="h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#2D6A4F] rounded-full transition-all duration-500"
+            className="h-full bg-[#0A9AFF] rounded-full transition-all duration-500"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -149,7 +149,7 @@ export function OnboardingChecklist({
                 }`}
               >
                 {item.completed ? (
-                  <div className="w-5 h-5 rounded-full bg-[#2D6A4F] flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-[#0A9AFF] flex items-center justify-center shrink-0">
                     <Check className="w-3 h-3 text-white" />
                   </div>
                 ) : (
@@ -172,7 +172,7 @@ export function OnboardingChecklist({
                 {!item.completed && (
                   <Link
                     href={item.href}
-                    className="text-xs font-medium text-[#2D6A4F] hover:underline flex items-center gap-1 shrink-0"
+                    className="text-xs font-medium text-[#0A9AFF] hover:underline flex items-center gap-1 shrink-0"
                   >
                     {item.ctaLabel}
                     <ArrowRight className="w-3 h-3" />

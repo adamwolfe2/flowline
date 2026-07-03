@@ -117,7 +117,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
     return NextResponse.json({
       funnelName: config.brand?.name ?? "Funnel",
       brandLogoUrl: config.brand?.logoUrl ?? null,
-      brandColor: config.brand?.primaryColor ?? "#2D6A4F",
+      brandColor: config.brand?.primaryColor ?? "#0A9AFF",
       teamBranding,
       stats,
       dropoff,

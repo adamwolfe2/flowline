@@ -190,7 +190,7 @@ function SkeletonBlock({ className }: { className?: string }) {
 }
 
 function tierBadgeColor(tier: string) {
-  if (tier === "high") return "bg-[#2D6A4F]/10 text-[#2D6A4F]";
+  if (tier === "high") return "bg-[#0A9AFF]/10 text-[#0A9AFF]";
   if (tier === "mid") return "bg-[#D97706]/10 text-[#D97706]";
   return "bg-gray-100 text-gray-600";
 }
@@ -466,7 +466,7 @@ export default function AnalyticsDashboard() {
         <div className="text-center space-y-3">
           <BarChart3 className="w-10 h-10 text-gray-300 mx-auto" />
           <p className="text-gray-500">{error ?? "No data available"}</p>
-          <Link href="/dashboard" className="text-[#2D6A4F] text-sm hover:underline">
+          <Link href="/dashboard" className="text-[#0A9AFF] text-sm hover:underline">
             Back to dashboard
           </Link>
         </div>
@@ -509,8 +509,8 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
         <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-          <div className="w-16 h-16 bg-[#2D6A4F]/10 rounded-2xl flex items-center justify-center mb-5">
-            <BarChart3 className="w-8 h-8 text-[#2D6A4F]" />
+          <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mb-5">
+            <BarChart3 className="w-8 h-8 text-[#0A9AFF]" />
           </div>
           <h2 className="text-lg font-semibold text-[#111827] mb-2">Waiting for your first visitor</h2>
           <p className="text-sm text-[#9CA3AF] max-w-md mb-6">
@@ -526,13 +526,13 @@ export default function AnalyticsDashboard() {
                   navigator.clipboard.writeText(`https://${platformDomain}/f/${funnelSlug}`);
                   toast.success("URL copied");
                 }}
-                className="text-xs bg-[#2D6A4F] text-white px-3 py-2 rounded-lg hover:bg-[#245840] transition-colors"
+                className="text-xs bg-[#0A9AFF] text-white px-3 py-2 rounded-lg hover:bg-[#0883DB] transition-colors"
               >
                 Copy URL
               </button>
             </div>
           )}
-          <Link href="/dashboard" className="text-sm text-[#2D6A4F] hover:underline">
+          <Link href="/dashboard" className="text-sm text-[#0A9AFF] hover:underline">
             Back to dashboard
           </Link>
         </div>
@@ -577,8 +577,8 @@ export default function AnalyticsDashboard() {
             >
               {shareToken ? (
                 <>
-                  <Link2 className="w-3 h-3 text-[#2D6A4F]" />
-                  <span className="text-[#2D6A4F] hidden sm:inline">Shared</span>
+                  <Link2 className="w-3 h-3 text-[#0A9AFF]" />
+                  <span className="text-[#0A9AFF] hidden sm:inline">Shared</span>
                 </>
               ) : (
                 <>
@@ -608,7 +608,7 @@ export default function AnalyticsDashboard() {
               onClick={() => setTimeRange(range)}
               className={`text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap min-h-[44px] ${
                 timeRange === range
-                  ? 'bg-[#2D6A4F] text-white'
+                  ? 'bg-[#0A9AFF] text-white'
                   : 'bg-[#FBFBFB] text-[#737373] hover:bg-[#F0F0F0] border border-[#EBEBEB]'
               }`}
             >
@@ -745,7 +745,7 @@ export default function AnalyticsDashboard() {
                             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all"
-                                style={{ width: `${(opt.count / maxCount) * 100}%`, backgroundColor: "#2D6A4F" }}
+                                style={{ width: `${(opt.count / maxCount) * 100}%`, backgroundColor: "#0A9AFF" }}
                               />
                             </div>
                           </div>
@@ -885,7 +885,7 @@ export default function AnalyticsDashboard() {
                               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">Control</span>
                             )}
                             {winner && winner.variantId === v.variantId && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#2D6A4F]/10 text-[#2D6A4F] font-medium">Winner</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#0A9AFF]/10 text-[#0A9AFF] font-medium">Winner</span>
                             )}
                           </span>
                         </td>
@@ -970,7 +970,7 @@ export default function AnalyticsDashboard() {
                         <input
                           type="checkbox"
                           aria-label="Select all leads on this page"
-                          className="w-3.5 h-3.5 rounded border-gray-300 text-[#2D6A4F] focus:ring-[#2D6A4F] accent-[#2D6A4F] align-middle cursor-pointer"
+                          className="w-3.5 h-3.5 rounded border-gray-300 text-[#0A9AFF] focus:ring-[#0A9AFF] accent-[#0A9AFF] align-middle cursor-pointer"
                           checked={recentLeads.length > 0 && recentLeads.every((l) => selectedLeads.has(l.id))}
                           onChange={(e) =>
                             setSelectedLeads(
@@ -992,7 +992,7 @@ export default function AnalyticsDashboard() {
                       <tr
                         key={lead.id}
                         className={`border-b border-gray-50 cursor-pointer transition-colors ${
-                          selectedLeads.has(lead.id) ? "bg-[#2D6A4F]/5" : "hover:bg-gray-50/50"
+                          selectedLeads.has(lead.id) ? "bg-[#0A9AFF]/5" : "hover:bg-gray-50/50"
                         }`}
                         onClick={() => setSelectedLeadId(lead.id)}
                       >
@@ -1000,7 +1000,7 @@ export default function AnalyticsDashboard() {
                           <input
                             type="checkbox"
                             aria-label={`Select ${lead.email}`}
-                            className="w-3.5 h-3.5 rounded border-gray-300 accent-[#2D6A4F] align-middle cursor-pointer"
+                            className="w-3.5 h-3.5 rounded border-gray-300 accent-[#0A9AFF] align-middle cursor-pointer"
                             checked={selectedLeads.has(lead.id)}
                             onChange={() => toggleLead(lead.id)}
                           />
@@ -1098,7 +1098,7 @@ export default function AnalyticsDashboard() {
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3 h-3 text-[#2D6A4F]" />
+                        <Check className="w-3 h-3 text-[#0A9AFF]" />
                         Copied
                       </>
                     ) : (
@@ -1124,7 +1124,7 @@ export default function AnalyticsDashboard() {
                       value={shareClientEmail}
                       onChange={(e) => setShareClientEmail(e.target.value)}
                       placeholder="client@example.com"
-                      className="w-full text-xs border border-[#E5E7EB] rounded-lg pl-9 pr-3 py-2 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#2D6A4F] focus:border-[#2D6A4F]"
+                      className="w-full text-xs border border-[#E5E7EB] rounded-lg pl-9 pr-3 py-2 text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-1 focus:ring-[#0A9AFF] focus:border-[#0A9AFF]"
                     />
                   </div>
                 </div>
@@ -1143,7 +1143,7 @@ export default function AnalyticsDashboard() {
                     setShareDailyDigest(next);
                   }}
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    shareDailyDigest ? "bg-[#2D6A4F]" : "bg-gray-200"
+                    shareDailyDigest ? "bg-[#0A9AFF]" : "bg-gray-200"
                   }`}
                 >
                   <span
@@ -1167,7 +1167,7 @@ export default function AnalyticsDashboard() {
                 <button
                   onClick={handleSendInvite}
                   disabled={!shareClientEmail || sendingInvite}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-[#2D6A4F] text-white hover:bg-[#245840] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-[#0A9AFF] text-white hover:bg-[#0883DB] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-3 h-3" />
                   {sendingInvite ? "Sending..." : "Send Invite"}

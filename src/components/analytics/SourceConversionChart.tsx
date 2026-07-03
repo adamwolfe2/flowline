@@ -14,8 +14,8 @@ interface SourceConversionChartProps {
   data: SourceConversionItem[];
 }
 
-const BRAND_COLOR = "#2D6A4F";
-const ACCENT_COLOR = "#52B788";
+const BRAND_COLOR = "#0A9AFF";
+const ACCENT_COLOR = "#5CBEFF";
 
 function displaySource(source: string | null): string {
   if (!source) return "Direct";
@@ -126,7 +126,7 @@ export function SourceConversionChart({ data }: SourceConversionChartProps) {
               <span className="text-gray-700 font-medium truncate max-w-[55%]">{d.label}</span>
               <span className="text-gray-400 shrink-0">
                 {d.sessions.toLocaleString()} sessions ({pct}%)
-                <span className="ml-2 text-[#2D6A4F] font-semibold">{d.conversionRate}% CVR</span>
+                <span className="ml-2 text-[#0A9AFF] font-semibold">{d.conversionRate}% CVR</span>
               </span>
             </div>
           );

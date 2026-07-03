@@ -280,7 +280,7 @@ export function SequenceEditor({ funnel }: SequenceEditorProps) {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => togglePreview(seq.id, si)}
-                            className="p-0.5 text-gray-300 hover:text-[#2D6A4F] transition-colors"
+                            className="p-0.5 text-gray-300 hover:text-[#0A9AFF] transition-colors"
                             aria-label={isPreviewOpen ? "Hide preview" : "Show preview"}
                             title={isPreviewOpen ? "Hide preview" : "Preview email"}
                           >

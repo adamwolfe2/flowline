@@ -401,7 +401,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-[#2D6A4F]" />
+          <Zap className="w-4 h-4 text-[#0A9AFF]" />
           <h3 className="text-sm font-semibold text-gray-900">Popup Campaigns</h3>
           {saving && (
             <span className="flex items-center gap-1 text-[10px] text-gray-400">
@@ -456,7 +456,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
           <div className="flex flex-col items-center gap-2">
             <Button
               onClick={() => setShowUrlWizard(true)}
-              className="gap-2 bg-[#2D6A4F] hover:bg-[#245840] text-white"
+              className="gap-2 bg-[#0A9AFF] hover:bg-[#0883DB] text-white"
             >
               <Sparkles className="w-4 h-4" />
               Generate from website URL
@@ -465,7 +465,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
             <button
               onClick={handleCreate}
               disabled={creating || !funnel.published}
-              className="text-xs text-[#2D6A4F] hover:underline disabled:text-gray-400 disabled:no-underline"
+              className="text-xs text-[#0A9AFF] hover:underline disabled:text-gray-400 disabled:no-underline"
             >
               {funnel.published
                 ? "Use this funnel as a popup"
@@ -494,7 +494,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
               key={campaign.id}
               className={`border rounded-lg transition-colors cursor-pointer ${
                 selectedCampaignId === campaign.id
-                  ? "border-[#2D6A4F] bg-green-50/30"
+                  ? "border-[#0A9AFF] bg-green-50/30"
                   : "border-[#E5E7EB] hover:border-gray-300"
               }`}
             >
@@ -654,7 +654,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
                               }
                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
                                 selectedCampaign.displayMode === value
-                                  ? "border-[#2D6A4F] bg-green-50 text-[#2D6A4F]"
+                                  ? "border-[#0A9AFF] bg-green-50 text-[#0A9AFF]"
                                   : "border-[#E5E7EB] text-gray-500 hover:border-gray-300"
                               }`}
                             >
@@ -680,7 +680,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
                                 }
                                 className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
                                   selectedCampaign.position === value
-                                    ? "border-[#2D6A4F] bg-green-50 text-[#2D6A4F]"
+                                    ? "border-[#0A9AFF] bg-green-50 text-[#0A9AFF]"
                                     : "border-[#E5E7EB] text-gray-500 hover:border-gray-300"
                                 }`}
                               >
@@ -982,7 +982,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
                               },
                             })
                           }
-                          className="w-full mt-1 accent-[#2D6A4F]"
+                          className="w-full mt-1 accent-[#0A9AFF]"
                         />
                       </div>
 
@@ -1027,7 +1027,7 @@ export function PopupCampaignEditor({ funnel, onPreviewChange }: PopupCampaignEd
                               },
                             })
                           }
-                          className="w-full mt-1 rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] focus:ring-offset-1"
+                          className="w-full mt-1 rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A9AFF] focus:ring-offset-1"
                         >
                           {ANIMATIONS.map(({ value, label }) => (
                             <option key={value} value={value}>
