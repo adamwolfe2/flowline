@@ -170,7 +170,7 @@ function DashboardContent() {
         transition={{ duration: 0.3 }}
         className="mb-8"
       >
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
           {isTeamContext && activeTeam ? activeTeam.name : "Your Funnels"}
         </h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -197,7 +197,7 @@ function DashboardContent() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
+              className="px-3 py-2 text-sm border border-black/[0.08] rounded-[10px] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
               aria-label="Sort funnels"
             >
               <option value="newest">Newest</option>
@@ -208,7 +208,7 @@ function DashboardContent() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-[#E5E7EB] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
+              className="px-3 py-2 text-sm border border-black/[0.08] rounded-[10px] bg-white focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 focus:border-[#0A9AFF] transition-colors min-h-[44px]"
               aria-label="Filter by status"
             >
               <option value="all">All</option>

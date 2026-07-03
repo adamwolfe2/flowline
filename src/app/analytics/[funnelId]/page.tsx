@@ -167,7 +167,7 @@ function StatCard({
   hint?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 flex flex-col gap-1">
+    <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-5 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-gray-400">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
@@ -177,7 +177,7 @@ function StatCard({
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900">
+      <p className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
         {value}
         {suffix && <span className="text-sm font-normal text-gray-400 ml-0.5">{suffix}</span>}
       </p>
@@ -676,19 +676,19 @@ export default function AnalyticsDashboard() {
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Audience Insights</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+              <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6">
                 <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Traffic Source Conversion</h4>
                 <SourceConversionChart data={sourceConversion ?? []} />
               </div>
             </ErrorBoundary>
             <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+              <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6">
                 <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Device Completion Rate</h4>
                 <DeviceConversionChart data={deviceConversion ?? []} />
               </div>
             </ErrorBoundary>
             <ErrorBoundary>
-              <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+              <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6">
                 <h4 className="text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wide">Time to Convert</h4>
                 <TimeToConvertChart data={timeToConvertHistogram ?? []} />
               </div>
@@ -703,7 +703,7 @@ export default function AnalyticsDashboard() {
           transition={{ duration: 0.4, delay: 0.3 }}
         >
           <ErrorBoundary>
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 overflow-x-auto">
+            <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6 overflow-x-auto">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
               <WaterfallChart steps={dropoff} />
             </div>
@@ -721,7 +721,7 @@ export default function AnalyticsDashboard() {
                 const totalCount = opts.reduce((s, o) => s + o.count, 0) || 1;
                 const smallSample = totalCount < 6;
                 return (
-                  <div key={qKey} className="bg-white rounded-xl border border-[#E5E7EB] p-5">
+                  <div key={qKey} className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-5">
                     <div className="flex items-center justify-between mb-3 gap-2">
                       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide truncate">{qKey}</p>
                       <span className={`text-[10px] font-medium shrink-0 rounded px-1.5 py-0.5 ${smallSample ? "text-[#B45309] bg-[#D9770614]" : "text-gray-400 bg-gray-50"}`} title={smallSample ? "Small sample — read the raw counts, not the %" : undefined}>
@@ -762,7 +762,7 @@ export default function AnalyticsDashboard() {
         {/* ---- Abandon + Device + UTM ---- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Abandonment by Step */}
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandonment by Step</h3>
             {abandons.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">No abandonment data yet</p>
@@ -794,7 +794,7 @@ export default function AnalyticsDashboard() {
           {/* Device + UTM */}
           <div className="space-y-6">
             {/* Device Breakdown */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Device Breakdown</h3>
               {devices.length === 0 ? (
                 <p className="text-sm text-gray-400 text-center py-4">No device data yet</p>
@@ -817,7 +817,7 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Lead Sources */}
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+            <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Lead Sources</h3>
               {utmSources.length === 0 ? (
                 <div className="text-center py-4">
@@ -859,7 +859,7 @@ export default function AnalyticsDashboard() {
             : null;
 
           return (
-            <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+            <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">A/B Test Performance</h3>
               <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
                 <table className="w-full text-xs min-w-[600px]">
@@ -912,7 +912,7 @@ export default function AnalyticsDashboard() {
 
         {/* ---- Leads Time Series ---- */}
         <ErrorBoundary>
-          <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6 overflow-x-auto">
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6 overflow-x-auto">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Leads ({timeRange === 'all' ? 'All Time' : `Last ${timeRange}`})</h3>
             {timeSeries.some((d) => d.count > 0) ? (
               <LeadsChart data={timeSeries} timeRange={timeRange} />
@@ -923,7 +923,7 @@ export default function AnalyticsDashboard() {
         </ErrorBoundary>
 
         {/* ---- Leads Table ---- */}
-        <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 sm:p-6">
+        <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <h3 className="text-sm font-semibold text-gray-900">Recent Leads</h3>
             {recentLeads.length > 0 && (
@@ -1065,7 +1065,7 @@ export default function AnalyticsDashboard() {
       {shareModalOpen && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShareModalOpen(false)}>
           <div
-            className="bg-white rounded-xl border border-[#E5E7EB] shadow-lg w-full max-w-md"
+            className="bg-white rounded-[16px] ring-1 ring-black/[0.06] shadow-lg w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}

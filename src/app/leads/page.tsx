@@ -349,7 +349,7 @@ export default function LeadsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden overflow-x-auto">
+      <div className="bg-white ring-1 ring-black/[0.06] rounded-[16px] overflow-hidden overflow-x-auto">
         {loading ? (
           <div className="divide-y divide-[#E5E7EB]">
             <div className="bg-[#F9FAFB] px-4 py-3 flex gap-4">

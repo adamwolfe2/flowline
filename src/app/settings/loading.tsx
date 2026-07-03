@@ -6,7 +6,7 @@ export default function SettingsLoading() {
       <Skeleton className="h-8 w-32 mb-1.5" />
       <Skeleton className="h-4 w-64 mb-8" />
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl p-6 mb-6">
+        <div key={i} className="bg-white ring-1 ring-black/[0.06] rounded-[16px] p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Skeleton className="h-4 w-4 rounded" />
             <Skeleton className="h-4 w-24" />

@@ -204,7 +204,7 @@ export default function SettingsPage() {
       <div className="max-w-4xl mx-auto">
         <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-8" />
         <div className="h-10 bg-gray-100 rounded-lg animate-pulse mb-6" />
-        <div className="h-64 bg-white rounded-xl border border-[#E5E7EB] animate-pulse" />
+        <div className="h-64 bg-white rounded-[16px] ring-1 ring-black/[0.06] animate-pulse" />
       </div>
     );
   }
@@ -240,7 +240,7 @@ export default function SettingsPage() {
       {/* Tab content */}
       {activeTab === "account" && (
         <div className="space-y-6">
-          <section className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <section className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <h2 className="text-sm font-semibold text-[#111827] uppercase tracking-wider mb-4">
               Account
             </h2>
@@ -283,7 +283,7 @@ export default function SettingsPage() {
       )}
 
       {activeTab === "billing" && (
-        <section className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+        <section className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
           <h2 className="text-sm font-semibold text-[#111827] uppercase tracking-wider mb-4">
             Plan & Billing
           </h2>
@@ -338,7 +338,7 @@ export default function SettingsPage() {
       )}
 
       {activeTab === "notifications" && (
-        <section className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+        <section className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
           <h2 className="text-sm font-semibold text-[#111827] uppercase tracking-wider mb-4">
             Notifications
           </h2>
@@ -385,7 +385,7 @@ export default function SettingsPage() {
       {activeTab === "integrations" && (
         <div className="space-y-6">
           {/* Shopify */}
-          <section className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <section className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <div className="flex items-center gap-2 mb-4">
               <ShoppingBag className="w-4 h-4 text-[#6B7280]" />
               <h2 className="text-sm font-semibold text-[#111827] uppercase tracking-wider">Shopify</h2>
@@ -439,7 +439,7 @@ export default function SettingsPage() {
           </section>
 
           {/* GoHighLevel */}
-          <section className="bg-white rounded-xl border border-[#E5E7EB] p-6">
+          <section className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <div className="flex items-center gap-2 mb-4">
               <Link2 className="w-4 h-4 text-[#6B7280]" />
               <h2 className="text-sm font-semibold text-[#111827] uppercase tracking-wider">GoHighLevel</h2>

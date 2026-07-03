@@ -17,7 +17,7 @@ export default function LeadsLoading() {
         <Skeleton className="h-10 w-32 rounded-lg" />
         <Skeleton className="h-10 w-36 rounded-lg" />
       </div>
-      <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+      <div className="bg-white ring-1 ring-black/[0.06] rounded-[16px] overflow-hidden">
         <div className="border-b border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 flex gap-4">
           <Skeleton className="h-3 w-32" />
           <Skeleton className="h-3 w-24" />
