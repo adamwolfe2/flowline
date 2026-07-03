@@ -76,7 +76,7 @@ export function BottomCTA() {
 
           <button
             onClick={() => router.push("/sign-up")}
-            className="group inline-flex items-center gap-2.5 bg-[#0A0A0A] text-white text-base sm:text-lg font-semibold pl-7 pr-6 py-3.5 sm:py-4 rounded-full hover:bg-[#232323] transition-all hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5"
+            className="group inline-flex items-center gap-2.5 bg-[#0A0A0A] text-white text-base sm:text-lg font-semibold pl-7 pr-6 py-3.5 sm:py-4 rounded-[12px] hover:bg-[#232323] transition-all hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 active:scale-[0.97]"
           >
             Start building free
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />

@@ -137,7 +137,7 @@ function LeftContent({ tab }: { tab: TabId }) {
   return (
     <>
       <h2
-        className="text-sm sm:text-2xl md:text-3xl font-bold text-[#111827] mb-3 sm:mb-6"
+        className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[#0A0A0A] mb-4 sm:mb-6"
         style={{ fontFamily: "var(--font-instrument-sans)" }}
       >
         {data.headline}
@@ -148,7 +148,7 @@ function LeftContent({ tab }: { tab: TabId }) {
             <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#0A9AFF]/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
               <bullet.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#0A9AFF]" />
             </div>
-            <p className="text-[11px] sm:text-sm text-[#6B7280] leading-relaxed">
+            <p className="text-[13px] sm:text-sm text-[#6B7280] leading-relaxed">
               {bullet.text}
             </p>
           </div>
@@ -156,7 +156,7 @@ function LeftContent({ tab }: { tab: TabId }) {
       </div>
       <Link
         href="/build"
-        className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#0A0A0A] text-white text-[11px] sm:text-sm font-semibold px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-[#232323] transition-colors"
+        className="inline-flex items-center gap-1.5 sm:gap-2 bg-[#0A0A0A] text-white text-[13px] sm:text-sm font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-[10px] hover:bg-[#232323] transition-colors"
       >
         {data.cta} <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
       </Link>
@@ -935,12 +935,12 @@ export function ProductDemo() {
 
         {/* Fillout-style frosted glass tab bar */}
         <div className="flex items-center justify-start sm:justify-center mb-10 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto scrollbar-hide">
-          <div className="inline-flex items-center gap-0.5 bg-white/80 backdrop-blur-sm rounded-full p-1.5 ring-1 ring-black/[0.06] shadow-sm">
+          <div className="inline-flex items-center gap-0.5 bg-white/80 backdrop-blur-sm rounded-[14px] p-1.5 ring-1 ring-black/[0.06] shadow-sm">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                className={`relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-[10px] text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-[#0A0A0A] text-white shadow-sm"
                     : "text-[#6B7280] hover:text-[#111827]"
@@ -976,14 +976,14 @@ export function ProductDemo() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="grid grid-cols-2 min-h-[300px] sm:min-h-[360px] md:min-h-[460px]"
+              className="grid grid-cols-1 md:grid-cols-2 min-h-[300px] sm:min-h-[360px] md:min-h-[460px]"
             >
               {/* LEFT: Copy */}
-              <div className="p-3 sm:p-8 md:p-10 flex flex-col justify-center">
+              <div className="p-6 sm:p-8 md:p-10 flex flex-col justify-center">
                 <LeftContent tab={activeTab} />
               </div>
               {/* RIGHT: Interactive mockup */}
-              <div className="bg-[#F9FAFB] p-3 sm:p-6 md:p-8 flex items-center justify-center border-l border-[#E5E7EB]">
+              <div className="bg-[#F9FAFB] p-5 sm:p-6 md:p-8 flex items-center justify-center border-t md:border-t-0 md:border-l border-[#E5E7EB]">
                 <RightMockup tab={activeTab} />
               </div>
             </motion.div>

@@ -202,6 +202,26 @@ h2, h3 {
   animation: float-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Crisp selection + smooth in-page anchor scrolling */
+::selection {
+  background: rgba(10, 154, 255, 0.22);
+}
+html {
+  scroll-behavior: smooth;
+}
+
+/* Respect reduced-motion preferences for our decorative animations */
+@media (prefers-reduced-motion: reduce) {
+  .cloud,
+  .animate-scroll,
+  .animate-float-up {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Focus states for keyboard navigation */
 a:focus-visible,
 button:focus-visible,

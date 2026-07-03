@@ -79,7 +79,7 @@ export function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-white border border-[#E5E7EB] rounded-[24px] p-5 sm:p-6 hover:shadow-md transition-shadow duration-200 min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
+              className="bg-white border border-[#E5E7EB] rounded-[24px] p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(6,60,110,0.25)] min-w-[280px] md:min-w-0 snap-center shrink-0 md:shrink"
             >
               {/* Stars */}
               <div className="flex items-center gap-0.5 mb-4">

@@ -52,7 +52,7 @@ export function IntegrationsSection() {
           {integrations.map((int) => (
             <div
               key={int.name}
-              className="flex flex-col items-center justify-center p-4 rounded-xl border border-[#E5E7EB] bg-white hover:shadow-md hover:border-[#D1D5DB] transition-all"
+              className="flex flex-col items-center justify-center p-4 rounded-xl border border-[#E5E7EB] bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-14px_rgba(6,60,110,0.25)] hover:border-[#D1D5DB]"
             >
               {int.icon ? (
                 <Image src={int.icon} alt={int.name} width={32} height={32} className="w-8 h-8 object-contain" />
@@ -67,7 +67,7 @@ export function IntegrationsSection() {
         </div>
 
         {/* Featured integration cards */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {featured.map((f) => (
             <div key={f.title} className="p-4 sm:p-6 rounded-[24px] border border-[#E5E7EB] hover:shadow-md transition-shadow">
               <h3 className="text-sm sm:text-base font-semibold text-[#111827] mb-1 sm:mb-2">{f.title}</h3>

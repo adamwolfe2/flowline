@@ -119,7 +119,7 @@ export function TemplatesSection() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`text-sm px-4 py-2.5 rounded-full transition-colors border min-h-[44px] ${
+              className={`text-sm px-4 py-2.5 rounded-[10px] transition-colors border min-h-[44px] ${
                 activeCategory === cat
                   ? "bg-[#0A0A0A] text-white border-[#0A0A0A]"
                   : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#D1D5DB]"
@@ -143,7 +143,7 @@ export function TemplatesSection() {
               >
                 <Link
                   href={`/build?prompt=${encodeURIComponent(t.prompt)}`}
-                  className="group block bg-white border border-[#E5E7EB] rounded-[24px] overflow-hidden hover:shadow-md hover:border-[#D1D5DB] transition-all duration-200"
+                  className="group block bg-white border border-[#E5E7EB] rounded-[24px] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(6,60,110,0.25)] hover:border-[#D1D5DB]"
                 >
                   <TemplateMockup color={t.color} questions={t.questions} />
                   <div className="p-3 sm:p-5 border-t border-[#E5E7EB]">
@@ -167,7 +167,7 @@ export function TemplatesSection() {
 
         {/* View all */}
         <div className="flex justify-center mt-10">
-          <Link href="/sign-up" className="inline-flex items-center gap-2 text-sm font-medium text-[#111827] border border-[#E5E7EB] rounded-full px-6 py-2.5 hover:bg-[#F9FAFB] transition-colors">
+          <Link href="/sign-up" className="inline-flex items-center gap-2 text-sm font-medium text-[#111827] border border-[#E5E7EB] rounded-[10px] px-6 py-2.5 hover:bg-[#F9FAFB] transition-colors">
             View all templates
             <ArrowRight className="w-4 h-4" />
           </Link>
