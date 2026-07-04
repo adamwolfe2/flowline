@@ -58,7 +58,7 @@ src/
 - **NO emojis** — use Lucide React icons
 - **NO dark mode** — light theme only, everywhere
 - **Fonts**: Instrument Sans (body, marketing), Instrument Serif (headings, marketing), Inter (app pages)
-- **Brand color**: `#2D6A4F` (forest green)
+- **Brand color**: `#0A9AFF` (sky blue, hover `#0883DB`) — redesigned 2026-07-03; ink `#0A0A0A`, paper `#FAFAF8`. Forest green is dead.
 - **Border color**: `#E5E7EB` everywhere
 - **Error logging**: `logger.error()` from `@/lib/logger` — never raw `console.error`
 - **Auth**: `auth()` from Clerk on every protected route, ownership verified via userId join
@@ -107,9 +107,17 @@ DATABASE_URL, CLERK keys (4), BLOB_READ_WRITE_TOKEN, NEXT_PUBLIC_PLATFORM_DOMAIN
 6. Added WEBHOOK_SIGNING_SECRET to .env.example
 7. Schema updated with shareTokenExpiresAt column (run `npx drizzle-kit push` to apply)
 
+## Webhooks / Attribution (verified 2026-07-04)
+- Events: `lead`, `completed`, `booking` (all carry `session_id`) + `raw` step stream (explicit opt-in, default OFF, never GHL format)
+- Outgoing: HMAC-signed (`X-Webhook-Signature` + `X-Webhook-Timestamp`, `WEBHOOK_SIGNING_SECRET` set in Vercel prod 2026-07-04) + optional per-funnel `Authorization: Bearer` (`webhook.authToken` in funnel config)
+- Deliveries logged in `webhook_deliveries` · per-funnel config via `/api/funnels/[id]/webhooks` · SSRF-guarded
+- Downstream consumer: send.amcollectivecapital.com (AM Collective attribution — stitches raw events → submit → booking via `session_id`)
+
+## Verified Working (2026-07-04 — do NOT re-fix)
+- Stripe checkout: all 4 `STRIPE_*_PRICE_ID` envs set in Vercel (100+ days), price IDs validated live+active, amounts match billing page ($49/$468 Pro, $149/$1428 Agency)
+- Test suite: vitest, 32 tests (`npx vitest run`) · eslint configured (since 2026-06-25)
+- `share_token_expires_at` column confirmed present in Neon prod
+
 ## What Still Needs Work
-- Stripe price IDs not configured (checkout returns 500) — set STRIPE_PRO_MONTHLY_PRICE_ID, STRIPE_PRO_ANNUAL_PRICE_ID, STRIPE_AGENCY_MONTHLY_PRICE_ID, STRIPE_AGENCY_ANNUAL_PRICE_ID env vars in Vercel
-- No test suite
-- No eslint config
 - Builder editor unusable on mobile (<640px) — needs dedicated mobile redesign
-- Database migration needed: run `npx drizzle-kit push` or `npx drizzle-kit generate && npx drizzle-kit migrate` to add share_token_expires_at column
+- send.amcollectivecapital.com E2E: share WEBHOOK_SIGNING_SECRET with receiver, point funnel webhooks at its ingest endpoint, verify deliveries
