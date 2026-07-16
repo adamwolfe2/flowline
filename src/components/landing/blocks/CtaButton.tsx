@@ -16,16 +16,25 @@ interface CtaButtonProps {
   targetBlockId?: string;
   /** Destination for action === 'link'. Must be http(s) or nothing renders. */
   url?: string;
+  /** 'primary' = filled brand button; 'secondary' = outline. Default primary. */
+  variant?: "primary" | "secondary";
   className?: string;
 }
 
 const BASE_CLASS =
   "inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-sm sm:text-base " +
-  "font-semibold text-white shadow-lg transition-opacity hover:opacity-90 " +
+  "font-semibold shadow-lg transition-opacity hover:opacity-90 " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A9AFF] " +
   "disabled:cursor-not-allowed disabled:opacity-60";
 
-export function CtaButton({ label, action, targetBlockId, url, className = "" }: CtaButtonProps) {
+export function CtaButton({
+  label,
+  action,
+  targetBlockId,
+  url,
+  variant = "primary",
+  className = "",
+}: CtaButtonProps) {
   const { scrollToBlock, trackEvent } = useLandingInteractive();
 
   // Only a scroll CTA counts as a "booking form start" (it jumps the visitor to
@@ -38,8 +47,13 @@ export function CtaButton({ label, action, targetBlockId, url, className = "" }:
     scrollToBlock(targetBlockId);
   }, [scrollToBlock, trackEvent, targetBlockId]);
 
-  const classes = `${BASE_CLASS} ${className}`.trim();
-  const style = { backgroundColor: "var(--landing-brand)" };
+  const variantClass =
+    variant === "secondary"
+      ? "border-2 bg-white text-[color:var(--landing-brand)] border-[color:var(--landing-brand)]"
+      : "text-white";
+  const classes = `${BASE_CLASS} ${variantClass} ${className}`.trim();
+  // Filled buttons paint the brand background; outline buttons stay white.
+  const style = variant === "secondary" ? undefined : { backgroundColor: "var(--landing-brand)" };
 
   if (action === "link") {
     const href = safeHttpUrl(url);

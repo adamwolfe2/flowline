@@ -14,6 +14,16 @@ export function HeroForm({ block, blocks, onChange }: BlockFormProps<"hero">) {
   return (
     <div className="space-y-2.5">
       <div>
+        <Label className="text-[10px] text-gray-400">Eyebrow / badge (optional)</Label>
+        <Input
+          value={props.eyebrow ?? ""}
+          onChange={(e) => onChange({ ...block, props: { ...props, eyebrow: e.target.value } })}
+          placeholder="For revenue leaders with 10+ reps"
+          className="text-xs mt-1"
+          maxLength={60}
+        />
+      </div>
+      <div>
         <Label className="text-[10px] text-gray-400">Headline</Label>
         <Textarea
           value={props.headline}
@@ -22,6 +32,19 @@ export function HeroForm({ block, blocks, onChange }: BlockFormProps<"hero">) {
           rows={2}
           maxLength={120}
         />
+      </div>
+      <div>
+        <Label className="text-[10px] text-gray-400">Highlight word/phrase (optional)</Label>
+        <Input
+          value={props.highlightText ?? ""}
+          onChange={(e) => onChange({ ...block, props: { ...props, highlightText: e.target.value } })}
+          placeholder="A part of the headline to accent"
+          className="text-xs mt-1"
+          maxLength={60}
+        />
+        <p className="text-[10px] text-gray-400 mt-1">
+          Must match text in the headline exactly. Shown in your brand colour.
+        </p>
       </div>
       <div>
         <Label className="text-[10px] text-gray-400">Subheadline</Label>
@@ -61,6 +84,39 @@ export function HeroForm({ block, blocks, onChange }: BlockFormProps<"hero">) {
         emptyHint="Add another block (e.g. a booking form) to give the CTA somewhere to scroll to."
         helpText="Usually your booking form or calendar."
       />
+      <div className="pt-1 border-t border-[#E5E7EB]">
+        <p className="text-[11px] font-medium text-gray-500 mt-2 mb-1">Secondary CTA (optional)</p>
+        <Label className="text-[10px] text-gray-400">Label</Label>
+        <Input
+          value={props.secondaryCtaLabel ?? ""}
+          onChange={(e) =>
+            onChange({ ...block, props: { ...props, secondaryCtaLabel: e.target.value } })
+          }
+          placeholder="Try for Free"
+          className="text-xs mt-1"
+          maxLength={40}
+        />
+      </div>
+      <BlockReferenceSelect
+        label="Secondary CTA scrolls to"
+        blocks={blocks}
+        selfId={block.id}
+        value={props.secondaryCtaTargetBlockId}
+        onChange={(id) =>
+          onChange({ ...block, props: { ...props, secondaryCtaTargetBlockId: id } })
+        }
+        emptyHint="Add another block to give the secondary CTA a destination."
+      />
+      <div>
+        <Label className="text-[10px] text-gray-400">Reassurance line (optional)</Label>
+        <Input
+          value={props.note ?? ""}
+          onChange={(e) => onChange({ ...block, props: { ...props, note: e.target.value } })}
+          placeholder="Free 15-minute call. No card required."
+          className="text-xs mt-1"
+          maxLength={120}
+        />
+      </div>
     </div>
   );
 }

@@ -175,11 +175,24 @@ export type LandingBlock =
 
 export interface HeroProps {
   logoUrl?: string;
+  /** Small eyebrow / badge shown above the headline (e.g. "FOR REVENUE LEADERS"). */
+  eyebrow?: string;
   headline: string;
+  /**
+   * A substring of `headline` to render in the brand accent colour. Matched
+   * literally (first occurrence); ignored if it is not found in the headline,
+   * so it can never corrupt the displayed text.
+   */
+  highlightText?: string;
   subheadline?: string;
   ctaLabel?: string;
   /** Scrolls to another block (e.g. the booking form). */
   ctaTargetBlockId?: string;
+  /** Optional secondary CTA rendered beside the primary one (outline style). */
+  secondaryCtaLabel?: string;
+  secondaryCtaTargetBlockId?: string;
+  /** Small reassurance line under the CTAs (e.g. a guarantee). */
+  note?: string;
 }
 
 export interface TextProps {

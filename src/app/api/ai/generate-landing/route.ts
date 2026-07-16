@@ -23,9 +23,12 @@ import { z } from "zod";
 const aiHeroSchema = z.object({
   type: z.literal("hero"),
   props: z.object({
+    eyebrow: z.string().optional(),
     headline: z.string().min(1),
+    highlightText: z.string().optional(),
     subheadline: z.string().optional(),
     ctaLabel: z.string().optional(),
+    note: z.string().optional(),
   }),
 });
 
@@ -122,9 +125,12 @@ function materializeBlocks(aiBlocks: AiBlock[]): LandingBlock[] {
           id: makeBlockId(),
           type: "hero",
           props: {
+            eyebrow: block.props.eyebrow,
             headline: block.props.headline,
+            highlightText: block.props.highlightText,
             subheadline: block.props.subheadline,
             ctaLabel: block.props.ctaLabel,
+            note: block.props.note,
           },
         };
       case "text":
@@ -197,9 +203,12 @@ Return ONLY valid JSON matching this exact schema:
     {
       "type": "hero",
       "props": {
+        "eyebrow": "string, optional short badge naming the audience, max 6 words",
         "headline": "string, outcome-focused, max 12 words",
+        "highlightText": "string, optional — an exact substring of the headline to accent, max 4 words",
         "subheadline": "string, clarifies who this is for, max 20 words",
-        "ctaLabel": "string, max 5 words"
+        "ctaLabel": "string, max 5 words",
+        "note": "string, optional reassurance line under the button, max 15 words"
       }
     },
     {
