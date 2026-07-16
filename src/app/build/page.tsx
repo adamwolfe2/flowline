@@ -11,7 +11,9 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PageTypeChoice, type BuildPageType } from "@/components/build/PageTypeChoice";
 import { TypeExamplePreview } from "@/components/build/TypeExamplePreview";
+import { TemplateGallery } from "@/components/build/TemplateGallery";
 import { buildLandingConfig } from "@/components/build/buildLandingConfig";
+import { getLandingTemplate } from "@/lib/landing-templates";
 import type { LandingBlock } from "@/types";
 
 const QuickStartPicker = dynamic(() => import("@/components/builder/QuickStartPicker"), { ssr: false });
@@ -464,6 +466,7 @@ function BuildContent() {
   const [autoStarted, setAutoStarted] = useState(false);
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [describeError, setDescribeError] = useState("");
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
 
   // BUG-003: Reset textInput when question changes so prior input doesn't bleed through
   useEffect(() => {
@@ -706,6 +709,39 @@ function BuildContent() {
       const msg = error instanceof Error ? error.message : "Landing generation failed";
       toast.error(msg);
       dispatch({ type: "SET_ERROR", error: msg });
+    }
+  }
+
+  // Template path: seed a landing funnel from a named template's blocks and hand
+  // off to the builder. No AI call — the blocks are hand-authored placeholders
+  // the user edits. Brand name derives from any description they typed, else the
+  // buildLandingConfig default.
+  async function startFromTemplate(templateId: string) {
+    if (pendingTemplateId) return; // one create at a time
+    const template = getLandingTemplate(templateId);
+    if (!template) {
+      toast.error("That template is unavailable.");
+      return;
+    }
+    setPendingTemplateId(templateId);
+    try {
+      const description = state.businessDescription.trim() || template.name;
+      const config = buildLandingConfig({ description, blocks: template.buildBlocks() });
+      const createRes = await fetch("/api/funnels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config, creationSource: "template" }),
+      });
+      if (!createRes.ok) {
+        const errBody = (await createRes.json().catch(() => ({}))) as { error?: string };
+        throw new Error(errBody.error || "Could not create your landing page");
+      }
+      const funnel = (await createRes.json()) as { id: string };
+      router.push(`/builder/${funnel.id}`);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Could not create your landing page";
+      toast.error(msg);
+      setPendingTemplateId(null);
     }
   }
 
@@ -974,6 +1010,23 @@ function BuildContent() {
                     className="w-full mt-4 py-3 bg-[#0A9AFF] hover:bg-[#0883DB] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4" /> {state.pageType === "landing" ? "Generate Landing Page" : "Start Building"}
                   </button>
+
+                  {state.pageType === "landing" && (
+                    <div className="mt-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-1 h-px bg-[#E5E7EB]" />
+                        <span className="text-[11px] font-medium text-[#9CA3AF] uppercase tracking-wider">
+                          or start from a template
+                        </span>
+                        <div className="flex-1 h-px bg-[#E5E7EB]" />
+                      </div>
+                      <TemplateGallery
+                        onSelect={startFromTemplate}
+                        pendingId={pendingTemplateId}
+                        disabled={pendingTemplateId !== null}
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
