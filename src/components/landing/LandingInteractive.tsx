@@ -37,6 +37,13 @@ interface LandingInteractiveValue {
    * Best-effort — never throws. `blockId` maps to the events `stepKey` column.
    */
   trackEvent: (eventType: string, blockId?: string) => void;
+  /**
+   * True once a booking form or calendar gate has captured this visitor. The
+   * exit-intent popup reads it to suppress itself post-conversion.
+   */
+  hasConverted: boolean;
+  /** Latches `hasConverted` to true. Called on a successful lead capture. */
+  markConverted: () => void;
 }
 
 const LandingInteractiveContext = createContext<LandingInteractiveValue | null>(null);
@@ -62,6 +69,9 @@ export function LandingInteractive({
     () => new Set<string>()
   );
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
+  const [hasConverted, setHasConverted] = useState(false);
+
+  const markConverted = useCallback(() => setHasConverted(true), []);
 
   const trackEvent = useCallback(
     (eventType: string, blockId?: string) => {
@@ -109,8 +119,8 @@ export function LandingInteractive({
   }, [pendingScrollId, scrollToBlock]);
 
   const value = useMemo<LandingInteractiveValue>(
-    () => ({ revealedBlockIds, revealBlock, scrollToBlock, trackEvent }),
-    [revealedBlockIds, revealBlock, scrollToBlock, trackEvent]
+    () => ({ revealedBlockIds, revealBlock, scrollToBlock, trackEvent, hasConverted, markConverted }),
+    [revealedBlockIds, revealBlock, scrollToBlock, trackEvent, hasConverted, markConverted]
   );
 
   return (

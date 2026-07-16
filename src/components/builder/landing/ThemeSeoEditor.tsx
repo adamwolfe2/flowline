@@ -24,10 +24,16 @@ const SEO_DESCRIPTION_MAX = 160;
 
 /** Page-level settings: theme background/width and SEO metadata. */
 export function ThemeSeoEditor({ config, onChange }: ThemeSeoEditorProps) {
-  const { theme, seo } = config;
+  const { theme, seo, exitIntent } = config;
 
   function setBackground(hex: string) {
     onChange({ ...config, theme: { ...theme, background: hex } });
+  }
+
+  // Exit-intent is ON by default; an absent config counts as enabled.
+  const exitIntentEnabled = exitIntent?.enabled !== false;
+  function setExitIntent(next: NonNullable<LandingConfig["exitIntent"]>) {
+    onChange({ ...config, exitIntent: { ...exitIntent, ...next } });
   }
 
   return (
@@ -128,6 +134,61 @@ export function ThemeSeoEditor({ config, onChange }: ThemeSeoEditorProps) {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="pt-1 border-t border-[#E5E7EB]">
+        <div className="flex items-center justify-between mt-3 mb-1">
+          <p className="text-[11px] font-medium text-gray-500">Exit-intent popup</p>
+          <label className="flex items-center gap-1.5 text-[10px] text-gray-500 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={exitIntentEnabled}
+              onChange={(e) => setExitIntent({ enabled: e.target.checked })}
+              className="accent-[#0A9AFF]"
+            />
+            {exitIntentEnabled ? "On" : "Off"}
+          </label>
+        </div>
+        <p className="text-[10px] text-gray-400 mb-2">
+          Shows a &ldquo;save your spot&rdquo; popup when a desktop visitor moves to leave
+          before booking. On by default.
+        </p>
+
+        {exitIntentEnabled && (
+          <div className="space-y-2.5">
+            <div>
+              <Label className="text-[10px] text-gray-400">Popup headline</Label>
+              <Input
+                value={exitIntent?.title ?? ""}
+                onChange={(e) => setExitIntent({ title: e.target.value })}
+                placeholder="Wait — your spot is still open"
+                className="text-xs mt-1"
+                maxLength={80}
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-gray-400">Popup message</Label>
+              <Textarea
+                value={exitIntent?.body ?? ""}
+                onChange={(e) => setExitIntent({ body: e.target.value })}
+                placeholder="Your spot is held for the next 15 minutes. Grab a time before it's gone."
+                className="text-xs mt-1 resize-none"
+                rows={2}
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] text-gray-400">Button label</Label>
+              <Input
+                value={exitIntent?.ctaLabel ?? ""}
+                onChange={(e) => setExitIntent({ ctaLabel: e.target.value })}
+                placeholder="Claim my spot"
+                className="text-xs mt-1"
+                maxLength={40}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

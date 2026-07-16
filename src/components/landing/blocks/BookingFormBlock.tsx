@@ -47,7 +47,7 @@ export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBloc
         : ["email"],
     [block.props.fields]
   );
-  const { revealBlock, trackEvent } = useLandingInteractive();
+  const { revealBlock, trackEvent, markConverted } = useLandingInteractive();
   const fieldFocusSent = useRef(false);
   const handleFieldFocus = useCallback(() => {
     // "Booking form starts" analytics stage: fire field_focused once per mount.
@@ -165,6 +165,9 @@ export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBloc
           blockId: block.id,
         });
 
+        // Suppress the exit-intent popup — this visitor has converted.
+        markConverted();
+
         applySuccessMode();
       } catch (err) {
         logger.error("[landing] booking form submit failed", {
@@ -176,7 +179,7 @@ export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBloc
         setStatus("idle");
       }
     },
-    [status, validate, fields, values, funnelId, sessionId, applySuccessMode, block.id]
+    [status, validate, fields, values, funnelId, sessionId, applySuccessMode, markConverted, block.id]
   );
 
   if (status === "success") {

@@ -149,6 +149,18 @@ export interface LandingConfig extends SharedConfig {
   seo?: { metaTitle?: string; metaDescription?: string };
   theme: LandingTheme;
   blocks: LandingBlock[];
+  /**
+   * Exit-intent popup shown when a desktop visitor moves to leave before
+   * converting. ON by default for every landing page — an absent object (legacy
+   * rows) and `enabled !== false` both mean shown. Set `{ enabled: false }` to
+   * turn it off per funnel.
+   */
+  exitIntent?: {
+    enabled?: boolean;
+    title?: string;
+    body?: string;
+    ctaLabel?: string;
+  };
 }
 
 export interface LandingTheme {
