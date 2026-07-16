@@ -452,11 +452,13 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                 Paste this code into your website&apos;s HTML to embed the funnel.
               </p>
             </div>
-            {/* Quiz Widget Embed */}
+            {/* Widget Embed (auto-resizing) */}
             <div className="mt-4 p-3 bg-[#F9FAFB] rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Code className="w-3.5 h-3.5 text-[#6B7280]" />
-                <p className="text-xs text-[#6B7280] font-medium">Quiz Widget Embed</p>
+                <p className="text-xs text-[#6B7280] font-medium">
+                  {funnel.type === "landing" ? "Landing Page Widget Embed" : "Quiz Widget Embed"}
+                </p>
               </div>
               <div className="relative">
                 <pre className="text-[10px] text-[#737373] font-mono bg-white border border-[#E5E7EB] rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-all">
@@ -481,7 +483,7 @@ export function PublishPanel({ funnel, config: _config, onUpdate }: PublishPanel
                 </Button>
               </div>
               <p className="text-[10px] text-[#9CA3AF] mt-2">
-                Paste this on any website to embed your quiz as an auto-resizing widget.
+                Paste this on any website to embed your {funnel.type === "landing" ? "landing page" : "quiz"} as an auto-resizing widget.
               </p>
             </div>
           </div>

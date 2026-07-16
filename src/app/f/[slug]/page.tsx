@@ -1,8 +1,9 @@
 import { getFunnelBySlug } from "@/db/queries/funnels";
 import { insertSession, parseDeviceType } from "@/db/queries/sessions";
 import { getActiveVariants, selectVariant, recordAssignment } from "@/db/queries/variants";
-import { FunnelClient } from "@/components/funnel/FunnelClient";
-import { FunnelConfig } from "@/types";
+import { FunnelSurface } from "@/components/funnel/FunnelSurface";
+import { AnyFunnelConfig } from "@/types";
+import { resolveFunnelMeta } from "@/lib/funnel-meta";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
@@ -29,9 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const funnel = await getCachedFunnel(slug);
   if (!funnel) return { title: "Not Found" };
-  const config = funnel.config as FunnelConfig;
-  const metaTitle = config.meta?.title || config.quiz?.headline || config.brand.name;
-  const metaDesc = config.meta?.description || config.quiz?.subheadline || "";
+  const { title: metaTitle, description: metaDesc } = resolveFunnelMeta(
+    funnel.config as AnyFunnelConfig
+  );
   return {
     title: metaTitle,
     description: metaDesc,
@@ -54,7 +55,12 @@ export default async function FunnelPage({ params, searchParams }: Props) {
   const sp = await searchParams;
   const funnel = await getCachedFunnel(slug);
   if (!funnel) notFound();
-  const config = funnel.config as FunnelConfig;
+  const config = funnel.config as AnyFunnelConfig;
+
+  // Read embed mode server-side. FunnelClient also detects it client-side from
+  // window.location, which flashes the badge on first paint; the landing
+  // renderer is a server component and gets it right the first time.
+  const isEmbed = sp.embed === "true";
 
   const utmSource = typeof sp.utm_source === "string" ? sp.utm_source : undefined;
   const utmMedium = typeof sp.utm_medium === "string" ? sp.utm_medium : undefined;
@@ -86,10 +92,19 @@ export default async function FunnelPage({ params, searchParams }: Props) {
   if (variants.length > 0) {
     const selected = selectVariant(variants);
     if (selected) {
-      activeConfig = selected.config as FunnelConfig;
+      activeConfig = selected.config as AnyFunnelConfig;
       await recordAssignment(sessionId, funnel.id, selected.id);
     }
   }
 
-  return <FunnelClient config={activeConfig} funnelId={funnel.id} sessionId={sessionId} hideBranding={hideBranding} />;
+  return (
+    <FunnelSurface
+      type={funnel.type}
+      config={activeConfig}
+      funnelId={funnel.id}
+      sessionId={sessionId}
+      hideBranding={hideBranding}
+      isEmbed={isEmbed}
+    />
+  );
 }

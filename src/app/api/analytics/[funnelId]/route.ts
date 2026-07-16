@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getFullAnalytics } from "@/db/queries/analytics";
+import { getLandingFullAnalytics } from "@/db/queries/analytics-landing";
 import { logger } from "@/lib/logger";
 import { requireFunnelAccess } from "@/lib/team-access";
 import { isSuperAdmin } from "@/lib/admin";
@@ -28,8 +29,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
     const VALID_TIME_RANGES = ["7d", "30d", "90d", "all"];
     const rawTimeRange = req.nextUrl.searchParams.get("timeRange") ?? "all";
     const timeRange = VALID_TIME_RANGES.includes(rawTimeRange) ? rawTimeRange : "all";
-    const funnelConfig = funnel.config as FunnelConfig;
-    const analytics = await getFullAnalytics(funnelId, leadsPage, timeRange, funnelConfig);
+    // Narrow on the `type` COLUMN, never on config shape: the column is NOT
+    // NULL and defaulted, so legacy rows resolve to 'quiz' and keep the exact
+    // quiz payload they had before landing pages existed.
+    const funnelType = funnel.type;
+    const analytics =
+      funnelType === "landing"
+        ? await getLandingFullAnalytics(funnelId, leadsPage, timeRange)
+        : await getFullAnalytics(funnelId, leadsPage, timeRange, funnel.config as FunnelConfig);
 
     const isAdmin = await isSuperAdmin(userId);
     let userPlan = 'agency';
@@ -38,7 +45,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
       userPlan = user?.plan ?? 'free';
     }
 
-    return NextResponse.json({ funnel, ...analytics, userPlan, isAdmin }, {
+    return NextResponse.json({ funnel, funnelType, ...analytics, userPlan, isAdmin }, {
       headers: { "Cache-Control": "private, max-age=60, stale-while-revalidate=300" },
     });
   } catch (error) {

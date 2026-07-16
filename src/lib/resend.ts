@@ -52,20 +52,31 @@ export async function sendLeadNotification(params: {
   toEmail: string;
   funnelName: string;
   leadEmail: string;
-  score: number;
-  calendarTier: string;
+  /** null for landing-page leads (not scored). */
+  score: number | null;
+  /** null for landing-page leads (not tier-routed). */
+  calendarTier: string | null;
   funnelId: string;
   brandName?: string;
 }) {
   if (!resend) return;
   const brand = params.brandName ?? DEFAULT_BRAND;
   const fromLine = brand !== DEFAULT_BRAND ? `${brand} <noreply@getmyvsl.com>` : FROM;
+  // Landing-page leads have no score/tier — drop the tier language entirely
+  // rather than rendering "(null tier)" / "New Lead: null fit".
+  const isScored = params.calendarTier !== null;
+  const subject = isScored
+    ? `New lead on ${params.funnelName} (${params.calendarTier} tier)`
+    : `New lead on ${params.funnelName}`;
+  const heading = isScored ? `New Lead: ${escapeHtml(params.calendarTier!)} fit` : "New Lead";
+  const scoreRow = params.score !== null ? `<p><strong>Score:</strong> ${params.score}</p>` : "";
+  const tierRow = isScored ? `<p><strong>Tier:</strong> ${escapeHtml(params.calendarTier!)}</p>` : "";
   try {
     await resend.emails.send({
       from: fromLine,
       to: params.toEmail,
-      subject: `New lead on ${params.funnelName} (${params.calendarTier} tier)`,
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">New Lead: ${escapeHtml(params.calendarTier)} fit</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p><p><strong>Score:</strong> ${params.score}</p><p><strong>Tier:</strong> ${escapeHtml(params.calendarTier)}</p></div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a><p style="color:#9CA3AF;font-size:11px;margin-top:24px;">Powered by ${escapeHtml(brand)}</p></div>`,
+      subject,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto"><h2 style="color:#111827">${heading}</h2><p style="color:#6B7280">Someone just completed your <strong>${escapeHtml(params.funnelName)}</strong> funnel.</p><div style="background:#F9FAFB;border-radius:8px;padding:16px;margin:16px 0"><p><strong>Email:</strong> ${escapeHtml(params.leadEmail)}</p>${scoreRow}${tierRow}</div><a href="${escapeHtml(process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com")}/analytics/${escapeHtml(params.funnelId)}" style="background:#0A9AFF;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">View Analytics</a><p style="color:#9CA3AF;font-size:11px;margin-top:24px;">Powered by ${escapeHtml(brand)}</p></div>`,
     });
   } catch (err) {
     logger.error("[resend] lead notification failed", { error: err instanceof Error ? err.message : String(err) });

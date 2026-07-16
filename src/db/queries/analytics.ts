@@ -1,9 +1,10 @@
 import { db } from "@/db";
 import { events, funnelSessions, leads, funnelVariants, variantAssignments } from "@/db/schema";
 import { eq, and, gte, sql, avg } from "drizzle-orm";
-import type { FunnelConfig } from "@/types";
+import { isLandingConfig } from "@/types";
+import type { AnyFunnelConfig, FunnelConfig } from "@/types";
 
-function getDateCutoff(timeRange: string): Date | null {
+export function getDateCutoff(timeRange: string): Date | null {
   const now = new Date();
   switch (timeRange) {
     case '7d': now.setDate(now.getDate() - 7); return now;
@@ -30,12 +31,25 @@ function engagedSessionWhere(funnelId: string, cutoff: Date | null) {
     : and(eq(funnelSessions.funnelId, funnelId), engaged);
 }
 
-function getStepLabel(
-  index: number,
-  totalQuestions: number,
-  hasVideo: boolean,
-  questionTexts?: string[]
-): string {
+interface StepMeta {
+  /**
+   * 'landing' pages have no steps at all, so the quiz labels (Welcome / Q1 /
+   * Email / Booked) are meaningless for them. Carrying the kind here — rather
+   * than inferring it from a zero question count — is what stops a landing
+   * funnel from being labelled as a 3-question quiz.
+   */
+  kind: "quiz" | "landing";
+  totalQuestions: number;
+  hasVideo: boolean;
+  questionTexts: string[];
+}
+
+function getStepLabel(index: number, meta: StepMeta): string {
+  // Landing pages are single-page: any step index we see is an ordinal, not a
+  // named quiz step. Label it neutrally instead of inventing "Question 1".
+  if (meta.kind === "landing") return `Step ${index + 1}`;
+
+  const { totalQuestions, hasVideo, questionTexts } = meta;
   if (index === 0) return "Welcome";
   const videoOffset = hasVideo ? 1 : 0;
   if (hasVideo && index === 1) return "Video";
@@ -53,15 +67,17 @@ function getStepLabel(
   return `Step ${index}`;
 }
 
-function extractConfigMeta(config: FunnelConfig | null | undefined): {
-  totalQuestions: number;
-  hasVideo: boolean;
-  questionTexts: string[];
-} {
-  if (!config) return { totalQuestions: 3, hasVideo: false, questionTexts: [] };
+function extractConfigMeta(config: AnyFunnelConfig | null | undefined): StepMeta {
+  // Legacy/absent config: keep the historical quiz assumption so existing quiz
+  // funnels label exactly as they did before landing pages existed.
+  if (!config) return { kind: "quiz", totalQuestions: 3, hasVideo: false, questionTexts: [] };
+  if (isLandingConfig(config)) {
+    return { kind: "landing", totalQuestions: 0, hasVideo: false, questionTexts: [] };
+  }
   const questions = config.quiz?.questions ?? [];
   const hasVideo = config.quiz?.video?.enabled === true;
   return {
+    kind: "quiz",
     totalQuestions: questions.length,
     hasVideo,
     questionTexts: questions.map((q) => q.text),
@@ -114,8 +130,8 @@ export async function getFunnelOverview(funnelId: string, timeRange = 'all') {
   };
 }
 
-export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', config?: FunnelConfig | null) {
-  const { totalQuestions, hasVideo, questionTexts } = extractConfigMeta(config);
+export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', config?: AnyFunnelConfig | null) {
+  const meta = extractConfigMeta(config);
   const cutoff = getDateCutoff(timeRange);
   const whereClause = cutoff
     ? and(eq(events.funnelId, funnelId), eq(events.eventType, "page_viewed"), gte(events.createdAt, cutoff))
@@ -137,7 +153,7 @@ export async function getDropoffWaterfall(funnelId: string, timeRange = 'all', c
     const prevVisitors = prev ? Number(prev.uniqueSessions) : visitors;
     return {
       stepIndex: row.stepIndex,
-      stepLabel: getStepLabel(row.stepIndex, totalQuestions, hasVideo, questionTexts),
+      stepLabel: getStepLabel(row.stepIndex, meta),
       visitors,
       dropoffFromPrev: prevVisitors > 0 ? Math.round((1 - visitors / prevVisitors) * 100) : 0,
       retentionFromTop: topOfFunnel > 0 ? Math.round((visitors / topOfFunnel) * 100) : 0,
@@ -170,8 +186,8 @@ export async function getAnswerDistribution(funnelId: string, timeRange = 'all')
   return grouped;
 }
 
-export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', config?: FunnelConfig | null) {
-  const { totalQuestions, hasVideo, questionTexts } = extractConfigMeta(config);
+export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', config?: AnyFunnelConfig | null) {
+  const meta = extractConfigMeta(config);
   const cutoff = getDateCutoff(timeRange);
   // Route through the same engaged-session definition as every other session
   // widget so the abandon chart can never count a bot/SSR zero-event row. In
@@ -194,7 +210,7 @@ export async function getAbandonHeatmap(funnelId: string, timeRange = 'all', con
 
   return result.map((r) => ({
     stepIndex: r.stepIndex ?? 0,
-    stepLabel: getStepLabel(r.stepIndex ?? 0, totalQuestions, hasVideo, questionTexts),
+    stepLabel: getStepLabel(r.stepIndex ?? 0, meta),
     abandonCount: Number(r.count),
   }));
 }

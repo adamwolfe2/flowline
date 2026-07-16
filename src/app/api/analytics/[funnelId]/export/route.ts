@@ -46,12 +46,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ funn
       .orderBy(sql`${leads.createdAt} desc`)
       .limit(10000);
 
-    const header = "Email,Score,Tier,Device,UTM Source,UTM Medium,UTM Campaign,Date";
+    // Landing leads are neither scored nor tier-routed, so those columns are
+    // always null for them — `String(null)` would write a literal "null" into
+    // the customer's spreadsheet. Drop the columns instead.
+    const isLanding = funnel.type === "landing";
+    const header = isLanding
+      ? "Email,Device,UTM Source,UTM Medium,UTM Campaign,Date"
+      : "Email,Score,Tier,Device,UTM Source,UTM Medium,UTM Campaign,Date";
     const rows = allLeads.map(l =>
       [
         escapeCsvField(l.email),
-        String(l.score),
-        l.calendarTier,
+        ...(isLanding ? [] : [l.score ?? "", l.calendarTier ?? ""]),
         l.deviceType ?? "",
         escapeCsvField(l.utmSource ?? ""),
         escapeCsvField(l.utmMedium ?? ""),

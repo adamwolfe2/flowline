@@ -31,6 +31,17 @@ export async function GET(
       return NextResponse.json({ error: e.error || 'Not found' }, { status: e.status || 404 });
     }
 
+    // The insights engine reasons over quiz questions, scores and thresholds
+    // (see db/queries/insights.ts). A landing page has none of those, so it
+    // would produce confident nonsense rather than an error. Refuse instead —
+    // the UI already hides the card for landing funnels.
+    if (funnel.type === 'landing') {
+      return NextResponse.json(
+        { error: 'AI Insights are not available for landing pages.', unsupported: true },
+        { status: 400 }
+      );
+    }
+
     // Plan gate
     const isAdmin = await isSuperAdmin(userId);
     if (!isAdmin) {

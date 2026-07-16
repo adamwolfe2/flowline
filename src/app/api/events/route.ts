@@ -1,25 +1,16 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { events, funnelSessions } from "@/db/schema";
+import { events, funnelSessions, eventTypeEnum } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { eventLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const VALID_EVENT_TYPES = [
-  "funnel_viewed",
-  "page_viewed",
-  "cta_clicked",
-  "answer_selected",
-  "field_focused",
-  "form_submitted",
-  "lead_created",
-  "funnel_completed",
-  "funnel_abandoned",
-  "back_navigated",
-  "email_captured",
-] as const;
+// Derived from the Postgres enum so the allowlist can never drift from the
+// column it guards. Adding a value to eventTypeEnum (+ its migration) is all
+// that is required to accept a new event type here.
+const VALID_EVENT_TYPES = eventTypeEnum.enumValues;
 
 export async function POST(req: Request) {
   try {

@@ -43,6 +43,13 @@
       "when": 1782374791978,
       "tag": "0005_reconcile_teams_domain_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784173683509,
+      "tag": "0006_landing_page_type",
+      "breakpoints": true
     }
   ]
 }

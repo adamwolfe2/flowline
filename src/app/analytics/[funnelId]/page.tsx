@@ -33,6 +33,8 @@ import {
 import dynamic from "next/dynamic";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LeadDetailModal } from "@/components/analytics/LeadDetailModal";
+import { VideoPlayRateCard } from "@/components/analytics/VideoPlayRateCard";
+import type { FunnelType } from "@/types";
 
 const LeadsChart = dynamic(
   () => import("@/components/analytics/LeadsChart").then((m) => m.LeadsChart),
@@ -90,6 +92,12 @@ interface AnalyticsData {
     config: { brand: { name: string; primaryColor: string; logoUrl?: string } };
     published: boolean;
   };
+  /**
+   * Authoritative funnel type from the `funnels.type` column. Landing funnels
+   * have no steps, questions, score or tier, so the quiz-shaped panels below
+   * are absent from their payload — gate on this, not on empty arrays.
+   */
+  funnelType: FunnelType;
   stats: {
     totalSessions: number;
     totalLeads: number;
@@ -99,20 +107,34 @@ interface AnalyticsData {
   };
   userPlan?: string;
   isAdmin?: boolean;
-  dropoff: Array<{
+  /** Quiz only. */
+  dropoff?: Array<{
     stepIndex: number;
     stepLabel: string;
     visitors: number;
     dropoffFromPrev: number;
     retentionFromTop: number;
   }>;
-  answers: Record<string, Array<{ answerId: string | null; answerLabel: string | null; count: number }>>;
-  abandons: Array<{ stepIndex: number; stepLabel: string; abandonCount: number }>;
+  /** Quiz only. */
+  answers?: Record<string, Array<{ answerId: string | null; answerLabel: string | null; count: number }>>;
+  /** Quiz only. */
+  abandons?: Array<{ stepIndex: number; stepLabel: string; abandonCount: number }>;
+  /** Landing only: views -> booking-form-starts -> submissions -> bookings. */
+  landingStages?: Array<{
+    key: string;
+    stepLabel: string;
+    visitors: number;
+    dropoffFromPrev: number;
+    retentionFromTop: number;
+  }>;
+  /** Landing only. */
+  videoPlayRate?: { plays: number; views: number; rate: number };
   devices: Array<{ deviceType: string | null; count: number }>;
   utmSources: Array<{ utmSource: string | null; utmMedium: string | null; utmCampaign: string | null; count: number }>;
-  tiers: Array<{ tier: string | null; count: number }>;
+  /** Quiz only — a landing lead has `calendarTier: null`, so this group is meaningless. */
+  tiers?: Array<{ tier: string | null; count: number }>;
   timeSeries: Array<{ date: string; count: number }>;
-  variantPerformance: Array<{
+  variantPerformance?: Array<{
     variantId: string;
     variantName: string;
     isControl: boolean;
@@ -136,13 +158,15 @@ interface AnalyticsData {
     completed: number;
     completionRate: number;
   }>;
-  timeToConvertHistogram: Array<{ bucket: string; count: number }>;
+  timeToConvertHistogram?: Array<{ bucket: string; count: number }>;
   totalLeadCount: number;
   recentLeads: Array<{
     id: string;
     email: string;
-    score: number;
-    calendarTier: string;
+    /** null for landing leads — they are not scored. */
+    score: number | null;
+    /** null for landing leads — they are not tier-routed. */
+    calendarTier: string | null;
     deviceType: string | null;
     utmSource: string | null;
     createdAt: string;
@@ -189,7 +213,7 @@ function SkeletonBlock({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-100 rounded-xl ${className ?? ""}`} />;
 }
 
-function tierBadgeColor(tier: string) {
+function tierBadgeColor(tier: string | null) {
   if (tier === "high") return "bg-[#0A9AFF]/10 text-[#0A9AFF]";
   if (tier === "mid") return "bg-[#D97706]/10 text-[#D97706]";
   return "bg-gray-100 text-gray-600";
@@ -205,12 +229,22 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function downloadCSV(leadRows: AnalyticsData["recentLeads"], funnelSlug: string) {
-  const header = "Email,Score,Tier,Device,UTM Source,Date";
-  const rows = leadRows.map(
-    (l) =>
-      `${l.email},${l.score},${l.calendarTier},${l.deviceType ?? ""},${l.utmSource ?? ""},${l.createdAt}`
-  );
+function downloadCSV(
+  leadRows: AnalyticsData["recentLeads"],
+  funnelSlug: string,
+  isLanding: boolean
+) {
+  // Landing leads have no score or tier — emitting "null,null" columns would
+  // be worse than omitting them.
+  const header = isLanding
+    ? "Email,Device,UTM Source,Date"
+    : "Email,Score,Tier,Device,UTM Source,Date";
+  const rows = leadRows.map((l) => {
+    const tail = `${l.deviceType ?? ""},${l.utmSource ?? ""},${l.createdAt}`;
+    return isLanding
+      ? `${l.email},${tail}`
+      : `${l.email},${l.score ?? ""},${l.calendarTier ?? ""},${tail}`;
+  });
   const csv = [header, ...rows].join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
@@ -474,9 +508,20 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  const { stats, dropoff, answers, abandons, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel, variantPerformance, sourceConversion, deviceConversion, timeToConvertHistogram } = data;
+  const { stats, devices, utmSources, timeSeries, recentLeads, totalLeadCount, funnel, variantPerformance, sourceConversion, deviceConversion, timeToConvertHistogram } = data;
   const leadsPerPage = 25;
   const totalLeadPages = Math.max(1, Math.ceil(totalLeadCount / leadsPerPage));
+
+  /* ---------- Funnel type gate ----------
+   * A landing page has no steps, questions, score or tier. Everything below
+   * that assumes a quiz is gated on this, and the API omits those payloads
+   * entirely for landing funnels rather than sending quiz-shaped defaults. */
+  const isLanding = data.funnelType === "landing";
+  const dropoff = data.dropoff ?? [];
+  const abandons = data.abandons ?? [];
+  const answers = data.answers ?? {};
+  const landingStages = data.landingStages ?? [];
+  const videoPlayRate = data.videoPlayRate;
 
   /* ---------- Device helpers ---------- */
   const totalDevices = devices.reduce((s, d) => s + d.count, 0) || 1;
@@ -648,8 +693,11 @@ export default function AnalyticsDashboard() {
           ))}
         </div>
 
-        {/* ---- AI Insights ---- */}
-        {data.userPlan && (
+        {/* ---- AI Insights ----
+             Quiz only: the insights engine reasons over questions, scores and
+             thresholds (see db/queries/insights.ts), none of which a landing
+             page has. */}
+        {!isLanding && data.userPlan && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -696,7 +744,10 @@ export default function AnalyticsDashboard() {
           </div>
         </motion.div>
 
-        {/* ---- Waterfall Chart ---- */}
+        {/* ---- Funnel Drop-off ----
+             Quiz: step-by-step waterfall (Welcome -> Q1..Qn -> Email -> Booked).
+             Landing: no steps exist, so the same chart renders the booking
+             journey instead — views -> form starts -> submissions -> bookings. */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -704,14 +755,36 @@ export default function AnalyticsDashboard() {
         >
           <ErrorBoundary>
             <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6 overflow-x-auto">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
-              <WaterfallChart steps={dropoff} />
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                {isLanding ? "Booking Journey" : "Funnel Drop-off"}
+              </h3>
+              <WaterfallChart steps={isLanding ? landingStages : dropoff} />
             </div>
           </ErrorBoundary>
         </motion.div>
 
-        {/* ---- Answer Distribution ---- */}
-        {answerKeys.length > 0 && (
+        {/* ---- Video Engagement (landing only) ---- */}
+        {isLanding && videoPlayRate && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.32 }}
+          >
+            <ErrorBoundary>
+              <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-4 sm:p-6 max-w-sm">
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Video Play Rate</h3>
+                <VideoPlayRateCard
+                  plays={videoPlayRate.plays}
+                  views={videoPlayRate.views}
+                  rate={videoPlayRate.rate}
+                />
+              </div>
+            </ErrorBoundary>
+          </motion.div>
+        )}
+
+        {/* ---- Answer Distribution (quiz only — a landing page has no questions) ---- */}
+        {!isLanding && answerKeys.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Answer Distribution</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -759,9 +832,12 @@ export default function AnalyticsDashboard() {
           </div>
         )}
 
-        {/* ---- Abandon + Device + UTM ---- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Abandonment by Step */}
+        {/* ---- Abandon + Device + UTM ----
+             Abandonment is keyed to quiz step indexes; a landing page has none,
+             so it drops out and Device/UTM take the full width. */}
+        <div className={`grid grid-cols-1 gap-6 ${isLanding ? "" : "md:grid-cols-2"}`}>
+          {/* Abandonment by Step (quiz only) */}
+          {!isLanding && (
           <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandonment by Step</h3>
             {abandons.length === 0 ? (
@@ -790,6 +866,7 @@ export default function AnalyticsDashboard() {
               </div>
             )}
           </div>
+          )}
 
           {/* Device + UTM */}
           <div className="space-y-6">
@@ -872,7 +949,8 @@ export default function AnalyticsDashboard() {
                       <th className="text-center py-2 font-medium">Completion %</th>
                       <th className="text-center py-2 font-medium">Conversions</th>
                       <th className="text-center py-2 font-medium">Conversion %</th>
-                      <th className="text-center py-2 font-medium">Avg Score</th>
+                      {/* Avg Score is quiz-only — landing leads are unscored */}
+                      {!isLanding && <th className="text-center py-2 font-medium">Avg Score</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -895,7 +973,7 @@ export default function AnalyticsDashboard() {
                         <td className="py-2.5 text-center text-gray-700">{v.completionRate}%</td>
                         <td className="py-2.5 text-center text-gray-700">{v.conversions}</td>
                         <td className="py-2.5 text-center font-medium text-gray-900">{v.conversionRate}%</td>
-                        <td className="py-2.5 text-center text-gray-700">{v.avgScore}</td>
+                        {!isLanding && <td className="py-2.5 text-center text-gray-700">{v.avgScore}</td>}
                       </tr>
                     ))}
                   </tbody>
@@ -939,7 +1017,7 @@ export default function AnalyticsDashboard() {
                   </button>
                 )}
                 <button
-                  onClick={() => downloadCSV(recentLeads, funnel.slug)}
+                  onClick={() => downloadCSV(recentLeads, funnel.slug, isLanding)}
                   className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#E5E7EB] text-gray-600 hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
                   <Download className="w-3 h-3" />
@@ -980,8 +1058,9 @@ export default function AnalyticsDashboard() {
                         />
                       </th>
                       <th className="text-left py-2 font-medium">Email</th>
-                      <th className="text-center py-2 font-medium">Score</th>
-                      <th className="text-center py-2 font-medium">Tier</th>
+                      {/* Score/Tier are quiz-only — always null on a landing lead */}
+                      {!isLanding && <th className="text-center py-2 font-medium">Score</th>}
+                      {!isLanding && <th className="text-center py-2 font-medium">Tier</th>}
                       <th className="text-center py-2 font-medium hidden sm:table-cell">Device</th>
                       <th className="text-left py-2 font-medium hidden sm:table-cell">Source</th>
                       <th className="text-right py-2 font-medium">Date</th>
@@ -1006,14 +1085,22 @@ export default function AnalyticsDashboard() {
                           />
                         </td>
                         <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
-                        <td className="py-2.5 text-center text-gray-700">{lead.score}</td>
-                        <td className="py-2.5 text-center">
-                          <span
-                            className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}
-                          >
-                            {lead.calendarTier}
-                          </span>
-                        </td>
+                        {!isLanding && (
+                          <td className="py-2.5 text-center text-gray-700">{lead.score ?? "--"}</td>
+                        )}
+                        {!isLanding && (
+                          <td className="py-2.5 text-center">
+                            {lead.calendarTier ? (
+                              <span
+                                className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}
+                              >
+                                {lead.calendarTier}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">--</span>
+                            )}
+                          </td>
+                        )}
                         <td className="py-2.5 text-center text-gray-500 capitalize hidden sm:table-cell">{lead.deviceType ?? "--"}</td>
                         <td className="py-2.5 text-gray-500 hidden sm:table-cell">{lead.utmSource ?? "--"}</td>
                         <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>

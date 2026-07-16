@@ -6,6 +6,10 @@ import { StatsBar } from "@/components/marketing/StatsBar";
 import { ThreeSteps } from "@/components/marketing/ThreeSteps";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
+const ModePreview = dynamic(
+  () => import("@/components/marketing/ModePreview").then((m) => m.ModePreview),
+  { ssr: true }
+);
 const ProductDemo = dynamic(
   () => import("@/components/marketing/ProductDemo").then((m) => m.ProductDemo),
   { ssr: true }
@@ -43,6 +47,7 @@ export default function HomePage() {
       <LogoStrip />
       <StatsBar />
       <ThreeSteps />
+      <ModePreview />
       <ProductDemo />
       <PopupSection />
       <IntegrationsSection />

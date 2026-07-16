@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useReducer, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Loader2, ArrowRight, Sparkles, ChevronRight, Eye, X, Upload, Trash2, LayoutTemplate } from "lucide-react";
 import Image from "next/image";
@@ -9,6 +9,10 @@ import Link from "next/link";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
+import { PageTypeChoice, type BuildPageType } from "@/components/build/PageTypeChoice";
+import { TypeExamplePreview } from "@/components/build/TypeExamplePreview";
+import { buildLandingConfig } from "@/components/build/buildLandingConfig";
+import type { LandingBlock } from "@/types";
 
 const QuickStartPicker = dynamic(() => import("@/components/builder/QuickStartPicker"), { ssr: false });
 
@@ -29,6 +33,8 @@ interface ReasoningStep {
 
 interface BuilderState {
   phase: "prompt" | "planning" | "questions" | "generating" | "preview";
+  /** Which kind of page the user is building. "quiz" preserves the original flow. */
+  pageType: BuildPageType;
   mode: "describe" | "url";
   businessDescription: string;
   thinking: string;
@@ -44,6 +50,7 @@ interface BuilderState {
 
 type BuilderAction =
   | { type: "SET_DESCRIPTION"; value: string }
+  | { type: "SET_PAGE_TYPE"; pageType: BuildPageType }
   | { type: "SET_MODE"; mode: "describe" | "url" }
   | { type: "START_PLANNING" }
   | { type: "SET_REASONING"; steps: ReasoningStep[] }
@@ -80,6 +87,8 @@ function reducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {
     case "SET_DESCRIPTION":
       return { ...state, businessDescription: action.value };
+    case "SET_PAGE_TYPE":
+      return { ...state, pageType: action.pageType };
     case "SET_MODE":
       return { ...state, mode: action.mode };
     case "START_PLANNING":
@@ -116,7 +125,7 @@ function reducer(state: BuilderState, action: BuilderAction): BuilderState {
       return { ...state, currentQuestionIndex: next };
     }
     case "START_GENERATING":
-      return { ...state, phase: "generating", buildStep: 0 };
+      return { ...state, phase: "generating", buildStep: 0, error: null, reasoningSteps: [] };
     case "SET_BUILD_STEP":
       return { ...state, buildStep: action.step };
     case "GENERATION_DONE":
@@ -140,6 +149,7 @@ const URL_BUILD_STEPS = [
 
 const initialState: BuilderState = {
   phase: "prompt",
+  pageType: "quiz",
   mode: "describe",
   businessDescription: "",
   thinking: "",
@@ -430,10 +440,13 @@ function FunnelPreview({ data, color, logoUrl }: { data: Record<string, unknown>
 // --- Main Builder ---
 
 function BuildContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialPrompt = searchParams.get("prompt") || "";
   const initialUrl = searchParams.get("url") || "";
   const modeParam = searchParams.get("mode");
+  const typeParam = searchParams.get("type");
+  const initialPageType: BuildPageType = typeParam === "landing" ? "landing" : "quiz";
 
   const [activeTab, setActiveTab] = useState<"ai" | "template">(
     modeParam === "template" ? "template" : "ai"
@@ -441,6 +454,7 @@ function BuildContent() {
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
+    pageType: initialPageType,
     businessDescription: initialPrompt || initialUrl,
     mode: initialUrl ? "url" : "describe",
   });
@@ -465,11 +479,16 @@ function BuildContent() {
   useEffect(() => {
     if (autoStarted) return;
     if (initialUrl && initialUrl.length > 5) {
+      // URL scraping is quiz-only (it generates a quiz config).
       setAutoStarted(true);
       startUrlGeneration(initialUrl);
     } else if (initialPrompt && initialPrompt.length > 10) {
       setAutoStarted(true);
-      startPlanning(initialPrompt);
+      if (initialPageType === "landing") {
+        startLandingGeneration(initialPrompt);
+      } else {
+        startPlanning(initialPrompt);
+      }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -614,6 +633,88 @@ function BuildContent() {
       const msg = error instanceof Error ? error.message : "URL generation failed";
       toast.error(msg);
       dispatch({ type: "SET_ERROR", error: msg });
+    }
+  }
+
+  // Landing path: no qualifying questions. Generate content, assemble a full
+  // landing config, create the funnel, and hand off to the landing builder.
+  async function startLandingGeneration(desc?: string) {
+    const text = (desc ?? state.businessDescription).trim();
+    if (text.length < 10) {
+      setDescribeError("Please describe your business in at least 10 characters.");
+      return;
+    }
+    setDescribeError("");
+
+    dispatch({ type: "SET_DESCRIPTION", value: text });
+    dispatch({ type: "SET_MODE", mode: "describe" });
+    dispatch({ type: "START_GENERATING" });
+
+    const steps: ReasoningStep[] = [
+      { label: "Reading your business description", status: "active" },
+      { label: "Writing your landing page copy", status: "pending" },
+      { label: "Designing your page sections", status: "pending" },
+      { label: "Assembling your landing page", status: "pending" },
+    ];
+    dispatch({ type: "SET_REASONING", steps: [...steps] });
+
+    try {
+      const fetchPromise = fetch("/api/ai/generate-landing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: text }),
+      });
+
+      // Animate reasoning steps while the API call runs (~60s UX).
+      for (let i = 0; i < steps.length - 1; i++) {
+        await new Promise(r => setTimeout(r, 900));
+        steps[i].status = "done";
+        steps[i + 1].status = "active";
+        dispatch({ type: "SET_REASONING", steps: [...steps] });
+        dispatch({ type: "SET_BUILD_STEP", step: i + 1 });
+      }
+
+      const res = await fetchPromise;
+      if (res.status === 429) {
+        toast.error("You've hit the rate limit for AI generation. Please wait a minute and try again.");
+        dispatch({ type: "SET_ERROR", error: "Rate limited" });
+        return;
+      }
+      if (!res.ok) throw new Error("Landing generation failed");
+      const data = (await res.json()) as { blocks: LandingBlock[] };
+
+      steps[steps.length - 1].status = "done";
+      dispatch({ type: "SET_REASONING", steps: [...steps] });
+
+      const config = buildLandingConfig({
+        description: text,
+        blocks: data.blocks ?? [],
+      });
+
+      const createRes = await fetch("/api/funnels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config, creationSource: "ai" }),
+      });
+      if (!createRes.ok) {
+        const errBody = (await createRes.json().catch(() => ({}))) as { error?: string };
+        throw new Error(errBody.error || "Could not save your landing page");
+      }
+      const funnel = (await createRes.json()) as { id: string };
+      router.push(`/builder/${funnel.id}`);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Landing generation failed";
+      toast.error(msg);
+      dispatch({ type: "SET_ERROR", error: msg });
+    }
+  }
+
+  // Prompt-phase primary CTA: routes to the quiz or landing path by page type.
+  function handleStart() {
+    if (state.pageType === "landing") {
+      startLandingGeneration();
+    } else {
+      startPlanning();
     }
   }
 
@@ -821,7 +922,14 @@ function BuildContent() {
                 <span className="text-sm font-semibold text-[#111827]">AI Builder</span>
               </div>
 
-              {/* Mode tabs */}
+              {/* Page-type choice — quiz (default) vs landing */}
+              <PageTypeChoice
+                value={state.pageType}
+                onChange={(pageType) => dispatch({ type: "SET_PAGE_TYPE", pageType })}
+              />
+
+              {/* Mode tabs (quiz only — landing generates from a description) */}
+              {state.pageType === "quiz" && (
               <div className="flex border border-[#E5E7EB] rounded-lg p-0.5 mb-4">
                 <button
                   onClick={() => dispatch({ type: "SET_MODE", mode: "describe" })}
@@ -844,8 +952,9 @@ function BuildContent() {
                   Website URL
                 </button>
               </div>
+              )}
 
-              {state.mode === "describe" ? (
+              {state.pageType === "landing" || state.mode === "describe" ? (
                 <>
                   <p className="text-sm text-[#6B7280] mb-4">
                     Describe your business and who you serve. The more detail you give, the better your funnel will be.
@@ -853,7 +962,7 @@ function BuildContent() {
                   <textarea
                     value={state.businessDescription}
                     onChange={(e) => { dispatch({ type: "SET_DESCRIPTION", value: e.target.value }); if (describeError) setDescribeError(""); }}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); startPlanning(); } }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleStart(); } }}
                     placeholder="I run a coaching business helping SaaS founders scale from $50k to $500k MRR through outbound sales systems..."
                     rows={5}
                     className="w-full text-sm text-[#111827] placeholder-[#9CA3AF] resize-none outline-none border border-[#E5E7EB] rounded-xl p-4 focus:border-[#0A9AFF] transition-colors"
@@ -861,9 +970,9 @@ function BuildContent() {
                     aria-label="Describe your business"
                   />
                   {describeError && <p className="text-xs text-red-500 mt-1">{describeError}</p>}
-                  <button onClick={() => startPlanning()} disabled={state.businessDescription.length < 10}
+                  <button onClick={() => handleStart()} disabled={state.businessDescription.length < 10}
                     className="w-full mt-4 py-3 bg-[#0A9AFF] hover:bg-[#0883DB] disabled:opacity-40 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
-                    <Sparkles className="w-4 h-4" /> Start Building
+                    <Sparkles className="w-4 h-4" /> {state.pageType === "landing" ? "Generate Landing Page" : "Start Building"}
                   </button>
                 </>
               ) : (
@@ -898,7 +1007,9 @@ function BuildContent() {
                 </>
               )}
               <p className="text-xs text-[#9CA3AF] text-center mt-3">
-                Free to build. No account required.
+                {state.pageType === "landing"
+                  ? "We'll generate your page and open it in the editor."
+                  : "Free to build. No account required."}
               </p>
             </div>
           )}
@@ -1237,17 +1348,8 @@ function BuildContent() {
               </motion.div>
             )}
             {activeTab === "ai" && state.phase === "prompt" && (
-              <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="text-center max-w-sm">
-                <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-[#0A9AFF]" />
-                </div>
-                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-sans)", letterSpacing: "-0.02em" }}>
-                  Your funnel will appear here
-                </p>
-                <p className="text-sm text-[#9CA3AF]">
-                  Describe your business on the left to get started
-                </p>
+              <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <TypeExamplePreview pageType={state.pageType} />
               </motion.div>
             )}
 

@@ -67,7 +67,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // No row = unknown session, wrong funnel, or already booked: succeed silently
     if (!session) return NextResponse.json({ success: true });
 
-    let lead: { email: string; score: number; calendarTier: string; answers: unknown } | null = null;
+    // score/calendarTier are null for landing-page leads (not scored, not tier-routed).
+    let lead: { email: string; score: number | null; calendarTier: string | null; answers: unknown } | null = null;
     if (session.leadId) {
       const [l] = await db
         .select({ email: leads.email, score: leads.score, calendarTier: leads.calendarTier, answers: leads.answers })

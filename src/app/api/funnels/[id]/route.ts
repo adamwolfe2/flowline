@@ -5,6 +5,7 @@ import { getSessionStats } from "@/db/queries/sessions";
 import { getLeadsByFunnel, getLeadsThisWeek, getLeadsThisMonth, getTierBreakdown } from "@/db/queries/leads";
 import { logger } from "@/lib/logger";
 import { requireFunnelAccess } from "@/lib/team-access";
+import { validateLandingConfig } from "@/lib/landing";
 import { logAuditEvent } from "@/lib/audit";
 import { db } from "@/db";
 import { clients } from "@/db/schema";
@@ -34,6 +35,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     const tierBreakdown = { high: 0, mid: 0, low: 0 };
     tierData.forEach((t) => {
+      // Landing leads are not tier-routed, so `calendarTier` is null and the
+      // group key is null. Skip it — writing it through would graft a bogus
+      // "null" bucket onto the breakdown.
+      if (!t.tier) return;
       tierBreakdown[t.tier as keyof typeof tierBreakdown] = Number(t.count);
     });
 
@@ -104,7 +109,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json(funnel);
     }
 
-    if (!validateConfig(body.config)) {
+    // Config shape is polymorphic on the funnel type. `funnelRow.type` (the
+    // column) is authoritative; a landing config has no `quiz` object and must
+    // be validated against the landing schema, else every landing-builder save
+    // is rejected with 400 "Invalid config format" and silently never persists.
+    const isLandingFunnel =
+      funnelRow.type === "landing" ||
+      (body.config as { type?: string } | null)?.type === "landing";
+    if (isLandingFunnel) {
+      const landingError = validateLandingConfig(body.config);
+      if (landingError) {
+        return NextResponse.json({ error: landingError }, { status: 400 });
+      }
+    } else if (!validateConfig(body.config)) {
       return NextResponse.json({ error: "Invalid config format" }, { status: 400 });
     }
 

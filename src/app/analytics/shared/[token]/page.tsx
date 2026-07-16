@@ -13,6 +13,7 @@ import {
   Tablet,
 } from "lucide-react";
 import Image from "next/image";
+import { VideoPlayRateCard } from "@/components/analytics/VideoPlayRateCard";
 
 // Lazy-load the chart so the shared client view stays light on first paint.
 const WaterfallChart = dynamic(
@@ -36,16 +37,28 @@ interface SharedAnalytics {
     conversionRate: number;
     medianCompletionTimeSec: number;
   };
+  /**
+   * Authoritative type from the `funnels.type` column. Landing pages have no
+   * steps, questions, score or tier — the quiz panels are gated on this.
+   */
+  funnelType: "quiz" | "landing";
+  /** Quiz: the step waterfall. Landing: the booking journey (same shape). */
   dropoff: Array<{ stepLabel: string; visitors: number; dropoffFromPrev: number; retentionFromTop: number }>;
+  /** Quiz only — keyed to step indexes. */
   abandons: Array<{ stepIndex: number; stepLabel: string; abandonCount: number }>;
-  tiers: Array<{ tier: string; count: number }>;
+  /** Quiz only — a landing lead has a null tier. */
+  tiers: Array<{ tier: string | null; count: number }>;
+  /** Landing only. */
+  videoPlayRate: { plays: number; views: number; rate: number } | null;
   timeSeries: Array<{ date: string; count: number }>;
   devices: Array<{ deviceType: string | null; count: number }>;
   recentLeads: Array<{
     id: string;
     email: string;
-    score: number;
-    calendarTier: string;
+    /** null for landing leads — not scored. */
+    score: number | null;
+    /** null for landing leads — not tier-routed. */
+    calendarTier: string | null;
     createdAt: string;
   }>;
 }
@@ -58,7 +71,7 @@ function formatDate(d: string) {
   }
 }
 
-function tierBadgeColor(tier: string): string {
+function tierBadgeColor(tier: string | null): string {
   if (tier === "high") return "bg-[#0A9AFF]/10 text-[#0A9AFF]";
   if (tier === "mid") return "bg-[#D97706]/10 text-[#D97706]";
   return "bg-gray-100 text-gray-600";
@@ -134,6 +147,11 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
       </div>
     );
   }
+
+  const isLanding = data.funnelType === "landing";
+  // Defensive: even on a quiz funnel a legacy/landing lead can carry a null
+  // tier, and `tier.toUpperCase()` on it would throw. Drop untiered rows.
+  const tieredLeads = data.tiers.filter((t) => Boolean(t.tier));
 
   const teamColor = data.teamBranding?.primaryColor ? sanitizeColor(data.teamBranding.primaryColor) : null;
   const accentColor = teamColor || sanitizeColor(data.brandColor || "#0A9AFF");
@@ -228,16 +246,31 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
           </div>
         )}
 
-        {/* Funnel Drop-off — color-coded severity hero (matches owner view) */}
+        {/* Funnel Drop-off — color-coded severity hero (matches owner view).
+            Landing pages get the booking journey in the same chart. */}
         {!hasNoData && (
           <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6 overflow-x-auto">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Funnel Drop-off</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+              {isLanding ? "Booking Journey" : "Funnel Drop-off"}
+            </h3>
             <WaterfallChart steps={data.dropoff} />
           </div>
         )}
 
-        {/* Abandonment by Step — amber, the warning signal (matches owner view) */}
-        {!hasNoData && (
+        {/* Video Play Rate — landing only */}
+        {!hasNoData && isLanding && data.videoPlayRate && (
+          <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6 max-w-sm">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Video Play Rate</h3>
+            <VideoPlayRateCard
+              plays={data.videoPlayRate.plays}
+              views={data.videoPlayRate.views}
+              rate={data.videoPlayRate.rate}
+            />
+          </div>
+        )}
+
+        {/* Abandonment by Step — quiz only (a landing page has no steps) */}
+        {!hasNoData && !isLanding && (
           <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4">Abandonment by Step</h3>
             {abandons.length === 0 ? (
@@ -268,9 +301,11 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
           </div>
         )}
 
-        {/* Device breakdown + Tier distribution row */}
+        {/* Device breakdown + Tier distribution row.
+            Lead Quality is quiz-only: landing leads are never tier-routed, so
+            the group would be a single all-null bucket. */}
         {!hasNoData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`grid grid-cols-1 gap-6 ${isLanding ? "" : "md:grid-cols-2"}`}>
             {/* Device Breakdown */}
             <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Device Breakdown</h3>
@@ -294,10 +329,11 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
               )}
             </div>
 
-            {/* Tier distribution */}
+            {/* Tier distribution (quiz only) */}
+            {!isLanding && (
             <div className="bg-white rounded-[16px] ring-1 ring-black/[0.06] p-6">
               {(() => {
-                const tierTotal = data.tiers.reduce((s, t) => s + t.count, 0);
+                const tierTotal = tieredLeads.reduce((s, t) => s + t.count, 0);
                 const smallSample = tierTotal > 0 && tierTotal < 6;
                 return (
                   <div className="flex items-center justify-between mb-4 gap-2">
@@ -313,12 +349,12 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
                   </div>
                 );
               })()}
-              {data.tiers.length > 0 ? (
+              {tieredLeads.length > 0 ? (
                 <div className="flex gap-3">
-                  {data.tiers.map(({ tier, count }) => (
+                  {tieredLeads.map(({ tier, count }) => (
                     <div key={tier} className="flex-1 text-center p-3 rounded-lg bg-gray-50">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${tierBadgeColor(tier)}`}>
-                        {tier.toUpperCase()}
+                        {tier!.toUpperCase()}
                       </span>
                       <p className="text-2xl font-bold tracking-tight text-[#0A0A0A] mt-2">{count}</p>
                     </div>
@@ -328,6 +364,7 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
                 <p className="text-sm text-gray-400 text-center py-4">No leads yet</p>
               )}
             </div>
+            )}
           </div>
         )}
 
@@ -341,8 +378,9 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
                   <thead>
                     <tr className="text-gray-400 border-b border-gray-100">
                       <th className="text-left py-2 font-medium">Email</th>
-                      <th className="text-center py-2 font-medium">Score</th>
-                      <th className="text-center py-2 font-medium">Tier</th>
+                      {/* Score/Tier are quiz-only — always null on a landing lead */}
+                      {!isLanding && <th className="text-center py-2 font-medium">Score</th>}
+                      {!isLanding && <th className="text-center py-2 font-medium">Tier</th>}
                       <th className="text-right py-2 font-medium">Date</th>
                     </tr>
                   </thead>
@@ -350,12 +388,20 @@ export default function SharedAnalyticsPage({ params }: { params: Promise<{ toke
                     {data.recentLeads.map((lead) => (
                       <tr key={lead.id} className="border-b border-gray-50">
                         <td className="py-2.5 text-gray-900 font-medium max-w-[200px] truncate">{lead.email}</td>
-                        <td className="py-2.5 text-center text-gray-700">{lead.score ?? "--"}</td>
-                        <td className="py-2.5 text-center">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier ?? "low")}`}>
-                            {lead.calendarTier ?? "unknown"}
-                          </span>
-                        </td>
+                        {!isLanding && (
+                          <td className="py-2.5 text-center text-gray-700">{lead.score ?? "--"}</td>
+                        )}
+                        {!isLanding && (
+                          <td className="py-2.5 text-center">
+                            {lead.calendarTier ? (
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${tierBadgeColor(lead.calendarTier)}`}>
+                                {lead.calendarTier}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">--</span>
+                            )}
+                          </td>
+                        )}
                         <td className="py-2.5 text-right text-gray-400">{formatDate(lead.createdAt)}</td>
                       </tr>
                     ))}

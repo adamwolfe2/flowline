@@ -106,30 +106,37 @@ export function LeadDetailModal({ leadId, onClose, onDeleted }: LeadDetailModalP
                 </div>
               </div>
 
-              {/* Score bar */}
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] text-[#A3A3A3]">Lead Score</span>
-                  <span className="text-xs font-semibold text-[#333333]">{lead.score as number} pts</span>
+              {/* Score bar — quiz leads only. A landing lead is not scored
+                  (score is null), and defaulting it to 0/'low' would invent a
+                  qualification the lead never went through. */}
+              {lead.score != null && (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-[#A3A3A3]">Lead Score</span>
+                    <span className="text-xs font-semibold text-[#333333]">{lead.score as number} pts</span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        (lead.calendarTier as string) === "high"
+                          ? "bg-emerald-500"
+                          : (lead.calendarTier as string) === "mid"
+                            ? "bg-amber-500"
+                            : "bg-gray-400"
+                      }`}
+                      style={{ width: `${Math.min(100, Math.max(5, ((lead.score as number) / 20) * 100))}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      (lead.calendarTier as string) === "high"
-                        ? "bg-emerald-500"
-                        : (lead.calendarTier as string) === "mid"
-                          ? "bg-amber-500"
-                          : "bg-gray-400"
-                    }`}
-                    style={{ width: `${Math.min(100, Math.max(5, ((lead.score as number) / 20) * 100))}%` }}
-                  />
-                </div>
-              </div>
+              )}
 
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge className={tierColor[(lead.calendarTier as string) as keyof typeof tierColor] || tierColor.low}>
-                  {(lead.calendarTier as string || 'low').toUpperCase()} TIER
-                </Badge>
+                {/* Tier badge — quiz leads only; landing leads are not tier-routed. */}
+                {lead.calendarTier != null && (
+                  <Badge className={tierColor[(lead.calendarTier as string) as keyof typeof tierColor] || tierColor.low}>
+                    {(lead.calendarTier as string).toUpperCase()} TIER
+                  </Badge>
+                )}
                 {lead.deviceType ? (() => {
                   const DeviceIcon = deviceIconMap[(lead.deviceType as string) as keyof typeof deviceIconMap] || Monitor;
                   return (
