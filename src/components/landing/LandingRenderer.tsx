@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { LandingBlock, LandingConfig } from "@/types";
 import { LandingInteractive } from "./LandingInteractive";
+import { ExitIntentModal } from "./ExitIntentModal";
 import { EmbedAutoResize } from "./EmbedAutoResize";
 import { HeroBlock } from "./blocks/HeroBlock";
 import { TextBlock } from "./blocks/TextBlock";
@@ -78,6 +79,13 @@ export function LandingRenderer({
   };
 
   const gatedCalendarIds = collectGatedCalendarIds(blocks);
+
+  // Exit-intent CTA scrolls the visitor back to the conversion point: the first
+  // booking form, or failing that the first calendar. Undefined => CTA just
+  // closes (no scroll target on the page).
+  const exitIntentTargetId =
+    blocks.find((b) => b.type === "booking_form")?.id ??
+    blocks.find((b) => b.type === "calendar")?.id;
 
   type VideoBlockData = Extract<LandingBlock, { type: "video" }>;
   type RenderGroup =
@@ -169,6 +177,14 @@ export function LandingRenderer({
           iframe. Inert (renders null) on the normal public page. */}
       {isEmbed && <EmbedAutoResize />}
       <LandingInteractive funnelId={funnelId} sessionId={sessionId}>
+        <ExitIntentModal
+          funnelId={funnelId}
+          sessionId={sessionId}
+          isEmbed={isEmbed}
+          exitIntent={config.exitIntent}
+          targetBlockId={exitIntentTargetId}
+          brandColor={brand.primaryColor}
+        />
         <div className={`mx-auto w-full ${MAX_WIDTH_CLASS[theme.maxWidth]} px-4 py-8 sm:px-6 sm:py-12`}>
           {renderGroups.map((group) =>
             group.kind === "video-slider" ? (

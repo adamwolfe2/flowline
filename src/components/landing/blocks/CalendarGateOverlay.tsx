@@ -78,7 +78,7 @@ export function CalendarGateOverlay({
   ctaLabel,
   onUnlock,
 }: CalendarGateOverlayProps) {
-  const { trackEvent } = useLandingInteractive();
+  const { trackEvent, markConverted } = useLandingInteractive();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -136,7 +136,8 @@ export function CalendarGateOverlay({
         // Analytics + session stitching (best-effort, never blocks the user).
         trackLandingEvents({ funnelId, sessionId, leadId: result?.leadId, blockId });
 
-        // Lead captured — reveal the real calendar.
+        // Lead captured — suppress exit-intent and reveal the real calendar.
+        markConverted();
         onUnlock();
       } catch (err) {
         logger.error("[landing] calendar gate submit failed", {
@@ -148,7 +149,7 @@ export function CalendarGateOverlay({
         setStatus("idle");
       }
     },
-    [status, name, email, funnelId, sessionId, blockId, onUnlock]
+    [status, name, email, funnelId, sessionId, blockId, onUnlock, markConverted]
   );
 
   const nameId = `gate-name-${blockId}`;
