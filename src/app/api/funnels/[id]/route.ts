@@ -110,13 +110,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     // Config shape is polymorphic on the funnel type. `funnelRow.type` (the
-    // column) is authoritative; a landing config has no `quiz` object and must
-    // be validated against the landing schema, else every landing-builder save
-    // is rejected with 400 "Invalid config format" and silently never persists.
-    const isLandingFunnel =
-      funnelRow.type === "landing" ||
-      (body.config as { type?: string } | null)?.type === "landing";
-    if (isLandingFunnel) {
+    // column) is the SOLE source of truth — never trust `body.config.type`,
+    // which is client-controlled: keying off it would let a caller PATCH a
+    // landing-shaped config onto a quiz funnel (bypassing the quiz validator),
+    // corrupting the row so its public page soft-fails. Reject any config whose
+    // declared type contradicts the column to prevent that drift.
+    const bodyConfigType = (body.config as { type?: string } | null)?.type;
+    if (bodyConfigType && bodyConfigType !== funnelRow.type) {
+      return NextResponse.json(
+        { error: "Config type does not match funnel type" },
+        { status: 400 }
+      );
+    }
+    if (funnelRow.type === "landing") {
       const landingError = validateLandingConfig(body.config);
       if (landingError) {
         return NextResponse.json({ error: landingError }, { status: 400 });

@@ -103,8 +103,9 @@ function placeholderVideoBlock(): LandingBlock {
 type BookingField = "name" | "email" | "phone";
 
 /**
- * Ensures a booking form always collects `email` (required by /api/submit),
- * with email first, order otherwise preserved, and duplicates removed.
+ * Ensures a booking form always collects `email` (required by /api/submit).
+ * Returns the accepted fields in a fixed canonical order (email, name, phone),
+ * with unknown values dropped and duplicates removed.
  */
 function normalizeBookingFields(fields: readonly string[]): BookingField[] {
   const allowed: BookingField[] = ["email", "name", "phone"];
