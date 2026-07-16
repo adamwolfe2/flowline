@@ -206,6 +206,21 @@ export interface ImageProps {
 export interface CalendarProps {
   url: string;
   provider: "cal" | "calendly" | "other";
+  /**
+   * Lead-gate mode for this calendar.
+   *  - 'none' (default, and the value assumed when absent — preserves legacy
+   *    rows and every existing funnel) renders the calendar immediately.
+   *  - 'blur_overlay' renders the calendar blurred behind a name/email capture
+   *    modal. The visitor is captured as a landing lead via the hardened
+   *    /api/submit path (null score/tier, no forging) BEFORE the calendar
+   *    unlocks and becomes bookable — so the lead is captured even if they
+   *    never pick a time.
+   */
+  gate?: "none" | "blur_overlay";
+  /** Optional copy overrides for the blur_overlay capture modal. */
+  gateTitle?: string;
+  gateSubtitle?: string;
+  gateCtaLabel?: string;
 }
 
 export type BookingFormField = "name" | "email" | "phone";

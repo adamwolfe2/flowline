@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { LandingBlock, TrackingConfig } from "@/types";
 import { useLandingInteractive } from "../LandingInteractive";
 import { useBookingConfirmed } from "../useBookingConfirmed";
+import { CalendarGateOverlay } from "./CalendarGateOverlay";
 import { calNamespaceFor, extractCalLink, isCalDotComUrl, safeHttpUrl } from "./url";
 
 type CalendarBlockData = Extract<LandingBlock, { type: "calendar" }>;
@@ -57,6 +58,13 @@ export function CalendarBlock({
 
   const isRevealed = !gated || revealedBlockIds.has(block.id);
 
+  // Lead-gate: when gate === 'blur_overlay', the calendar renders blurred behind
+  // a capture modal until the visitor is captured as a lead. `captured` is the
+  // one-way latch that unlocks it. Defaults to ungated for legacy rows.
+  const gate = block.props.gate ?? "none";
+  const [captured, setCaptured] = useState(false);
+  const showGate = gate === "blur_overlay" && !captured;
+
   const safeUrl = useMemo(() => safeHttpUrl(url) ?? "", [url]);
 
   // The Cal.com JS embed injects a third-party script, so it is only used when
@@ -79,7 +87,9 @@ export function CalendarBlock({
   // (script error, missing global, throw, or a 10s empty container) falls back
   // to the plain iframe path below.
   useEffect(() => {
-    if (!isRevealed || !useCalEmbed || !calLink || isMobileScreen) return;
+    // Defer the third-party Cal.com script until the gate is cleared: mounting
+    // the embed while blurred would expose a bookable iframe behind the overlay.
+    if (!isRevealed || showGate || !useCalEmbed || !calLink || isMobileScreen) return;
 
     const script = document.createElement("script");
     script.src = "https://app.cal.com/embed/embed.js";
@@ -122,12 +132,35 @@ export function CalendarBlock({
       clearTimeout(timeout);
       script.remove();
     };
-  }, [isRevealed, useCalEmbed, calLink, calNamespace, brandColor, isMobileScreen]);
+  }, [isRevealed, showGate, useCalEmbed, calLink, calNamespace, brandColor, isMobileScreen]);
 
   // Gated + not yet revealed: keep the element mounted so the id stays a valid
   // scroll target, but render nothing and hide it from assistive tech.
   if (!isRevealed) {
     return <section id={block.id} className="hidden" aria-hidden="true" />;
+  }
+
+  // Lead-gate active: blurred calendar behind a name/email capture modal. The
+  // real embed above stays unmounted until `captured` flips, so nothing is
+  // bookable until the lead is captured through the hardened submit path.
+  if (showGate) {
+    return (
+      <section id={block.id} className="w-full py-6 sm:py-8">
+        <CalendarGateOverlay
+          funnelId={funnelId}
+          sessionId={sessionId}
+          blockId={block.id}
+          brandColor={brandColor}
+          title={block.props.gateTitle?.trim() || "See available times"}
+          subtitle={
+            block.props.gateSubtitle?.trim() ||
+            "Enter your name and email to unlock the calendar and pick a time."
+          }
+          ctaLabel={block.props.gateCtaLabel?.trim() || "Unlock the calendar"}
+          onUnlock={() => setCaptured(true)}
+        />
+      </section>
+    );
   }
 
   // The Cal.com JS embed is the richest experience, used on desktop for the

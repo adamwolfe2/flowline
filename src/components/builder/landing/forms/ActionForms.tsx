@@ -31,6 +31,19 @@ function isCalendarProvider(value: string): value is CalendarProvider {
   return (CALENDAR_PROVIDERS as readonly string[]).includes(value);
 }
 
+type CalendarGate = NonNullable<CalendarProps["gate"]>;
+
+const CALENDAR_GATES: readonly CalendarGate[] = ["none", "blur_overlay"];
+
+const CALENDAR_GATE_LABELS: Record<CalendarGate, string> = {
+  none: "Off — show the calendar immediately",
+  blur_overlay: "On — capture name & email before booking",
+};
+
+function isCalendarGate(value: string): value is CalendarGate {
+  return (CALENDAR_GATES as readonly string[]).includes(value);
+}
+
 export function CalendarForm({ block, onChange }: BlockFormProps<"calendar">) {
   const { props } = block;
 
@@ -66,6 +79,68 @@ export function CalendarForm({ block, onChange }: BlockFormProps<"calendar">) {
       <p className="text-[10px] text-gray-400">
         A landing page books against a single calendar — there is no tier routing.
       </p>
+
+      <div>
+        <Label className="text-[10px] text-gray-400">Lead gate</Label>
+        <select
+          value={props.gate ?? "none"}
+          onChange={(e) => {
+            if (!isCalendarGate(e.target.value)) return;
+            onChange({ ...block, props: { ...props, gate: e.target.value } });
+          }}
+          className="w-full border border-[#E5E7EB] rounded-md px-2.5 py-2 text-xs bg-white mt-1"
+          aria-label="Calendar lead gate"
+        >
+          {CALENDAR_GATES.map((gate) => (
+            <option key={gate} value={gate}>
+              {CALENDAR_GATE_LABELS[gate]}
+            </option>
+          ))}
+        </select>
+        <p className="text-[10px] text-gray-400 mt-1">
+          Blurs the calendar behind a name/email form. The lead is captured even if
+          they never pick a time.
+        </p>
+      </div>
+
+      {(props.gate ?? "none") === "blur_overlay" && (
+        <div className="space-y-2.5 border-l-2 border-[#E5E7EB] pl-3">
+          <div>
+            <Label className="text-[10px] text-gray-400">Gate headline</Label>
+            <Input
+              value={props.gateTitle ?? ""}
+              onChange={(e) => onChange({ ...block, props: { ...props, gateTitle: e.target.value } })}
+              placeholder="See available times"
+              className="text-xs mt-1"
+              maxLength={80}
+            />
+          </div>
+          <div>
+            <Label className="text-[10px] text-gray-400">Gate subtext</Label>
+            <Input
+              value={props.gateSubtitle ?? ""}
+              onChange={(e) =>
+                onChange({ ...block, props: { ...props, gateSubtitle: e.target.value } })
+              }
+              placeholder="Enter your name and email to unlock the calendar and pick a time."
+              className="text-xs mt-1"
+              maxLength={140}
+            />
+          </div>
+          <div>
+            <Label className="text-[10px] text-gray-400">Button label</Label>
+            <Input
+              value={props.gateCtaLabel ?? ""}
+              onChange={(e) =>
+                onChange({ ...block, props: { ...props, gateCtaLabel: e.target.value } })
+              }
+              placeholder="Unlock the calendar"
+              className="text-xs mt-1"
+              maxLength={40}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
