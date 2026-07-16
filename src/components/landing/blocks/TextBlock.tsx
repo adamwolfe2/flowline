@@ -46,24 +46,26 @@ export function TextBlock({ block }: { block: TextBlockData }) {
   const paragraphs = parseMarkdown(body);
 
   return (
-    <section id={block.id} className="w-full py-6 sm:py-8">
-      {heading && (
-        <h2
-          className="mb-3 text-xl font-bold text-[#0A0A0A] sm:text-2xl"
-          style={{ fontFamily: "var(--landing-font-heading)" }}
-        >
-          {heading}
-        </h2>
-      )}
+    <section id={block.id} className="w-full py-6 text-center sm:py-8">
+      <div className="mx-auto max-w-2xl">
+        {heading && (
+          <h2
+            className="mb-3 text-xl font-bold text-[#0A0A0A] sm:text-2xl"
+            style={{ fontFamily: "var(--landing-font-heading)" }}
+          >
+            {heading}
+          </h2>
+        )}
 
-      {paragraphs.map((paragraph, index) => (
-        <p
-          key={index}
-          className="mb-4 text-sm leading-relaxed text-[#374151] last:mb-0 sm:text-base"
-        >
-          {renderInline(paragraph.children)}
-        </p>
-      ))}
+        {paragraphs.map((paragraph, index) => (
+          <p
+            key={index}
+            className="mb-4 text-sm leading-relaxed text-[#374151] last:mb-0 sm:text-base"
+          >
+            {renderInline(paragraph.children)}
+          </p>
+        ))}
+      </div>
     </section>
   );
 }
