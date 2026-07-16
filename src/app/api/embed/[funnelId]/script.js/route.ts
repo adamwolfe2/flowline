@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ fun
 
     // Verify funnel exists and is published
     const [funnel] = await db
-      .select({ slug: funnels.slug })
+      .select({ slug: funnels.slug, type: funnels.type })
       .from(funnels)
       .where(and(eq(funnels.id, funnelId), eq(funnels.published, true)));
 
@@ -31,6 +31,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ fun
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getmyvsl.com";
     const embedUrl = `${appUrl}/f/${funnel.slug}?embed=true`;
+    // The container id stays `myvsl-quiz-` for both types so existing embed
+    // snippets keep resolving; only the human-facing iframe title varies.
+    const iframeTitle = funnel.type === "landing" ? "MyVSL Landing Page" : "MyVSL Quiz";
 
     const script = `(function() {
   "use strict";
@@ -53,7 +56,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ fun
   iframe.setAttribute("scrolling", "no");
   iframe.setAttribute("allowtransparency", "true");
   iframe.setAttribute("allow", "clipboard-write");
-  iframe.title = "MyVSL Quiz";
+  iframe.title = ${JSON.stringify(iframeTitle)};
   container.appendChild(iframe);
 
   window.addEventListener("message", function(event) {

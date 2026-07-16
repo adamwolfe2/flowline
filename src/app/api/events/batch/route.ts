@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { events, funnelSessions, funnels, leads } from "@/db/schema";
+import { events, funnelSessions, funnels, leads, eventTypeEnum } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { checkRateLimit, eventLimiter } from "@/lib/rate-limit";
 import { fireWebhook, webhookEnabledFor } from "@/lib/webhook";
@@ -52,7 +52,8 @@ async function fireCompletionWebhook(
     if (!webhookEnabledFor(config.webhook, "completed")) return;
 
     // Authoritative lead data from the DB (never trust client payload for PII)
-    let lead: { email: string; score: number; calendarTier: string; answers: unknown } | null = null;
+    // score/calendarTier are null for landing-page leads (not scored, not tier-routed).
+    let lead: { email: string; score: number | null; calendarTier: string | null; answers: unknown } | null = null;
     if (session.leadId) {
       const [l] = await db
         .select({ email: leads.email, score: leads.score, calendarTier: leads.calendarTier, answers: leads.answers })
@@ -115,11 +116,9 @@ async function forwardRawEvents(
   }
 }
 
-const VALID_EVENT_TYPES = [
-  "funnel_viewed", "page_viewed", "answer_selected", "field_focused",
-  "form_submitted", "lead_created", "funnel_completed", "funnel_abandoned",
-  "back_navigated", "cta_clicked", "email_captured",
-] as const;
+// Derived from the Postgres enum so the allowlist can never drift from the
+// column it guards. See api/events/route.ts for the same pattern.
+const VALID_EVENT_TYPES = eventTypeEnum.enumValues;
 
 type EventType = (typeof VALID_EVENT_TYPES)[number];
 

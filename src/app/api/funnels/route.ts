@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { getFunnelsWithStats, createFunnel, getFunnelCount, checkSlugAvailable } from "@/db/queries/funnels";
 import { DEFAULT_FUNNEL_CONFIG } from "@/lib/default-config";
 import { getTemplateById } from "@/lib/templates";
+import { validateLandingConfig } from "@/lib/landing";
 import { generateSlug } from "@/lib/utils";
 import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { db } from "@/db";
@@ -144,11 +145,21 @@ export async function POST(req: NextRequest) {
       };
     }
 
+    // Landing pages are validated against their own contract — they have no
+    // `quiz` object at all. The funnel `type` column is derived from the config
+    // discriminator so the two can never disagree.
+    const funnelType: "quiz" | "landing" = config?.type === "landing" ? "landing" : "quiz";
+
     // Validate config has required sections
     if (!config?.brand || typeof config.brand !== "object") {
       return NextResponse.json({ error: "Config must include a 'brand' object" }, { status: 400 });
     }
-    if (!config?.quiz || typeof config.quiz !== "object") {
+    if (funnelType === "landing") {
+      const landingError = validateLandingConfig(config);
+      if (landingError) {
+        return NextResponse.json({ error: landingError }, { status: 400 });
+      }
+    } else if (!config?.quiz || typeof config.quiz !== "object") {
       return NextResponse.json({ error: "Config must include a 'quiz' object" }, { status: 400 });
     }
 
@@ -156,14 +167,18 @@ export async function POST(req: NextRequest) {
     if (config.brand.name && config.brand.name.length > 100) {
       return NextResponse.json({ error: "Business name too long (max 100 chars)" }, { status: 400 });
     }
-    if (config.quiz.headline && config.quiz.headline.length > 200) {
-      return NextResponse.json({ error: "Headline too long (max 200 chars)" }, { status: 400 });
-    }
-    if (config.quiz.subheadline && config.quiz.subheadline.length > 300) {
-      return NextResponse.json({ error: "Subheadline too long (max 300 chars)" }, { status: 400 });
-    }
-    if (config.quiz.questions && config.quiz.questions.length > 10) {
-      return NextResponse.json({ error: "Too many questions (max 10)" }, { status: 400 });
+    // Quiz-only field-length checks — a landing config has no `quiz` object,
+    // so guard these to avoid dereferencing `config.quiz` on landing creates.
+    if (funnelType !== "landing") {
+      if (config.quiz.headline && config.quiz.headline.length > 200) {
+        return NextResponse.json({ error: "Headline too long (max 200 chars)" }, { status: 400 });
+      }
+      if (config.quiz.subheadline && config.quiz.subheadline.length > 300) {
+        return NextResponse.json({ error: "Subheadline too long (max 300 chars)" }, { status: 400 });
+      }
+      if (config.quiz.questions && config.quiz.questions.length > 10) {
+        return NextResponse.json({ error: "Too many questions (max 10)" }, { status: 400 });
+      }
     }
 
     // Webhook URL validation with SSRF protection
@@ -215,9 +230,19 @@ export async function POST(req: NextRequest) {
       },
     };
 
+    // DEFAULT_FUNNEL_CONFIG carries a `quiz` block. A landing config has no
+    // `quiz` key to override it, so the spread above would otherwise leave a
+    // vestigial default quiz on the stored landing config — bloating the JSONB
+    // and making the config shape disagree with the `type` column.
+    if (funnelType === "landing") {
+      delete (finalConfig as Record<string, unknown>).quiz;
+    }
+
     const validSources = ['ai', 'template', 'manual'] as const;
     const creationSource = validSources.includes(rawCreationSource) ? rawCreationSource as 'ai' | 'template' | 'manual' : null;
-    const funnel = await createFunnel({ userId, slug, config: finalConfig, teamId: resolvedTeamId ?? null, creationSource });
+    // `type` is derived from the config discriminator above, never taken from
+    // the client directly, so the column and the config shape cannot disagree.
+    const funnel = await createFunnel({ userId, slug, config: finalConfig, teamId: resolvedTeamId ?? null, creationSource, type: funnelType });
 
     // Fire-and-forget audit log (team funnels only)
     if (resolvedTeamId) {

@@ -11,10 +11,18 @@ import { sql } from 'drizzle-orm';
 export const planEnum = pgEnum('plan', ['free', 'pro', 'agency']);
 export const tierEnum = pgEnum('calendar_tier', ['high', 'mid', 'low']);
 
+// Discriminates the two funnel kinds. 'quiz' is the default so every
+// pre-existing row resolves to the multi-step quiz behavior unchanged.
+export const funnelTypeEnum = pgEnum('funnel_type', ['quiz', 'landing']);
+
 export const eventTypeEnum = pgEnum('event_type', [
   'funnel_viewed', 'page_viewed', 'answer_selected', 'field_focused',
   'form_submitted', 'lead_created', 'funnel_completed', 'funnel_abandoned',
   'back_navigated', 'cta_clicked', 'email_captured',
+  // Landing-page events. Postgres enums are append-only; these are added via
+  // ALTER TYPE ... ADD VALUE (see drizzle/0006). Keep in sync with the
+  // VALID_EVENT_TYPES allowlists in api/events/route.ts + api/events/batch/route.ts.
+  'video_played', 'booking_submitted',
 ]);
 
 export const deviceTypeEnum = pgEnum('device_type', ['mobile', 'desktop', 'tablet']);
@@ -50,6 +58,9 @@ export const funnels = pgTable('funnels', {
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
   clientId: uuid('client_id').references(() => clients.id, { onDelete: 'set null' }),
   creationSource: text('creation_source').$type<'ai' | 'template' | 'manual'>(),
+  // Shape of `config` is polymorphic on this column: 'quiz' -> FunnelConfig.quiz,
+  // 'landing' -> FunnelConfig.landing. Defaults to 'quiz' for backfill safety.
+  type: funnelTypeEnum('type').default('quiz').notNull(),
 }, (t) => [
   index('funnels_user_id_idx').on(t.userId),
   index('funnels_team_id_idx').on(t.teamId),
@@ -61,8 +72,10 @@ export const leads = pgTable('leads', {
   funnelId: uuid('funnel_id').notNull().references(() => funnels.id, { onDelete: 'cascade' }),
   email: text('email').notNull(),
   answers: jsonb('answers').notNull(),
-  score: integer('score').notNull(),
-  calendarTier: tierEnum('calendar_tier').notNull(),
+  // Nullable since landing-page leads are not scored and are not tier-routed.
+  // A NULL score/tier means "landing lead"; readers must handle null.
+  score: integer('score'),
+  calendarTier: tierEnum('calendar_tier'),
   sessionId: uuid('session_id'),
   utmSource: text('utm_source'),
   utmMedium: text('utm_medium'),

@@ -34,6 +34,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     const tierBreakdown = { high: 0, mid: 0, low: 0 };
     tierData.forEach((t) => {
+      // Landing leads are not tier-routed, so `calendarTier` is null and the
+      // group key is null. Skip it — writing it through would graft a bogus
+      // "null" bucket onto the breakdown.
+      if (!t.tier) return;
       tierBreakdown[t.tier as keyof typeof tierBreakdown] = Number(t.count);
     });
 

@@ -7,8 +7,10 @@ interface LeadData {
   email: string;
   name?: string;
   phone?: string;
-  score: number;
-  tier: string;
+  /** null for landing-page leads (not scored). */
+  score: number | null;
+  /** null for landing-page leads (not tier-routed). */
+  tier: string | null;
   answers: Record<string, string>;
 }
 
@@ -115,12 +117,14 @@ export async function syncLeadToGHL(
     const [firstName, ...lastParts] = (lead.name ?? "").split(" ");
     const lastName = lastParts.join(" ");
 
-    const tags = ["myvsl-lead", `score-${lead.tier}`];
+    // Landing-page leads are unscored: tag them as such instead of emitting a
+    // "score-null" tag, and omit the quiz_score/quiz_tier custom fields rather
+    // than pushing "null" strings into the CRM.
+    const tags = ["myvsl-lead", lead.tier ? `score-${lead.tier}` : "landing-lead"];
 
-    const customFields: Array<{ key: string; value: string }> = [
-      { key: "quiz_score", value: String(lead.score) },
-      { key: "quiz_tier", value: lead.tier },
-    ];
+    const customFields: Array<{ key: string; value: string }> = [];
+    if (lead.score !== null) customFields.push({ key: "quiz_score", value: String(lead.score) });
+    if (lead.tier !== null) customFields.push({ key: "quiz_tier", value: lead.tier });
 
     // Add quiz answers as custom fields
     for (const [key, value] of Object.entries(lead.answers)) {

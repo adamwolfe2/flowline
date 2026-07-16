@@ -35,6 +35,15 @@ export async function POST(
       return NextResponse.json({ error: e.error || 'Not found' }, { status: e.status || 404 });
     }
 
+    // Quiz-only: see the GET route. A landing page has no questions, scores or
+    // thresholds for the insights engine to reason over.
+    if (funnel.type === 'landing') {
+      return NextResponse.json(
+        { error: 'AI Insights are not available for landing pages.', unsupported: true },
+        { status: 400 }
+      );
+    }
+
     // Plan gate + rate limit
     const isAdmin = await isSuperAdmin(userId);
     let userPlan = 'agency';

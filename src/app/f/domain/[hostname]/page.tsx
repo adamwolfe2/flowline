@@ -1,7 +1,8 @@
 import { getFunnelByCustomDomain } from "@/db/queries/funnels";
 import { insertSession, parseDeviceType } from "@/db/queries/sessions";
-import { FunnelClient } from "@/components/funnel/FunnelClient";
-import { FunnelConfig } from "@/types";
+import { FunnelSurface } from "@/components/funnel/FunnelSurface";
+import { AnyFunnelConfig } from "@/types";
+import { resolveFunnelMeta } from "@/lib/funnel-meta";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
@@ -28,9 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { hostname } = await params;
   const funnel = await getCachedFunnel(hostname);
   if (!funnel) return { title: "Not Found" };
-  const config = funnel.config as FunnelConfig;
-  const metaTitle = config.meta?.title || config.brand.name;
-  const metaDesc = config.meta?.description || "";
+  const { title: metaTitle, description: metaDesc } = resolveFunnelMeta(
+    funnel.config as AnyFunnelConfig
+  );
   return {
     title: metaTitle,
     description: metaDesc,
@@ -53,7 +54,9 @@ export default async function DomainFunnelPage({ params, searchParams }: Props) 
   const sp = await searchParams;
   const funnel = await getCachedFunnel(hostname);
   if (!funnel) notFound();
-  const config = funnel.config as FunnelConfig;
+  const config = funnel.config as AnyFunnelConfig;
+
+  const isEmbed = sp.embed === "true";
 
   const utmSource = typeof sp.utm_source === "string" ? sp.utm_source : undefined;
   const utmMedium = typeof sp.utm_medium === "string" ? sp.utm_medium : undefined;
@@ -78,5 +81,14 @@ export default async function DomainFunnelPage({ params, searchParams }: Props) 
     .where(eq(users.id, funnel.userId));
   const hideBranding = funnelOwner?.plan === "pro" || funnelOwner?.plan === "agency";
 
-  return <FunnelClient config={config} funnelId={funnel.id} sessionId={sessionId} hideBranding={hideBranding} />;
+  return (
+    <FunnelSurface
+      type={funnel.type}
+      config={config}
+      funnelId={funnel.id}
+      sessionId={sessionId}
+      hideBranding={hideBranding}
+      isEmbed={isEmbed}
+    />
+  );
 }

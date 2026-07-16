@@ -6,17 +6,25 @@ export async function insertLead(data: {
   funnelId: string;
   email: string;
   answers: Record<string, string>;
-  score: number;
-  calendarTier: 'high' | 'mid' | 'low';
+  /** null for landing-page leads — they are not scored. */
+  score?: number | null;
+  /** null for landing-page leads — they are not tier-routed. */
+  calendarTier?: 'high' | 'mid' | 'low' | null;
   sessionId?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
 }) {
   const result = await db.insert(leads).values({
     funnelId: data.funnelId,
     email: data.email,
     answers: data.answers,
-    score: data.score,
-    calendarTier: data.calendarTier,
+    score: data.score ?? null,
+    calendarTier: data.calendarTier ?? null,
     sessionId: data.sessionId ?? null,
+    utmSource: data.utmSource ?? null,
+    utmMedium: data.utmMedium ?? null,
+    utmCampaign: data.utmCampaign ?? null,
   }).returning();
   return result[0];
 }

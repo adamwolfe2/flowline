@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Funnel, FunnelConfig } from "@/types";
+import { Funnel, FunnelConfig, LandingConfig, Plan } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentEditor } from "@/components/builder/ContentEditor";
 import { BrandEditor } from "@/components/builder/BrandEditor";
@@ -15,9 +15,10 @@ import { ContentBlocksEditor } from "@/components/builder/ContentBlocksEditor";
 import { PopupCampaignEditor } from "@/components/builder/PopupCampaignEditor";
 import { PopupPreview } from "@/components/builder/PopupPreview";
 import { EngagementEditor } from "@/components/builder/EngagementEditor";
+import { LandingBuilder } from "@/components/builder/landing/LandingBuilder";
 import { UpgradeGate } from "@/components/builder/UpgradeGate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2, Zap, Bell } from "lucide-react";
+import { ArrowLeft, Monitor, Smartphone, Eye, Pencil, FlaskConical, Mail, BarChart3, LayoutGrid, ChevronDown, FileText, Palette, Calendar, Send, Copy, RotateCcw, Check, X, Loader2, Zap, Bell, Layers } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,6 +27,60 @@ import { FunnelHealthWidget } from "@/components/builder/FunnelHealthWidget";
 import { calculateFunnelHealth } from "@/lib/funnel-health";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { workspaceFetch } from "@/hooks/useWorkspace";
+
+interface BuilderTab {
+  value: string;
+  label: string;
+  icon: typeof FileText;
+}
+
+/**
+ * Tab sets per funnel type. The FIRST entry is that type's default tab.
+ *
+ * Quiz keeps exactly the tabs it always had, in the same order — this list is
+ * the single source of truth for the tab bar, the mobile bottom bar AND the
+ * `?tab=` whitelist, so the three can no longer drift apart.
+ */
+const QUIZ_TABS: readonly BuilderTab[] = [
+  { value: "content", label: "Content", icon: FileText },
+  { value: "blocks", label: "Blocks", icon: LayoutGrid },
+  { value: "brand", label: "Brand", icon: Palette },
+  { value: "calendars", label: "Calendars", icon: Calendar },
+  { value: "emails", label: "Emails", icon: Mail },
+  { value: "ab-test", label: "A/B", icon: FlaskConical },
+  { value: "tracking", label: "Tracking", icon: BarChart3 },
+  { value: "popup", label: "Popup", icon: Zap },
+  { value: "engagement", label: "Engage", icon: Bell },
+  { value: "publish", label: "Publish", icon: Send },
+];
+
+/**
+ * Landing pages have no quiz steps, so `content` and `blocks` (both quiz-copy
+ * editors) and `calendars` (tier-based routing — a landing page has at most one
+ * calendar, configured on its Calendar block) do not apply. Everything else is
+ * driven off SharedConfig and works for both types.
+ */
+const LANDING_TABS: readonly BuilderTab[] = [
+  { value: "landing", label: "Page", icon: Layers },
+  { value: "brand", label: "Brand", icon: Palette },
+  { value: "emails", label: "Emails", icon: Mail },
+  { value: "ab-test", label: "A/B", icon: FlaskConical },
+  { value: "tracking", label: "Tracking", icon: BarChart3 },
+  { value: "popup", label: "Popup", icon: Zap },
+  { value: "engagement", label: "Engage", icon: Bell },
+  { value: "publish", label: "Publish", icon: Send },
+];
+
+/**
+ * Accepted `?tab=` values across both types. The funnel type is not known at
+ * first render (the funnel is fetched), so the deep link is parsed against the
+ * union here and then narrowed to the type's own tab set once `funnel` loads —
+ * see `builderTabs` / `currentTab` below. A landing funnel deep-linked to
+ * `?tab=content` therefore lands on its default tab, never on the quiz editor.
+ */
+const ALL_TAB_VALUES: readonly string[] = Array.from(
+  new Set([...QUIZ_TABS, ...LANDING_TABS].map(t => t.value)),
+);
 
 export default function BuilderPage() {
   const params = useParams();
@@ -42,7 +97,7 @@ export default function BuilderPage() {
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window !== "undefined") {
       const tabParam = new URLSearchParams(window.location.search).get("tab");
-      if (tabParam && ["content", "blocks", "brand", "calendars", "emails", "ab-test", "tracking", "popup", "engagement", "publish"].includes(tabParam)) {
+      if (tabParam && ALL_TAB_VALUES.includes(tabParam)) {
         return tabParam;
       }
     }
@@ -254,18 +309,27 @@ export default function BuilderPage() {
     );
   }
 
-  const builderTabs = [
-    { value: "content", label: "Content", icon: FileText },
-    { value: "blocks", label: "Blocks", icon: LayoutGrid },
-    { value: "brand", label: "Brand", icon: Palette },
-    { value: "calendars", label: "Calendars", icon: Calendar },
-    { value: "emails", label: "Emails", icon: Mail },
-    { value: "ab-test", label: "A/B", icon: FlaskConical },
-    { value: "tracking", label: "Tracking", icon: BarChart3 },
-    { value: "popup", label: "Popup", icon: Zap },
-    { value: "engagement", label: "Engage", icon: Bell },
-    { value: "publish", label: "Publish", icon: Send },
-  ];
+  // Narrow on the `funnels.type` COLUMN — it is NOT NULL and defaulted, whereas
+  // `config.type` is absent on every legacy quiz row.
+  const isLanding = funnel.type === "landing";
+  const builderTabs = isLanding ? LANDING_TABS : QUIZ_TABS;
+
+  /**
+   * The tab actually rendered. `activeTab` may hold a value from the other
+   * type's set (a `?tab=` deep link parsed before the funnel loaded), so it is
+   * validated against this funnel's tabs and falls back to the type's default.
+   * Deriving rather than correcting via an effect means there is never a frame
+   * where a landing config is handed to a quiz-only editor.
+   */
+  const currentTab = builderTabs.some(t => t.value === activeTab) ? activeTab : builderTabs[0].value;
+
+  /**
+   * The page state is typed as the quiz shape (see the note on `Funnel` in
+   * @/types): the builder is one of the few polymorphic entry points. Having
+   * narrowed on the type column above, re-associate the config with its real
+   * shape for the landing editor.
+   */
+  const landingConfig = isLanding ? (config as unknown as LandingConfig) : null;
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -389,7 +453,7 @@ export default function BuilderPage() {
       </div>
 
       {/* Main area — tabs on top, content + preview below */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+      <Tabs value={currentTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         {/* Tab bar — hidden on mobile, shown via bottom bar */}
         <div className="hidden sm:flex border-b border-gray-100 items-center gap-2 px-2 sm:px-4 flex-shrink-0 relative z-20">
           <div className="overflow-x-auto scrollbar-hide">
@@ -459,23 +523,40 @@ export default function BuilderPage() {
           <div className="w-full sm:w-[420px] sm:flex-shrink-0 sm:border-r sm:border-gray-100 overflow-y-auto p-3 sm:p-4 pb-20 sm:pb-4">
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeTab}
+                key={currentTab}
                 initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.15 }}
               >
-                <TabsContent value="content" className="mt-0">
-                  <ContentEditor config={config} onSave={saveConfig} />
-                </TabsContent>
-                <TabsContent value="blocks" className="mt-0">
-                  <ContentBlocksEditor config={config} onSave={saveConfig} />
-                </TabsContent>
+                {/* Landing-only. The quiz editors below dereference config.quiz,
+                    so they must never mount for a landing funnel — hence the
+                    hard branch rather than relying on the active tab. */}
+                {landingConfig && (
+                  <TabsContent value="landing" className="mt-0">
+                    <LandingBuilder
+                      config={landingConfig}
+                      onSave={next => saveConfig(next as unknown as FunnelConfig)}
+                    />
+                  </TabsContent>
+                )}
+                {/* Quiz-only: content/blocks/calendars. */}
+                {!isLanding && (
+                  <>
+                    <TabsContent value="content" className="mt-0">
+                      <ContentEditor config={config} onSave={saveConfig} />
+                    </TabsContent>
+                    <TabsContent value="blocks" className="mt-0">
+                      <ContentBlocksEditor config={config} onSave={saveConfig} />
+                    </TabsContent>
+                    <TabsContent value="calendars" className="mt-0">
+                      <CalendarEditor config={config} onSave={saveConfig} />
+                    </TabsContent>
+                  </>
+                )}
+                {/* Shared: every editor below reads only SharedConfig fields. */}
                 <TabsContent value="brand" className="mt-0">
                   <BrandEditor config={config} onSave={saveConfig} />
-                </TabsContent>
-                <TabsContent value="calendars" className="mt-0">
-                  <CalendarEditor config={config} onSave={saveConfig} />
                 </TabsContent>
                 <TabsContent value="emails" className="mt-0">
                   <UpgradeGate feature="Email Sequences" plan={userPlan}>
@@ -511,14 +592,17 @@ export default function BuilderPage() {
               </motion.div>
             </AnimatePresence>
             <FunnelHealthWidget
-              health={calculateFunnelHealth(config, funnel.published, funnel.customDomain)}
+              health={calculateFunnelHealth(config, funnel.published, funnel.customDomain, {
+                plan: userPlan as Plan,
+                type: funnel.type,
+              })}
             />
           </div>
 
           {/* Preview pane — hidden on mobile (use floating button instead) */}
-          <div className={`hidden sm:flex flex-1 bg-gray-50 items-start justify-center overflow-hidden ${activeTab === "popup" ? "p-0" : previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
+          <div className={`hidden sm:flex flex-1 bg-gray-50 items-start justify-center overflow-hidden ${currentTab === "popup" ? "p-0" : previewMode === "mobile" ? "p-3 sm:p-6" : "p-2 sm:p-3"}`}>
             <ErrorBoundary>
-              {activeTab === "popup" && popupPreviewSettings ? (
+              {currentTab === "popup" && popupPreviewSettings ? (
                 <div className="relative w-full h-full rounded-xl border border-gray-200 overflow-hidden">
                   <PopupPreview
                     key={`popup-${popupPreviewSettings.displayMode}-${popupPreviewSettings.position}`}
@@ -617,7 +701,7 @@ export default function BuilderPage() {
         {/* Tab bar */}
         <div className="flex overflow-x-auto scrollbar-hide">
           {builderTabs.map(tab => {
-            const isActive = activeTab === tab.value;
+            const isActive = currentTab === tab.value;
             return (
               <button
                 key={tab.value}

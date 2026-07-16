@@ -83,8 +83,12 @@ export async function GET(req: Request) {
 
         // Determine recipient email — either from lead or from recipientEmail (abandoned)
         let recipientEmail: string | null = enrollmentRecipientEmail;
-        let leadScore = 0;
-        let leadTier = "low";
+        // null = not scored / not tier-routed (landing-page leads, or an
+        // abandoned-session enrollment with no lead row yet). Deliberately NOT
+        // defaulted to 0/"low" — that would render a fake tier in the email and
+        // pick a tier calendar the lead was never routed to.
+        let leadScore: number | null = null;
+        let leadTier: string | null = null;
         let calendarUrl = "";
 
         if (enrollmentLeadId) {
@@ -140,8 +144,10 @@ export async function GET(req: Request) {
 
           const emailBody = step.body
             .replace(/\{email\}/g, escapeHtml(recipientEmail))
-            .replace(/\{score\}/g, escapeHtml(String(leadScore)))
-            .replace(/\{tier\}/g, escapeHtml(leadTier))
+            // Unscored (landing) leads render an empty string rather than the
+            // literal "null"/"0"/"low".
+            .replace(/\{score\}/g, escapeHtml(leadScore === null ? "" : String(leadScore)))
+            .replace(/\{tier\}/g, escapeHtml(leadTier ?? ""))
             .replace(/\{calendar_url\}/g, escapeHtml(calendarUrl))
             .replace(/\{funnel_name\}/g, escapeHtml(funnelName));
 

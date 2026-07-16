@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { funnels } from "@/db/schema";
+import { funnels, users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { aiLimiter, checkRateLimit } from "@/lib/rate-limit";
 import { FUNNEL_TEMPLATES, type TemplateId } from "@/lib/funnel-templates";
+import { getFunnelCount } from "@/db/queries/funnels";
+import { canCreateFunnel } from "@/lib/plan-limits";
+import { isSuperAdmin } from "@/lib/admin";
 
 const schema = z.object({
   templateId: z.string().min(1),
@@ -55,6 +59,25 @@ export async function POST(req: NextRequest) {
         { error: "Rate limit exceeded. Please try again later." },
         { status: 429 }
       );
+    }
+
+    // Plan enforcement — this route previously inserted with no funnel-count
+    // check, letting a free user exceed the 1-funnel limit entirely (bounded
+    // only by the 5/day aiLimiter above). Mirrors POST /api/funnels.
+    const isAdmin = await isSuperAdmin(userId);
+    if (!isAdmin) {
+      const [userRow] = await db
+        .select({ plan: users.plan })
+        .from(users)
+        .where(eq(users.id, userId));
+      const plan = userRow?.plan ?? "free";
+      const count = await getFunnelCount(userId);
+      if (!canCreateFunnel(plan, count)) {
+        const limitMsg = plan === "free"
+          ? "Free plan allows 1 funnel. Upgrade to Pro for more."
+          : `Your ${plan} plan funnel limit has been reached. Upgrade for more.`;
+        return NextResponse.json({ error: limitMsg, upgrade: true }, { status: 403 });
+      }
     }
 
     const body = await req.json();

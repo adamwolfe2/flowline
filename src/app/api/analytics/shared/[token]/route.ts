@@ -3,9 +3,10 @@ import { db } from "@/db";
 import { funnels, leads, teams } from "@/db/schema";
 import { eq, and, gte, desc } from "drizzle-orm";
 import { getFunnelOverview, getDropoffWaterfall, getTierDistribution, getLeadsTimeSeries, getDeviceBreakdown, getAbandonHeatmap } from "@/db/queries/analytics";
+import { getLandingEngagement } from "@/db/queries/analytics-landing";
 import { logger } from "@/lib/logger";
 import { sharedAnalyticsLimiter, checkRateLimit } from "@/lib/rate-limit";
-import type { FunnelConfig, TeamBranding } from "@/types";
+import type { AnyFunnelConfig, TeamBranding } from "@/types";
 
 const VALID_TIME_RANGES = ["7d", "30d", "90d"];
 
@@ -54,7 +55,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       return NextResponse.json({ error: "Share link has expired" }, { status: 410 });
     }
 
-    const config = funnel.config as FunnelConfig;
+    const config = funnel.config as AnyFunnelConfig;
+    // Narrow on the `type` COLUMN — see the owner analytics route.
+    const isLanding = funnel.type === "landing";
 
     // Fetch team branding if the funnel belongs to a team
     let teamBranding: {
@@ -94,11 +97,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       ? and(eq(leads.funnelId, funnel.id), gte(leads.createdAt, cutoff))
       : eq(leads.funnelId, funnel.id);
 
-    const [stats, dropoff, abandons, tiers, timeSeries, devices, recentLeads] = await Promise.all([
+    // Landing pages have no steps, questions or tiers — skip those queries
+    // entirely and answer the booking journey instead, exactly as the owner
+    // view does. Feeding the quiz widgets here would mislabel a landing page's
+    // step 1 as "Question 1" and crash the tier panel on a null tier.
+    const [stats, dropoff, abandons, tiers, landing, timeSeries, devices, recentLeads] = await Promise.all([
       getFunnelOverview(funnel.id, timeRange),
-      getDropoffWaterfall(funnel.id, timeRange, config),
-      getAbandonHeatmap(funnel.id, timeRange, config),
-      getTierDistribution(funnel.id, timeRange),
+      isLanding ? Promise.resolve([]) : getDropoffWaterfall(funnel.id, timeRange, config),
+      isLanding ? Promise.resolve([]) : getAbandonHeatmap(funnel.id, timeRange, config),
+      isLanding ? Promise.resolve([]) : getTierDistribution(funnel.id, timeRange),
+      isLanding ? getLandingEngagement(funnel.id, timeRange) : Promise.resolve(null),
       getLeadsTimeSeries(funnel.id, timeRange),
       getDeviceBreakdown(funnel.id, timeRange),
       db.select({
@@ -119,10 +127,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ toke
       brandLogoUrl: config.brand?.logoUrl ?? null,
       brandColor: config.brand?.primaryColor ?? "#0A9AFF",
       teamBranding,
+      funnelType: funnel.type,
       stats,
-      dropoff,
+      dropoff: isLanding ? (landing?.stages ?? []) : dropoff,
       abandons,
       tiers,
+      videoPlayRate: landing?.videoPlayRate ?? null,
       timeSeries,
       devices,
       recentLeads: recentLeads.map((l) => ({

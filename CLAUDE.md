@@ -10,7 +10,44 @@ npm run dev
 ```
 
 ## What This Is
-MyVSL is a no-code VSL funnel builder. Users describe their business, AI asks clarifying questions, then generates a quiz-to-calendar booking funnel with lead scoring and tier-based routing. Live at getmyvsl.com.
+MyVSL is a no-code VSL funnel builder. Users describe their business, AI asks clarifying questions, then generates a funnel. Live at getmyvsl.com.
+
+There are **two funnel types**, discriminated by the `funnels.type` column (`'quiz' | 'landing'`, default `'quiz'`):
+- **quiz** — the original multi-step qualification quiz → lead scoring → tier-based calendar routing (Best/Good/Intro).
+- **landing** — a single drag-and-drop landing page (hero, video, calendar, booking form, etc.). No steps, no scoring, single calendar. Added 2026-07-15.
+
+Both share the SAME `funnels` object, tracking links, custom domains, embed, webhooks, billing, and the leads pipeline. The `config` JSONB is polymorphic on `type`.
+
+### Funnel type architecture (READ before touching config)
+- `funnels.type` (NOT NULL, default `'quiz'`) is the **source of truth**. `config.type` mirrors it but is absent on legacy rows — narrow on the COLUMN.
+- `FunnelConfig` (in `src/types/index.ts`) is the QUIZ shape and is unchanged. `LandingConfig` is a sibling type. `AnyFunnelConfig = FunnelConfig | LandingConfig`; narrow with `isLandingConfig()` / the column. This avoids widening ~155 `config.quiz.*` derefs.
+- All three public renderers (`/f/[slug]`, `/f/domain/[hostname]`, `/f/preview/[funnelId]`) dispatch through ONE choke point: `src/components/funnel/FunnelSurface.tsx`. Add rendering branches THERE, not in three places.
+- `leads.score` and `leads.calendar_tier` are NULLABLE — NULL means a landing lead (not scored, not tier-routed). Every reader must handle null (sequences cron, GHL sync, lead-notification email, analytics all do).
+- Landing analytics: `src/db/queries/analytics-landing.ts`; the dashboard gates quiz-only panels on `funnelType === 'landing'`.
+
+### Landing config schema (`config` when `type='landing'`)
+```jsonc
+{
+  "type": "landing",
+  "seo": { "metaTitle": "…", "metaDescription": "…" },
+  "theme": { "background": "#ffffff", "maxWidth": "narrow|wide", "font": "inherit-from-brand" },
+  "blocks": [ { "id": "uuid", "type": "<block type>", "props": { … } } ]
+  // brand, webhook, meta, tracking, engagementTriggers are SHARED (same shape as quiz config)
+}
+```
+Block types + `props` contracts (full interfaces in `src/types/index.ts`):
+- `hero` — `{ logoUrl?, headline, subheadline?, ctaLabel?, ctaTargetBlockId? }` (CTA scrolls to a block id)
+- `text` — `{ heading?, body }` (markdown; sanitized via a safe AST renderer, NOT dangerouslySetInnerHTML)
+- `video` — `{ provider: youtube|vimeo|loom|vidalytics, url, autoplay, aspectRatio: '16:9' }`
+- `image` — `{ url, alt, link? }`
+- `calendar` — `{ url, provider: cal|calendly|other }` (single calendar, Cal.com JS embed / iframe; no tier routing)
+- `booking_form` — `{ fields: [name|email|phone], submitLabel, successMode: show_calendar|message|redirect, successCalendarBlockId?|successMessage?|redirectUrl? }`
+- `testimonial` — `{ quote, author, role?, avatarUrl? }`
+- `button` — `{ label, action: scroll|link, targetBlockId?|url? }`
+- `divider` / `spacer` — `{ size: sm|md|lg }`
+
+Key files: renderer `src/components/landing/`, builder `src/components/builder/landing/` (dnd-kit sortable), AI path `src/app/api/ai/generate-landing`, submit branch `src/app/api/submit/[funnelId]/route.ts`, defaults `src/lib/landing-defaults.ts`, helpers `src/lib/landing.ts`.
+Block-id references (`ctaTargetBlockId`, `targetBlockId`, `successCalendarBlockId`) are auto-sanitized on any block delete/reorder in the builder.
 
 ## Tech Stack
 - **Framework**: Next.js 16.1.7 (Turbopack), React 19, TypeScript strict
@@ -18,7 +55,7 @@ MyVSL is a no-code VSL funnel builder. Users describe their business, AI asks cl
 - **Auth**: Clerk (middleware-protected routes)
 - **Payments**: Stripe (checkout, webhooks, plan enforcement)
 - **Email**: Resend (lead notifications, welcome emails, sequences via cron)
-- **Storage**: Vercel Blob (logo uploads)
+- **Storage**: Vercel Blob (uploads via `/api/upload/asset` — `kind: 'logo'|'image'`; `/api/upload/logo` is a legacy delegate)
 - **Rate limiting**: Upstash Redis with in-memory fallback
 - **Monitoring**: Sentry (error tracking + structured logger)
 - **AI**: OpenAI GPT-4o (funnel planning + generation)
