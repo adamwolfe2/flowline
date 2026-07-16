@@ -100,6 +100,19 @@ function placeholderVideoBlock(): LandingBlock {
  * the model is not trusted with (video url, booking-form success mode).
  * Also wires the hero CTA to scroll to the booking form when both exist.
  */
+type BookingField = "name" | "email" | "phone";
+
+/**
+ * Ensures a booking form always collects `email` (required by /api/submit),
+ * with email first, order otherwise preserved, and duplicates removed.
+ */
+function normalizeBookingFields(fields: readonly string[]): BookingField[] {
+  const allowed: BookingField[] = ["email", "name", "phone"];
+  const present = new Set(fields.filter((f): f is BookingField => (allowed as string[]).includes(f)));
+  present.add("email");
+  return allowed.filter((f) => present.has(f));
+}
+
 function materializeBlocks(aiBlocks: AiBlock[]): LandingBlock[] {
   const blocks: LandingBlock[] = aiBlocks.map((block): LandingBlock => {
     switch (block.type) {
@@ -136,7 +149,10 @@ function materializeBlocks(aiBlocks: AiBlock[]): LandingBlock[] {
           id: makeBlockId(),
           type: "booking_form",
           props: {
-            fields: block.props.fields,
+            // `email` is required by the submit endpoint; the AI schema only
+            // enforces .min(1), so guarantee email is present (first) and
+            // dedupe. Without this, a name/phone-only form 400s every visitor.
+            fields: normalizeBookingFields(block.props.fields),
             submitLabel: block.props.submitLabel,
             // successMode is forced: 'show_calendar' would need a calendar
             // block id, and the AI path never emits calendars.

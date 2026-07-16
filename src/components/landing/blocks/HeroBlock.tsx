@@ -1,5 +1,6 @@
 import type { LandingBlock } from "@/types";
 import { CtaButton } from "./CtaButton";
+import { safeHttpUrl } from "./url";
 
 type HeroBlockData = Extract<LandingBlock, { type: "hero" }>;
 
@@ -7,14 +8,17 @@ type HeroBlockData = Extract<LandingBlock, { type: "hero" }>;
 export function HeroBlock({ block }: { block: HeroBlockData }) {
   const { logoUrl, headline, subheadline, ctaLabel, ctaTargetBlockId } = block.props;
   const showCta = Boolean(ctaLabel && ctaTargetBlockId);
+  // Gate the author-supplied logo URL to http(s), matching ImageBlock. An
+  // `<img src>` can't execute javascript:/data:, but keep the surface uniform.
+  const safeLogoUrl = safeHttpUrl(logoUrl);
 
   return (
     <section id={block.id} className="w-full py-8 text-center sm:py-12">
-      {logoUrl && (
+      {safeLogoUrl && (
         // Author-supplied remote logo; next/image would require per-tenant remotePatterns.
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={logoUrl}
+          src={safeLogoUrl}
           alt=""
           className="mx-auto mb-6 h-10 w-auto object-contain sm:h-12"
           loading="eager"

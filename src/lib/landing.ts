@@ -11,6 +11,14 @@ import type { LandingConfig, LandingBlock, AnyFunnelConfig } from "@/types";
 const ALLOWED_FIELDS = ["name", "email", "phone"] as const;
 
 /**
+ * Length caps on persisted booking-form values. Prevents an attacker from
+ * writing multi-MB strings into `leads.answers` / the email column (storage
+ * abuse / minor DoS). 254 is the RFC-5321 max email length.
+ */
+const MAX_FIELD_LEN = 200;
+const MAX_EMAIL_LEN = 254;
+
+/**
  * Normalizes a client-supplied booking-form `fields` object into the shape
  * persisted on `leads.answers`.
  *
@@ -29,7 +37,7 @@ export function extractLandingFields(raw: unknown): Record<string, string> {
     if (typeof value !== "string") continue;
     const trimmed = value.trim();
     if (trimmed === "") continue;
-    out[key] = trimmed;
+    out[key] = trimmed.slice(0, MAX_FIELD_LEN);
   }
   return out;
 }
@@ -38,7 +46,7 @@ export function extractLandingFields(raw: unknown): Record<string, string> {
 export function extractLandingEmail(raw: unknown): string | undefined {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
   const value = (raw as Record<string, unknown>).email;
-  return typeof value === "string" ? value.trim() : undefined;
+  return typeof value === "string" ? value.trim().slice(0, MAX_EMAIL_LEN) : undefined;
 }
 
 /**
@@ -61,6 +69,24 @@ export function validateLandingConfig(config: unknown): string | null {
     if (seen.has(block.id)) return `Duplicate block id: ${block.id}`;
     seen.add(block.id);
     if (typeof block.type !== "string") return "Each block needs a type";
+
+    // A booking_form is the one block the public renderer dereferences deeply
+    // (`fields.map`, per-field validation). Reject malformed props here so a
+    // hand-crafted create/update payload can never crash the renderer, and
+    // require `email` — a form without it always 400s on submit.
+    if (block.type === "booking_form") {
+      const props = (block as { props?: unknown }).props;
+      const fields = (props as { fields?: unknown } | undefined)?.fields;
+      if (!Array.isArray(fields) || fields.length === 0) {
+        return "A booking form must include at least one field";
+      }
+      if (!fields.every((f) => f === "name" || f === "email" || f === "phone")) {
+        return "Booking form fields must be name, email, or phone";
+      }
+      if (!fields.includes("email")) {
+        return "A booking form must collect an email";
+      }
+    }
   }
   return null;
 }

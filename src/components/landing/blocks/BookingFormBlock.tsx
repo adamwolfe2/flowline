@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useMemo, useRef, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import type { BookingFormField, LandingBlock } from "@/types";
 import { logger } from "@/lib/logger";
@@ -34,9 +34,27 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMPTY_VALUES: Record<BookingFormField, string> = { name: "", email: "", phone: "" };
 
 export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBlockProps) {
-  const { fields, submitLabel, successMode, successCalendarBlockId, successMessage, redirectUrl } =
+  const { submitLabel, successMode, successCalendarBlockId, successMessage, redirectUrl } =
     block.props;
-  const { revealBlock } = useLandingInteractive();
+  // Defensive: a malformed config (empty/undefined fields) must not crash the
+  // public renderer via `fields.map`. Fall back to an email-only form — the one
+  // field the submit endpoint requires. validateLandingConfig also rejects this
+  // upstream, but the renderer stays crash-proof regardless.
+  const fields: BookingFormField[] = useMemo(
+    () =>
+      Array.isArray(block.props.fields) && block.props.fields.length > 0
+        ? block.props.fields
+        : ["email"],
+    [block.props.fields]
+  );
+  const { revealBlock, trackEvent } = useLandingInteractive();
+  const fieldFocusSent = useRef(false);
+  const handleFieldFocus = useCallback(() => {
+    // "Booking form starts" analytics stage: fire field_focused once per mount.
+    if (fieldFocusSent.current) return;
+    fieldFocusSent.current = true;
+    trackEvent("field_focused", block.id);
+  }, [trackEvent, block.id]);
 
   const [values, setValues] = useState<Record<BookingFormField, string>>(EMPTY_VALUES);
   const [status, setStatus] = useState<Status>("idle");
@@ -208,6 +226,7 @@ export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBloc
                   autoComplete={meta.autoComplete}
                   value={values[field]}
                   onChange={(event) => setField(field, event.target.value)}
+                  onFocus={handleFieldFocus}
                   disabled={isBusy}
                   aria-invalid={error ? true : undefined}
                   className="w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#0A0A0A] placeholder:text-[#9CA3AF] focus:border-[#0A9AFF] focus:outline-none focus:ring-2 focus:ring-[#0A9AFF]/20 disabled:opacity-60"

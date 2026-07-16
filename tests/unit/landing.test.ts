@@ -54,6 +54,12 @@ describe("extractLandingFields", () => {
     expect(extractLandingFields({ name: "  Ada  " })).toEqual({ name: "Ada" });
   });
 
+  it("caps field length at 200 chars (storage-abuse guard)", () => {
+    const long = "x".repeat(5000);
+    const out = extractLandingFields({ name: long });
+    expect(out.name).toHaveLength(200);
+  });
+
   it("returns {} for non-object input", () => {
     expect(extractLandingFields(null)).toEqual({});
     expect(extractLandingFields(undefined)).toEqual({});
@@ -112,6 +118,40 @@ describe("validateLandingConfig", () => {
 
   it("rejects non-objects", () => {
     expect(validateLandingConfig(null)).toMatch(/must be an object/);
+  });
+
+  it("accepts a booking_form that collects email", () => {
+    const config = makeLandingConfig({
+      blocks: [
+        { id: "bf", type: "booking_form", props: { fields: ["email", "name"] } } as never,
+      ],
+    });
+    expect(validateLandingConfig(config)).toBeNull();
+  });
+
+  it("rejects a booking_form with empty/missing fields (renderer would crash on fields.map)", () => {
+    const config = makeLandingConfig({
+      blocks: [{ id: "bf", type: "booking_form", props: {} } as never],
+    });
+    expect(validateLandingConfig(config)).toMatch(/at least one field/);
+  });
+
+  it("rejects a booking_form that does not collect email (submit would 400)", () => {
+    const config = makeLandingConfig({
+      blocks: [
+        { id: "bf", type: "booking_form", props: { fields: ["name", "phone"] } } as never,
+      ],
+    });
+    expect(validateLandingConfig(config)).toMatch(/must collect an email/);
+  });
+
+  it("rejects a booking_form with an unknown field name", () => {
+    const config = makeLandingConfig({
+      blocks: [
+        { id: "bf", type: "booking_form", props: { fields: ["email", "ssn"] } } as never,
+      ],
+    });
+    expect(validateLandingConfig(config)).toMatch(/must be name, email, or phone/);
   });
 });
 

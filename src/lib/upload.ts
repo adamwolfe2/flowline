@@ -28,19 +28,19 @@ const IMAGE_TYPES: Record<string, string> = {
 };
 
 const KIND_CONFIG: Record<UploadKind, KindConfig> = {
-  // Logos keep SVG/ICO for back-compat (favicons, vector logos). SVG is a
-  // stored-XSS vector when served with its own content-type, so it is NOT
-  // allowed for general content images below.
+  // Logos keep ICO for back-compat (favicons). SVG is intentionally NOT allowed:
+  // uploads are unauthenticated and served `access: public` with their own
+  // content-type, so an `image/svg+xml` with an embedded <script> is a stored-XSS
+  // vector on the blob origin when opened directly. Raster + ICO only.
   logo: {
     allowed: {
       ...IMAGE_TYPES,
-      "image/svg+xml": "svg",
       "image/x-icon": "ico",
       "image/vnd.microsoft.icon": "ico",
     },
     maxBytes: 2 * 1024 * 1024,
     prefix: "logos",
-    errorMsg: "Supported formats: PNG, JPG, SVG, GIF, WebP, ICO",
+    errorMsg: "Supported formats: PNG, JPG, GIF, WebP, ICO",
   },
   // Content images for landing blocks. No SVG (XSS), larger ceiling for photos.
   image: {

@@ -134,7 +134,7 @@ export function LandingRenderer({
       {/* When embedded, report content height so the embed script can size the
           iframe. Inert (renders null) on the normal public page. */}
       {isEmbed && <EmbedAutoResize />}
-      <LandingInteractive>
+      <LandingInteractive funnelId={funnelId} sessionId={sessionId}>
         <div className={`mx-auto w-full ${MAX_WIDTH_CLASS[theme.maxWidth]} px-4 py-8 sm:px-6 sm:py-12`}>
           {blocks.map(renderBlock)}
 

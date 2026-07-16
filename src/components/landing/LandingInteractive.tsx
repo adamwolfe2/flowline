@@ -6,9 +6,11 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { postLandingEvent } from "./postLandingEvent";
 
 /**
  * Client-side coordination for an otherwise server-rendered landing page.
@@ -30,6 +32,11 @@ interface LandingInteractiveValue {
   revealBlock: (blockId: string) => void;
   /** Smooth-scrolls to an already-rendered block. No-op if it is absent. */
   scrollToBlock: (blockId: string) => void;
+  /**
+   * Fires a landing analytics event bound to this page's funnel/session.
+   * Best-effort — never throws. `blockId` maps to the events `stepKey` column.
+   */
+  trackEvent: (eventType: string, blockId?: string) => void;
 }
 
 const LandingInteractiveContext = createContext<LandingInteractiveValue | null>(null);
@@ -42,11 +49,36 @@ export function useLandingInteractive(): LandingInteractiveValue {
   return context;
 }
 
-export function LandingInteractive({ children }: { children: ReactNode }) {
+export function LandingInteractive({
+  children,
+  funnelId,
+  sessionId,
+}: {
+  children: ReactNode;
+  funnelId: string;
+  sessionId: string;
+}) {
   const [revealedBlockIds, setRevealedBlockIds] = useState<ReadonlySet<string>>(
     () => new Set<string>()
   );
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
+
+  const trackEvent = useCallback(
+    (eventType: string, blockId?: string) => {
+      postLandingEvent({ funnelId, sessionId, eventType, stepKey: blockId });
+    },
+    [funnelId, sessionId]
+  );
+
+  // Emit `page_viewed` exactly once per mount. This is the denominator for the
+  // landing analytics waterfall (Page views) and the video-play-rate metric;
+  // without it both read 0. The ref guards React 18/19 StrictMode double-mount.
+  const pageViewSent = useRef(false);
+  useEffect(() => {
+    if (pageViewSent.current) return;
+    pageViewSent.current = true;
+    trackEvent("page_viewed");
+  }, [trackEvent]);
 
   const scrollToBlock = useCallback((blockId: string) => {
     const element = document.getElementById(blockId);
@@ -77,8 +109,8 @@ export function LandingInteractive({ children }: { children: ReactNode }) {
   }, [pendingScrollId, scrollToBlock]);
 
   const value = useMemo<LandingInteractiveValue>(
-    () => ({ revealedBlockIds, revealBlock, scrollToBlock }),
-    [revealedBlockIds, revealBlock, scrollToBlock]
+    () => ({ revealedBlockIds, revealBlock, scrollToBlock, trackEvent }),
+    [revealedBlockIds, revealBlock, scrollToBlock, trackEvent]
   );
 
   return (
