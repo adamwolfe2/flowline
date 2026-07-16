@@ -5,6 +5,7 @@ import { EmbedAutoResize } from "./EmbedAutoResize";
 import { HeroBlock } from "./blocks/HeroBlock";
 import { TextBlock } from "./blocks/TextBlock";
 import { VideoBlock } from "./blocks/VideoBlock";
+import { VideoSlider } from "./blocks/VideoSlider";
 import { ImageBlock } from "./blocks/ImageBlock";
 import { CalendarBlock } from "./blocks/CalendarBlock";
 import { BookingFormBlock } from "./blocks/BookingFormBlock";
@@ -78,6 +79,39 @@ export function LandingRenderer({
 
   const gatedCalendarIds = collectGatedCalendarIds(blocks);
 
+  type VideoBlockData = Extract<LandingBlock, { type: "video" }>;
+  type RenderGroup =
+    | { kind: "single"; block: LandingBlock }
+    | { kind: "video-slider"; key: string; videos: VideoBlockData[] };
+
+  // Collapse each run of 2+ consecutive video blocks into a horizontal slider
+  // so stacked videos don't bury the calendar. A lone video stays a normal
+  // full-width block. Order is otherwise preserved exactly.
+  function groupBlocks(input: LandingBlock[]): RenderGroup[] {
+    const groups: RenderGroup[] = [];
+    let run: VideoBlockData[] = [];
+    const flush = () => {
+      if (run.length >= 2) {
+        groups.push({ kind: "video-slider", key: `slider-${run[0].id}`, videos: run });
+      } else if (run.length === 1) {
+        groups.push({ kind: "single", block: run[0] });
+      }
+      run = [];
+    };
+    for (const block of input) {
+      if (block.type === "video") {
+        run.push(block);
+        continue;
+      }
+      flush();
+      groups.push({ kind: "single", block });
+    }
+    flush();
+    return groups;
+  }
+
+  const renderGroups = groupBlocks(blocks);
+
   function renderBlock(block: LandingBlock): ReactNode {
     switch (block.type) {
       case "hero":
@@ -136,7 +170,18 @@ export function LandingRenderer({
       {isEmbed && <EmbedAutoResize />}
       <LandingInteractive funnelId={funnelId} sessionId={sessionId}>
         <div className={`mx-auto w-full ${MAX_WIDTH_CLASS[theme.maxWidth]} px-4 py-8 sm:px-6 sm:py-12`}>
-          {blocks.map(renderBlock)}
+          {renderGroups.map((group) =>
+            group.kind === "video-slider" ? (
+              <VideoSlider
+                key={group.key}
+                blocks={group.videos}
+                funnelId={funnelId}
+                sessionId={sessionId}
+              />
+            ) : (
+              renderBlock(group.block)
+            )
+          )}
 
           {/* Powered by badge — hidden for Pro+ plans or embed mode */}
           {!hideBranding && !isEmbed && (

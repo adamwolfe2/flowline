@@ -130,7 +130,14 @@ export function CalendarBlock({
     return <section id={block.id} className="hidden" aria-hidden="true" />;
   }
 
+  // The Cal.com JS embed is the richest experience, used on desktop for the
+  // 'cal' provider. Everything else — mobile, non-cal providers (Calendly,
+  // etc.), and a FAILED/timed-out Cal embed — falls back to an INLINE iframe so
+  // the visitor always books on-page. An external link is a last resort, used
+  // only when there is no embeddable URL at all. Reducing this friction (never
+  // bouncing the visitor off to the provider) is the whole point of the block.
   const showCalEmbed = useCalEmbed && !!calLink && !embedFailed && !isMobileScreen;
+  const canEmbedIframe = !!safeUrl;
   const bookHref = safeUrl || (calLink ? `https://cal.com/${calLink}` : "");
 
   return (
@@ -141,32 +148,21 @@ export function CalendarBlock({
             id={`cal-embed-${calNamespace}`}
             style={{ width: "100%", height: "min(700px, 80vh)", overflow: "auto" }}
           />
-        ) : isMobileScreen && bookHref ? (
-          // Calendar embeds are unusable under 600px — hand off to the provider.
-          <div className="py-10 text-center">
-            <p className="mb-5 text-sm text-[#6B7280]">Tap below to book your call.</p>
-            <a
-              href={bookHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-opacity hover:opacity-90"
-              style={{ backgroundColor: brandColor }}
-            >
-              Book Your Call
-            </a>
-          </div>
-        ) : safeUrl && !embedFailed ? (
+        ) : canEmbedIframe ? (
+          // Universal inline embed: Cal.com (incl. when the JS embed failed),
+          // Calendly, or any https booking URL — renders in-page on desktop AND
+          // mobile. Height is responsive so the calendar is usable on a phone.
           <iframe
             src={safeUrl}
-            width="100%"
-            height="700"
-            className="block"
-            style={{ minHeight: "500px", maxHeight: "80vh", border: "0" }}
+            className="block w-full h-[620px] sm:h-[720px] max-h-[85vh]"
+            style={{ border: "0" }}
             title="Book your call"
+            loading="lazy"
           />
         ) : bookHref ? (
+          // Last resort only: no embeddable URL was resolvable.
           <div className="py-12 text-center">
-            <p className="mb-4 text-sm text-[#6B7280]">Calendar is loading externally.</p>
+            <p className="mb-4 text-sm text-[#6B7280]">Pick a time to book your call.</p>
             <a
               href={bookHref}
               target="_blank"

@@ -10,6 +10,7 @@ import { deriveLightColor, deriveDarkColor } from "@/lib/colors";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PageTypeChoice, type BuildPageType } from "@/components/build/PageTypeChoice";
+import { TypeExamplePreview } from "@/components/build/TypeExamplePreview";
 import { buildLandingConfig } from "@/components/build/buildLandingConfig";
 import type { LandingBlock } from "@/types";
 
@@ -1347,17 +1348,8 @@ function BuildContent() {
               </motion.div>
             )}
             {activeTab === "ai" && state.phase === "prompt" && (
-              <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="text-center max-w-sm">
-                <div className="w-16 h-16 bg-[#0A9AFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-[#0A9AFF]" />
-                </div>
-                <p className="text-lg font-semibold text-[#111827] mb-2" style={{ fontFamily: "var(--font-instrument-sans)", letterSpacing: "-0.02em" }}>
-                  Your funnel will appear here
-                </p>
-                <p className="text-sm text-[#9CA3AF]">
-                  Describe your business on the left to get started
-                </p>
+              <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <TypeExamplePreview pageType={state.pageType} />
               </motion.div>
             )}
 
