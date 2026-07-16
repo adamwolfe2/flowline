@@ -1,5 +1,7 @@
 "use client";
 
+import { postLandingEvent } from "./postLandingEvent";
+
 /**
  * Best-effort analytics emission for a successful landing booking-form submit.
  *
@@ -31,7 +33,7 @@ export function trackLandingEvents({
 
   // `stepKey` is the events route's free-form identifier column. It does not
   // accept a `blockId` field — that would be silently dropped on insert.
-  void postEvent({
+  postLandingEvent({
     funnelId,
     sessionId,
     eventType: "booking_submitted",
@@ -39,7 +41,7 @@ export function trackLandingEvents({
   });
 
   if (leadId) {
-    void postEvent({
+    postLandingEvent({
       funnelId,
       sessionId,
       eventType: "lead_created",
@@ -50,20 +52,9 @@ export function trackLandingEvents({
   // A landing page has no steps, so "completed" means the booking form was
   // submitted. Firing this keeps session.completed (and therefore the existing
   // completion-rate stat) meaningful for landing funnels.
-  void postEvent({
+  postLandingEvent({
     funnelId,
     sessionId,
     eventType: "funnel_completed",
   });
-}
-
-function postEvent(body: Record<string, unknown>): Promise<void> {
-  return fetch("/api/events", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    keepalive: true,
-  })
-    .then(() => undefined)
-    .catch(() => undefined);
 }
