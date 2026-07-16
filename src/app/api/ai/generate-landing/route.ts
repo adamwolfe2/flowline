@@ -115,7 +115,14 @@ function normalizeBookingFields(fields: readonly string[]): BookingField[] {
 }
 
 function materializeBlocks(aiBlocks: AiBlock[]): LandingBlock[] {
-  const blocks: LandingBlock[] = aiBlocks.map((block): LandingBlock => {
+  // Never publish an AI-fabricated testimonial. Reviews must come from the
+  // user's real customers, not the model — a made-up quote/name is a trust and
+  // FTC liability. The prompt no longer asks for one; this strips any the model
+  // returns anyway so it can never reach a published page.
+  const sourceBlocks = aiBlocks.filter(
+    (b): b is Exclude<AiBlock, { type: "testimonial" }> => b.type !== "testimonial"
+  );
+  const blocks: LandingBlock[] = sourceBlocks.map((block): LandingBlock => {
     switch (block.type) {
       case "hero":
         return {
@@ -135,16 +142,6 @@ function materializeBlocks(aiBlocks: AiBlock[]): LandingBlock[] {
         };
       case "video":
         return placeholderVideoBlock();
-      case "testimonial":
-        return {
-          id: makeBlockId(),
-          type: "testimonial",
-          props: {
-            quote: block.props.quote,
-            author: block.props.author,
-            role: block.props.role,
-          },
-        };
       case "booking_form":
         return {
           id: makeBlockId(),
@@ -211,14 +208,6 @@ Return ONLY valid JSON matching this exact schema:
     },
     { "type": "video", "props": {} },
     {
-      "type": "testimonial",
-      "props": {
-        "quote": "string, specific and believable, max 40 words",
-        "author": "string, plausible full name",
-        "role": "string, job title and company"
-      }
-    },
-    {
       "type": "booking_form",
       "props": {
         "fields": ["name", "email"],
@@ -229,7 +218,7 @@ Return ONLY valid JSON matching this exact schema:
   ]
 }
 
-Return the blocks in that order. Do NOT invent block "id" values, calendar URLs, video URLs, image URLs, colors, or a logo. The video block is a placeholder and takes no props. Do not use em dashes in any generated text. Return JSON only, no markdown, no backticks.`;
+Return the blocks in that order. Do NOT invent block "id" values, calendar URLs, video URLs, image URLs, colors, or a logo. Do NOT invent testimonials, reviews, customer quotes, ratings, or social proof of any kind — the user adds those from their own real customers. The video block is a placeholder and takes no props. Do not use em dashes in any generated text. Return JSON only, no markdown, no backticks.`;
 }
 
 export async function POST(req: NextRequest) {
@@ -323,14 +312,6 @@ export async function POST(req: NextRequest) {
       },
     },
     { type: "video", props: {} },
-    {
-      type: "testimonial",
-      props: {
-        quote: "We cut our no-show rate in half and doubled closed revenue in one quarter, from the exact same ad budget.",
-        author: "Marcus Reed",
-        role: "Founder, Northline Growth",
-      },
-    },
     {
       type: "booking_form",
       props: {

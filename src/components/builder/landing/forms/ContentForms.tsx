@@ -101,11 +101,16 @@ export function TestimonialForm({ block, onChange }: BlockFormProps<"testimonial
 
   return (
     <div className="space-y-2.5">
+      <p className="text-[10px] text-gray-400">
+        Use a real quote from a real customer. Leave the quote or name blank and this
+        block stays hidden on the published page.
+      </p>
       <div>
         <Label className="text-[10px] text-gray-400">Quote</Label>
         <Textarea
           value={props.quote}
           onChange={(e) => onChange({ ...block, props: { ...props, quote: e.target.value } })}
+          placeholder="Paste a real customer quote"
           className="text-xs mt-1 resize-none"
           rows={3}
           maxLength={300}
@@ -117,6 +122,7 @@ export function TestimonialForm({ block, onChange }: BlockFormProps<"testimonial
           <Input
             value={props.author}
             onChange={(e) => onChange({ ...block, props: { ...props, author: e.target.value } })}
+            placeholder="Customer name"
             className="text-xs mt-1"
             maxLength={50}
           />
