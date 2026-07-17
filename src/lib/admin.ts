@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 // Hardcoded super admin — full unrestricted access to everything
 const SUPER_ADMIN_EMAIL = "adamwolfe102@gmail.com";
-const SUPER_ADMIN_USER_ID = "user_3BDXaPSL6jBfBefM44mC1PldhHz";
+const SUPER_ADMIN_USER_ID = "user_3B44ImzxwilWiXcChhQP2ijSSRn";
 
 /**
  * Check if a userId belongs to the super admin.
