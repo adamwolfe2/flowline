@@ -104,8 +104,9 @@ src/
 
 ## Super Admin
 - Email: adamwolfe102@gmail.com
-- User ID: user_3BDXaPSL6jBfBefM44mC1PldhHz
+- User ID: user_3B44ImzxwilWiXcChhQP2ijSSRn  (real working account — owns all funnels)
 - Hardcoded in `src/lib/admin.ts` — bypasses all plan limits, gets agency plan, sees Admin nav link
+- NOTE: `user_3BDXaPSL6jBfBefM44mC1PldhHz` was a DUPLICATE Clerk user on the same email, deduped 2026-07-17. Do NOT reintroduce it.
 
 ## Database Tables
 users, funnels, leads, funnel_sessions, events, funnel_variants, variant_assignments, email_sequences, email_steps, sequence_enrollments, teams, team_members, team_invites, webhook_deliveries
