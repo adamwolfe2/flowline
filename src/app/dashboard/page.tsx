@@ -37,6 +37,15 @@ function DashboardContent() {
     }
     return "all";
   });
+  // Landing-page vs quiz-funnel view. Filtered client-side so it composes with
+  // the server-side sort/status without an extra round-trip.
+  const [typeFilter, setTypeFilter] = useState<"all" | "landing" | "quiz">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("myvsl_dashboard_type");
+      if (saved === "landing" || saved === "quiz") return saved;
+    }
+    return "all";
+  });
   const claimAttempted = useRef(false);
   const { isTeamContext, activeTeam } = useWorkspace();
 
@@ -156,7 +165,20 @@ function DashboardContent() {
     localStorage.setItem("myvsl_dashboard_status", statusFilter);
   }, [statusFilter]);
 
-  // Sort/filter is handled server-side; funnels is already sorted and filtered
+  useEffect(() => {
+    localStorage.setItem("myvsl_dashboard_type", typeFilter);
+  }, [typeFilter]);
+
+  // Sort/status are handled server-side; the landing-vs-quiz split is applied
+  // here. The DB column is authoritative; fall back to config.type for any
+  // legacy row the API doesn't stamp.
+  const isLanding = (f: FunnelWithStats) => (f.type ?? f.config?.type) === "landing";
+  const landingCount = funnels.filter(isLanding).length;
+  const quizCount = funnels.length - landingCount;
+  const visibleFunnels =
+    typeFilter === "all"
+      ? funnels
+      : funnels.filter((f) => (typeFilter === "landing" ? isLanding(f) : !isLanding(f)));
 
   function handleDelete(id: string) {
     setFunnels(prev => prev.filter(f => f.id !== id));
@@ -194,6 +216,35 @@ function DashboardContent() {
         <TemplateGallery ref={templateGalleryRef} onCreated={loadFunnels} />
         {!loading && funnels.length > 0 && (
           <>
+            <div
+              className="inline-flex items-center rounded-[10px] border border-black/[0.08] bg-white p-0.5 min-h-[44px]"
+              role="tablist"
+              aria-label="Filter by page type"
+            >
+              {([
+                ["all", "All", funnels.length],
+                ["landing", "Landing Pages", landingCount],
+                ["quiz", "Funnels", quizCount],
+              ] as const).map(([value, label, count]) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={typeFilter === value}
+                  onClick={() => setTypeFilter(value)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-[8px] transition-colors ${
+                    typeFilter === value
+                      ? "bg-[#0A9AFF] text-white"
+                      : "text-[#6B7280] hover:text-[#111827]"
+                  }`}
+                >
+                  {label}
+                  <span className={`ml-1.5 ${typeFilter === value ? "text-white/70" : "text-[#9CA3AF]"}`}>
+                    {count}
+                  </span>
+                </button>
+              ))}
+            </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -227,10 +278,23 @@ function DashboardContent() {
         </div>
       ) : funnels.length === 0 ? (
         <EmptyState onOpenTemplates={() => templateGalleryRef.current?.open()} />
+      ) : visibleFunnels.length === 0 ? (
+        <div className="text-center py-16 text-[#6B7280]">
+          <p className="text-sm">
+            No {typeFilter === "landing" ? "landing pages" : "funnels"} yet.
+          </p>
+          <button
+            type="button"
+            onClick={() => setTypeFilter("all")}
+            className="mt-2 text-sm font-medium text-[#0A9AFF] hover:underline"
+          >
+            Show all
+          </button>
+        </div>
       ) : (
         <ErrorBoundary>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {funnels.map((funnel, index) => (
+            {visibleFunnels.map((funnel, index) => (
               <motion.div
                 key={funnel.id}
                 initial={{ opacity: 0 }}
