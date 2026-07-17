@@ -144,6 +144,15 @@ export function FunnelCard({ funnel, stats, onDelete, onDuplicate }: FunnelCardP
                 </h3>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <p className="text-xs text-gray-400">{funnel.slug}</p>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                      (funnel.type ?? funnel.config?.type) === "landing"
+                        ? "bg-[#E6F4FF] text-[#0883DB]"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {(funnel.type ?? funnel.config?.type) === "landing" ? "Landing" : "Funnel"}
+                  </span>
                   {funnel.clientName && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
                       {funnel.clientName}
