@@ -87,6 +87,16 @@ export function validateLandingConfig(config: unknown): string | null {
         return "A booking form must collect an email";
       }
     }
+
+    // The calendar `gate` prop drives a client-side booking lock. Reject an
+    // unrecognized value from a hand-crafted payload rather than silently
+    // treating it as ungated — keeps the stored config honest.
+    if (block.type === "calendar") {
+      const gate = (block as { props?: { gate?: unknown } }).props?.gate;
+      if (gate !== undefined && gate !== "none" && gate !== "blur_overlay") {
+        return "Calendar gate must be 'none' or 'blur_overlay'";
+      }
+    }
   }
   return null;
 }

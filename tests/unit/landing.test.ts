@@ -153,6 +153,41 @@ describe("validateLandingConfig", () => {
     });
     expect(validateLandingConfig(config)).toMatch(/must be name, email, or phone/);
   });
+
+  it("accepts a calendar with a valid gate value", () => {
+    const config = makeLandingConfig({
+      blocks: [
+        {
+          id: "cal",
+          type: "calendar",
+          props: { url: "https://cal.com/x", provider: "cal", gate: "blur_overlay" },
+        } as never,
+      ],
+    });
+    expect(validateLandingConfig(config)).toBeNull();
+  });
+
+  it("accepts a calendar with no gate (legacy rows default to ungated)", () => {
+    const config = makeLandingConfig({
+      blocks: [
+        { id: "cal", type: "calendar", props: { url: "https://cal.com/x", provider: "cal" } } as never,
+      ],
+    });
+    expect(validateLandingConfig(config)).toBeNull();
+  });
+
+  it("rejects a calendar with an unknown gate value", () => {
+    const config = makeLandingConfig({
+      blocks: [
+        {
+          id: "cal",
+          type: "calendar",
+          props: { url: "https://cal.com/x", provider: "cal", gate: "paywall" },
+        } as never,
+      ],
+    });
+    expect(validateLandingConfig(config)).toMatch(/gate must be 'none' or 'blur_overlay'/);
+  });
 });
 
 describe("isLanding", () => {
