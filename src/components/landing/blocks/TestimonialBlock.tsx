@@ -13,7 +13,7 @@ export function TestimonialBlock({ block }: { block: TestimonialBlockData }) {
 
   return (
     <section id={block.id} className="w-full py-6 sm:py-8">
-      <figure className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
+      <figure className="mx-auto max-w-2xl rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
         <div className="mb-3 flex gap-1" aria-hidden="true">
           {STARS.map((star) => (
             <Star

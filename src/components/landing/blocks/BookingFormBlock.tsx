@@ -188,7 +188,7 @@ export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBloc
     return (
       <section id={block.id} className="w-full py-6 sm:py-8">
         <div
-          className="rounded-2xl border border-[#E5E7EB] bg-white p-6 text-center shadow-sm"
+          className="mx-auto max-w-xl rounded-2xl border border-[#E5E7EB] bg-white p-6 text-center shadow-sm"
           role="status"
         >
           <p className="text-sm font-medium text-[#0A0A0A] sm:text-base">{message}</p>
@@ -204,7 +204,7 @@ export function BookingFormBlock({ block, funnelId, sessionId }: BookingFormBloc
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm"
+        className="mx-auto max-w-xl rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm"
       >
         <div className="space-y-4">
           {fields.map((field) => {
