@@ -11,6 +11,13 @@ export function TestimonialBlock({ block }: { block: TestimonialBlockData }) {
   const { quote, author, role, avatarUrl } = block.props;
   const avatar = safeHttpUrl(avatarUrl);
 
+  // A testimonial with no quote is an unfilled placeholder — never render an
+  // empty card, and never let a half-filled block publish as a review. The id
+  // stays a (hidden) element so any stray scroll reference remains valid.
+  if (!quote?.trim() || !author?.trim()) {
+    return <section id={block.id} className="hidden" aria-hidden="true" />;
+  }
+
   return (
     <section id={block.id} className="w-full py-6 sm:py-8">
       <figure className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm">

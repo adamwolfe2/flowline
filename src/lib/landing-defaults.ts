@@ -95,13 +95,17 @@ export function createDefaultBlock(type: LandingBlockType): LandingBlock {
         },
       };
     case "testimonial":
+      // Empty on purpose: a testimonial must be a REAL customer quote the user
+      // pastes in — never seed a fabricated review. The builder form shows
+      // placeholder guidance, and the renderer hides the block until a real
+      // quote is entered, so an unedited block never publishes a fake review.
       return {
         id: makeBlockId(),
         type: "testimonial",
         props: {
-          quote: "This is the single best investment we made all year.",
-          author: "Jane Doe",
-          role: "Founder, Acme",
+          quote: "",
+          author: "",
+          role: "",
         },
       };
     case "button":

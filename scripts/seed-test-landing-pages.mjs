@@ -89,15 +89,6 @@ function pitchAndCoConfig() {
         },
       },
       {
-        id: "pc-testimonial",
-        type: "testimonial",
-        props: {
-          quote: "The launch video paid for itself in the first week.",
-          author: "A Pitch&Co Client",
-          role: "Founder",
-        },
-      },
-      {
         id: "pc-booking",
         type: "booking_form",
         props: {
